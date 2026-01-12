@@ -1,0 +1,38 @@
+############################
+# DEPENDÊNCIAS
+**/node_modules/
+
+############################
+# BUILDS
+frontend/dist/
+frontend/dist-ssr/
+backend/dist/
+
+############################
+# VARIÁVEIS DE AMBIENTE
+.env
+.env.*
+!.env.example
+
+############################
+# LOGS
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+############################
+# VITE
+frontend/.vite/
+
+############################
+# IDE / EDITORES
+.vscode/
+!.vscode/extensions.json
+.idea/
+
+############################
+# SISTEMA OPERACIONAL
+.DS_Store
+Thumbs.db
