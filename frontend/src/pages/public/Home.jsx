@@ -1,11 +1,17 @@
+// React 
+import { useContext } from 'react';
+
+// DB
+import { DadosContext } from '../../contexts/DadosContext';
+
 import Text from '../../components/Text'
 import CourseCard from '../../components/public/CourseCard'
 import PublicLayout from '../../layouts/public/PublicLayout'
 
-// BD
-import { courses } from '../../../../backend/data/data'
 
 export default function Home() {
+    const { dados, loading } = useContext(DadosContext)
+
     return (
         <PublicLayout>
             <Text as='section'>
@@ -21,12 +27,12 @@ export default function Home() {
                 <Text as='div' className='
                     bg-gray flex gap-3 justify-center pt-9 pb-50
                 '>
-                    {courses.map(curso => (
+                    {dados.map(curso => (
                         <CourseCard key={curso.id} 
                             id={curso.id}
-                            curso={curso.curso}
+                            curso={curso.nome}
                             data={curso.data}
-                            horario={curso.horario}
+                            horario={curso.hora}
                             loja={curso.loja}
                             destaque={curso.destaque}
                         />
