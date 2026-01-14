@@ -4,6 +4,7 @@
     "cors": "^2.8.5",
     "dom": "^0.0.3",
     "express": "^5.2.1",
+    "multer": "^2.0.2",
     "node.js": "^0.0.1-security",
     "react": "^19.2.3",
     "react-router-dom": "^7.12.0",
