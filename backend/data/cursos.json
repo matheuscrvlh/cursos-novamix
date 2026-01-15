@@ -1,11 +1,40 @@
 [
   {
-    "id": "ad009282-4011-486a-9502-e48c9f53ff5a",
-    "nome": "Bolo de Pote",
-    "culinarista": "Jessica Ribeiro",
-    "foto": null,
-    "data": "2026-01-14",
-    "hora": "16:30",
-    "loja": "Prado"
+    "id": "75d2370a-ae47-40ca-b5d5-0c4cb86cca2c",
+    "culinarista": "Chef Dagoberto",
+    "data": "15/01/2026",
+    "hora": "15:00",
+    "loja": "Centro",
+    "valor": 15.9,
+    "fotos": [
+      "/uploads/cursos/50d2efc9-b749-4027-bdbd-70f2de8c6752.png",
+      "/uploads/cursos/a6e22e33-edc7-4af2-a3ac-9c0be4cbd281.jpg"
+    ]
+  },
+  {
+    "id": "24fc6f28-6553-464b-88d5-81843d481ca3",
+    "nomeCurso": "Curso de pao",
+    "culinarista": "Chef Dagoberto",
+    "data": "15/01/2026",
+    "hora": "15:00",
+    "loja": "Centro",
+    "valor": 15.9,
+    "fotos": [
+      "/uploads/cursos/14d05dab-f1db-4fe6-866f-b0f728998d2d.png",
+      "/uploads/cursos/612a165a-1fd3-44a0-9aad-018a7f5d9042.jpg"
+    ]
+  },
+  {
+    "id": "ebc00e9f-adcc-41f8-ad47-c391eb08eb2f",
+    "nomeCurso": "Curso de Ovo",
+    "culinarista": "Chef Cleiton",
+    "data": "15/01/2026",
+    "hora": "15:00",
+    "loja": "Teresopolis",
+    "valor": 10,
+    "fotos": [
+      "/uploads/cursos/f85d5ca0-c8d9-4606-a60f-3665a2b08147.png",
+      "/uploads/cursos/875a56a2-c5db-433e-b6e5-587e5c00df95.jpg"
+    ]
   }
 ]

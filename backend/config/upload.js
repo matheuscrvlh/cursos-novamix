@@ -4,17 +4,17 @@ const uuidv4 = require('uuid').v4;
 
 const storege = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../uploads'));
+        cb(null, path.join(__dirname, '../uploads/cursos'));
     },
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
-        cb(null, uuidv4() + ext);
+        cb(null, `${uuidv4()}${ext}`);
     }
 });
 
 const fileFilter = (req, file, cb) => {
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
-    if (tiposPermitidos.includes(file.mimetype)) {
+    const allowed = ['image/jpeg', 'image/png','image/jpg'];
+    if (allowed.includes(file.mimetype)) {
         cb(null, true);
     } else {
         cb(new Error('Tipo de arquivo não permitido'));

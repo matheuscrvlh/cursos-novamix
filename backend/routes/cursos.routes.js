@@ -5,84 +5,127 @@ const { v4: uuidv4 } = require('uuid');
 const upload = require('../config/upload');
 
 const router = express.Router();
-const cursosFilePath = path.join(__dirname, '../data/cursos.json');
 
-const readCursosFromFile = () => {
-  if (!fs.existsSync(cursosFilePath)) {
-    fs.writeFileSync(cursosFilePath, JSON.stringify([]));
+const cursosPath = path.join(__dirname, '../data/cursos.json');
+const assentosPath = path.join(__dirname, '../data/assentos.json');
+
+const safeRead = (filePath) => {
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, JSON.stringify([]));
   }
-  return JSON.parse(fs.readFileSync(cursosFilePath, 'utf8'));
+
+  const content = fs.readFileSync(filePath, 'utf8');
+  if (!content.trim()) return [];
+
+  return JSON.parse(content);
 };
 
-const writeCursosToFile = (cursos) => {
-  fs.writeFileSync(cursosFilePath, JSON.stringify(cursos, null, 2));
-};
+const write = (p, d) => fs.writeFileSync(p, JSON.stringify(d, null, 2));
 
 router.get('/', (req, res) => {
-  res.json(readCursosFromFile());
+  res.json(safeRead(cursosPath));
 });
 
-router.post('/', upload.single('foto'), (req, res) => {
-  const cursos = readCursosFromFile();
+router.post('/', upload.array('fotos', 5), (req, res) => {
+  const cursos = safeRead(cursosPath);
+  const assentos = safeRead(assentosPath);
+
+  const cursoId = uuidv4();
+  const fotos = req.files
+    ? req.files.map(f => `/uploads/cursos/${f.filename}`)
+    : [];
+
+    const valor = parseFloat(req.body.valor);
+
+if (isNaN(valor)) {
+  return res.status(400).json({ message: 'Valor do curso inválido' });
+}
 
   const novoCurso = {
-    id: uuidv4(),
-    nome: req.body.nome,
+    id: cursoId,
+    nomeCurso: req.body.nomeCurso,
     culinarista: req.body.culinarista,
-    foto: req.file ? `/uploads/cursos/${req.file.filename}` : null,
     data: req.body.data,
     hora: req.body.hora,
     loja: req.body.loja,
-    modalidade: req.body.modalidade
+    valor,
+    fotos
   };
 
   cursos.push(novoCurso);
-  writeCursosToFile(cursos);
+
+  // gerar 24 assentos
+  for (let i = 1; i <= 24; i++) {
+    assentos.push({
+      id: i,
+      cursoId,
+      status: 'livre'
+    });
+  }
+
+  write(cursosPath, cursos);
+  write(assentosPath, assentos);
 
   res.status(201).json(novoCurso);
 });
 
-router.put('/:id', upload.single('foto'), (req, res) => {
-  const cursos = readCursosFromFile();
+router.put('/:id', upload.array('fotos', 5), (req, res) => {
+  const cursos = safeRead(cursosPath);
   const index = cursos.findIndex(c => c.id === req.params.id);
 
   if (index === -1) {
     return res.status(404).json({ message: 'Curso não encontrado' });
   }
 
-  // remove imagem antiga se trocar
-  if (req.file && cursos[index].foto) {
-    const fotoPath = path.join(__dirname, '..', cursos[index].foto);
-    if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+  if (req.files && req.files.length > 0) {
+    cursos[index].fotos.forEach(foto => {
+      const fotoPath = path.join(__dirname, '..', foto);
+      if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+    });
+
+    cursos[index].fotos = req.files.map(
+      f => `/uploads/cursos/${f.filename}`
+    );
   }
 
   cursos[index] = {
     ...cursos[index],
-    ...req.body,
-    foto: req.file
-      ? `/uploads/cursos/${req.file.filename}`
-      : cursos[index].foto
+    nomeCurso: req.body.nomeCurso ?? cursos[index].nomeCurso,
+    culinarista: req.body.culinarista ?? cursos[index].culinarista,
+    data: req.body.data ?? cursos[index].data,
+    hora: req.body.hora ?? cursos[index].hora,
+    loja: req.body.loja ?? cursos[index].loja,
+    modalidade: req.body.modalidade ?? cursos[index].modalidade
   };
 
-  writeCursosToFile(cursos);
+  write(cursosPath, cursos);
   res.json(cursos[index]);
 });
 
-
 router.delete('/:id', (req, res) => {
-  const cursos = readCursosFromFile();
-  const curso = cursos.find(c => c.id === req.params.id);
+  const cursos = safeRead(cursosPath);
+  const assentos = safeRead(assentosPath);
 
+  const curso = cursos.find(c => c.id === req.params.id);
   if (!curso) {
     return res.status(404).json({ message: 'Curso não encontrado' });
   }
 
-  if (curso.foto) {
-    const imgPath = path.join(__dirname, '..', curso.foto);
-    if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
-  }
 
-  writeCursosToFile(cursos.filter(c => c.id !== req.params.id));
+  curso.fotos.forEach(foto => {
+    const fotoPath = path.join(__dirname, '..', foto);
+    if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+  });
+
+  const cursosAtualizados = cursos.filter(c => c.id !== req.params.id);
+
+  const assentosAtualizados = assentos.filter(
+    a => a.cursoId !== req.params.id
+  );
+
+  write(cursosPath, cursosAtualizados);
+  write(assentosPath, assentosAtualizados);
+
   res.status(204).send();
 });
 
