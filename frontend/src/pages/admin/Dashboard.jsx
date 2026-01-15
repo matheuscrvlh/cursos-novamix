@@ -11,7 +11,12 @@ export default function Dashboard() {
             <SideBar />
             <Text as='main' className='flex-1 p-15 ml-[15%]'>
                 <TopBar title={'Dashboard'} />
-                
+                <Text as='article' className='flex gap-[6%] mb-15'>
+                    
+                </Text>
+                <Text as='article' className='flex flex-col gap-10'>
+                    
+                </Text>
             </Text>
         </Text>
     )

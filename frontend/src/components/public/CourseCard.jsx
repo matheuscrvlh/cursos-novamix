@@ -12,7 +12,7 @@ export default function CourseCard({
 
     return (
         <Text as='div' className='
-            bg-white rounded-xl w-70 min-h-[380px] p-4 flex flex-col
+            bg-white rounded-xl w-70 min-h-[380px] p-4 flex flex-col shadow-md
         '>
             <Text as='div' className='
                 rounded-md h-40

@@ -1,17 +1,23 @@
 import React from "react"
 
 export default function CardDash({
-    as='div',
-    className,
-    children,
-    ...props
-    }) {
-    return React.createElement(
-        as,
-        {
-            className: `${className ? className : 'bg-white h-[200px] w-[300px] rounded-md p-10 shadow-sm'}`,
-            ...props
-        },
-        children
-    )
+  as = 'div',
+  width,
+  height,
+  className = '',
+  children,
+  ...props
+}) {
+  return React.createElement(
+    as,
+    {
+      style: {
+        width,
+        height
+      },
+      className: `bg-white rounded-md p-5 shadow-sm ${className}`,
+      ...props
+    },
+    children
+  )
 }
