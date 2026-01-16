@@ -24,7 +24,7 @@ export default function Courses() {
         } = useContext(DadosContext);
 
     const [form, setForm] = useState({
-        nome: '',
+        nomeCurso: '',
         data: '',
         hora: '',
         loja: '',
@@ -33,25 +33,40 @@ export default function Courses() {
         ativo: 'true'
     });
 
-    function handleSubmit() {
-        if(!form.nome || !form.hora || !form.data || !form.loja) {
-            alert('Preencha todos os campos')
-            return;
-        }
-
-        addCourses(form);
-
-        setForm({
-            nome: '',
-            data: '',
-            hora: '',
-            loja: '',
-            culinarista: '',
-            valor: '',
-            ativo: 'true',
-            imagem: null,
-        });
+  function handleSubmit() {
+    if (!form.nomeCurso || !form.hora || !form.data || !form.loja) {
+        alert('Preencha todos os campos');
+        return;
     }
+
+    const formData = new FormData();
+
+    formData.append('nomeCurso', form.nomeCurso);
+    formData.append('data', form.data);
+    formData.append('hora', form.hora);
+    formData.append('loja', form.loja);
+    formData.append('culinarista', form.culinarista);
+    formData.append('valor', form.valor);
+    formData.append('ativo', form.ativo);
+
+    if (form.imagem) {
+        formData.append('fotos', form.imagem); // mesmo nome do backend
+    }
+
+    addCourses(formData);
+
+    setForm({
+        nomeCurso: '',
+        data: '',
+        hora: '',
+        loja: '',
+        culinarista: '',
+        valor: '',
+        ativo: 'true',
+        imagem: null,
+    });
+}
+
 
     return (
         <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
@@ -81,8 +96,8 @@ export default function Courses() {
                                 placeholder='Curso'
                                 width='400px'
                                 height='40px'
-                                value={form.nome}
-                                onChange={e => setForm({ ...form, nome: e.target.value })}
+                                value={form.nomeCurso}
+                                onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
                             />
                             <Input 
                                 type='date' 
@@ -160,7 +175,7 @@ export default function Courses() {
                         ) : (
                             dados.map(curso => (
                             <Text as='div' className='grid grid-cols-[2fr_1fr_1fr_1fr_1fr] text-gray-text mt-3' key={curso.id}>
-                                <Text as='p'>{curso.nome}</Text>
+                                <Text as='p'>{curso.nomeCurso}</Text>
                                 <Text as='p'>{curso.loja}</Text>
                                 <Text as='p'>{curso.data}</Text>
                                 <Text as='p'>{curso.hora}</Text>

@@ -1,15 +1,28 @@
 // React
 import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router'
+import { useState } from 'react'
 
 // Components
 import Text from '../../components/Text'
 import LinkSideBar from '../../components/admin/LinkSideBar'
+import ConfirmModal from '../../components/public/ModalSaida'
 
 // Images
 import { logoNm } from '../../assets/images/logos/'
 
+
 export default function SideBar() {
+
+    const [openModal, setOpenModal] = useState(false)
+    const navigate = useNavigate()
+
+    function handleLogout() {
+        navigate('/')
+    }
+
     return (
+        <>
         <Text as='aside' className='flex flex-col h-screen fixed bg-white w-[15%] shadow-sm'>
             <Text 
                 as='img' 
@@ -22,12 +35,20 @@ export default function SideBar() {
                 <LinkSideBar to='/cursos'>Cursos</LinkSideBar>
             </Text>
             <Link
-                to='/'
+                onClick={() => setOpenModal(true)}
                 className='bg-red-light shadow-sm w-[80%] rounded-md p-2 text-white
                      font-semibold cursor-pointer hover:bg-red-base ml-auto mr-auto mt-auto mb-[10%]
             '>
                 Sair
             </Link>
         </Text>
+        <ConfirmModal
+            isOpen={openModal}
+            title='Confirmação de Logout'
+            message='Tem certeza que deseja sair?'
+            onConfirm={handleLogout}
+            onCancel={() => setOpenModal(false)}
+        />
+      </>  
     )
 }

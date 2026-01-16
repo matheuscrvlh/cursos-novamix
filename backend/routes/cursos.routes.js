@@ -106,27 +106,35 @@ router.delete('/:id', (req, res) => {
   const cursos = safeRead(cursosPath);
   const assentos = safeRead(assentosPath);
 
-  const curso = cursos.find(c => c.id === req.params.id);
-  if (!curso) {
+  const cursoIndex = cursos.findIndex(c => c.id === req.params.id);
+
+  if (cursoIndex === -1) {
     return res.status(404).json({ message: 'Curso não encontrado' });
   }
 
+  const curso = cursos[cursoIndex];
 
-  curso.fotos.forEach(foto => {
-    const fotoPath = path.join(__dirname, '..', foto);
-    if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
-  });
+  // apagar fotos do curso
+  if (curso.fotos && curso.fotos.length > 0) {
+    curso.fotos.forEach(foto => {
+      const fotoPath = path.join(__dirname, '..', foto);
+      if (fs.existsSync(fotoPath)) {
+        fs.unlinkSync(fotoPath);
+      }
+    });
+  }
 
-  const cursosAtualizados = cursos.filter(c => c.id !== req.params.id);
+  // romover curso
+  cursos.splice(cursoIndex, 1);
 
+  // remove assentos
   const assentosAtualizados = assentos.filter(
     a => a.cursoId !== req.params.id
   );
 
-  write(cursosPath, cursosAtualizados);
+  write(cursosPath, cursos);
   write(assentosPath, assentosAtualizados);
 
-  res.status(204).send();
+  return res.status(204).send();
 });
-
 module.exports = router;

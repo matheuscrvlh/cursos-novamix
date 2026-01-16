@@ -40,11 +40,15 @@ export default function Home() {
                         {dados.map(curso => (
                             <CourseCard key={curso.id} 
                                 id={curso.id}
-                                curso={curso.nome}
+                                curso={curso.nomeCurso}
                                 data={curso.data}
                                 horario={curso.hora}
                                 loja={curso.loja}
-                                destaque={curso.destaque}
+                                imagem={
+                                    curso.fotos?.length
+                                    ? `http://localhost:3001${curso.fotos[0]}`
+                                    : null
+                                }
                             />
                         ))}  
                     </Text> 
