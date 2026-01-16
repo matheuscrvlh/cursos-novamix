@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "264eb50f-ecf5-4950-89fc-089f87d88cf1",
+    "nomeCurso": "pao de maca ",
+    "culinarista": "dagoberto",
+    "data": "2026-01-26",
+    "hora": "18:22",
+    "loja": "Teresopolis",
+    "valor": 11,
+    "fotos": [
+      "/uploads/cursos/9721bd50-8e77-4455-90f7-d8b0aed1b6b5.jpeg"
+    ]
+  }
+]

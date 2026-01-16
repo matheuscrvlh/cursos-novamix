@@ -3,6 +3,7 @@
 @theme {
     --color-*: initial;
     --color-white: #ffffff;
+    --color-black: #000000;
     --color-gray: #F5F5F5;
     --color-gray-dark: #354856;
     --color-gray-base: #1E8581;

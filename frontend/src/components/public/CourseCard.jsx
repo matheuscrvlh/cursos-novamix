@@ -1,12 +1,12 @@
 import Text from '../Text';
 
 export default function CourseCard({
-    id,
     curso,
     data,
     horario,
     loja,
-    imagem
+    imagem,
+    onClick
 }) {
     return (
         <Text
@@ -49,6 +49,7 @@ export default function CourseCard({
                 <Text
                     as='button'
                     className='bg-orange-base rounded-sm p-2 w-62 mt-3 text-white font-semibold cursor-pointer hover:bg-orange-light hover:shadow-md'
+                    onClick={onClick}
                 >
                     Garantir minha vaga
                 </Text>
