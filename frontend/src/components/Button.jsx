@@ -11,8 +11,8 @@ export default function Button({
     return React.createElement(
         as,
         {   
-            style: {width, height},
-            className: `${className ? className : 'bg-orange-base shadow-md rounded-md text-white font-semibold hover:bg-orange-light cursor-pointer p-2'}`,
+            style: {width, height },
+            className: `shadow-md rounded-md font-semibold cursor-pointer p-2 ${className}`,
             ...props
         },
         children

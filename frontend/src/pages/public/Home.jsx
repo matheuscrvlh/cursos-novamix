@@ -16,6 +16,7 @@ import PublicLayout from '../../layouts/public/PublicLayout'
 
 // Images
 import { bannerHome } from '../../assets/images/banner/'
+import { assentos } from '../../assets/images/icons'
 
 export default function Home() {
     const { dados, loading } = useContext(DadosContext)
@@ -87,6 +88,7 @@ export default function Home() {
                                 data={curso.data}
                                 horario={curso.hora}
                                 loja={curso.loja}
+                                culinarista={curso.culinarista}
                                 onClick={() => openForm(curso.id)}
                                 imagem={
                                     curso.fotos?.length
@@ -103,7 +105,7 @@ export default function Home() {
                     isOpen={step === 'form'}
                     onClose={closeModal}
                 >   
-                    <Text as='div' className='flex flex-col gap-3'>
+                    <Text as='div' className='flex flex-col gap-3 h-[90%]'>
                         <Text as='p' className='font-semibold mt-3 mb-3 text-center'>Digite suas informações para cadastramos você!</Text>
                         <Input 
                             type='text'
@@ -125,11 +127,12 @@ export default function Home() {
                             type='text'
                             width='100%'
                             height='40px'
-                            placeholder='telefone'
+                            placeholder='Telefone'
                             value={form.telefone}
                             onChange={e => setForm({...form, telefone: e.target.value})}
                         />
-                        <Button 
+                        <Button
+                            className='bg-orange-base hover:bg-orange-light text-white mt-auto'
                             onClick={openAssento}
                         >
                             Enviar
@@ -142,10 +145,16 @@ export default function Home() {
                     isOpen={step === 'assento'}
                     onClose={closeModal}
                 >   
-                    <Text as='div' className='flex flex-col gap-3'>
+                    <Text as='div' className='flex flex-col gap-3 h-[90%]'>
                         <Text as='p' className='font-semibold mt-3 mb-3 text-center'>Escolha seu assento para assistir ao curso</Text>
-                        
+                        <Text
+                            as='img'
+                            src={assentos}
+                            alt='Assentos'
+                            className='w-[40%] h-full ml-auto mr-auto'
+                            />
                         <Button 
+                            className='bg-orange-base hover:bg-orange-light text-white mt-auto'
                             onClick={closeModal}
                         >
                             Enviar

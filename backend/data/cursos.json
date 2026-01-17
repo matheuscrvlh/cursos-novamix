@@ -1,14 +1,74 @@
 [
   {
-    "id": "264eb50f-ecf5-4950-89fc-089f87d88cf1",
-    "nomeCurso": "pao de maca ",
-    "culinarista": "dagoberto",
-    "data": "2026-01-26",
-    "hora": "18:22",
-    "loja": "Teresopolis",
-    "valor": 11,
+    "id": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nomeCurso": "Bolo de Rolo",
+    "culinarista": "Lorena Borges",
+    "data": "2026-01-07",
+    "hora": "10:30",
+    "loja": "Prado",
+    "valor": 1,
     "fotos": [
-      "/uploads/cursos/9721bd50-8e77-4455-90f7-d8b0aed1b6b5.jpeg"
+      "/uploads/cursos/d756e83b-e317-407b-8815-293042a7cd96.jpeg"
+    ]
+  },
+  {
+    "id": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
+    "nomeCurso": "Docinhos Neon",
+    "culinarista": "Valéria Sato",
+    "data": "2026-01-10",
+    "hora": "10:00",
+    "loja": "Prado",
+    "valor": 4,
+    "fotos": [
+      "/uploads/cursos/5c301887-8eed-43f6-ab2e-1fd8d9f712ee.jpeg"
+    ]
+  },
+  {
+    "id": "4fa2de49-f068-486c-987a-29208f486db1",
+    "nomeCurso": "Pizza Brownie",
+    "culinarista": "Flávia Macedo",
+    "data": "2026-01-15",
+    "hora": "14:00",
+    "loja": "Prado",
+    "valor": 20,
+    "fotos": [
+      "/uploads/cursos/2081e126-2b99-4f14-8887-a6e022d4b8e7.jpeg"
+    ]
+  },
+  {
+    "id": "001d1b85-93e7-4097-82b6-514354e551d1",
+    "nomeCurso": "Docinhos Neon",
+    "culinarista": "Valéria Sato",
+    "data": "2026-01-07",
+    "hora": "14:00",
+    "loja": "Teresopolis",
+    "valor": 4,
+    "fotos": [
+      "/uploads/cursos/d6f150e0-df19-4d1a-b9f5-961cfe28e171.jpeg"
+    ]
+  },
+  {
+    "id": "1f73519a-de92-41c5-b5f8-fe73b6d74146",
+    "nomeCurso": "Pão de Mel",
+    "culinarista": "Lorena Borges",
+    "data": "2026-01-23",
+    "hora": "14:00",
+    "loja": "Prado",
+    "valor": 4,
+    "fotos": [
+      "/uploads/cursos/e87b0ae5-15d5-4b68-8b14-0086cd53fc63.jpeg"
+    ]
+  },
+  {
+    "id": "3d246548-abf8-47c5-9471-c6119b58900b",
+    "nomeCurso": "Morango do Amor",
+    "culinarista": "Thais Vargas",
+    "data": "2026-01-17",
+    "hora": "12:59",
+    "loja": "Prado",
+    "valor": 99,
+    "fotos": [
+      "/uploads/cursos/c17da79e-aae7-49a7-b9eb-87e8cfac2382.jpeg"
     ]
   }
 ]

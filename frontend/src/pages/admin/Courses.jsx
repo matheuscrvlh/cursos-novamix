@@ -155,6 +155,7 @@ export default function Courses() {
                             </Input>
                             <Button 
                                 width='100%'
+                                className='bg-orange-base hover:bg-orange-light text-white'
                                 onClick={handleSubmit}
                             >
                                 Adicionar
@@ -163,25 +164,29 @@ export default function Courses() {
                     </CardDash>
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>CURSOS ATIVOS</Text>
-                        <Text as='div' className='grid grid-cols-[2fr_1fr_1fr_1fr_1fr] font-bold text-gray-text'>
+                        <Text as='div' className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] font-bold text-gray-text'>
                             <Text as='p'>NOME</Text>
-                            <Text as='p'>LOJA</Text>
+                            <Text as='p'>CULINARISTA</Text>
+                            <Text as='p'>VALOR</Text>
                             <Text as='p'>DATA</Text>
                             <Text as='p'>HORARIO</Text>
+                            <Text as='p'>LOJA</Text>
                             <Text as='p'>FUNÇÕES</Text>
                         </Text>
                         {loading ? (
                             <Text as='p'>Carregando cursos...</Text>
                         ) : (
                             dados.map(curso => (
-                            <Text as='div' className='grid grid-cols-[2fr_1fr_1fr_1fr_1fr] text-gray-text mt-3' key={curso.id}>
+                            <Text as='div' className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] text-gray-text mt-3' key={curso.id}>
                                 <Text as='p'>{curso.nomeCurso}</Text>
-                                <Text as='p'>{curso.loja}</Text>
+                                <Text as='p'>{curso.culinarista}</Text>
+                                <Text as='p'>{curso.valor}</Text>
                                 <Text as='p'>{curso.data}</Text>
                                 <Text as='p'>{curso.hora}</Text>
+                                <Text as='p'>{curso.loja}</Text>
                                     
                                 <Button 
-                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md'
+                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
                                     onClick={() => removeCourse(curso.id)}
                                 >
                                     Excluir

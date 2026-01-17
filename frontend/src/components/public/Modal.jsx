@@ -38,6 +38,7 @@ export default function Modal({
             >
                 <Text 
                     as='button'
+                    className='cursor-pointer'
                     onClick={onClose}
                 >
                     X

@@ -1,6 +1,11 @@
-import Text from '../../components/Text'
-import { logo } from '../../assets/images/logos'
+// React
+import { Link } from 'react-router-dom'
 
+// Components
+import Text from '../../components/Text'
+
+// Images
+import { logo } from '../../assets/images/logos'
 import { stores, whatsapp } from '../../assets/images/icons'
 
 export default function PublicLayout({ children }) {
@@ -23,7 +28,7 @@ export default function PublicLayout({ children }) {
                         href='https://api.whatsapp.com/send?phone=5522998336225&text=Ol%C3%A1,%20gostaria%20de%20falar%20sobre%20os%20cursos'
                         target='_blank'
                         rel="noopener noreferrer"
-                        className='flex w-[16%] h-[40px] p-2 bg-gray-base mt-auto mb-auto rounded-md gap-3 cursor-pointer'
+                        className='flex w-[16%] h-[40px] p-2 bg-gray-base mt-auto mb-auto rounded-md gap-3 cursor-pointer hover:bg-gray-base/80'
                     >
                         <Text as='img' src={whatsapp} alt='whatsapp' className='h-[25px]'/>
                         <Text as='p' className='text-sm font-semibold mt-[2px]'>Atendimento Whatsapp</Text>
@@ -58,10 +63,16 @@ export default function PublicLayout({ children }) {
                         Os preços e disponibilidade dos produtos da Loja Virtual podem não ser os mesmos da Loja Física. Na loja física temos uma maior variedade de produtos e departamentos. Imagens meramente ilustrativas.
                     </Text>
                 </Text>
-                <Text as='div' className='bg-orange-light text-white p-7 font-regular'>
+                <Text as='div' className='flex bg-orange-light text-white p-7 font-regular'>
                     <Text as='p'>
                         © 2023 Novamix Food Service Comércio de Alimentos Ltda. Todos os direitos reservados.
                     </Text>
+                    <Link 
+                        to={'/login'}
+                        className='bg-orange-base rounded p-2 ml-auto pb-1'
+                    >
+                        Administrativo
+                    </Link>
                 </Text>
             </Text>
         </Text>
