@@ -1,5 +1,10 @@
 import { request } from './http'
 
+export function getAssentos(cursoId) {
+    return request(`/assentos/${cursoId}`);
+}
+
+// ======= CURSOS
 export function getCourses() {
     return request('/cursos');
 }

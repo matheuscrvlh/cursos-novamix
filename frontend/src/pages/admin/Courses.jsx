@@ -1,6 +1,5 @@
 // React
 import { useContext, useState, useEffect } from 'react';
-import React from 'react'
 
 // Components
 import Input from '../../components/Input'
@@ -17,7 +16,7 @@ import { DadosContext } from '../../contexts/DadosContext';
 
 export default function Courses() {
     const { 
-            dados,
+            cursos,
             loading, 
             addCourses, 
             removeCourse 
@@ -33,40 +32,87 @@ export default function Courses() {
         ativo: 'true'
     });
 
-  function handleSubmit() {
-    if (!form.nomeCurso || !form.hora || !form.data || !form.loja) {
-        alert('Preencha todos os campos');
-        return;
-    }
-
-    const formData = new FormData();
-
-    formData.append('nomeCurso', form.nomeCurso);
-    formData.append('data', form.data);
-    formData.append('hora', form.hora);
-    formData.append('loja', form.loja);
-    formData.append('culinarista', form.culinarista);
-    formData.append('valor', form.valor);
-    formData.append('ativo', form.ativo);
-
-    if (form.imagem) {
-        formData.append('fotos', form.imagem); // mesmo nome do backend
-    }
-
-    addCourses(formData);
-
-    setForm({
-        nomeCurso: '',
-        data: '',
-        hora: '',
-        loja: '',
-        culinarista: '',
-        valor: '',
-        ativo: 'true',
-        imagem: null,
+    // State Culinarista
+    const [formCulinarian, setFormCulinarian] = useState({
+        nomeCulinarista: '',
+        cpf: '',
+        cursoAtual: '',
+        lojas: [],
+        cursos: [],
+        imagem: null
     });
-}
 
+    useEffect(() => {
+        console.log(formCulinarian.lojas)
+    }, [formCulinarian.lojas])
+
+    useEffect(() => {
+        console.log(formCulinarian.cursos)
+    }, [formCulinarian.cursos])
+
+    // Adicionar Culinarista
+    function handleSubmitCulinarian() {
+        if(!formCulinarian.nomeCulinarista || !formCulinarian.cpf || !formCulinarian.lojas || !formCulinarian.cursos) {
+            alert('Preencha os campos.');
+            return
+        }
+
+        const formData = new FormData();
+
+        formData.append('nomeCulinarista', formCulinarian.nomeCulinarista);
+        formData.append('cpf');
+        formData.append('lojas', formCulinarian.lojas);
+        formData.append('cursos', formCulinarian.cursos);
+
+        addCulinarian(formData);
+    }
+
+    function handleSubmit() {
+        if (!form.nomeCurso || !form.hora || !form.data || !form.loja) {
+            alert('Preencha todos os campos');
+        return;
+        }
+
+        const formData = new FormData();
+
+        formData.append('nomeCurso', form.nomeCurso);
+        formData.append('data', form.data);
+        formData.append('hora', form.hora);
+        formData.append('loja', form.loja);
+        formData.append('culinarista', form.culinarista);
+        formData.append('valor', form.valor);
+        formData.append('ativo', form.ativo);
+
+        if (form.imagem) {
+            formData.append('fotos', form.imagem); // mesmo nome do backend
+        }
+
+        addCourses(formData);
+
+        setForm({
+            nomeCurso: '',
+            data: '',
+            hora: '',
+            loja: '',
+            culinarista: '',
+            valor: '',
+            ativo: 'true',
+            imagem: null,
+        })
+    }
+
+    function handleToggleLoja(loja) {
+        setFormCulinarian(prev => {
+            const existe = prev.lojas.includes(loja)
+
+            return {
+                ...prev,
+                lojas:  existe
+                ? prev.lojas.filter(l => l !== loja)
+                : [...prev.lojas, loja]
+            }
+        })
+    }
 
     return (
         <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
@@ -77,7 +123,7 @@ export default function Courses() {
                     <CardDash width='30%' height='150px'>
                         <Text as='p' className='font-bold text-gray-text'>CURSOS ATIVOS</Text>
                         <Text as='p' className='font-bold text-6xl text-gray-text text-center pt-1'>
-                            {dados.length}
+                        {cursos.length}
                         </Text>
                     </CardDash>
                     <CardDash width='30%'>
@@ -164,7 +210,7 @@ export default function Courses() {
                     </CardDash>
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>CURSOS ATIVOS</Text>
-                        <Text as='div' className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] font-bold text-gray-text'>
+                        <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] font-bold text-gray-text'>
                             <Text as='p'>NOME</Text>
                             <Text as='p'>CULINARISTA</Text>
                             <Text as='p'>VALOR</Text>
@@ -176,8 +222,8 @@ export default function Courses() {
                         {loading ? (
                             <Text as='p'>Carregando cursos...</Text>
                         ) : (
-                            dados.map(curso => (
-                            <Text as='div' className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] text-gray-text mt-3' key={curso.id}>
+                            cursos.map(curso => (
+                            <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3' key={curso.id}>
                                 <Text as='p'>{curso.nomeCurso}</Text>
                                 <Text as='p'>{curso.culinarista}</Text>
                                 <Text as='p'>{curso.valor}</Text>
@@ -193,6 +239,123 @@ export default function Courses() {
                                 </Button>
                             </Text>
                         )))}
+                    </CardDash>
+                    <CardDash as='div' className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
+                        <Text as='p' className='font-bold text-gray-text mb-4'>CADASTRE UMA CULINARISTA</Text>
+                        <Text as='div' className='flex flex-wrap gap-3'>
+                            <Input
+                                width='250px'
+                                height='40px'
+                                placeholder='Nome'
+                            />
+                            <Input
+                                width='170px'
+                                height='40px'   
+                                placeholder='Cpf'
+                            />
+                            <Input
+                                width='170px'
+                                height='40px' 
+                                className='mr-7'
+                                type='file'
+                            />
+                            <Text as='div' className='flex gap-3'>
+                                <Input 
+                                    type='checkbox'
+                                    className='w-6 cursor-pointer'
+                                    id='prado'
+                                    name='Prado'
+                                    value='Prado'
+                                    onChange={() => handleToggleLoja('Prado')}
+                                />
+                                <Text as='label' className='mt-2 mr-9'>Prado</Text>
+                                <Input 
+                                    type='checkbox'
+                                    className='w-6 cursor-pointer'
+                                    id='teresopolis'
+                                    name='teresopolis'
+                                    value='Teresopolis'
+                                    onChange={() => handleToggleLoja('Teresopolis')}
+                                />
+                                <Text as='label' className='mt-2'>Teresopolis</Text>
+                            </Text>
+
+                            <Text as='div' className='flex gap-3'>
+                                <Input
+                                    width='250px'
+                                    height='40px'
+                                    placeholder='Curso'
+                                    value={formCulinarian.cursoAtual}
+                                    onChange={e => setFormCulinarian({ ...formCulinarian, cursoAtual: e.target.value })}
+                                />
+                                <Button
+                                    width='180px'
+                                    className='bg-orange-base text-white'
+                                    onClick={() => {
+                                        if(!formCulinarian.cursoAtual) {
+                                            alert('Preencha o campo.')
+                                        }
+                                        setFormCulinarian({ 
+                                            ...formCulinarian,
+                                            cursos: [
+                                                ...formCulinarian.cursos,
+                                                formCulinarian.cursoAtual
+                                            ],
+                                            cursoAtual: ''
+                                        })}
+                                    }
+                                >
+                                    Adicionar Curso
+                                </Button>
+                            </Text>
+                            <Text as='div' className='flex flex-wrap gap-3 w-full'>
+                                {formCulinarian.cursos.map((curso, index) => (
+                                    <Text 
+                                        as='div'
+                                        key={index}
+                                        className="relative flex items-center"
+                                    >
+                                        <Text 
+                                            as='p' 
+                                            className="bg-orange-base px-4 py-2 text-white rounded-md"
+                                        >
+                                            {curso}
+                                        </Text>
+                                        <Text 
+                                            className="
+                                                absolute -top-2 -right-2
+                                                flex items-center justify-center
+                                                w-5 h-5 text-xs
+                                                bg-black text-white
+                                                rounded-full cursor-pointer font-bold
+                                                "
+                                            onClick={() => {
+                                                setFormCulinarian({
+                                                    ...formCulinarian,
+                                                    cursos: formCulinarian.cursos.filter(
+                                                        (_, i) => i !== index
+                                                    )
+                                                    
+                                                })
+                                            }}
+                                        >
+                                            X
+                                        </Text>
+                                    </Text>
+                                ))}
+                            </Text>
+                            <Button 
+                                onClick={handleSubmitCulinarian}
+                                className='bg-orange-base text-white w-full'
+                            >
+                                Adicionar Culinarista
+                            </Button>
+                        </Text>
+                    </CardDash>
+                    <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
+                        <Text as='p' className='font-bold text-gray-text'>
+                            CULINARISTAS ATIVAS
+                        </Text>
                     </CardDash>
                 </Text>
             </Text>

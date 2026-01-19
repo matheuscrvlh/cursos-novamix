@@ -4,6 +4,9 @@ import { useContext, useState, useEffect } from 'react';
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
 
+// SERVICES
+import { getAssentos } from '../../api/courses.service';
+
 // Components
 import Text from '../../components/Text'
 import CourseCard from '../../components/public/CourseCard'
@@ -16,30 +19,15 @@ import PublicLayout from '../../layouts/public/PublicLayout'
 
 // Images
 import { bannerHome } from '../../assets/images/banner/'
-import { assentos } from '../../assets/images/icons'
 
 export default function Home() {
-    const { dados, loading } = useContext(DadosContext)
-    const [ step, setStep ] = useState(null)
+    const { 
+        cursos,
+        loading, 
+        addRegisterClient
+    } = useContext(DadosContext);
 
-    useEffect(() => {
-        console.log(step)
-    }, [step])
-
-    const openForm = (cursoId) => {
-        setForm(prev => ({ ...prev, cursoId }))
-        setStep('form')
-    }
-
-    const openAssento = () => {
-        setStep('assento')
-    }
-
-    const closeModal = () => {
-        setStep(null)
-        setForm({cursoId: '', nome: '', cpf: '', telefone: '', assento: ''})
-    }
-
+    // ========= STATE CADASTRO CLIENTE  ========= 
     const [ form, setForm ] = useState({
         cursoId: '',
         nome: '',
@@ -48,19 +36,74 @@ export default function Home() {
         assento: ''
     })
 
-    useEffect(() => {
-        console.log(form)
-    }, [form])
+    // ========= STATE ASSENTOS ========= 
+    const [ cursoSelecionado, setCursoSelecionado ] = useState('');
+    const [ assentos, setAssentos ] = useState([]);
 
+    // ========= STATE MODAL ========= 
+    const [ step, setStep ] = useState(null)
+
+    // =========  CADASTRO CLIENTE ========= 
     function handleSubmit() {
-        if(!form.nome || !form.cpf || form.telefone) {
+        if(!form.nome || !form.cpf || !form.celular) {
             alert('Preencha todos os campos.')
+            return;
         }
+
+        addRegisterClient({
+            cursoId: form.cursoId,
+            nome: form.nome,
+            cpf: form.cpf,
+            celular: form.celular,
+            assento: form.assento
+        });
+
+        setForm({
+            cursoId: '',
+            nome: '',
+            cpf: '',
+            celular: '',
+            assento: ''
+        });
     }
 
     useEffect(() => {
-        console.log(open)
-    }, [open])
+        if (!cursoSelecionado) {
+            return
+        }
+
+        getAssentos(cursoSelecionado)
+        .then(setAssentos)
+        .catch(console.error)
+
+        console.log(assentos)
+    }, [cursoSelecionado])
+
+    // =========  FUNCOES MODAL ========= 
+    const openForm = (cursoId) => {
+        setForm(prev => ({ ...prev, cursoId }))
+        setStep('form')
+        setCursoSelecionado(cursoId)
+    }
+
+    const openAssento = () => {
+        if(!form.nome || !form.cpf || !form.celular) {
+            alert('Preencha todos os campos.')
+            return;
+        }
+        setStep('assento')
+    }
+
+    const closeModal = () => {
+        if(!form.assento) {
+            alert('Marque algum assento.');
+            return
+        }
+        setStep(null)
+        setForm({cursoId: '', nome: '', cpf: '', telefone: '', assento: ''})
+        setCursoSelecionado('')
+        alert('Você foi cadastrado!')
+    }
 
     return (
         <PublicLayout>
@@ -81,7 +124,7 @@ export default function Home() {
                     bg-gray flex justify-center gap-3 w-full justify-center pt-6 pb-30
                 '>
                     <Text as='div' className='max-w-[80vw] bg-gray flex flex-wrap justify-center gap-3'>
-                        {dados.map(curso => (
+                        {cursos.map(curso => (
                             <CourseCard key={curso.id} 
                                 id={curso.id}
                                 curso={curso.nomeCurso}
@@ -128,8 +171,8 @@ export default function Home() {
                             width='100%'
                             height='40px'
                             placeholder='Telefone'
-                            value={form.telefone}
-                            onChange={e => setForm({...form, telefone: e.target.value})}
+                            value={form.celular}
+                            onChange={e => setForm({...form, celular: e.target.value})}
                         />
                         <Button
                             className='bg-orange-base hover:bg-orange-light text-white mt-auto'
@@ -146,16 +189,49 @@ export default function Home() {
                     onClose={closeModal}
                 >   
                     <Text as='div' className='flex flex-col gap-3 h-[90%]'>
-                        <Text as='p' className='font-semibold mt-3 mb-3 text-center'>Escolha seu assento para assistir ao curso</Text>
-                        <Text
-                            as='img'
-                            src={assentos}
-                            alt='Assentos'
-                            className='w-[40%] h-full ml-auto mr-auto'
-                            />
+                        <Text as='p' className='font-semibold text-center'>Escolha seu assento para assistir ao curso</Text>
+                        <Text 
+                            as='div'
+                            className='bg-gray-base rounded-sm p-6 mb-2 text-center text-white font-semibold'
+                        >
+                            Balcão
+                        </Text>
+                        <Text as='div' className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-2'>
+                            {assentos.map(assento => {
+                                const isReservado = assento.status === 'reservado';
+                                const isSelecionado = form.assento === assento.id;
+
+                                return (
+                                    <Text 
+                                        as='p'
+                                        key={assento.id}
+                                        className={`p-1 rounded-full text-center font-semibold text-white ${
+                                            isReservado
+                                            ? 'bg-gray-base cursor-not-allowed'
+                                            : isSelecionado
+                                            ? 'bg-gray-dark cursor-pointer'
+                                            : 'bg-orange-base cursor-pointer'
+                                        }`}
+                                        onClick={() => {
+                                            if(isReservado) return;
+
+                                            setForm(prev => ({
+                                            ...prev,
+                                            assento: assento.id
+                                            }));
+                                        }}
+                                    >
+                                        {assento.id}
+                                    </Text>
+                            )})}
+                        </Text>
                         <Button 
                             className='bg-orange-base hover:bg-orange-light text-white mt-auto'
-                            onClick={closeModal}
+                            onClick={() => {
+                                handleSubmit() 
+                                closeModal()
+                                }
+                            }
                         >
                             Enviar
                         </Button>

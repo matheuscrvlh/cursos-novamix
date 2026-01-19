@@ -1,1 +1,101 @@
-[]
+[
+  {
+    "id": "caaa9334-03e6-4d3d-8732-67acf07dfbc1",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 19,
+    "dataInscricao": "2026-01-19T17:26:54.549Z"
+  },
+  {
+    "id": "11244e7e-b10e-4213-8143-f1701a2def21",
+    "cursoId": "1f73519a-de92-41c5-b5f8-fe73b6d74146",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 19,
+    "dataInscricao": "2026-01-19T17:29:29.922Z"
+  },
+  {
+    "id": "8f328372-365d-4c7e-a8d8-b2cb96b278b1",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 18,
+    "dataInscricao": "2026-01-19T18:51:59.153Z"
+  },
+  {
+    "id": "77b64daa-6d8f-4fca-873e-58b995571d13",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 17,
+    "dataInscricao": "2026-01-19T18:53:38.965Z"
+  },
+  {
+    "id": "2dc82cb5-1a7a-4f72-be58-060140a58922",
+    "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 15,
+    "dataInscricao": "2026-01-19T18:54:10.554Z"
+  },
+  {
+    "id": "bf620bba-31ff-4e3e-a9b0-febf9e72ff47",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 15,
+    "dataInscricao": "2026-01-19T18:57:54.433Z"
+  },
+  {
+    "id": "b5b3c6fb-1536-4839-acc9-79a64f56030b",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 3,
+    "dataInscricao": "2026-01-19T19:36:37.583Z"
+  },
+  {
+    "id": "40ab58cf-69bc-4edc-aa9e-cf8288139172",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 4,
+    "dataInscricao": "2026-01-19T19:37:34.427Z"
+  },
+  {
+    "id": "fc2fcaa6-8a87-41cc-b218-3d774a8090f1",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "aa",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 5,
+    "dataInscricao": "2026-01-19T19:40:55.760Z"
+  },
+  {
+    "id": "c96a4d5e-9383-4c7b-809b-8ca9084d575f",
+    "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 14,
+    "dataInscricao": "2026-01-19T19:42:15.341Z"
+  },
+  {
+    "id": "ac16604f-e14d-40db-a9cb-27e271e6b707",
+    "cursoId": "1f73519a-de92-41c5-b5f8-fe73b6d74146",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 3,
+    "dataInscricao": "2026-01-19T19:49:07.214Z"
+  }
+]
