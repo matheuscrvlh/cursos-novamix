@@ -45,6 +45,8 @@ if (isNaN(valor)) {
     id: cursoId,
     nomeCurso: req.body.nomeCurso,
     culinarista: req.body.culinarista,
+    categoria: req.body.categoria,
+    duracao: req.body.duracao,
     data: req.body.data,
     hora: req.body.hora,
     loja: req.body.loja,
@@ -92,6 +94,9 @@ router.put('/:id', upload.array('fotos', 5), (req, res) => {
     ...cursos[index],
     nomeCurso: req.body.nomeCurso ?? cursos[index].nomeCurso,
     culinarista: req.body.culinarista ?? cursos[index].culinarista,
+    categoria: req.body.categoria ?? cursos[index].categoria,
+    duracao: req.body.duracao ?? cursos[index].duracao,
+    valor: req.body.valor ? parseFloat(req.body.valor) : cursos[index].valor,
     data: req.body.data ?? cursos[index].data,
     hora: req.body.hora ?? cursos[index].hora,
     loja: req.body.loja ?? cursos[index].loja,
@@ -114,7 +119,7 @@ router.delete('/:id', (req, res) => {
 
   const curso = cursos[cursoIndex];
 
-  // apagar fotos do curso
+  // apagar fotos do curso 
   if (curso.fotos && curso.fotos.length > 0) {
     curso.fotos.forEach(foto => {
       const fotoPath = path.join(__dirname, '..', foto);

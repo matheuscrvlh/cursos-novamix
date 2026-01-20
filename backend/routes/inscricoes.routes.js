@@ -75,4 +75,35 @@ router.post('/', (req, res) => {
   }
 });
 
+router.get('/curso/:cursoId', (req, res) => {
+  try {
+    const { cursoId } = req.params;
+    const inscricoes = safeRead(inscricoesPath);
+    const incricoesCurso = inscricoes.filter(i => i.cursoId === cursoId); 
+    res.json(incricoesCurso);
+  } catch (err) {
+    console.error('ERRO AO OBTER INSCRIÇÕES:', err);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+});
+
+router.delete('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const inscricoes = safeRead(inscricoesPath);
+    const index = inscricoes.findIndex(i => i.id === id);
+    if (index === -1) {
+      return res.status(404).json({ message: 'Inscrição não encontrada' });
+    }
+
+    inscricoes.splice(index, 1);
+    safeWrite(inscricoesPath, inscricoes);
+
+    res.json({ message: 'Inscrição removida com sucesso' });
+  } catch (err) {
+    console.error('ERRO AO DELETAR INSCRIÇÃO:', err);
+    res.status(500).json({ message: 'Erro interno no servidor' });
+  }
+});
+
 module.exports = router;
