@@ -37,7 +37,7 @@ export default function SideBar() {
             <Link
                 onClick={() => setOpenModal(true)}
                 className='bg-red-light shadow-sm w-[80%] rounded-md p-2 text-white
-                     font-semibold cursor-pointer hover:bg-red-base ml-auto mr-auto mt-auto mb-[10%]
+                     font-semibold cursor-pointer hover:bg-red-base ml-auto mr-auto mt-auto mb-[10%] text-center
             '>
                 Sair
             </Link>

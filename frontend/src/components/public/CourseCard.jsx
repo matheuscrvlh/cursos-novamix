@@ -7,6 +7,11 @@ export default function CourseCard({
     loja,
     imagem,
     culinarista,
+    duracao,
+    categoria,
+    valor,
+    vagasLivres,
+    vagasReservadas,
     onClick
 }) {
     return (
@@ -14,7 +19,13 @@ export default function CourseCard({
             as='div'
             className='bg-white rounded-xl w-70 min-h-[380px] flex flex-col shadow-md'
         >
-            <Text as='div' className='rounded-md h-full overflow-hidden'>
+            <Text as='div' className='relative rounded-md h-full overflow-hidden'>
+                <Text 
+                    as='p'
+                    className='absolute top-1 text-white right-1 bg-orange-base rounded-md p-2 w-auto'
+                >
+                    {`${valor} R$`}
+                </Text>
                 {imagem ? (
                     <Text
                         as='img'
@@ -44,6 +55,9 @@ export default function CourseCard({
                     {`${data} - ${horario}h`}
                 </Text>
                 <Text as='p' className='text-gray-dark'>
+                    {`Duração: ${duracao}`}
+                </Text>
+                <Text as='p' className='text-gray-dark'>
                     {`Loja: ${loja}`}
                 </Text>
                 <Text as='p' className='text-gray-dark'>
@@ -56,6 +70,9 @@ export default function CourseCard({
                     onClick={onClick}
                 >
                     Garantir minha vaga
+                </Text>
+                <Text as='p' className='text-gray-dark text-center'>
+                    {`Vagas: ${vagasLivres}/24`}
                 </Text>
             </Text>
         </Text>

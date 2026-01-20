@@ -21,7 +21,8 @@ export default function Courses() {
             addCourses, 
             removeCourse 
         } = useContext(DadosContext);
-
+    
+    // ======= STATE CURSOS
     const [form, setForm] = useState({
         nomeCurso: '',
         data: '',
@@ -29,10 +30,12 @@ export default function Courses() {
         loja: '',
         culinarista: '',
         valor: '',
+        duracao: '',
+        categoria: '',
         ativo: 'true'
     });
 
-    // State Culinarista
+    // ======= STATE CULINARISTAS
     const [formCulinarian, setFormCulinarian] = useState({
         nomeCulinarista: '',
         cpf: '',
@@ -42,15 +45,7 @@ export default function Courses() {
         imagem: null
     });
 
-    useEffect(() => {
-        console.log(formCulinarian.lojas)
-    }, [formCulinarian.lojas])
-
-    useEffect(() => {
-        console.log(formCulinarian.cursos)
-    }, [formCulinarian.cursos])
-
-    // Adicionar Culinarista
+    // ======= CADASTRO CURSOS
     function handleSubmitCulinarian() {
         if(!formCulinarian.nomeCulinarista || !formCulinarian.cpf || !formCulinarian.lojas || !formCulinarian.cursos) {
             alert('Preencha os campos.');
@@ -67,8 +62,9 @@ export default function Courses() {
         addCulinarian(formData);
     }
 
+    // ======= CADASTRO CURSOS
     function handleSubmit() {
-        if (!form.nomeCurso || !form.hora || !form.data || !form.loja) {
+    if (!form.nomeCurso || !form.hora || !form.data || !form.loja || !form.categoria || !form.duracao) {
             alert('Preencha todos os campos');
         return;
         }
@@ -81,6 +77,8 @@ export default function Courses() {
         formData.append('loja', form.loja);
         formData.append('culinarista', form.culinarista);
         formData.append('valor', form.valor);
+        formData.append('duracao', form.duracao);
+        formData.append('categoria', form.categoria);
         formData.append('ativo', form.ativo);
 
         if (form.imagem) {
@@ -96,11 +94,14 @@ export default function Courses() {
             loja: '',
             culinarista: '',
             valor: '',
+            duracao: '',
+            categoria: '',
             ativo: 'true',
             imagem: null,
         })
     }
 
+    // ======== Toggle loja Culinarista
     function handleToggleLoja(loja) {
         setFormCulinarian(prev => {
             const existe = prev.lojas.includes(loja)
@@ -186,6 +187,22 @@ export default function Courses() {
                                 onChange={e => setForm({ ...form, valor: e.target.value})}
                             />
                             <Input 
+                                type='text'
+                                width='140px'
+                                height='40px'
+                                placeholder='Duração'
+                                value={form.duracao}
+                                onChange={e => setForm({ ...form, duracao: e.target.value })}
+                            />
+                            <Input 
+                                type='text'
+                                width='150px'
+                                height='40px'
+                                placeholder='Categoria'
+                                value={form.categoria}
+                                onChange={e => setForm({ ...form, categoria: e.target.value })}
+                            />
+                            <Input 
                                 type='file'
                                 accept='image/png, image/jpeg'
                                 onChange={(e) => {
@@ -211,7 +228,7 @@ export default function Courses() {
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>CURSOS ATIVOS</Text>
                         <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] font-bold text-gray-text'>
-                            <Text as='p'>NOME</Text>
+                            <Text as='p'>DESCRIÇÃO</Text>
                             <Text as='p'>CULINARISTA</Text>
                             <Text as='p'>VALOR</Text>
                             <Text as='p'>DATA</Text>

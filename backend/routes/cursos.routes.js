@@ -35,12 +35,6 @@ router.post('/', upload.array('fotos', 5), (req, res) => {
     ? req.files.map(f => `/uploads/cursos/${f.filename}`)
     : [];
 
-    const valor = parseFloat(req.body.valor);
-
-if (isNaN(valor)) {
-  return res.status(400).json({ message: 'Valor do curso inválido' });
-}
-
   const novoCurso = {
     id: cursoId,
     nomeCurso: req.body.nomeCurso,
@@ -50,7 +44,7 @@ if (isNaN(valor)) {
     data: req.body.data,
     hora: req.body.hora,
     loja: req.body.loja,
-    valor,
+    valor: req.body.valor,
     fotos
   };
 

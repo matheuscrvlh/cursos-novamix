@@ -223,5 +223,86 @@
     "celular": "a",
     "assento": 4,
     "dataInscricao": "2026-01-20T00:12:47.132Z"
+  },
+  {
+    "id": "33b96107-5ec5-46c5-af9a-ee69578e2ad7",
+    "cursoId": "1f73519a-de92-41c5-b5f8-fe73b6d74146",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 4,
+    "dataInscricao": "2026-01-20T11:45:13.142Z"
+  },
+  {
+    "id": "5d45fd6a-7631-48bb-b449-a07c9610556f",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 9,
+    "dataInscricao": "2026-01-20T11:51:34.716Z"
+  },
+  {
+    "id": "ebd71ecf-c1d5-4daf-bcc9-3310b510e5e3",
+    "cursoId": "918f8923-bb96-4382-8eff-816b7ff62ea3",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 10,
+    "dataInscricao": "2026-01-20T14:21:44.016Z"
+  },
+  {
+    "id": "e96a3c65-6bec-46fd-b3f0-a7d66ccced65",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 1,
+    "dataInscricao": "2026-01-20T14:23:40.307Z"
+  },
+  {
+    "id": "277a7585-eb13-4f3f-88d7-adcfc8e65668",
+    "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 8,
+    "dataInscricao": "2026-01-20T14:26:31.487Z"
+  },
+  {
+    "id": "605f1fda-aaba-448d-9e5e-dd89e56590aa",
+    "cursoId": "918f8923-bb96-4382-8eff-816b7ff62ea3",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 11,
+    "dataInscricao": "2026-01-20T14:27:05.846Z"
+  },
+  {
+    "id": "119d4b73-6b6a-40b3-9029-c41c39299da2",
+    "cursoId": "918f8923-bb96-4382-8eff-816b7ff62ea3",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 12,
+    "dataInscricao": "2026-01-20T14:27:13.402Z"
+  },
+  {
+    "id": "31769e02-1213-4c55-b8ba-fc175c7843aa",
+    "cursoId": "9cceff0c-ad22-4a73-a297-d45725123f6b",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 3,
+    "dataInscricao": "2026-01-20T14:38:56.646Z"
+  },
+  {
+    "id": "a3bcd99d-844c-4cd8-af2f-bd0795a3bb36",
+    "cursoId": "918f8923-bb96-4382-8eff-816b7ff62ea3",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 4,
+    "dataInscricao": "2026-01-20T14:50:31.578Z"
   }
 ]

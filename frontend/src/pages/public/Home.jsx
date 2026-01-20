@@ -36,6 +36,10 @@ export default function Home() {
         assento: ''
     })
 
+    // ========= STATE VAGAS ========= 
+    const [vagasPorCurso, setVagasPorCurso] = useState({});
+    const [refreshVagas, setRefreshVagas] = useState(0);
+
     // ========= STATE ASSENTOS ========= 
     const [ cursoSelecionado, setCursoSelecionado ] = useState('');
     const [ assentos, setAssentos ] = useState([]);
@@ -106,7 +110,38 @@ export default function Home() {
         setStep(null)
         setForm({cursoId: '', nome: '', cpf: '', telefone: '', assento: ''})
         setCursoSelecionado('')
+        setRefreshVagas(prev => prev + 1);
     }
+
+    // ====== FUNCOES
+    // layout data
+    function layoutData(data) {
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    // buscar vagas livres e reservadas
+    useEffect(() => {
+    if (!cursos.length) return;
+
+    async function loadVagas() {
+        const resultado = {};
+
+        await Promise.all(
+        cursos.map(async (curso) => {
+            const assentos = await getAssentos(curso.id);
+            resultado[curso.id] = {
+            livres: assentos.filter(v => v.status === 'livre').length,
+            reservadas: assentos.filter(v => v.status === 'reservado').length
+            };
+        })
+        );
+
+        setVagasPorCurso(resultado);
+    }
+
+    loadVagas();
+    }, [cursos, refreshVagas]);
 
     return (
         <PublicLayout>
@@ -115,7 +150,7 @@ export default function Home() {
                     as='a'
                     href='#cursos'
                 >
-                    <Text as='img' src={bannerHome} alt='banner' className='bg-orange-base w-auto h-[220px] mr-auto ml-auto'/>
+                    <Text as='img' src={bannerHome} alt='banner' className='bg-orange-base w-auto h-[350px] mr-auto ml-auto'/>
                 </Text>
                 <Text as='div' className='
                     bg-gray text-blue-base w-full text-center text-3xl 
@@ -127,14 +162,22 @@ export default function Home() {
                     bg-gray flex justify-center gap-3 w-full pt-6 pb-30
                 '>
                     <Text as='div' className='max-w-[80vw] bg-gray flex flex-wrap justify-center gap-3'>
-                        {cursos.map(curso => (
+                        {cursos.map(curso => {
+                            const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
+
+                            return (
                             <CourseCard key={curso.id} 
                                 id={curso.id}
                                 curso={curso.nomeCurso}
-                                data={curso.data}
+                                data={layoutData(curso.data)}
                                 horario={curso.hora}
                                 loja={curso.loja}
                                 culinarista={curso.culinarista}
+                                duracao={curso.duracao}
+                                categoria={curso.categoria}
+                                vagasLivres={vagas.livres}
+                                vagasReservadas={vagas.reservadas}
+                                valor={curso.valor}
                                 onClick={() => openForm(curso.id)}
                                 imagem={
                                     curso.fotos?.length
@@ -142,7 +185,7 @@ export default function Home() {
                                     : null
                                 }
                             />
-                        ))}  
+                        )})}  
                     </Text> 
                 </Text>
                 <Modal 

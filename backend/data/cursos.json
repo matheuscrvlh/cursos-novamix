@@ -6,7 +6,7 @@
     "data": "2026-01-07",
     "hora": "10:30",
     "loja": "Prado",
-    "valor": 1,
+    "valor": "4,99",
     "fotos": [
       "/uploads/cursos/d756e83b-e317-407b-8815-293042a7cd96.jpeg"
     ]
@@ -18,7 +18,7 @@
     "data": "2026-01-10",
     "hora": "10:00",
     "loja": "Prado",
-    "valor": 4,
+    "valor": "4,99",
     "fotos": [
       "/uploads/cursos/5c301887-8eed-43f6-ab2e-1fd8d9f712ee.jpeg"
     ]
@@ -30,7 +30,7 @@
     "data": "2026-01-15",
     "hora": "14:00",
     "loja": "Prado",
-    "valor": 20,
+    "valor": "4,99",
     "fotos": [
       "/uploads/cursos/2081e126-2b99-4f14-8887-a6e022d4b8e7.jpeg"
     ]
@@ -42,7 +42,7 @@
     "data": "2026-01-07",
     "hora": "14:00",
     "loja": "Teresopolis",
-    "valor": 4,
+    "valor": "4,99",
     "fotos": [
       "/uploads/cursos/d6f150e0-df19-4d1a-b9f5-961cfe28e171.jpeg"
     ]
@@ -51,10 +51,12 @@
     "id": "1f73519a-de92-41c5-b5f8-fe73b6d74146",
     "nomeCurso": "Pão de Mel",
     "culinarista": "Lorena Borges",
+    "categoria": "Teste",
+    "duracao": "2h",
     "data": "2026-01-23",
     "hora": "14:00",
     "loja": "Prado",
-    "valor": 4,
+    "valor": "4,99",
     "fotos": [
       "/uploads/cursos/e87b0ae5-15d5-4b68-8b14-0086cd53fc63.jpeg"
     ]
@@ -63,12 +65,28 @@
     "id": "3d246548-abf8-47c5-9471-c6119b58900b",
     "nomeCurso": "Morango do Amor",
     "culinarista": "Thais Vargas",
+    "categoria": "Salgados",
+    "duracao": "2h",
     "data": "2026-01-17",
     "hora": "12:59",
     "loja": "Prado",
-    "valor": 99,
+    "valor": "4,99",
     "fotos": [
       "/uploads/cursos/c17da79e-aae7-49a7-b9eb-87e8cfac2382.jpeg"
+    ]
+  },
+  {
+    "id": "918f8923-bb96-4382-8eff-816b7ff62ea3",
+    "nomeCurso": "Bolo de Pote Brilhoso",
+    "culinarista": "Valéria Lima",
+    "categoria": "Doces",
+    "duracao": "2h",
+    "data": "2026-01-29",
+    "hora": "09:40",
+    "loja": "Prado",
+    "valor": "4,99",
+    "fotos": [
+      "/uploads/cursos/2081e126-2b99-4f14-8887-a6e022d4b8e7.jpeg"
     ]
   }
 ]

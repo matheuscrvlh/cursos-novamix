@@ -1,7 +1,7 @@
-import loja from './loja.jpg'
 import bannerHome from './bannerHome.jpg'
+import bannerLogin from './bannerLogin.jpeg'
 
 export {
-    loja,
-    bannerHome
+    bannerHome,
+    bannerLogin
 }
