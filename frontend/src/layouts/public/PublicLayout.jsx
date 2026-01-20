@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom'
 import Text from '../../components/Text'
 
 // Images
-import { logo } from '../../assets/images/logos'
 import { stores, whatsapp } from '../../assets/images/icons'
 
 export default function PublicLayout({ children }) {
@@ -28,7 +27,7 @@ export default function PublicLayout({ children }) {
                         href='https://api.whatsapp.com/send?phone=5522998336225&text=Ol%C3%A1,%20gostaria%20de%20falar%20sobre%20os%20cursos'
                         target='_blank'
                         rel="noopener noreferrer"
-                        className='flex w-[16%] h-[40px] p-2 bg-gray-base mt-auto mb-auto rounded-md gap-3 cursor-pointer hover:bg-gray-base/80'
+                        className='flex w-auto h-[40px] p-2 pl-3 pr-4 bg-gray-base mt-auto mb-auto rounded-md gap-3 cursor-pointer hover:bg-gray-base/80'
                     >
                         <Text as='img' src={whatsapp} alt='whatsapp' className='h-[25px]'/>
                         <Text as='p' className='text-sm font-semibold mt-[2px]'>Atendimento Whatsapp</Text>

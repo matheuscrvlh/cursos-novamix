@@ -94,25 +94,28 @@ export default function Home() {
         setStep('assento')
     }
 
-    const closeModal = () => {
+    const openConfirmacao = () => {
         if(!form.assento) {
             alert('Marque algum assento.');
             return
         }
+        setStep('confirmacao')
+    }
+
+    const closeModal = () => {
         setStep(null)
         setForm({cursoId: '', nome: '', cpf: '', telefone: '', assento: ''})
         setCursoSelecionado('')
-        alert('Você foi cadastrado!')
     }
 
     return (
         <PublicLayout>
-            <Text as='section'>
+            <Text as='section' className='bg-orange-banner'>
                 <Text 
                     as='a'
                     href='#cursos'
                 >
-                    <Text as='img' src={bannerHome} alt='banner' className='bg-blue-base w-full h-[220px] '/>
+                    <Text as='img' src={bannerHome} alt='banner' className='bg-orange-base w-auto h-[220px] mr-auto ml-auto'/>
                 </Text>
                 <Text as='div' className='
                     bg-gray text-blue-base w-full text-center text-3xl 
@@ -121,7 +124,7 @@ export default function Home() {
                     <Text as='h1' id='cursos'>Nossos Cursos</Text>
                 </Text>
                 <Text as='div' className='
-                    bg-gray flex justify-center gap-3 w-full justify-center pt-6 pb-30
+                    bg-gray flex justify-center gap-3 w-full pt-6 pb-30
                 '>
                     <Text as='div' className='max-w-[80vw] bg-gray flex flex-wrap justify-center gap-3'>
                         {cursos.map(curso => (
@@ -144,12 +147,12 @@ export default function Home() {
                 </Text>
                 <Modal 
                     width='40%' 
-                    height='60%'
+                    height='auto'
                     isOpen={step === 'form'}
                     onClose={closeModal}
                 >   
-                    <Text as='div' className='flex flex-col gap-3 h-[90%]'>
-                        <Text as='p' className='font-semibold mt-3 mb-3 text-center'>Digite suas informações para cadastramos você!</Text>
+                    <Text as='div' className='flex flex-col gap-3 h-full'>
+                        <Text as='p' className='font-semibold mb-3 text-center text-xl mt-auto'>Digite suas informações para cadastramos você!</Text>
                         <Input 
                             type='text'
                             width='100%'
@@ -175,7 +178,7 @@ export default function Home() {
                             onChange={e => setForm({...form, celular: e.target.value})}
                         />
                         <Button
-                            className='bg-orange-base hover:bg-orange-light text-white mt-auto'
+                            className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                             onClick={openAssento}
                         >
                             Enviar
@@ -184,15 +187,15 @@ export default function Home() {
                 </Modal>
                 <Modal 
                     width='40%' 
-                    height='60%'
+                    height='auto'
                     isOpen={step === 'assento'}
                     onClose={closeModal}
                 >   
-                    <Text as='div' className='flex flex-col gap-3 h-[90%]'>
-                        <Text as='p' className='font-semibold text-center'>Escolha seu assento para assistir ao curso</Text>
+                    <Text as='div' className='flex flex-col gap-3 h-full'>
+                        <Text as='p' className='font-semibold text-center text-xl mt-auto'>Escolha seu assento para assistir ao curso</Text>
                         <Text 
                             as='div'
-                            className='bg-gray-base rounded-sm p-6 mb-2 text-center text-white font-semibold'
+                            className='bg-gray-base rounded-sm p-6 text-center text-white font-semibold mb-10'
                         >
                             Balcão
                         </Text>
@@ -226,14 +229,34 @@ export default function Home() {
                             )})}
                         </Text>
                         <Button 
-                            className='bg-orange-base hover:bg-orange-light text-white mt-auto'
+                            className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                             onClick={() => {
                                 handleSubmit() 
-                                closeModal()
+                                openConfirmacao()
                                 }
                             }
                         >
                             Enviar
+                        </Button>
+                    </Text>
+                </Modal>
+                <Modal 
+                    width='40%' 
+                    height='auto'
+                    isOpen={step === 'confirmacao'}
+                    onClose={closeModal}
+                >
+                    <Text 
+                        as='div'
+                        className='flex flex-col w-full h-full font-semibold p-2 gap-3 text-center'
+                    >
+                        <Text as='p' className='text-xl'>Você foi cadastrado(a)!</Text>
+                        <Text as='p' className='text-xl'>Entraremos em contato para finalizar seu pagamento.</Text>
+                        <Button 
+                            className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
+                            onClick={() => closeModal()}
+                        >
+                            Sair
                         </Button>
                     </Text>
                 </Modal>

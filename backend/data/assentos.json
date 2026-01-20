@@ -7,7 +7,7 @@
   {
     "id": 2,
     "cursoId": "0ee7f332-bb4d-4b59-ab29-cc5e93ea8c92",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 3,
@@ -122,27 +122,27 @@
   {
     "id": 1,
     "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 2,
     "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 3,
     "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 4,
     "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 5,
     "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 6,
@@ -157,17 +157,17 @@
   {
     "id": 8,
     "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 9,
     "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 10,
     "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 11,
@@ -222,7 +222,7 @@
   {
     "id": 21,
     "cursoId": "a88e3448-72a4-47ca-81a1-b3c203d11c14",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 22,
@@ -252,12 +252,12 @@
   {
     "id": 3,
     "cursoId": "4fa2de49-f068-486c-987a-29208f486db1",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 4,
     "cursoId": "4fa2de49-f068-486c-987a-29208f486db1",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 5,
@@ -672,12 +672,12 @@
   {
     "id": 15,
     "cursoId": "3d246548-abf8-47c5-9471-c6119b58900b",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 16,
     "cursoId": "3d246548-abf8-47c5-9471-c6119b58900b",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 17,
