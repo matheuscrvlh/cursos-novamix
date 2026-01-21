@@ -122,25 +122,25 @@ export default function Home() {
 
     // buscar vagas livres e reservadas
     useEffect(() => {
-    if (!cursos.length) return;
+        if (!cursos.length) return;
 
-    async function loadVagas() {
-        const resultado = {};
+        async function loadVagas() {
+            const resultado = {};
 
-        await Promise.all(
-        cursos.map(async (curso) => {
-            const assentos = await getAssentos(curso.id);
-            resultado[curso.id] = {
-            livres: assentos.filter(v => v.status === 'livre').length,
-            reservadas: assentos.filter(v => v.status === 'reservado').length
-            };
-        })
-        );
+            await Promise.all(
+                cursos.map(async (curso) => {
+                    const assentos = await getAssentos(curso.id);
+                    resultado[curso.id] = {
+                        livres: assentos.filter(v => v.status === 'livre').length,
+                        reservadas: assentos.filter(v => v.status === 'reservado').length
+                    };
+                })
+            );
 
-        setVagasPorCurso(resultado);
-    }
+            setVagasPorCurso(resultado);
+        }
 
-    loadVagas();
+        loadVagas();
     }, [cursos, refreshVagas]);
 
     return (
@@ -149,53 +149,65 @@ export default function Home() {
                 <Text 
                     as='a'
                     href='#cursos'
+                    className='block w-full'
                 >
-                    <Text as='img' src={bannerHome} alt='banner' className='bg-orange-base w-auto h-[350px] mr-auto ml-auto'/>
+                    {/* Banner responsivo */}
+                    <Text 
+                        as='img' 
+                        src={bannerHome} 
+                        alt='banner' 
+                        className='bg-orange-base w-full h-auto max-h-[250px] sm:max-h-[300px] md:max-h-[350px] lg:max-h-[400px] object-contain'
+                    />
                 </Text>
-                <Text as='div' className='
-                    bg-gray text-blue-base w-full text-center text-3xl 
-                    font-bold pt-12 
-                '>
+                
+                <Text as='div' className='bg-gray text-blue-base w-full text-center text-2xl md:text-3xl font-bold pt-8 md:pt-12'>
                     <Text as='h1' id='cursos'>Nossos Cursos</Text>
                 </Text>
-                <Text as='div' className='
-                    bg-gray flex justify-center gap-3 w-full pt-6 pb-30
-                '>
-                    <Text as='div' className='max-w-[80vw] bg-gray flex flex-wrap justify-center gap-3'>
+                
+                {/* Grid de cursos responsivo */}
+                <Text as='div' className='bg-gray flex justify-center w-full pt-6 pb-20 md:pb-30 px-4'>
+                    <Text as='div' className='max-w-[1400px] w-full bg-gray grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6'>
                         {cursos.map(curso => {
                             const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
                             return (
-                            <CourseCard key={curso.id} 
-                                id={curso.id}
-                                curso={curso.nomeCurso}
-                                data={layoutData(curso.data)}
-                                horario={curso.hora}
-                                loja={curso.loja}
-                                culinarista={curso.culinarista}
-                                duracao={curso.duracao}
-                                categoria={curso.categoria}
-                                vagasLivres={vagas.livres}
-                                vagasReservadas={vagas.reservadas}
-                                valor={curso.valor}
-                                onClick={() => openForm(curso.id)}
-                                imagem={
-                                    curso.fotos?.length
-                                    ? `http://localhost:3001${curso.fotos[0]}`
-                                    : null
-                                }
-                            />
-                        )})}  
+                                <CourseCard 
+                                    key={curso.id} 
+                                    id={curso.id}
+                                    curso={curso.nomeCurso}
+                                    data={layoutData(curso.data)}
+                                    horario={curso.hora}
+                                    loja={curso.loja}
+                                    culinarista={curso.culinarista}
+                                    duracao={curso.duracao}
+                                    categoria={curso.categoria}
+                                    vagasLivres={vagas.livres}
+                                    vagasReservadas={vagas.reservadas}
+                                    valor={curso.valor}
+                                    onClick={() => openForm(curso.id)}
+                                    imagem={
+                                        curso.fotos?.length
+                                        ? `http://localhost:3001${curso.fotos[0]}`
+                                        : null
+                                    }
+                                />
+                            )
+                        })}  
                     </Text> 
                 </Text>
+                
+                {/* Modal de formulário - responsivo */}
                 <Modal 
-                    width='40%' 
+                    width='90%'
+                    maxWidth='500px'
                     height='auto'
                     isOpen={step === 'form'}
                     onClose={closeModal}
                 >   
                     <Text as='div' className='flex flex-col gap-3 h-full'>
-                        <Text as='p' className='font-semibold mb-3 text-center text-xl mt-auto'>Digite suas informações para cadastramos você!</Text>
+                        <Text as='p' className='font-semibold mb-3 text-center text-lg md:text-xl mt-auto'>
+                            Digite suas informações para cadastramos você!
+                        </Text>
                         <Input 
                             type='text'
                             width='100%'
@@ -228,21 +240,27 @@ export default function Home() {
                         </Button>
                     </Text>
                 </Modal>
+                
+                {/* Modal de assentos - responsivo */}
                 <Modal 
-                    width='40%' 
+                    width='90%'
+                    maxWidth='600px'
                     height='auto'
                     isOpen={step === 'assento'}
                     onClose={closeModal}
                 >   
                     <Text as='div' className='flex flex-col gap-3 h-full'>
-                        <Text as='p' className='font-semibold text-center text-xl mt-auto'>Escolha seu assento para assistir ao curso</Text>
+                        <Text as='p' className='font-semibold text-center text-lg md:text-xl mt-auto'>
+                            Escolha seu assento para assistir ao curso
+                        </Text>
                         <Text 
                             as='div'
-                            className='bg-gray-base rounded-sm p-6 text-center text-white font-semibold mb-10'
+                            className='bg-gray-base rounded-sm p-4 md:p-6 text-center text-white font-semibold mb-6 md:mb-10'
                         >
                             Balcão
                         </Text>
-                        <Text as='div' className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-2'>
+                        {/* Grid de assentos responsivo */}
+                        <Text as='div' className='grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2'>
                             {assentos.map(assento => {
                                 const isReservado = assento.status === 'reservado';
                                 const isSelecionado = form.assento === assento.id;
@@ -251,7 +269,7 @@ export default function Home() {
                                     <Text 
                                         as='p'
                                         key={assento.id}
-                                        className={`p-1 rounded-full text-center font-semibold text-white ${
+                                        className={`p-2 rounded-full text-center font-semibold text-white text-sm ${
                                             isReservado
                                             ? 'bg-gray-base cursor-not-allowed'
                                             : isSelecionado
@@ -262,29 +280,32 @@ export default function Home() {
                                             if(isReservado) return;
 
                                             setForm(prev => ({
-                                            ...prev,
-                                            assento: assento.id
+                                                ...prev,
+                                                assento: assento.id
                                             }));
                                         }}
                                     >
                                         {assento.id}
                                     </Text>
-                            )})}
+                                )
+                            })}
                         </Text>
                         <Button 
                             className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                             onClick={() => {
                                 handleSubmit() 
                                 openConfirmacao()
-                                }
-                            }
+                            }}
                         >
                             Enviar
                         </Button>
                     </Text>
                 </Modal>
+                
+                {/* Modal de confirmação - responsivo */}
                 <Modal 
-                    width='40%' 
+                    width='90%'
+                    maxWidth='400px'
                     height='auto'
                     isOpen={step === 'confirmacao'}
                     onClose={closeModal}
@@ -293,8 +314,8 @@ export default function Home() {
                         as='div'
                         className='flex flex-col w-full h-full font-semibold p-2 gap-3 text-center'
                     >
-                        <Text as='p' className='text-xl'>Você foi cadastrado(a)!</Text>
-                        <Text as='p' className='text-xl'>Entraremos em contato para finalizar seu pagamento.</Text>
+                        <Text as='p' className='text-lg md:text-xl'>Você foi cadastrado(a)!</Text>
+                        <Text as='p' className='text-lg md:text-xl'>Entraremos em contato para finalizar seu pagamento.</Text>
                         <Button 
                             className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                             onClick={() => closeModal()}
