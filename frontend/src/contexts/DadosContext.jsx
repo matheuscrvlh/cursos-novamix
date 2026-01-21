@@ -1,26 +1,62 @@
 // React
 import { createContext, useEffect, useState } from 'react';
-import { getCourses, deleteCourse } from '../api/courses.service';
+import { getCourses, deleteCourse, getCulinaristas } from '../api/courses.service';
 
 export const DadosContext = createContext();
 
 export function DadosProvider({ children }) {
     const [cursos, setCursos] = useState([]);
+    const [culinaristas, setCulinaristas] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // CURSOS
     useEffect(() => {
         getCourses()
             .then(data => {
-                setCursos(data);
+                setCursos(data)
             })
             .catch(err => {
-                console.error('Erro ao buscar cursos', err);
+                console.error('Erro ao buscar cursos', err)
             })
             .finally(() => {
-                setLoading(false);
+                setLoading(false)
             });
     }, []);
+
+    // CULINARISTAS
+    useEffect(() => {
+        getCulinaristas()
+        .then(data => {
+            setCulinaristas(data)
+        })
+        .catch(err => {
+            console.error('Erro ao buscar culinaristas', err)
+        })
+        .finally(() => {
+            setLoading(false)
+        })
+    }, [])
+
+    // ============  CADASTRAR CULINARISTA   ============
+    async function addCulinarian(formData) {
+        try {
+            const response = await fetch('http://localhost:3001/culinaristas', {
+                method: 'POST',
+                body: formData, // direto no formData
+            });
+
+            if(!response.ok) {
+                throw new Error('Erro ao cadastrar culinarista')
+            }
+
+            const novaCulinarista = response.json();
+
+            setCulinaristas(prev => [...prev, novaCulinarista])
+        } catch (error) {
+            console.log('Erro ao cadastrar culinarista', error);
+            alert('Erro ao cadastrar culinarista', error)
+        }
+    }
 
     // ============   SE CADASTRAR (CLIENTE)   ============ 
     async function addRegisterClient(data) {
@@ -84,7 +120,9 @@ export function DadosProvider({ children }) {
                 loading,
                 addCourses,
                 removeCourse,
-                addRegisterClient
+                addRegisterClient,
+                addCulinarian,
+                culinaristas
             }}
         >
             {children}

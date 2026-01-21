@@ -27,7 +27,7 @@ router.get('/', (req, res) => {
 
 router.post('/', upload.single('foto'), (req, res) => {
   try {
-    const { nomeCulinarista, cpf, lojas, cursos } = req.body;
+    const { nomeCulinarista, cpf, lojas, cursos, instagram, industria, telefone } = req.body;
 
     if (!nomeCulinarista || !cpf) {
       return res.status(400).json({ message: 'Nome e CPF são obrigatórios' });
@@ -39,6 +39,9 @@ router.post('/', upload.single('foto'), (req, res) => {
       id: uuidv4(),
       nomeCulinarista,
       cpf,
+      industria,
+      telefone,
+      instagram, 
       lojas: lojas ? JSON.parse(lojas) : [],
       cursos: cursos ? JSON.parse(cursos) : [],
       foto: req.file ? `/uploads/culinaristas/${req.file.filename}` : null,

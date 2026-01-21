@@ -46,7 +46,7 @@ export default function Login() {
             <Text 
                 as='div' 
                 className='bg-white w-[30%] min-h-[60%] flex flex-col gap-2 p-5 justify-center  rounded-md absolute
-                     right-15 top-1/2 -translate-y-1/2'
+                     right-[10%] top-1/2 -translate-y-1/2'
                 >
                 <Text as='img' src={logoNm} alt='Logo' className='w-[50%] ml-auto mr-auto'/>
                 <Input 

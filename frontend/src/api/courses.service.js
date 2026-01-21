@@ -1,7 +1,13 @@
 import { request } from './http'
 
+// ======= ASSENTOS
 export function getAssentos(cursoId) {
     return request(`/assentos/${cursoId}`);
+}
+
+// ======= CULINARISTAS
+export function getCulinaristas() {
+    return request(`/culinaristas`)
 }
 
 // ======= CURSOS

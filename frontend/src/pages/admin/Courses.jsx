@@ -19,7 +19,9 @@ export default function Courses() {
             cursos,
             loading, 
             addCourses, 
-            removeCourse 
+            removeCourse,
+            addCulinarian,
+            culinaristas
         } = useContext(DadosContext);
     
     // ======= STATE CURSOS
@@ -39,15 +41,26 @@ export default function Courses() {
     const [formCulinarian, setFormCulinarian] = useState({
         nomeCulinarista: '',
         cpf: '',
+        instagram: '',
+        industria: '',
+        telefone: '',
         cursoAtual: '',
         lojas: [],
         cursos: [],
-        imagem: null
+        foto: null
     });
 
-    // ======= CADASTRO CURSOS
+    useEffect(() => {
+        console.log(formCulinarian)
+    }, [formCulinarian])
+
+    // ======= CADASTRO CULINARISTA
     function handleSubmitCulinarian() {
-        if(!formCulinarian.nomeCulinarista || !formCulinarian.cpf || !formCulinarian.lojas || !formCulinarian.cursos) {
+        if(
+            !formCulinarian.nomeCulinarista 
+            || !formCulinarian.cpf 
+            ) 
+        {
             alert('Preencha os campos.');
             return
         }
@@ -55,11 +68,30 @@ export default function Courses() {
         const formData = new FormData();
 
         formData.append('nomeCulinarista', formCulinarian.nomeCulinarista);
-        formData.append('cpf');
-        formData.append('lojas', formCulinarian.lojas);
-        formData.append('cursos', formCulinarian.cursos);
+        formData.append('cpf', formCulinarian.cpf);
+        formData.append('instagram', formCulinarian.instagram);
+        formData.append('industria', formCulinarian.industria);
+        formData.append('telefone', formCulinarian.telefone);
+        formData.append('lojas', JSON.stringify(formCulinarian.lojas));
+        formData.append('cursos', JSON.stringify(formCulinarian.cursos));
+
+        if(formCulinarian.foto) {
+            formData.append('foto', formCulinarian.foto);
+        }
 
         addCulinarian(formData);
+
+        setFormCulinarian({
+            nomeCulinarista: '',
+            cpf: '',
+            instagram: '',
+            industria: '',
+            telefone: '',
+            cursoAtual: '',
+            lojas: [],
+            cursos: [],
+            foto: null
+        });
     }
 
     // ======= CADASTRO CURSOS
@@ -264,17 +296,52 @@ export default function Courses() {
                                 width='250px'
                                 height='40px'
                                 placeholder='Nome'
+                                value={formCulinarian.nomeCulinarista}
+                                onChange={e => setFormCulinarian({ ...formCulinarian, nomeCulinarista: e.target.value})}
                             />
                             <Input
                                 width='170px'
                                 height='40px'   
                                 placeholder='Cpf'
+                                value={formCulinarian.cpf}
+                                onChange={e => setFormCulinarian({ ...formCulinarian, cpf: e.target.value})}
+                            />
+                            <Input
+                                width='170px'
+                                height='40px'   
+                                placeholder='Insdustria'
+                                value={formCulinarian.industria}
+                                onChange={e => setFormCulinarian({ ...formCulinarian, industria: e.target.value})}
+                            />
+                            <Input
+                                width='170px'
+                                height='40px'   
+                                placeholder='Telefone'
+                                value={formCulinarian.telefone}
+                                onChange={e => setFormCulinarian({ ...formCulinarian, telefone: e.target.value})}
+                            />
+                            <Input
+                                width='170px'
+                                height='40px'   
+                                placeholder='Instagram'
+                                value={formCulinarian.instagram}
+                                onChange={e => setFormCulinarian({ ...formCulinarian, instagram: e.target.value})}
                             />
                             <Input
                                 width='170px'
                                 height='40px' 
                                 className='mr-7'
                                 type='file'
+                                accept='image/png, image/jpeg'
+                                onChange={(e) => {
+                                    const file = e.target.files[0]
+                                    if(!file) return
+
+                                    setFormCulinarian((prev) => ({
+                                        ...prev,
+                                        foto: file,
+                                    }))
+                                }}
                             />
                             <Text as='div' className='flex gap-3'>
                                 <Input 
@@ -372,6 +439,18 @@ export default function Courses() {
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-gray-text'>
                             CULINARISTAS ATIVAS
+                            <Text>
+                                {culinaristas.map(c => (
+                                    <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3' key={c.id}>
+                                        <Text as='p'>{c.nomeCulinarista}</Text>
+                                        <Text as='p'>{c.industria}</Text>
+                                        <Text as='p'>{c.telefone}</Text>
+                                        <Text as='p'>{c.instagram}</Text>
+                                        <Text as='p'>{c.lojas}</Text>
+                                        <Text as='p'>{c.dataCadastro}</Text>
+                                    </Text>
+                                ))}
+                            </Text>
                         </Text>
                     </CardDash>
                 </Text>
