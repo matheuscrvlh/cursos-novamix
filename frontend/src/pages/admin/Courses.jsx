@@ -21,6 +21,7 @@ export default function Courses() {
             addCourses, 
             removeCourse,
             addCulinarian,
+            removeCulinarian,
             culinaristas
         } = useContext(DadosContext);
     
@@ -49,10 +50,6 @@ export default function Courses() {
         cursos: [],
         foto: null
     });
-
-    useEffect(() => {
-        console.log(formCulinarian)
-    }, [formCulinarian])
 
     // ======= CADASTRO CULINARISTA
     function handleSubmitCulinarian() {
@@ -437,17 +434,27 @@ export default function Courses() {
                         </Text>
                     </CardDash>
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                        <Text as='p' className='font-bold text-gray-text'>
-                            CULINARISTAS ATIVAS
-                            <Text>
+                        <Text as='div' className='font-bold text-gray-text'>
+                            <Text>CULINARISTAS ATIVAS</Text>
+                            <Text as='div'>
                                 {culinaristas.map(c => (
-                                    <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3' key={c.id}>
+                                    <Text 
+                                        as='div' 
+                                        className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3'
+                                        key={c.id}
+                                    >
                                         <Text as='p'>{c.nomeCulinarista}</Text>
                                         <Text as='p'>{c.industria}</Text>
                                         <Text as='p'>{c.telefone}</Text>
                                         <Text as='p'>{c.instagram}</Text>
                                         <Text as='p'>{c.lojas}</Text>
                                         <Text as='p'>{c.dataCadastro}</Text>
+                                        <Button 
+                                            className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                            onClick={() => removeCulinarian(c.id)}
+                                        >
+                                            Excluir
+                                        </Button>
                                     </Text>
                                 ))}
                             </Text>

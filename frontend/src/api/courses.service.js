@@ -10,6 +10,12 @@ export function getCulinaristas() {
     return request(`/culinaristas`)
 }
 
+export function deleteCulinarista(id) {
+    return request(`/culinaristas/${id}`, {
+        method: 'DELETE' 
+    })
+}
+
 // ======= CURSOS
 export function getCourses() {
     return request('/cursos');

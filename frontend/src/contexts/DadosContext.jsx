@@ -1,6 +1,6 @@
 // React
 import { createContext, useEffect, useState } from 'react';
-import { getCourses, deleteCourse, getCulinaristas } from '../api/courses.service';
+import { getCourses, deleteCourse, getCulinaristas, deleteCulinarista } from '../api/courses.service';
 
 export const DadosContext = createContext();
 
@@ -37,7 +37,7 @@ export function DadosProvider({ children }) {
         })
     }, [])
 
-    // ============  CADASTRAR CULINARISTA   ============
+    // ============  CULINARISTAS  ============
     async function addCulinarian(formData) {
         try {
             const response = await fetch('http://localhost:3001/culinaristas', {
@@ -57,6 +57,17 @@ export function DadosProvider({ children }) {
             alert('Erro ao cadastrar culinarista', error)
         }
     }
+
+    async function removeCulinarian(id) {
+        try {
+            await deleteCulinarista(id)
+
+            setCulinaristas(prev => prev.filter(c => c.id !== id))
+        } catch(erro) {
+            console.error('Erro ao deletar culinarista', erro)
+        }
+    }
+
 
     // ============   SE CADASTRAR (CLIENTE)   ============ 
     async function addRegisterClient(data) {
@@ -112,7 +123,9 @@ export function DadosProvider({ children }) {
             console.error('Erro ao remover curso', err);
             alert('Erro ao remover curso');
         }
-        }
+    }
+
+
     return (
         <DadosContext.Provider
             value={{
@@ -122,7 +135,8 @@ export function DadosProvider({ children }) {
                 removeCourse,
                 addRegisterClient,
                 addCulinarian,
-                culinaristas
+                culinaristas,
+                removeCulinarian
             }}
         >
             {children}

@@ -6,7 +6,7 @@ import { useState } from 'react'
 // Components
 import Text from '../../components/Text'
 import LinkSideBar from '../../components/admin/LinkSideBar'
-import ConfirmModal from '../../components/public/ModalSaida'
+import ConfirmModal from '../../components/public/ModalConfirm'
 
 // Images
 import { logoNm } from '../../assets/images/logos/'
