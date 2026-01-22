@@ -4,6 +4,8 @@ import { getCourses, deleteCourse, getCulinaristas, deleteCulinarista } from '..
 
 export const DadosContext = createContext();
 
+const URL = 'http://72.61.25.63:3001/';
+
 export function DadosProvider({ children }) {
     const [cursos, setCursos] = useState([]);
     const [culinaristas, setCulinaristas] = useState([]);
@@ -40,7 +42,7 @@ export function DadosProvider({ children }) {
     // ============  CULINARISTAS  ============
     async function addCulinarian(formData) {
         try {
-            const response = await fetch('http://localhost:3001/culinaristas', {
+            const response = await fetch(`${URL}culinaristas`, {
                 method: 'POST',
                 body: formData, // direto no formData
             });
@@ -72,7 +74,7 @@ export function DadosProvider({ children }) {
     // ============   SE CADASTRAR (CLIENTE)   ============ 
     async function addRegisterClient(data) {
         try {
-            const response = await fetch('http://localhost:3001/inscricoes', {
+            const response = await fetch(`${URL}inscricoes`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -94,7 +96,7 @@ export function DadosProvider({ children }) {
     // ============   CURSOS   ============ 
     async function addCourses(formData) {
         try {
-            const response = await fetch('http://localhost:3001/cursos', {
+            const response = await fetch(`${URL}cursos`, {
                 method: 'POST',
                 body: formData, // direto no formData
             });
