@@ -7,6 +7,9 @@ import { DadosContext } from '../../contexts/DadosContext';
 // SERVICES
 import { getAssentos } from '../../api/courses.service';
 
+// HEAD 
+import { Head } from '../../components/Head'
+
 // Components
 import Text from '../../components/Text'
 import CourseCard from '../../components/public/CourseCard'
@@ -145,6 +148,7 @@ export default function Home() {
 
     return (
         <PublicLayout>
+            <Head title='Loja Novamix | Cursos'/>
             <Text as='section' className='bg-orange-banner'>
                 <Text 
                     as='a'
