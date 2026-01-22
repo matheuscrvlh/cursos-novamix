@@ -187,7 +187,7 @@ export default function Home() {
                                     onClick={() => openForm(curso.id)}
                                     imagem={
                                         curso.fotos?.length
-                                        ? `http://localhost:3001${curso.fotos[0]}`
+                                        ? curso.fotos[0]
                                         : null
                                     }
                                 />

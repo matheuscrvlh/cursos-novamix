@@ -5,8 +5,7 @@ const path = require('path');
 const cursosRoutes = require('./routes/cursos.routes');
 const assentosRoutes = require('./routes/assentos.routes');
 const inscricoesRoutes = require('./routes/inscricoes.routes');
-const culinaristasRoutes = require('./routes/culinaristas.routes')
-
+const culinaristasRoutes = require('./routes/culinaristas.routes');
 const app = express();
 
 app.use(cors());
