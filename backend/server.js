@@ -15,10 +15,10 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
-app.use('/cursos', cursosRoutes);
-app.use('/assentos', assentosRoutes);
-app.use('/inscricoes', inscricoesRoutes);
-app.use('/culinaristas', culinaristasRoutes);
+app.use('/api/cursos', cursosRoutes);
+app.use('/api/assentos', assentosRoutes);
+app.use('/api/inscricoes', inscricoesRoutes);
+app.use('/api/culinaristas', culinaristasRoutes);
 
 app.listen(3001, () => {
   console.log('Backend torando na porta 3001');
