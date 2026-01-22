@@ -3,7 +3,7 @@ export async function request(url, options = {}) {
         ? {}
         : { 'Content-Type': 'application/json' };
 
-    const response = await fetch(`http://72.61.25.63:3001${url}`, {
+    const response = await fetch(`/api${url}`, {
         ...options,
         headers
     });

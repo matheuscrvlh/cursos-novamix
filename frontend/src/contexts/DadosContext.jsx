@@ -4,8 +4,6 @@ import { getCourses, deleteCourse, getCulinaristas, deleteCulinarista } from '..
 
 export const DadosContext = createContext();
 
-const URL = 'http://72.61.25.63:3001/';
-
 export function DadosProvider({ children }) {
     const [cursos, setCursos] = useState([]);
     const [culinaristas, setCulinaristas] = useState([]);
@@ -42,7 +40,7 @@ export function DadosProvider({ children }) {
     // ============  CULINARISTAS  ============
     async function addCulinarian(formData) {
         try {
-            const response = await fetch(`${URL}culinaristas`, {
+            const response = await fetch(`/api/culinaristas`, {
                 method: 'POST',
                 body: formData, // direto no formData
             });
@@ -51,7 +49,7 @@ export function DadosProvider({ children }) {
                 throw new Error('Erro ao cadastrar culinarista')
             }
 
-            const novaCulinarista = response.json();
+            const novaCulinarista = await response.json();
 
             setCulinaristas(prev => [...prev, novaCulinarista])
         } catch (error) {
@@ -74,7 +72,7 @@ export function DadosProvider({ children }) {
     // ============   SE CADASTRAR (CLIENTE)   ============ 
     async function addRegisterClient(data) {
         try {
-            const response = await fetch(`${URL}inscricoes`, {
+            const response = await fetch(`/api/inscricoes`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -96,7 +94,7 @@ export function DadosProvider({ children }) {
     // ============   CURSOS   ============ 
     async function addCourses(formData) {
         try {
-            const response = await fetch(`${URL}cursos`, {
+            const response = await fetch(`/api/cursos`, {
                 method: 'POST',
                 body: formData, // direto no formData
             });
