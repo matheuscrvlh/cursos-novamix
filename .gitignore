@@ -3,6 +3,14 @@
 **/node_modules/
 
 ############################
+# DATA
+backend/data/
+
+############################
+# UPLOADS
+backend/uploads/
+
+############################
 # BUILDS
 frontend/dist/
 frontend/dist-ssr/
