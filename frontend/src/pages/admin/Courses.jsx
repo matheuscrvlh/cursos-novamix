@@ -144,6 +144,13 @@ export default function Courses() {
         })
     }
 
+    // ====== FUNCOES
+    // layout data
+    function layoutData(data) {
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+
     return (
         <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <SideBar />
@@ -167,84 +174,111 @@ export default function Courses() {
                     <CardDash className='bg-white h-[200px] w-full h-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-gray-text'>CADASTRE UM CURSO</Text>
                         <Text as='div' className='flex flex-wrap w-full gap-[20px] mt-[30px]'>
-                            <Input 
-                                type='text'
-                                placeholder='Curso'
-                                width='400px'
-                                height='40px'
-                                value={form.nomeCurso}
-                                onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Curso</Text>
+                                <Input 
+                                    type='text'
+                                    placeholder='Curso'
+                                    width='400px'
+                                    height='40px'
+                                    value={form.nomeCurso}
+                                    onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
                             />
-                            <Input 
-                                type='date' 
-                                width='170px'
-                                height='40px'
-                                value={form.data}
-                                onChange={e => setForm({ ...form, data: e.target.value })}
-                            />
-                            <Input 
-                                type='time' 
-                                width='140px'
-                                height='40px'
-                                value={form.hora}
-                                onChange={e => setForm({ ...form, hora: e.target.value })}
-                            />
-                            <Text 
-                                as='select' 
-                                value={form.loja}
-                                onChange={e => setForm({ ...form, loja: e.target.value})}
-                                className='w-[150px] h-[40px] border border-gray-base rounded-md'
-                            >
-                                <Text as='option' value=''>Selecione a loja</Text>
-                                <Text as='option' value='Prado'>Prado</Text>
-                                <Text as='option' value='Teresopolis'>Teresopolis</Text>
                             </Text>
-                            <Input 
-                                type='text'
-                                width='400px'
-                                height='40px'
-                                placeholder='Culinarista'
-                                value={form.culinarista}
-                                onChange={e => setForm({ ...form, culinarista: e.target.value })}
-                            />
-                            <Input 
-                                type='text' 
-                                width='170px'
-                                height='40px'
-                                placeholder='Valor'
-                                value={form.valor}
-                                onChange={e => setForm({ ...form, valor: e.target.value})}
-                            />
-                            <Input 
-                                type='text'
-                                width='140px'
-                                height='40px'
-                                placeholder='Duração'
-                                value={form.duracao}
-                                onChange={e => setForm({ ...form, duracao: e.target.value })}
-                            />
-                            <Input 
-                                type='text'
-                                width='150px'
-                                height='40px'
-                                placeholder='Categoria'
-                                value={form.categoria}
-                                onChange={e => setForm({ ...form, categoria: e.target.value })}
-                            />
-                            <Input 
-                                type='file'
-                                accept='image/png, image/jpeg'
-                                onChange={(e) => {
-                                    const file = e.target.files[0];
-                                    if (!file) return;
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Data</Text>
+                                <Input 
+                                    type='date' 
+                                    width='170px'
+                                    height='40px'
+                                    value={form.data}
+                                    onChange={e => setForm({ ...form, data: e.target.value })}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Horario</Text>
+                                <Input 
+                                    type='time' 
+                                    width='140px'
+                                    height='40px'
+                                    value={form.hora}
+                                    onChange={e => setForm({ ...form, hora: e.target.value })}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Loja</Text>
+                                <Text 
+                                    as='select' 
+                                    value={form.loja}
+                                    onChange={e => setForm({ ...form, loja: e.target.value})}
+                                    className='w-[150px] h-[40px] border border-gray-base rounded-md'
+                                >
+                                    <Text as='option' value=''>Selecione a loja</Text>
+                                    <Text as='option' value='Prado'>Prado</Text>
+                                    <Text as='option' value='Teresopolis'>Teresopolis</Text>
+                                </Text>
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Culinarista</Text>  
+                                <Input 
+                                    type='text'
+                                    width='400px'
+                                    height='40px'
+                                    placeholder='Culinarista'
+                                    value={form.culinarista}
+                                    onChange={e => setForm({ ...form, culinarista: e.target.value })}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Valor</Text>
+                                <Input 
+                                    type='text' 
+                                    width='170px'
+                                    height='40px'
+                                    placeholder='Valor'
+                                    value={form.valor}
+                                    onChange={e => setForm({ ...form, valor: e.target.value})}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Duração</Text>  
+                                <Input 
+                                    type='text'
+                                    width='140px'
+                                    height='40px'
+                                    placeholder='Duração'
+                                    value={form.duracao}
+                                    onChange={e => setForm({ ...form, duracao: e.target.value })}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Categoria</Text>    
+                                <Input 
+                                    type='text'
+                                    width='150px'
+                                    height='40px'
+                                    placeholder='Categoria'
+                                    value={form.categoria}
+                                    onChange={e => setForm({ ...form, categoria: e.target.value })}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Imagem</Text>  
+                                <Input 
+                                    type='file'
+                                    accept='image/png, image/jpeg'
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
 
-                                    setForm((prev) => ({
-                                        ...prev,
-                                        imagem: file,
-                                    }));
-                                }}
-                            >
-                            </Input>
+                                        setForm((prev) => ({
+                                            ...prev,
+                                            imagem: file,
+                                        }));
+                                    }}
+                                >
+                                </Input>
+                            </Text>
                             <Button 
                                 width='100%'
                                 className='bg-orange-base hover:bg-orange-light text-white'
@@ -273,7 +307,7 @@ export default function Courses() {
                                 <Text as='p'>{curso.nomeCurso}</Text>
                                 <Text as='p'>{curso.culinarista}</Text>
                                 <Text as='p'>{curso.valor}</Text>
-                                <Text as='p'>{curso.data}</Text>
+                                <Text as='p'>{layoutData(curso.data)}</Text>
                                 <Text as='p'>{curso.hora}</Text>
                                 <Text as='p'>{curso.loja}</Text>
                                     
@@ -289,57 +323,75 @@ export default function Courses() {
                     <CardDash as='div' className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-gray-text mb-4'>CADASTRE UMA CULINARISTA</Text>
                         <Text as='div' className='flex flex-wrap gap-3'>
-                            <Input
-                                width='250px'
-                                height='40px'
-                                placeholder='Nome'
-                                value={formCulinarian.nomeCulinarista}
-                                onChange={e => setFormCulinarian({ ...formCulinarian, nomeCulinarista: e.target.value})}
-                            />
-                            <Input
-                                width='170px'
-                                height='40px'   
-                                placeholder='Cpf'
-                                value={formCulinarian.cpf}
-                                onChange={e => setFormCulinarian({ ...formCulinarian, cpf: e.target.value})}
-                            />
-                            <Input
-                                width='170px'
-                                height='40px'   
-                                placeholder='Insdustria'
-                                value={formCulinarian.industria}
-                                onChange={e => setFormCulinarian({ ...formCulinarian, industria: e.target.value})}
-                            />
-                            <Input
-                                width='170px'
-                                height='40px'   
-                                placeholder='Telefone'
-                                value={formCulinarian.telefone}
-                                onChange={e => setFormCulinarian({ ...formCulinarian, telefone: e.target.value})}
-                            />
-                            <Input
-                                width='170px'
-                                height='40px'   
-                                placeholder='Instagram'
-                                value={formCulinarian.instagram}
-                                onChange={e => setFormCulinarian({ ...formCulinarian, instagram: e.target.value})}
-                            />
-                            <Input
-                                width='170px'
-                                height='40px' 
-                                className='mr-7'
-                                type='file'
-                                accept='image/png, image/jpeg'
-                                onChange={(e) => {
-                                    const file = e.target.files[0]
-                                    if(!file) return
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Nome</Text> 
+                                <Input
+                                    width='250px'
+                                    height='40px'
+                                    placeholder='Nome'
+                                    value={formCulinarian.nomeCulinarista}
+                                    onChange={e => setFormCulinarian({ ...formCulinarian, nomeCulinarista: e.target.value})}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Cpf</Text> 
+                                <Input
+                                    width='170px'
+                                    height='40px'   
+                                    placeholder='Cpf'
+                                    value={formCulinarian.cpf}
+                                    onChange={e => setFormCulinarian({ ...formCulinarian, cpf: e.target.value})}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Industria</Text> 
+                                <Input
+                                    width='170px'
+                                    height='40px'   
+                                    placeholder='Insdustria'
+                                    value={formCulinarian.industria}
+                                    onChange={e => setFormCulinarian({ ...formCulinarian, industria: e.target.value})}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Telefone</Text> 
+                                <Input
+                                    width='170px'
+                                    height='40px'   
+                                    placeholder='Telefone'
+                                    value={formCulinarian.telefone}
+                                    onChange={e => setFormCulinarian({ ...formCulinarian, telefone: e.target.value})}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Instagram</Text> 
+                                <Input
+                                    width='170px'
+                                    height='40px'   
+                                    placeholder='Instagram'
+                                    value={formCulinarian.instagram}
+                                    onChange={e => setFormCulinarian({ ...formCulinarian, instagram: e.target.value})}
+                                />
+                            </Text>
+                            <Text as='div' className='flex flex-col text-gray-dark'>
+                                <Text>Imagem</Text>
+                                <Input
+                                    width='170px'
+                                    height='40px' 
+                                    className='mr-7'
+                                    type='file'
+                                    accept='image/png, image/jpeg'
+                                    onChange={(e) => {
+                                        const file = e.target.files[0]
+                                        if(!file) return
 
-                                    setFormCulinarian((prev) => ({
-                                        ...prev,
-                                        foto: file,
-                                    }))
-                                }}
-                            />
+                                        setFormCulinarian((prev) => ({
+                                            ...prev,
+                                            foto: file,
+                                        }))
+                                    }}
+                                />
+                            </Text>    
                             <Text as='div' className='flex gap-3'>
                                 <Input 
                                     type='checkbox'
@@ -361,33 +413,36 @@ export default function Courses() {
                                 <Text as='label' className='mt-2'>Teresopolis</Text>
                             </Text>
 
-                            <Text as='div' className='flex gap-3'>
-                                <Input
-                                    width='250px'
-                                    height='40px'
-                                    placeholder='Curso'
-                                    value={formCulinarian.cursoAtual}
-                                    onChange={e => setFormCulinarian({ ...formCulinarian, cursoAtual: e.target.value })}
-                                />
-                                <Button
-                                    width='180px'
-                                    className='bg-orange-base text-white'
-                                    onClick={() => {
-                                        if(!formCulinarian.cursoAtual) {
-                                            alert('Preencha o campo.')
+                            <Text as='div' className='flex flex-col'>
+                                <Text>Cursos que executa</Text>
+                                <Text as='div' className='flex gap-3 text-gray-dark'>
+                                    <Input
+                                        width='250px'
+                                        height='40px'
+                                        placeholder='Curso'
+                                        value={formCulinarian.cursoAtual}
+                                        onChange={e => setFormCulinarian({ ...formCulinarian, cursoAtual: e.target.value })}
+                                    />
+                                    <Button
+                                        width='180px'
+                                        className='bg-orange-base text-white'
+                                        onClick={() => {
+                                            if(!formCulinarian.cursoAtual) {
+                                                alert('Preencha o campo.')
+                                            }
+                                            setFormCulinarian({ 
+                                                ...formCulinarian,
+                                                cursos: [
+                                                    ...formCulinarian.cursos,
+                                                    formCulinarian.cursoAtual
+                                                ],
+                                                cursoAtual: ''
+                                            })}
                                         }
-                                        setFormCulinarian({ 
-                                            ...formCulinarian,
-                                            cursos: [
-                                                ...formCulinarian.cursos,
-                                                formCulinarian.cursoAtual
-                                            ],
-                                            cursoAtual: ''
-                                        })}
-                                    }
-                                >
-                                    Adicionar Curso
-                                </Button>
+                                    >
+                                        Adicionar Curso
+                                    </Button>
+                                </Text>
                             </Text>
                             <Text as='div' className='flex flex-wrap gap-3 w-full'>
                                 {formCulinarian.cursos.map((curso, index) => (
@@ -436,6 +491,15 @@ export default function Courses() {
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='div' className='font-bold text-gray-text'>
                             <Text>CULINARISTAS ATIVAS</Text>
+                            <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3'>
+                                <Text as='p'>NOME</Text>
+                                <Text as='p'>INDUSTRIA</Text>
+                                <Text as='p'>TELEFONE</Text>
+                                <Text as='p'>INSTAGRAM</Text>
+                                <Text as='p'>LOJAS</Text>
+                                <Text as='p'>CADASTRO</Text>
+                                <Text as='p'>FUNÇOES</Text>
+                            </Text>
                             <Text as='div'>
                                 {culinaristas.map(c => (
                                     <Text 
