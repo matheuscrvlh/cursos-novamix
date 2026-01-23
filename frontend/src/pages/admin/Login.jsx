@@ -2,6 +2,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+// HEAD
+import { Head } from '../../components/Head'
+
 // Components
 import Text from '../../components/Text'
 import Button from '../../components/Button'
@@ -37,6 +40,7 @@ export default function Login() {
 
     return (
         <Text as='main' className='w-full min-h-screen flex relative overflow-hidden'>
+            <Head title='Loja Novamix | Login'/>
             {/* Imagem de fundo */}
             <Text 
                 as='img' 
