@@ -6,6 +6,10 @@ import Input from '../../components/Input'
 import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
+import CourseCard from '../../components/public/CourseCard'
+
+// SERVICES
+import { getAssentos } from '../../api/courses.service';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -21,12 +25,39 @@ export default function CoursesDashboard() {
             culinaristas
         } = useContext(DadosContext);
 
+    // ========= STATE VAGAS ========= 
+    const [vagasPorCurso, setVagasPorCurso] = useState({});
+    const [refreshVagas, setRefreshVagas] = useState(0);
+
     // ====== FUNCOES
     // layout data
     function layoutData(data) {
         const [ano, mes, dia] = data.split('-');
         return `${dia}/${mes}/${ano}`;
     }
+
+    // buscar vagas livres e reservadas
+    useEffect(() => {
+        if (!cursos.length) return;
+
+        async function loadVagas() {
+            const resultado = {};
+
+            await Promise.all(
+                cursos.map(async (curso) => {
+                    const assentos = await getAssentos(curso.id);
+                    resultado[curso.id] = {
+                        livres: assentos.filter(v => v.status === 'livre').length,
+                        reservadas: assentos.filter(v => v.status === 'reservado').length
+                    };
+                })
+            );
+
+            setVagasPorCurso(resultado);
+        }
+
+        loadVagas();
+    }, [cursos, refreshVagas]);
 
     return (
         <Text>
@@ -45,74 +76,45 @@ export default function CoursesDashboard() {
                 </CardDash>
             </Text>
             <Text as='article' className='flex flex-col gap-10'>
-                <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                    <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>CURSOS ATIVOS</Text>
-                    <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] font-bold text-gray-text'>
-                        <Text as='p'>DESCRIÇÃO</Text>
-                        <Text as='p'>CULINARISTA</Text>
-                        <Text as='p'>VALOR</Text>
-                        <Text as='p'>DATA</Text>
-                        <Text as='p'>HORARIO</Text>
-                        <Text as='p'>LOJA</Text>
-                        <Text as='p'>FUNÇÕES</Text>
-                    </Text>
-                    {loading ? (
-                        <Text as='p'>Carregando cursos...</Text>
-                    ) : (
-                        cursos.map(curso => (
-                        <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3' key={curso.id}>
-                            <Text as='p'>{curso.nomeCurso}</Text>
-                            <Text as='p'>{curso.culinarista}</Text>
-                            <Text as='p'>{curso.valor}</Text>
-                            <Text as='p'>{layoutData(curso.data)}</Text>
-                            <Text as='p'>{curso.hora}</Text>
-                            <Text as='p'>{curso.loja}</Text>
-                                
-                            <Button 
-                                className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                onClick={() => removeCourse(curso.id)}
-                            >
-                                Excluir
-                            </Button>
-                        </Text>
-                    )))}
-                </CardDash>
-                <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                    <Text as='div' className='font-bold text-gray-text'>
-                        <Text>CULINARISTAS ATIVAS</Text>
-                        <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3'>
-                            <Text as='p'>NOME</Text>
-                            <Text as='p'>INDUSTRIA</Text>
-                            <Text as='p'>TELEFONE</Text>
-                            <Text as='p'>INSTAGRAM</Text>
-                            <Text as='p'>LOJAS</Text>
-                            <Text as='p'>CADASTRO</Text>
-                            <Text as='p'>FUNÇOES</Text>
-                        </Text>
-                        <Text as='div'>
-                            {culinaristas.map(c => (
-                                <Text 
-                                    as='div' 
-                                    className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3'
-                                    key={c.id}
-                                >
-                                    <Text as='p'>{c.nomeCulinarista}</Text>
-                                    <Text as='p'>{c.industria}</Text>
-                                    <Text as='p'>{c.telefone}</Text>
-                                    <Text as='p'>{c.instagram}</Text>
-                                    <Text as='p'>{c.lojas}</Text>
-                                    <Text as='p'>{c.dataCadastro}</Text>
-                                    <Button 
-                                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                        onClick={() => removeCulinarian(c.id)}
-                                    >
-                                        Excluir
-                                    </Button>
-                                </Text>
-                            ))}
-                        </Text>
-                    </Text>
-                </CardDash>
+                <Text>CATALOGO DE CURSOS</Text>
+                <Text 
+                    as='div'
+                    className="
+                        w-[70vw]
+                        max-h-[600px]
+                        flex
+                        gap-4
+                        overflow-x-auto
+                        overflow-y-hidden
+                        whitespace-nowrap
+                    "
+                >
+                    {cursos.map(curso => {
+                        const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
+
+                        return (
+                            <CourseCard 
+                                key={curso.id} 
+                                id={curso.id}
+                                curso={curso.nomeCurso}
+                                data={layoutData(curso.data)}
+                                horario={curso.hora}
+                                loja={curso.loja}
+                                culinarista={curso.culinarista}
+                                duracao={curso.duracao}
+                                categoria={curso.categoria}
+                                vagasLivres={vagas.livres}
+                                vagasReservadas={vagas.reservadas}
+                                valor={curso.valor}
+                                imagem={
+                                    curso.fotos?.length
+                                    ? curso.fotos[0]
+                                    : null
+                                }
+                            />
+                        )
+                    })}  
+                </Text>
             </Text>
         </Text>
     )

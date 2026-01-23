@@ -149,20 +149,6 @@ export default function CoursesRegister() {
 
     return (
         <Text>
-            <Text as='article' className='flex gap-[6%] mb-15'>
-                <CardDash width='30%' height='150px'>
-                    <Text as='p' className='font-bold text-gray-text'>CURSOS ATIVOS</Text>
-                    <Text as='p' className='font-bold text-6xl text-gray-text text-center pt-1'>
-                    {cursos.length}
-                    </Text>
-                </CardDash>
-                <CardDash width='30%'>
-                    <Text as='p' className='font-bold'>INCRIÇÕES TOTAIS</Text>
-                </CardDash>
-                <CardDash width='30%'>
-                    <Text as='p' className='font-bold'>SEILA</Text>
-                </CardDash>
-            </Text>
             <Text as='article' className='flex flex-col gap-10'>
                 <CardDash className='bg-white h-[200px] w-full h-full rounded-md p-10 shadow-sm'>
                     <Text as='p' className='font-bold text-gray-text'>CADASTRE UM CURSO</Text>

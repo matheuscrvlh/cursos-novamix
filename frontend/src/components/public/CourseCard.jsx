@@ -67,7 +67,7 @@ export default function CourseCard({
                 <Text
                     as='button'
                     className='bg-orange-base rounded-sm p-2 md:p-3 w-full mt-3 text-white text-sm md:text-base font-semibold cursor-pointer hover:bg-orange-light hover:shadow-md transition-all'
-                    onClick={onClick}
+                    onClick={onClick ? onClick : null}
                 >
                     Garantir minha vaga
                 </Text>
