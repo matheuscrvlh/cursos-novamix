@@ -1,18 +1,15 @@
-import Text from '../Text';
+import Text from "../Text"
 
-export default function CourseCard({
-    curso,
-    data,
-    horario,
-    loja,
+export default function CulinarianCard({
     imagem,
     culinarista,
-    duracao,
-    categoria,
-    valor,
-    vagasLivres,
-    vagasReservadas,
+    industria,
+    telefone,
+    instagram,
+    lojas,
+    cursos,
     onClick
+
 }) {
     return (
         <Text
@@ -24,13 +21,13 @@ export default function CourseCard({
                     as='p'
                     className='absolute top-2 text-white right-2 bg-orange-base rounded-md p-2 text-sm md:text-base font-semibold z-10'
                 >
-                    {`R$ ${valor}`}
+                    {`R$ ${culinarista}`}
                 </Text>
                 {imagem ? (
                     <Text
                         as='img'
                         src={imagem}
-                        alt={curso}
+                        alt={culinarista}
                         className='rounded-t-md w-full h-full object-cover'
                     />
                 ) : (
@@ -47,21 +44,18 @@ export default function CourseCard({
                 as='h1'
                 className='text-blue-base font-bold text-xl md:text-2xl p-4 line-clamp-2'
             >
-                {curso}
+                {culinarista}
             </Text>
 
             <Text as='div' className='mt-auto p-4 pt-0'>
                 <Text as='p' className='text-gray-dark text-sm md:text-base mb-1'>
-                    {`${data} - ${horario}h`}
+                    {`${industria}`}
                 </Text>
                 <Text as='p' className='text-gray-dark text-sm md:text-base mb-1'>
-                    {`Duração: ${duracao}`}
+                    {`${lojas}`}
                 </Text>
                 <Text as='p' className='text-gray-dark text-sm md:text-base mb-1'>
-                    {`Loja: ${loja}`}
-                </Text>
-                <Text as='p' className='text-gray-dark text-sm md:text-base mb-3'>
-                    {`Culinarista: ${culinarista}`}
+                    {`${cursos}`}
                 </Text>
 
                 <Text
@@ -69,12 +63,12 @@ export default function CourseCard({
                     className='bg-orange-base rounded-sm p-2 md:p-3 w-full mt-3 text-white text-sm md:text-base font-semibold cursor-pointer hover:bg-orange-light hover:shadow-md transition-all'
                     onClick={onClick ? onClick : null}
                 >
-                    Garantir minha vaga
+                    Ver detalhes
                 </Text>
                 <Text as='p' className='text-gray-dark text-center text-sm md:text-base mt-2'>
-                    {`Vagas: ${vagasLivres}/24`}
+                    {`${telefone} - ${instagram}`}
                 </Text>
             </Text>
         </Text>
-    );
+    )
 }
