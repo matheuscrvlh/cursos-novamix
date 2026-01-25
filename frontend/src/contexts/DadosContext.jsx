@@ -1,6 +1,6 @@
 // React
 import { createContext, useEffect, useState } from 'react';
-import { getCourses, deleteCourse, getCulinaristas, deleteCulinarista } from '../api/courses.service';
+import { getCourses, deleteCourse, getCulinaristas, deleteCulinarista, putCourse } from '../api/courses.service';
 
 export const DadosContext = createContext();
 
@@ -92,6 +92,7 @@ export function DadosProvider({ children }) {
     }
 
     // ============   CURSOS   ============ 
+    // add course
     async function addCourses(formData) {
         try {
             const response = await fetch(`/api/cursos`, {
@@ -112,8 +113,8 @@ export function DadosProvider({ children }) {
         }
     }
 
-    
-   async function removeCourse(id) {
+    // remove course
+    async function removeCourse(id) {
         try {
             await deleteCourse(id);
 
@@ -125,6 +126,34 @@ export function DadosProvider({ children }) {
         }
     }
 
+    // edit course
+    async function editCourse(formData) {
+        try {
+            await putCourse(formData.get('id'), formData) 
+
+            setCursos(prev => 
+                prev.map(curso => 
+                    curso.id === formData.get('id') 
+                    ?   {
+                            id: formData.get('id'),
+                            nomeCurso: formData.get('nomeCurso'),
+                            data: formData.get('data'),
+                            hora: formData.get('hora'),
+                            loja: formData.get('loja'),
+                            culinarista: formData.get('culinarista'),
+                            valor: formData.get('valor'),
+                            duracao: formData.get('duracao'),
+                            categoria: formData.get('catergoria'),
+                            ativo: formData.get('ativo')
+                        }
+                    : curso
+            )
+        );
+        } catch (err) {
+            console.error('Erro ao editar curso', err)
+            alert('Erro ao editar curso')
+        }
+    }
 
     return (
         <DadosContext.Provider
@@ -133,6 +162,7 @@ export function DadosProvider({ children }) {
                 loading,
                 addCourses,
                 removeCourse,
+                editCourse,
                 addRegisterClient,
                 addCulinarian,
                 culinaristas,

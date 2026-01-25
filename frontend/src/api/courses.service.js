@@ -34,8 +34,9 @@ export function deleteCourse(id) {
     })
 }
 
-export function putCourse(id) {
+export function putCourse(id, data) {
     return request(`/cursos/${id}`, {
-        method: 'PUT'
-    })
+        method: 'PUT',
+        body: data
+    });
 }
