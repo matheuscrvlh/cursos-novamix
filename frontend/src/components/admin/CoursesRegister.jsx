@@ -10,6 +10,7 @@ import Modal from '../public/Modal';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
+import { getAssentos } from '../../api/courses.service';
 
 export default function CoursesRegister() {
     const { 
@@ -62,6 +63,9 @@ export default function CoursesRegister() {
         cursos: [],
         foto: null
     });
+
+    // ======= STATE ASSENTOS
+    const [ assentos, setAssentos ] = useState([])
 
     // ======= STATE MODAL
     const [ step, setStep ] = useState('close')
@@ -145,7 +149,7 @@ export default function CoursesRegister() {
         })
     }
 
-    // ======== FILTROS
+    // ======== EDIT CURSOS
     function handleEditCourse(cursoId) {
         setStep('edit');
 
@@ -203,6 +207,19 @@ export default function CoursesRegister() {
         setStep('close');
     }
 
+    // ======== INSCRICOES CURSO
+    async function handleInscricoesCurso(cursoId) {
+        try{setStep('inscricoes');
+
+        const assentos = await getAssentos(cursoId);
+        console.log(assentos)
+        setAssentos(assentos)
+        
+        } catch(err) {
+            console.log(err)
+        }
+    }
+
     // ======== HANDLES
     // ======== Toggle loja Culinarista
     function handleToggleLoja(loja) {
@@ -226,21 +243,37 @@ export default function CoursesRegister() {
     }
 
     function closeModal() {
-        setStep('close');
-        
-        setCursoEditar({
-            id: '',
-            nomeCurso: '',
-            data: '',
-            hora: '',
-            loja: '',
-            culinarista: '',
-            valor: '',
-            duracao: '',
-            categoria: '',
-            ativo: 'true'
-        })
+        if(step === 'inscricoes') {
+            setAssentos([]);
+            setStep('close');
+            return
+
+        } else if(step === 'edit') {
+            setCursoEditar({
+                id: '',
+                nomeCurso: '',
+                data: '',
+                hora: '',
+                loja: '',
+                culinarista: '',
+                valor: '',
+                duracao: '',
+                categoria: '',
+                ativo: 'true'
+            });
+
+            setStep('close');
+            return
+
+        } else {
+            setStep('close');
+            return
+        }
     }
+
+    useEffect(() => {
+        console.log(assentos)
+    }, [assentos])
 
     return (
         <Text as='article' className='flex flex-col gap-10 mt-10'>
@@ -363,10 +396,9 @@ export default function CoursesRegister() {
             </CardDash>
             <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                 <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>CURSOS ATIVOS</Text>
-                <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] font-bold text-gray-text'>
+                <Text as='div' className='grid grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] font-bold text-gray-text'>
                     <Text as='p'>DESCRIÇÃO</Text>
                     <Text as='p'>CULINARISTA</Text>
-                    <Text as='p'>VALOR</Text>
                     <Text as='p'>DATA</Text>
                     <Text as='p'>HORARIO</Text>
                     <Text as='p'>LOJA</Text>
@@ -378,28 +410,34 @@ export default function CoursesRegister() {
                     cursos.map(curso => (
                     <Text 
                         as='div' 
-                        className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3' 
+                        className='grid grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] text-gray-text mt-3' 
                         key={curso.id}
                     >
                         <Text as='p'>{curso.nomeCurso}</Text>
                         <Text as='p'>{curso.culinarista}</Text>
-                        <Text as='p'>{curso.valor}</Text>
                         <Text as='p'>{layoutData(curso.data)}</Text>
                         <Text as='p'>{curso.hora}</Text>
                         <Text as='p'>{curso.loja}</Text>
-                            
-                        <Button 
-                            className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                            onClick={() => removeCourse(curso.id)}
-                        >
-                            Excluir
-                        </Button>
-                        <Button 
-                            className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                            onClick={() => handleEditCourse(curso.id)}
-                        >
-                            Editar
-                        </Button>
+                        <Text as='div' className='flex gap-3'>
+                            <Button 
+                                className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
+                                onClick={() => removeCourse(curso.id)}
+                            >
+                                Excluir
+                            </Button>
+                            <Button 
+                                className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                onClick={() => handleEditCourse(curso.id)}
+                            >
+                                Editar
+                            </Button>
+                            <Button 
+                                className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
+                                onClick={() => handleInscricoesCurso(curso.id)}
+                            >
+                                Inscrições
+                            </Button>
+                        </Text>
                     </Text>
                 )))}
             </CardDash>
@@ -667,6 +705,26 @@ export default function CoursesRegister() {
                 >
                     Salvar Edições
                 </Button>
+            </Modal>
+            <Modal
+                width='90%'
+                maxWidth='400px'
+                height='auto'
+                isOpen={step === 'inscricoes'}
+                onClose={() => closeModal()}
+            >
+                    {assentos.map(assento => {
+                        return (
+                            <Text
+                                as='div'
+                                className='flex'
+                                key={assento.id}
+                            >
+                                <Text as='p'>{assento.id}</Text>
+                                <Text as='p'>{assento.status}</Text>
+                            </Text>
+                        )
+                    })}
             </Modal>
         </Text>
     )
