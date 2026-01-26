@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const upload = require('../config/uploadCulinaristas');
+const createUpload = require('../config/createUpload');
+
 
 const router = express.Router();
 
@@ -21,11 +23,13 @@ const safeWrite = (data) => {
   fs.writeFileSync(culinaristasPath, JSON.stringify(data, null, 2));
 };
 
+const uploadCulinaristas = createUpload('culinaristas');
+
 router.get('/', (req, res) => {
   res.json(safeRead());
 });
 
-router.post('/', upload.single('foto'), (req, res) => {
+router.post('/', uploadCulinaristas.single('foto'), (req, res) => {
   try {
     const { nomeCulinarista, cpf, lojas, cursos, instagram, industria, telefone } = req.body;
 
@@ -66,25 +70,34 @@ router.put('/:id', upload.single('foto'), (req, res) => {
     return res.status(404).json({ message: 'Culinarista não encontrado' });
   }
 
+  // apagar a foto antiga se uma nova for enviada 
   if (req.file && culinaristas[index].foto) {
     const fotoPath = path.join(__dirname, '..', culinaristas[index].foto);
-    if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+    if (fs.existsSync(fotoPath)) {
+      fs.unlinkSync(fotoPath);
+    }
   }
 
   culinaristas[index] = {
     ...culinaristas[index],
-    nomeCulinarista: req.body.nomeCulinarista ?? culinaristas[index].nomeCulinarista,
+    nomeCulinarista:
+      req.body.nomeCulinarista ?? culinaristas[index].nomeCulinarista,
     cpf: req.body.cpf ?? culinaristas[index].cpf,
-    lojas: req.body.lojas ? JSON.parse(req.body.lojas) : culinaristas[index].lojas,
-    cursos: req.body.cursos ? JSON.parse(req.body.cursos) : culinaristas[index].cursos,
+    lojas: req.body.lojas
+      ? JSON.parse(req.body.lojas)
+      : culinaristas[index].lojas,
+    cursos: req.body.cursos
+      ? JSON.parse(req.body.cursos)
+      : culinaristas[index].cursos,
     foto: req.file
-      ? `/uploads/culinaristas/${req.file.filename}`
+      ? `uploads/culinaristas/${req.file.filename}` 
       : culinaristas[index].foto
   };
 
   safeWrite(culinaristas);
   res.json(culinaristas[index]);
 });
+
 
 router.delete('/:id', (req, res) => {
   const culinaristas = safeRead();

@@ -2,7 +2,9 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const upload = require('../config/upload');
+const createUpload = require('../config/createUpload');
+
+const uploadCursos = createUpload('cursos');
 
 const router = express.Router();
 
@@ -26,7 +28,7 @@ router.get('/', (req, res) => {
   res.json(safeRead(cursosPath));
 });
 
-router.post('/', upload.array('fotos', 5), (req, res) => {
+router.post('/', uploadCursos.array('fotos', 5), (req, res) => {
   const cursos = safeRead(cursosPath);
   const assentos = safeRead(assentosPath);
 
@@ -65,7 +67,7 @@ router.post('/', upload.array('fotos', 5), (req, res) => {
   res.status(201).json(novoCurso);
 });
 
-router.put('/:id', upload.array('fotos', 5), (req, res) => {
+router.put('/:id', uploadCursos.array('fotos', 5), (req, res) => {
   const cursos = safeRead(cursosPath);
   const index = cursos.findIndex(c => c.id === req.params.id);
 

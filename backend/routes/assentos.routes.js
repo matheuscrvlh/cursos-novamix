@@ -12,5 +12,16 @@ router.get('/:cursoId', (req, res) => {
   res.json(assentos);
 });
 
+router.put('/:cursoId', (req, res) => {
+  const { cursoId } = req.params;
+  const updatedAssentos = req.body;
+
+  let assentos = read();
+  assentos = assentos.filter(a => a.cursoId !== cursoId).concat(updatedAssentos);
+  fs.writeFileSync(assentosPath, JSON.stringify(assentos, null, 2));
+
+  res.json({ message: 'Assentos atualizados com sucesso!' });
+});
+
 module.exports = router;
 
