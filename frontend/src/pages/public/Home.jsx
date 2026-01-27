@@ -24,14 +24,14 @@ import PublicLayout from '../../layouts/public/PublicLayout'
 import { bannerHome } from '../../assets/images/banner/'
 
 export default function Home() {
-    const { 
+    const {
         cursos,
-        loading, 
+        loading,
         addRegisterClient
     } = useContext(DadosContext);
 
     // ========= STATE CADASTRO CLIENTE  ========= 
-    const [ form, setForm ] = useState({
+    const [form, setForm] = useState({
         cursoId: '',
         nome: '',
         cpf: '',
@@ -44,15 +44,15 @@ export default function Home() {
     const [refreshVagas, setRefreshVagas] = useState(0);
 
     // ========= STATE ASSENTOS ========= 
-    const [ cursoSelecionado, setCursoSelecionado ] = useState('');
-    const [ assentos, setAssentos ] = useState([]);
+    const [cursoSelecionado, setCursoSelecionado] = useState('');
+    const [assentos, setAssentos] = useState([]);
 
     // ========= STATE MODAL ========= 
-    const [ step, setStep ] = useState(null)
+    const [step, setStep] = useState(null)
 
     // =========  CADASTRO CLIENTE ========= 
     function handleSubmit() {
-        if(!form.nome || !form.cpf || !form.celular) {
+        if (!form.nome || !form.cpf || !form.celular) {
             alert('Preencha todos os campos.')
             return;
         }
@@ -80,8 +80,8 @@ export default function Home() {
         }
 
         getAssentos(cursoSelecionado)
-        .then(setAssentos)
-        .catch(console.error)
+            .then(setAssentos)
+            .catch(console.error)
 
         console.log(assentos)
     }, [cursoSelecionado])
@@ -94,7 +94,7 @@ export default function Home() {
     }
 
     const openAssento = () => {
-        if(!form.nome || !form.cpf || !form.celular) {
+        if (!form.nome || !form.cpf || !form.celular) {
             alert('Preencha todos os campos.')
             return;
         }
@@ -102,7 +102,7 @@ export default function Home() {
     }
 
     const openConfirmacao = () => {
-        if(!form.assento) {
+        if (!form.assento) {
             alert('Marque algum assento.');
             return
         }
@@ -111,7 +111,7 @@ export default function Home() {
 
     const closeModal = () => {
         setStep(null)
-        setForm({cursoId: '', nome: '', cpf: '', telefone: '', assento: ''})
+        setForm({ cursoId: '', nome: '', cpf: '', telefone: '', assento: '' })
         setCursoSelecionado('')
         setRefreshVagas(prev => prev + 1);
     }
@@ -148,35 +148,39 @@ export default function Home() {
 
     return (
         <PublicLayout>
-            <Head title='Loja Novamix | Cursos'/>
+            <Head title='Loja Novamix | Cursos' />
             <Text as='section' className='bg-orange-banner'>
-                <Text 
+                <Text
                     as='a'
                     href='#cursos'
                     className='block w-full'
                 >
                     {/* Banner responsivo */}
-                    <Text 
-                        as='img' 
-                        src={bannerHome} 
-                        alt='banner' 
-                        className='bg-orange-base w-full h-auto max-h-[250px] sm:max-h-[300px] md:max-h-[350px] lg:max-h-[400px] object-contain'
-                    />
+                    <Text
+                        as="img"
+                        src={bannerHome}
+                        alt="Cursos Novamix"
+                        className="
+                            w-full 
+                            max-h-[140px] 
+                             object-contain 
+                             mb-4
+                         " />
                 </Text>
-                
+
                 <Text as='div' className='bg-gray text-blue-base w-full text-center text-2xl md:text-3xl font-bold pt-8 md:pt-12'>
                     <Text as='h1' id='cursos'>Nossos Cursos</Text>
                 </Text>
-                
+
                 {/* Grid de cursos responsivo */}
                 <Text as='div' className='bg-gray flex justify-center w-full pt-6 pb-20 md:pb-30 px-4'>
-                    <Text as='div' className='max-w-[1400px] w-full bg-gray grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6'>
+                    <Text as='div' className='max-w-[1400px] justify-items-center w-full bg-gray grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6'>
                         {cursos.map(curso => {
                             const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
                             return (
-                                <CourseCard 
-                                    key={curso.id} 
+                                <CourseCard
+                                    key={curso.id}
                                     id={curso.id}
                                     curso={curso.nomeCurso}
                                     data={layoutData(curso.data)}
@@ -191,50 +195,50 @@ export default function Home() {
                                     onClick={() => openForm(curso.id)}
                                     imagem={
                                         curso.fotos?.length
-                                        ? curso.fotos[0]
-                                        : null
+                                            ? curso.fotos[0]
+                                            : null
                                     }
                                 />
                             )
-                        })}  
-                    </Text> 
+                        })}
+                    </Text>
                 </Text>
-                
+
                 {/* Modal de formulário - responsivo */}
-                <Modal 
+                <Modal
                     width='90%'
                     maxWidth='500px'
                     height='auto'
                     isOpen={step === 'form'}
                     onClose={closeModal}
-                >   
+                >
                     <Text as='div' className='flex flex-col gap-3 h-full'>
                         <Text as='p' className='font-semibold mb-3 text-center text-lg md:text-xl mt-auto'>
                             Digite suas informações para cadastramos você!
                         </Text>
-                        <Input 
+                        <Input
                             type='text'
                             width='100%'
                             height='40px'
                             placeholder='Nome completo'
                             value={form.nome}
-                            onChange={e => setForm({...form, nome: e.target.value})}
+                            onChange={e => setForm({ ...form, nome: e.target.value })}
                         />
-                        <Input 
+                        <Input
                             type='text'
                             width='100%'
                             height='40px'
                             placeholder='CPF'
                             value={form.cpf}
-                            onChange={e => setForm({...form, cpf: e.target.value})}
+                            onChange={e => setForm({ ...form, cpf: e.target.value })}
                         />
-                        <Input 
+                        <Input
                             type='text'
                             width='100%'
                             height='40px'
                             placeholder='Telefone'
                             value={form.celular}
-                            onChange={e => setForm({...form, celular: e.target.value})}
+                            onChange={e => setForm({ ...form, celular: e.target.value })}
                         />
                         <Button
                             className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
@@ -244,20 +248,20 @@ export default function Home() {
                         </Button>
                     </Text>
                 </Modal>
-                
+
                 {/* Modal de assentos - responsivo */}
-                <Modal 
+                <Modal
                     width='90%'
                     maxWidth='600px'
                     height='auto'
                     isOpen={step === 'assento'}
                     onClose={closeModal}
-                >   
+                >
                     <Text as='div' className='flex flex-col gap-3 h-full'>
                         <Text as='p' className='font-semibold text-center text-lg md:text-xl mt-auto'>
                             Escolha seu assento para assistir ao curso
                         </Text>
-                        <Text 
+                        <Text
                             as='div'
                             className='bg-gray-base rounded-sm p-4 md:p-6 text-center text-white font-semibold mb-6 md:mb-10'
                         >
@@ -270,18 +274,17 @@ export default function Home() {
                                 const isSelecionado = form.assento === assento.id;
 
                                 return (
-                                    <Text 
+                                    <Text
                                         as='p'
                                         key={assento.id}
-                                        className={`p-2 rounded-full text-center font-semibold text-white text-sm ${
-                                            isReservado
-                                            ? 'bg-gray-base cursor-not-allowed'
-                                            : isSelecionado
-                                            ? 'bg-gray-dark cursor-pointer'
-                                            : 'bg-orange-base cursor-pointer'
-                                        }`}
+                                        className={`p-2 rounded-full text-center font-semibold text-white text-sm ${isReservado
+                                                ? 'bg-gray-base cursor-not-allowed'
+                                                : isSelecionado
+                                                    ? 'bg-gray-dark cursor-pointer'
+                                                    : 'bg-orange-base cursor-pointer'
+                                            }`}
                                         onClick={() => {
-                                            if(isReservado) return;
+                                            if (isReservado) return;
 
                                             setForm(prev => ({
                                                 ...prev,
@@ -294,10 +297,10 @@ export default function Home() {
                                 )
                             })}
                         </Text>
-                        <Button 
+                        <Button
                             className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                             onClick={() => {
-                                handleSubmit() 
+                                handleSubmit()
                                 openConfirmacao()
                             }}
                         >
@@ -305,22 +308,22 @@ export default function Home() {
                         </Button>
                     </Text>
                 </Modal>
-                
+
                 {/* Modal de confirmação - responsivo */}
-                <Modal 
+                <Modal
                     width='90%'
                     maxWidth='400px'
                     height='auto'
                     isOpen={step === 'confirmacao'}
                     onClose={closeModal}
                 >
-                    <Text 
+                    <Text
                         as='div'
                         className='flex flex-col w-full h-full font-semibold p-2 gap-3 text-center'
                     >
                         <Text as='p' className='text-lg md:text-xl'>Você foi cadastrado(a)!</Text>
                         <Text as='p' className='text-lg md:text-xl'>Entraremos em contato para finalizar seu pagamento.</Text>
-                        <Button 
+                        <Button
                             className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                             onClick={() => closeModal()}
                         >

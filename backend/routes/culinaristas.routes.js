@@ -62,7 +62,7 @@ router.post('/', uploadCulinaristas.single('foto'), (req, res) => {
   }
 });
 
-router.put('/:id', upload.single('foto'), (req, res) => {
+router.put('/:id', uploadCulinaristas.single('foto'), (req, res) => {
   const culinaristas = safeRead();
   const index = culinaristas.findIndex(c => c.id === req.params.id);
 

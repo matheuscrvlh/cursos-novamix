@@ -88,6 +88,75 @@ router.get('/curso/:cursoId', (req, res) => {
   }
 });
 
+router.put('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nome, cpf, celular, assento } = req.body;
+
+    const inscricoes = safeRead(inscricoesPath);
+    const assentos = safeRead(assentosPath);
+
+    const index = inscricoes.findIndex(i => i.id === id);
+
+    if (index === -1) {
+      return res.status(404).json({ message: 'Inscrição não encontrada' });
+    }
+
+    const inscricaoAtual = inscricoes[index];
+
+    // se mudar de assento
+    if (assento !== undefined && Number(assento) !== inscricaoAtual.assento) {
+      const novoAssentoId = Number(assento);
+
+      // assento atual
+      const assentoAntigo = assentos.find(
+        a => a.cursoId === inscricaoAtual.cursoId && a.id === inscricaoAtual.assento
+      );
+
+      // novo assento
+      const novoAssento = assentos.find(
+        a => a.cursoId === inscricaoAtual.cursoId && a.id === novoAssentoId
+      );
+
+      if (!novoAssento) {
+        return res.status(404).json({ message: 'Novo assento não encontrado' });
+      }
+
+      if (novoAssento.status !== 'livre') {
+        return res.status(400).json({ message: 'Novo assento indisponível' });
+      }
+
+      // liberar assento antigo
+      if (assentoAntigo) {
+        assentoAntigo.status = 'livre';
+      }
+
+      // reservar novo assento
+      novoAssento.status = 'reservado';
+
+      inscricaoAtual.assento = novoAssentoId;
+    }
+
+    // atualizar dados 
+    inscricoes[index] = {
+      ...inscricaoAtual,
+      nome: nome ?? inscricaoAtual.nome,
+      cpf: cpf ?? inscricaoAtual.cpf,
+      celular: celular ?? inscricaoAtual.celular
+    };
+
+    safeWrite(assentosPath, assentos);
+    safeWrite(inscricoesPath, inscricoes);
+
+    res.json(inscricoes[index]);
+
+  } catch (err) {
+    console.error('ERRO AO ATUALIZAR INSCRIÇÃO:', err);
+    res.status(500).json({ message: 'Erro interno no servidor' });
+  }
+});
+
+
 router.delete('/:id', (req, res) => {
   try {
     const { id } = req.params;
