@@ -5,6 +5,18 @@ export function getAssentos(cursoId) {
     return request(`/assentos/${cursoId}`);
 }
 
+// ======= INSCRICOES
+export function getInscricoes(cursoId) {
+    return request(`/inscricoes/curso/${cursoId}`);
+}
+
+export function putInscricoes(cursoId, body) {
+    return request(`/inscricoes/curso/${cursoId}`, {
+        method: 'PUT',
+        body: JSON.stringify(body)
+    });
+}
+
 // ======= CULINARISTAS
 export function getCulinaristas() {
     return request(`/culinaristas`)

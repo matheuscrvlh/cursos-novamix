@@ -59,6 +59,7 @@ router.post('/', (req, res) => {
       cpf,
       celular,
       assento: assentoId,
+      status: 'verificar',
       dataInscricao: new Date().toISOString()
     };
 

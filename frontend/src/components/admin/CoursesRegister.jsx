@@ -10,7 +10,7 @@ import Modal from '../public/Modal';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
-import { getAssentos } from '../../api/courses.service';
+import { getAssentos, getInscricoes } from '../../api/courses.service';
 
 export default function CoursesRegister() {
     const { 
@@ -66,6 +66,9 @@ export default function CoursesRegister() {
 
     // ======= STATE ASSENTOS
     const [ assentos, setAssentos ] = useState([])
+
+    // ======= STATE INSCRICOES
+    const [ inscricoes, setInscricoes ] = useState([])
 
     // ======= STATE MODAL
     const [ step, setStep ] = useState('close')
@@ -171,10 +174,6 @@ export default function CoursesRegister() {
         });
     }
 
-    useEffect(() => {
-            console.log(cursoEditar)
-        }, [cursoEditar])
-
     function editarCourse() {
         const formData = new FormData()
 
@@ -212,8 +211,10 @@ export default function CoursesRegister() {
         try{setStep('inscricoes');
 
         const assentos = await getAssentos(cursoId);
-        console.log(assentos)
+        const inscricoes = await getInscricoes(cursoId)
+        console.log(inscricoes)
         setAssentos(assentos)
+        setInscricoes(inscricoes)
         
         } catch(err) {
             console.log(err)
@@ -245,6 +246,7 @@ export default function CoursesRegister() {
     function closeModal() {
         if(step === 'inscricoes') {
             setAssentos([]);
+            setInscricoes([]);
             setStep('close');
             return
 
@@ -270,10 +272,6 @@ export default function CoursesRegister() {
             return
         }
     }
-
-    useEffect(() => {
-        console.log(assentos)
-    }, [assentos])
 
     return (
         <Text as='article' className='flex flex-col gap-10 mt-10'>
@@ -708,23 +706,51 @@ export default function CoursesRegister() {
             </Modal>
             <Modal
                 width='90%'
-                maxWidth='400px'
+                maxWidth='1000px'
                 height='auto'
                 isOpen={step === 'inscricoes'}
                 onClose={() => closeModal()}
             >
-                    {assentos.map(assento => {
-                        return (
-                            <Text
-                                as='div'
-                                className='flex'
-                                key={assento.id}
-                            >
-                                <Text as='p'>{assento.id}</Text>
-                                <Text as='p'>{assento.status}</Text>
-                            </Text>
-                        )
+                <Text 
+                    as='div'
+                    className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] mb-5 font-semibold'
+                >
+                    <Text as='p'>ASSENTO</Text>
+                    <Text as='p'>NOME</Text>
+                    <Text as='p'>CPF</Text>
+                    <Text as='p'>CELULAR</Text>
+                    <Text as='p'>STATUS</Text>
+                    <Text as='p'>INSCRICAO</Text>
+                    <Text as='p'>FUNÇÕES</Text>
+                </Text>
+                <Text 
+                    as='div'
+                >
+                    {inscricoes.length === 0 
+                        ? <Text className='mr-auto ml-auto'>Nenhuma inscrição ainda</Text> 
+                        : inscricoes.map(inscricao => {
+                            return (
+                                <Text
+                                    as='div'
+                                    className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr]'
+                                    key={inscricao.id}
+                                >
+                                    <Text as='p'>{inscricao.assento}</Text>
+                                    <Text as='p'>{inscricao.nome}</Text>
+                                    <Text as='p'>{inscricao.cpf}</Text>
+                                    <Text as='p'>{inscricao.celular}</Text>
+                                    <Text as='p'>{inscricao.status}</Text>
+                                    <Text as='p'>{layoutData(inscricao.dataInscricao)}</Text>
+                                    <Button
+                                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                        onClick={() => setAssentos([])}
+                                    >
+                                        Editar
+                                    </Button>
+                                </Text>
+                            )
                     })}
+                </Text>
             </Modal>
         </Text>
     )

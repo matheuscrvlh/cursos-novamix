@@ -617,7 +617,7 @@
   {
     "id": 4,
     "cursoId": "837bfb6c-48d7-4387-8dee-b4d1b3d2c5bc",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 5,
@@ -672,12 +672,12 @@
   {
     "id": 15,
     "cursoId": "837bfb6c-48d7-4387-8dee-b4d1b3d2c5bc",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 16,
     "cursoId": "837bfb6c-48d7-4387-8dee-b4d1b3d2c5bc",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 17,
