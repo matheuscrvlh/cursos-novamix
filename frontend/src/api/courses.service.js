@@ -10,6 +10,12 @@ export function getInscricoes(cursoId) {
     return request(`/inscricoes/curso/${cursoId}`);
 }
 
+export function deleteInscricoes(inscricaoId) {
+    return request(`/inscricoes/${inscricaoId}`, {
+        method: 'DELETE'
+    });
+}
+
 export function putInscricoes(cursoId, body) {
     return request(`/inscricoes/curso/${cursoId}`, {
         method: 'PUT',

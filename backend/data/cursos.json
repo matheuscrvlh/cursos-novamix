@@ -80,5 +80,19 @@
     "fotos": [
       "/uploads/cursos/0cb03e63-6b5d-47bf-9add-a5f27aa97f10.png"
     ]
+  },
+  {
+    "id": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
+    "nomeCurso": "cba",
+    "culinarista": "a",
+    "categoria": "c",
+    "duracao": "c",
+    "data": "2026-01-01",
+    "hora": "15:55",
+    "loja": "Prado",
+    "valor": "2",
+    "fotos": [
+      "/uploads/cursos/1769540098927-Imagem_2026-01-16_10-56-09.png"
+    ]
   }
 ]

@@ -1,6 +1,9 @@
 // React
 import { useContext, useState, useEffect } from 'react';
 
+// LUCIDE ICONS
+import { Trash, Edit, Users, Plus, X } from 'lucide-react';
+
 // Components
 import Input from '../../components/Input'
 import Text from '../../components/Text'
@@ -10,7 +13,7 @@ import Modal from '../public/Modal';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
-import { getAssentos, getInscricoes } from '../../api/courses.service';
+import { getAssentos, getInscricoes, putInscricoes, deleteInscricoes } from '../../api/courses.service';
 
 export default function CoursesRegister() {
     const { 
@@ -24,6 +27,7 @@ export default function CoursesRegister() {
             culinaristas
         } = useContext(DadosContext);
     
+    // ============== STATES ==============
     // ======= STATE CURSOS
     const [form, setForm] = useState({
         nomeCurso: '',
@@ -73,6 +77,9 @@ export default function CoursesRegister() {
     // ======= STATE MODAL
     const [ step, setStep ] = useState('close')
 
+    // ============== STATES ==============
+
+    // ============== POST ==============
     // ======= CADASTRO CULINARISTA
     function handleSubmitCulinarian() {
         if(
@@ -133,7 +140,7 @@ export default function CoursesRegister() {
         formData.append('ativo', form.ativo);
 
         if (form.imagem) {
-            formData.append('fotos', form.imagem); // mesmo nome do backend
+            formData.append('fotos', form.imagem); 
         }
 
         addCourses(formData);
@@ -151,7 +158,9 @@ export default function CoursesRegister() {
             imagem: null,
         })
     }
+    // ============== POST ==============
 
+    // ============== PUT ==============
     // ======== EDIT CURSOS
     function handleEditCourse(cursoId) {
         setStep('edit');
@@ -206,13 +215,56 @@ export default function CoursesRegister() {
         setStep('close');
     }
 
+    // ======== EDIT INSCRICOES
+    async function handleEditInscricao(inscricaoId) {
+        try {
+            const inscricaoFiltrada = inscricoes.find(inscricao =>
+                inscricao.id === inscricaoId
+            )
+
+            console.log(inscricaoFiltrada)
+
+            const novoStatus = inscricaoFiltrada.status = 'verificar' ? 'pago' : 'verificar';
+
+            const inscricaoAlterada = {
+                id: inscricaoFiltrada.id,
+                cursoId: inscricaoFiltrada.cursoId,
+                nome: inscricaoFiltrada.nome,
+                cpf: inscricaoFiltrada.cpf,
+                celular: inscricaoFiltrada.celular,
+                assento: inscricaoFiltrada.assento,
+                dataInscricao: inscricaoFiltrada.dataInscricao,
+                status: novoStatus
+            };
+            putInscricoes(inscricaoAlterada.cursoId, inscricaoAlterada);
+        } catch(err) {
+            console.log('Erro ao editar inscricao', err)
+        }
+    }
+    // ============== PUT ==============
+
+    // ============== DELETE ==============
+    async function deletarInscricao(inscricaoId) {
+        try {
+            await deleteInscricoes(inscricaoId)
+            
+            setInscricoes(prev => 
+                prev.filter(inscricao => inscricao.id != inscricaoId)
+            );
+
+        } catch(err) {
+            console.log('Erro ao deletar inscrição', err)
+        }
+    }
+    // ============== DELETE ==============
+
+    // ============== HANDLES ==============
     // ======== INSCRICOES CURSO
     async function handleInscricoesCurso(cursoId) {
         try{setStep('inscricoes');
 
         const assentos = await getAssentos(cursoId);
         const inscricoes = await getInscricoes(cursoId)
-        console.log(inscricoes)
         setAssentos(assentos)
         setInscricoes(inscricoes)
         
@@ -221,7 +273,6 @@ export default function CoursesRegister() {
         }
     }
 
-    // ======== HANDLES
     // ======== Toggle loja Culinarista
     function handleToggleLoja(loja) {
         setFormCulinarian(prev => {
@@ -235,8 +286,9 @@ export default function CoursesRegister() {
             }
         })
     }
+    // ============== HANDLES ==============
 
-    // ====== FUNCOES
+    // ============== FUNCOES ==============
     // layout data
     function layoutData(data) {
         const [ano, mes, dia] = data.split('-');
@@ -272,6 +324,7 @@ export default function CoursesRegister() {
             return
         }
     }
+    // ============== FUNCOES ==============
 
     return (
         <Text as='article' className='flex flex-col gap-10 mt-10'>
@@ -324,14 +377,24 @@ export default function CoursesRegister() {
                     </Text>
                     <Text as='div' className='flex flex-col text-gray-dark'>
                         <Text>Culinarista</Text>  
-                        <Input 
-                            type='text'
-                            width='400px'
-                            height='40px'
-                            placeholder='Culinarista'
+                        <Text
+                            as='select'
                             value={form.culinarista}
                             onChange={e => setForm({ ...form, culinarista: e.target.value })}
-                        />
+                            className='w-[200px] h-[40px] border border-gray-base rounded-md'
+                        >
+                            <Text as='option' value=''>Selecione a culinarista</Text>
+                            {culinaristas === null
+                            ? 'Nenhuma encontrada' 
+                            : culinaristas.map(culinarista =>
+                                <Text 
+                                    as='option' 
+                                    value={culinarista.nomeCulinarista}
+                                >
+                                    {culinarista.nomeCulinarista}
+                                </Text>
+                            )}
+                        </Text>
                     </Text>
                     <Text as='div' className='flex flex-col text-gray-dark'>
                         <Text>Valor</Text>
@@ -402,40 +465,44 @@ export default function CoursesRegister() {
                     <Text as='p'>LOJA</Text>
                     <Text as='p'>FUNÇÕES</Text>
                 </Text>
+                <Text as='hr' className='border-gray-base/30 w-full mt-4 pb-2'/>
                 {loading ? (
                     <Text as='p'>Carregando cursos...</Text>
                 ) : (
                     cursos.map(curso => (
-                    <Text 
-                        as='div' 
-                        className='grid grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] text-gray-text mt-3' 
-                        key={curso.id}
-                    >
-                        <Text as='p'>{curso.nomeCurso}</Text>
-                        <Text as='p'>{curso.culinarista}</Text>
-                        <Text as='p'>{layoutData(curso.data)}</Text>
-                        <Text as='p'>{curso.hora}</Text>
-                        <Text as='p'>{curso.loja}</Text>
-                        <Text as='div' className='flex gap-3'>
-                            <Button 
-                                className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
-                                onClick={() => removeCourse(curso.id)}
-                            >
-                                Excluir
-                            </Button>
-                            <Button 
-                                className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                onClick={() => handleEditCourse(curso.id)}
-                            >
-                                Editar
-                            </Button>
-                            <Button 
-                                className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
-                                onClick={() => handleInscricoesCurso(curso.id)}
-                            >
-                                Inscrições
-                            </Button>
+                    <Text as='div'>
+                        <Text 
+                            as='div' 
+                            className='grid grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] text-gray-text mt-3' 
+                            key={curso.id}
+                        >
+                            <Text as='p'>{curso.nomeCurso}</Text>
+                            <Text as='p'>{curso.culinarista}</Text>
+                            <Text as='p'>{layoutData(curso.data)}</Text>
+                            <Text as='p'>{curso.hora}</Text>
+                            <Text as='p'>{curso.loja}</Text>
+                            <Text as='div' className='flex gap-3'>
+                                <Button 
+                                    className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
+                                    onClick={() => removeCourse(curso.id)}
+                                >
+                                    <Trash />
+                                </Button>
+                                <Button 
+                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                    onClick={() => handleEditCourse(curso.id)}
+                                >
+                                    <Edit />
+                                </Button>
+                                <Button 
+                                    className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
+                                    onClick={() => handleInscricoesCurso(curso.id)}
+                                >
+                                    <Users />
+                                </Button>
+                            </Text>
                         </Text>
+                        <Text as='hr' className='border-gray-base/30 w-full'/>
                     </Text>
                 )))}
             </CardDash>
@@ -531,7 +598,7 @@ export default function CoursesRegister() {
                         />
                         <Text as='label' className='mt-2'>Teresopolis</Text>
                     </Text>
-
+                    <Text as='hr' className='border-gray-base/30 w-full mt-4 pb-2'/>
                     <Text as='div' className='flex flex-col'>
                         <Text>Cursos que executa</Text>
                         <Text as='div' className='flex gap-3 text-gray-dark'>
@@ -543,8 +610,8 @@ export default function CoursesRegister() {
                                 onChange={e => setFormCulinarian({ ...formCulinarian, cursoAtual: e.target.value })}
                             />
                             <Button
-                                width='180px'
-                                className='bg-orange-base text-white'
+                                width='auto'
+                                className='bg-orange-base text-white hover:bg-orange-light'
                                 onClick={() => {
                                     if(!formCulinarian.cursoAtual) {
                                         alert('Preencha o campo.')
@@ -559,7 +626,7 @@ export default function CoursesRegister() {
                                     })}
                                 }
                             >
-                                Adicionar Curso
+                                <Plus />
                             </Button>
                         </Text>
                     </Text>
@@ -594,14 +661,14 @@ export default function CoursesRegister() {
                                         })
                                     }}
                                 >
-                                    X
+                                    <X />
                                 </Text>
                             </Text>
                         ))}
                     </Text>
                     <Button 
                         onClick={handleSubmitCulinarian}
-                        className='bg-orange-base text-white w-full'
+                        className='bg-orange-base text-white w-full hover:bg-orange-light'
                     >
                         Adicionar Culinarista
                     </Button>
@@ -619,25 +686,37 @@ export default function CoursesRegister() {
                         <Text as='p'>CADASTRO</Text>
                         <Text as='p'>FUNÇOES</Text>
                     </Text>
+                    <Text as='hr' className='border-gray-base/30 w-full mt-4 pb-2'/>
                     <Text as='div'>
                         {culinaristas.map(c => (
-                            <Text 
-                                as='div' 
-                                className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3'
-                                key={c.id}
-                            >
-                                <Text as='p'>{c.nomeCulinarista}</Text>
-                                <Text as='p'>{c.industria}</Text>
-                                <Text as='p'>{c.telefone}</Text>
-                                <Text as='p'>{c.instagram}</Text>
-                                <Text as='p'>{c.lojas}</Text>
-                                <Text as='p'>{c.dataCadastro}</Text>
-                                <Button 
-                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                    onClick={() => removeCulinarian(c.id)}
+                            <Text as='div'>
+                                <Text 
+                                    as='div' 
+                                    className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3'
+                                    key={c.id}
                                 >
-                                    Excluir
-                                </Button>
+                                    <Text as='p'>{c.nomeCulinarista}</Text>
+                                    <Text as='p'>{c.industria}</Text>
+                                    <Text as='p'>{c.telefone}</Text>
+                                    <Text as='p'>{c.instagram}</Text>
+                                    <Text as='p'>{c.lojas}</Text>
+                                    <Text as='p'>{c.dataCadastro}</Text>
+                                    <Text as='div' className='flex gap-3'>
+                                        <Button 
+                                            className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
+                                            onClick={() => removeCulinarian(c.id)}
+                                        >
+                                            <Trash />
+                                        </Button>
+                                        <Button 
+                                            className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                            //onClick={() => removeCulinarian(c.id)}
+                                        >
+                                            <Edit />
+                                        </Button>
+                                    </Text>
+                                </Text>
+                                <Text as='hr' className='border-gray-base/30 w-full'/>
                             </Text>
                         ))}
                     </Text>
@@ -645,60 +724,106 @@ export default function CoursesRegister() {
             </CardDash>
             <Modal
                 width='90%'
-                maxWidth='400px'
+                maxWidth='800px'
                 height='auto'
                 isOpen={step === 'edit'}
                 onClose={() => closeModal()}
             >   
-                <Text as='div'>
+                <Text as='div' className='text-xl font-semibold mb-4'>
                     <Text>Editar Curso</Text>
                 </Text>
-                <Text>
-                    <Input
-                        value={cursoEditar.nomeCurso}
-                        onChange={e => setCursoEditar({ ...cursoEditar, nomeCurso: e.target.value })}
-                    />
-                    <Input
-                        type='date'
-                        value={cursoEditar.data}
-                        onChange={e => setCursoEditar({ ...cursoEditar, data: e.target.value })}
-                    />
-                    <Input
-                        type='time'
-                        value={cursoEditar.hora}
-                        onChange={e => setCursoEditar({ ...cursoEditar, hora: e.target.value })}
-                    />
-                    <Input
-                        value={cursoEditar.loja}
-                        onChange={e => setCursoEditar({ ...cursoEditar, loja: e.target.value })}
-                    />
-                    <Input
-                        value={cursoEditar.culinarista}
-                        onChange={e => setCursoEditar({ ...cursoEditar, culinarista: e.target.value })}
-                    />
-                    <Input
-                        value={cursoEditar.valor}
-                        onChange={e => setCursoEditar({ ...cursoEditar, valor: e.target.value })}
-                    />
-                    <Input
-                        value={cursoEditar.duracao}
-                        onChange={e => setCursoEditar({ ...cursoEditar, duracao: e.target.value })}
-                    />
-                    <Input
-                        value={cursoEditar.categoria}
-                        onChange={e => setCursoEditar({ ...cursoEditar, categoria: e.target.value })}
-                    />
-                    <Input
-                        type='file'
-                        accept='imagem/png, image/jpeg'
-                        value={cursoEditar.fotos}
-                        onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (!file) return;
-                            }}
-                    />
+                <Text className='flex flex-wrap gap-3'>
+                    <Text as='div'>
+                        <Text as='p'>Descrição</Text>
+                        <Input
+                            value={cursoEditar.nomeCurso}
+                            onChange={e => setCursoEditar({ ...cursoEditar, nomeCurso: e.target.value })}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Data</Text>
+                        <Input
+                            type='date'
+                            value={cursoEditar.data}
+                            onChange={e => setCursoEditar({ ...cursoEditar, data: e.target.value })}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Horario</Text>
+                        <Input
+                            type='time'
+                            value={cursoEditar.hora}
+                            onChange={e => setCursoEditar({ ...cursoEditar, hora: e.target.value })}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Loja</Text>
+                        <Text
+                            as='select'
+                            className='w-[200px] h-[40px] border border-gray-base rounded-md'
+                            value={cursoEditar.loja}
+                            onChange={e => setCursoEditar({ ...cursoEditar, loja: e.target.value })}
+                        >
+                            <Text as='option' value='Prado'>Prado</Text>
+                            <Text as='option' value='Teresopolis'>Teresopolis</Text>
+                        </Text>
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Culinarista</Text>
+                        <Text
+                            as='select'
+                            className='w-[200px] h-[40px] border border-gray-base rounded-md'
+                            value={cursoEditar.culinarista}
+                            onChange={e => setCursoEditar({ ...cursoEditar, culinarista: e.target.value })}
+                        >
+                            {culinaristas === null
+                            ? 'Nenhuma encontrada' 
+                            : culinaristas.map(culinarista =>
+                                <Text 
+                                    as='option' 
+                                    value={culinarista.nomeCulinarista}
+                                >
+                                    {culinarista.nomeCulinarista}
+                                </Text>
+                            )}
+                        </Text>
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Valor</Text>
+                        <Input
+                            value={cursoEditar.valor}
+                            onChange={e => setCursoEditar({ ...cursoEditar, valor: e.target.value })}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Duração</Text>
+                        <Input
+                            value={cursoEditar.duracao}
+                            onChange={e => setCursoEditar({ ...cursoEditar, duracao: e.target.value })}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Categoria</Text>
+                        <Input
+                            value={cursoEditar.categoria}
+                            onChange={e => setCursoEditar({ ...cursoEditar, categoria: e.target.value })}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Imagem</Text>
+                        <Input
+                            type='file'
+                            accept='imagem/png, image/jpeg'
+                            value={cursoEditar.fotos}
+                            onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (!file) return;
+                                }}
+                        />
+                    </Text>
                 </Text>
                 <Button
+                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
                     onClick={() => editarCourse()}
                 >
                     Salvar Edições
@@ -723,30 +848,43 @@ export default function CoursesRegister() {
                     <Text as='p'>INSCRICAO</Text>
                     <Text as='p'>FUNÇÕES</Text>
                 </Text>
+                <Text as='hr' className='border-gray-base/30 w-full mb-4'/>
                 <Text 
                     as='div'
+                    className='flex flex-col gap-3'
                 >
                     {inscricoes.length === 0 
-                        ? <Text className='mr-auto ml-auto'>Nenhuma inscrição ainda</Text> 
+                        ? <Text className='mr-auto ml-auto p-10'>Nenhuma inscrição encontrada</Text> 
                         : inscricoes.map(inscricao => {
                             return (
-                                <Text
-                                    as='div'
-                                    className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr]'
-                                    key={inscricao.id}
-                                >
-                                    <Text as='p'>{inscricao.assento}</Text>
-                                    <Text as='p'>{inscricao.nome}</Text>
-                                    <Text as='p'>{inscricao.cpf}</Text>
-                                    <Text as='p'>{inscricao.celular}</Text>
-                                    <Text as='p'>{inscricao.status}</Text>
-                                    <Text as='p'>{layoutData(inscricao.dataInscricao)}</Text>
-                                    <Button
-                                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                        onClick={() => setAssentos([])}
+                                <Text as='div'>
+                                    <Text
+                                        as='div'
+                                        className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr]'
+                                        key={inscricao.id}
                                     >
-                                        Editar
-                                    </Button>
+                                        <Text as='p'>{inscricao.assento}</Text>
+                                        <Text as='p'>{inscricao.nome}</Text>
+                                        <Text as='p'>{inscricao.cpf}</Text>
+                                        <Text as='p'>{inscricao.celular}</Text>
+                                        <Text as='p'>{inscricao.status}</Text>
+                                        <Text as='p'>{layoutData(inscricao.dataInscricao)}</Text>
+                                        <Text as='div' className='flex gap-3'>
+                                            <Button
+                                                className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                                onClick={() => handleEditInscricao(inscricao.id)}
+                                            >
+                                                <Edit />
+                                            </Button>
+                                            <Button
+                                                className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
+                                                onClick={() => deletarInscricao(inscricao.id)}
+                                            >
+                                                <Trash />
+                                            </Button>
+                                        </Text>
+                                    </Text>
+                                    <Text as='hr' className='border-gray-base/30 w-full'/>
                                 </Text>
                             )
                     })}

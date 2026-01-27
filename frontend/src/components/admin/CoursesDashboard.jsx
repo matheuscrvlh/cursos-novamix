@@ -71,6 +71,8 @@ export default function CoursesDashboard() {
                         <CardDash>
                             <Text>Cursos Ativos</Text>
                             {cursos.length}
+                            <p>Inscricoes pagas:</p>
+                            <p>Inscricoes a verificar:</p>
                         </CardDash>
                         <CardDash>
                             <Text>Cursos Concluidos</Text>
@@ -93,7 +95,8 @@ export default function CoursesDashboard() {
                         </CardDash>
                         <CardDash>
                             <Text>Cursos Hoje</Text>
-                            <p>a</p>
+                            <p>Inscricoes pagas:</p>
+                            <p>Inscricoes a verificar:</p>
                         </CardDash>
                         <CardDash>
                             <p>a</p>
