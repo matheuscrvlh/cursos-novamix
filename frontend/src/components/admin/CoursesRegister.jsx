@@ -222,9 +222,7 @@ export default function CoursesRegister() {
                 inscricao.id === inscricaoId
             )
 
-            console.log(inscricaoFiltrada)
-
-            const novoStatus = inscricaoFiltrada.status = 'verificar' ? 'pago' : 'verificar';
+            const novoStatus = inscricaoFiltrada.status === 'verificar' ? 'pago' : 'verificar';
 
             const inscricaoAlterada = {
                 id: inscricaoFiltrada.id,
@@ -236,7 +234,16 @@ export default function CoursesRegister() {
                 dataInscricao: inscricaoFiltrada.dataInscricao,
                 status: novoStatus
             };
-            putInscricoes(inscricaoAlterada.cursoId, inscricaoAlterada);
+
+            setInscricoes(prev => 
+                prev.map(inscricao => 
+                    inscricao.id === inscricaoAlterada.id
+                    ? inscricaoAlterada
+                    : inscricao
+                )
+            );
+            console.log(inscricaoAlterada);
+            putInscricoes(inscricaoAlterada.id, inscricaoAlterada);
         } catch(err) {
             console.log('Erro ao editar inscricao', err)
         }
@@ -261,12 +268,13 @@ export default function CoursesRegister() {
     // ============== HANDLES ==============
     // ======== INSCRICOES CURSO
     async function handleInscricoesCurso(cursoId) {
-        try{setStep('inscricoes');
+        try{
+            setStep('inscricoes');
 
-        const assentos = await getAssentos(cursoId);
-        const inscricoes = await getInscricoes(cursoId)
-        setAssentos(assentos)
-        setInscricoes(inscricoes)
+            const assentos = await getAssentos(cursoId);
+            const inscricoes = await getInscricoes(cursoId);
+            setAssentos(assentos);
+            setInscricoes(inscricoes);
         
         } catch(err) {
             console.log(err)
@@ -387,7 +395,7 @@ export default function CoursesRegister() {
                             {culinaristas === null
                             ? 'Nenhuma encontrada' 
                             : culinaristas.map(culinarista =>
-                                <Text 
+                                <Text key={culinarista.id}
                                     as='option' 
                                     value={culinarista.nomeCulinarista}
                                 >
@@ -470,11 +478,13 @@ export default function CoursesRegister() {
                     <Text as='p'>Carregando cursos...</Text>
                 ) : (
                     cursos.map(curso => (
-                    <Text as='div'>
+                    <Text 
+                        as='div'
+                        key={curso.id}
+                    >
                         <Text 
                             as='div' 
                             className='grid grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] text-gray-text mt-3' 
-                            key={curso.id}
                         >
                             <Text as='p'>{curso.nomeCurso}</Text>
                             <Text as='p'>{curso.culinarista}</Text>
@@ -689,11 +699,13 @@ export default function CoursesRegister() {
                     <Text as='hr' className='border-gray-base/30 w-full mt-4 pb-2'/>
                     <Text as='div'>
                         {culinaristas.map(c => (
-                            <Text as='div'>
+                            <Text 
+                                as='div'
+                                key={c.id}
+                            >
                                 <Text 
                                     as='div' 
                                     className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3'
-                                    key={c.id}
                                 >
                                     <Text as='p'>{c.nomeCulinarista}</Text>
                                     <Text as='p'>{c.industria}</Text>
@@ -781,6 +793,7 @@ export default function CoursesRegister() {
                             : culinaristas.map(culinarista =>
                                 <Text 
                                     as='option' 
+                                    key={culinarista.id}
                                     value={culinarista.nomeCulinarista}
                                 >
                                     {culinarista.nomeCulinarista}
@@ -854,20 +867,32 @@ export default function CoursesRegister() {
                     className='flex flex-col gap-3'
                 >
                     {inscricoes.length === 0 
-                        ? <Text className='mr-auto ml-auto p-10'>Nenhuma inscrição encontrada</Text> 
+                        ? <Text 
+                            className='mr-auto ml-auto p-10'
+                            key={1}
+                        >
+                            Nenhuma inscrição encontrada
+                        </Text> 
                         : inscricoes.map(inscricao => {
                             return (
-                                <Text as='div'>
+                                <Text 
+                                    as='div'
+                                    key={inscricao.id}
+                                >
                                     <Text
                                         as='div'
-                                        className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr]'
-                                        key={inscricao.id}
+                                        className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] text-center'
                                     >
                                         <Text as='p'>{inscricao.assento}</Text>
                                         <Text as='p'>{inscricao.nome}</Text>
                                         <Text as='p'>{inscricao.cpf}</Text>
                                         <Text as='p'>{inscricao.celular}</Text>
-                                        <Text as='p'>{inscricao.status}</Text>
+                                        <Text 
+                                            as='p'
+                                            className={`p-1 text-white font-semibold rounded-md ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
+                                        >
+                                            {inscricao.status}
+                                        </Text>
                                         <Text as='p'>{layoutData(inscricao.dataInscricao)}</Text>
                                         <Text as='div' className='flex gap-3'>
                                             <Button

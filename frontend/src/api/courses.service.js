@@ -17,7 +17,7 @@ export function deleteInscricoes(inscricaoId) {
 }
 
 export function putInscricoes(cursoId, body) {
-    return request(`/inscricoes/curso/${cursoId}`, {
+    return request(`/inscricoes/${cursoId}`, {
         method: 'PUT',
         body: JSON.stringify(body)
     });

@@ -105,7 +105,8 @@
     "cpf": "a",
     "celular": "a",
     "assento": 15,
-    "dataInscricao": "2026-01-19T23:31:49.973Z"
+    "dataInscricao": "2026-01-19T23:31:49.973Z",
+    "status": "verificar"
   },
   {
     "id": "0cd3cef7-c1d5-4a01-9484-495952a7b220",
@@ -213,7 +214,8 @@
     "cpf": "a",
     "celular": "a",
     "assento": 12,
-    "dataInscricao": "2026-01-20T14:27:13.402Z"
+    "dataInscricao": "2026-01-20T14:27:13.402Z",
+    "status": "verificar"
   },
   {
     "id": "31769e02-1213-4c55-b8ba-fc175c7843aa",
@@ -223,15 +225,6 @@
     "celular": "a",
     "assento": 3,
     "dataInscricao": "2026-01-20T14:38:56.646Z"
-  },
-  {
-    "id": "a3bcd99d-844c-4cd8-af2f-bd0795a3bb36",
-    "cursoId": "918f8923-bb96-4382-8eff-816b7ff62ea3",
-    "nome": "a",
-    "cpf": "a",
-    "celular": "a",
-    "assento": 4,
-    "dataInscricao": "2026-01-20T14:50:31.578Z"
   },
   {
     "id": "1644d255-ed95-4d65-b771-d6c1a1589b77",

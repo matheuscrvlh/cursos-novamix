@@ -91,7 +91,7 @@ router.get('/curso/:cursoId', (req, res) => {
 router.put('/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const { nome, cpf, celular, assento } = req.body;
+    const { nome, cpf, celular, assento, status } = req.body;
 
     const inscricoes = safeRead(inscricoesPath);
     const assentos = safeRead(assentosPath);
@@ -142,7 +142,8 @@ router.put('/:id', (req, res) => {
       ...inscricaoAtual,
       nome: nome ?? inscricaoAtual.nome,
       cpf: cpf ?? inscricaoAtual.cpf,
-      celular: celular ?? inscricaoAtual.celular
+      celular: celular ?? inscricaoAtual.celular,
+      status: status ?? inscricaoAtual.status
     };
 
     safeWrite(assentosPath, assentos);
