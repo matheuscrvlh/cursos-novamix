@@ -722,7 +722,7 @@
   {
     "id": 1,
     "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 2,
@@ -737,12 +737,12 @@
   {
     "id": 4,
     "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 5,
     "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 6,
@@ -762,12 +762,12 @@
   {
     "id": 9,
     "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 10,
     "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 11,
@@ -777,7 +777,7 @@
   {
     "id": 12,
     "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 13,
@@ -787,17 +787,17 @@
   {
     "id": 14,
     "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 15,
     "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 16,
     "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 17,

@@ -15,7 +15,7 @@ export default function CardDash({
         width,
         height
       },
-      className: `bg-white rounded-md p-5 shadow-sm ${className}`,
+      className: `bg-white rounded-mb shadow-sm ${className}`,
       ...props
     },
     children

@@ -31,7 +31,14 @@ export function getCulinaristas() {
 export function deleteCulinarista(id) {
     return request(`/culinaristas/${id}`, {
         method: 'DELETE' 
-    })
+    });
+}
+
+export function putCulinarista(id, body) {
+    return request(`/culinaristas/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(body)
+    });
 }
 
 // ======= CURSOS

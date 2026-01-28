@@ -24,6 +24,7 @@ export default function CoursesRegister() {
             editCourse,
             addCulinarian,
             removeCulinarian,
+            editCulinarian,
             culinaristas
         } = useContext(DadosContext);
     
@@ -57,6 +58,18 @@ export default function CoursesRegister() {
 
     // ======= STATE CULINARISTAS
     const [formCulinarian, setFormCulinarian] = useState({
+        nomeCulinarista: '',
+        cpf: '',
+        instagram: '',
+        industria: '',
+        telefone: '',
+        cursoAtual: '',
+        lojas: [],
+        cursos: [],
+        foto: null
+    });
+
+    const [culinarianEditar, setCulinarianEditar] = useState({
         nomeCulinarista: '',
         cpf: '',
         instagram: '',
@@ -163,7 +176,7 @@ export default function CoursesRegister() {
     // ============== PUT ==============
     // ======== EDIT CURSOS
     function handleEditCourse(cursoId) {
-        setStep('edit');
+        setStep('editCourse');
 
         const cursoFiltrado = cursos.find(c => c.id === cursoId);
 
@@ -248,6 +261,66 @@ export default function CoursesRegister() {
             console.log('Erro ao editar inscricao', err)
         }
     }
+
+    // ======== EDIT CULINARISTAS
+    function handleEditCulinarian(culinaristaId) {
+        setStep('editCulinarian');
+
+        const culinaristaFiltrada = culinaristas.find(culinarista => culinarista.id === culinaristaId);
+        console.log(culinaristaFiltrada)
+
+        setCulinarianEditar({
+            id: culinaristaFiltrada.id,
+            nomeCulinarista: culinaristaFiltrada.nomeCulinarista,
+            cpf: culinaristaFiltrada.cpf,
+            instagram: culinaristaFiltrada.instagram,
+            industria: culinaristaFiltrada.industria,
+            telefone: culinaristaFiltrada.telefone,
+            cursoAtual: culinaristaFiltrada.cursoAtual,
+            lojas: culinaristaFiltrada.lojas,
+            cursos: culinaristaFiltrada.cursos,
+            foto: culinaristaFiltrada.foto
+        });
+    }
+
+    async function editarCulinarian(culinarianEditar) {
+        try {
+            const formData = new FormData()
+
+            formData.append('nomeCulinarista', culinarianEditar.nomeCulinarista);
+            formData.append('cpf', culinarianEditar.cpf);
+            formData.append('instagram', culinarianEditar.instagram);
+            formData.append('industria', culinarianEditar.industria);
+            formData.append('telefone', culinarianEditar.telefone);
+            formData.append('cursoAtual', culinarianEditar.cursoAtual);
+            formData.append('lojas', culinarianEditar.lojas);
+            formData.append('cursos', culinarianEditar.cursos);
+
+            await editCulinarian(formData);
+
+            setCulinarianEditar ({
+                nomeCulinarista: '',
+                cpf: '',
+                instagram: '',
+                industria: '',
+                telefone: '',
+                cursoAtual: '',
+                lojas: [],
+                cursos: [],
+                foto: null
+            });
+
+            setStep('close')
+
+        } catch (err) {
+            console.log('Erro ao enviar edição', err)
+        }
+    }
+    
+    useEffect(() => {
+        console.log('culinarianEditar')
+    }, [culinarianEditar])
+
     // ============== PUT ==============
 
     // ============== DELETE ==============
@@ -297,9 +370,16 @@ export default function CoursesRegister() {
     // ============== HANDLES ==============
 
     // ============== FUNCOES ==============
-    // layout data
-    function layoutData(data) {
+    // layout para datas que vieram do input
+    function layoutDataInput(data) {
         const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+
+    // layout para datas que vieram do sistema
+    function layoutDataSistem(data) {
+        const dataFiltrada = data.split('T')[0];
+        const [ano, mes, dia] = dataFiltrada.split('-')
         return `${dia}/${mes}/${ano}`;
     }
 
@@ -310,7 +390,7 @@ export default function CoursesRegister() {
             setStep('close');
             return
 
-        } else if(step === 'edit') {
+        } else if(step === 'editCourse') {
             setCursoEditar({
                 id: '',
                 nomeCurso: '',
@@ -322,6 +402,22 @@ export default function CoursesRegister() {
                 duracao: '',
                 categoria: '',
                 ativo: 'true'
+            });
+
+            setStep('close');
+            return
+        
+        } else if (setStep === 'editCulinarian') {
+            setCulinarianEditar({
+                nomeCulinarista: '',
+                cpf: '',
+                instagram: '',
+                industria: '',
+                telefone: '',
+                cursoAtual: '',
+                lojas: [],
+                cursos: [],
+                foto: null
             });
 
             setStep('close');
@@ -473,48 +569,50 @@ export default function CoursesRegister() {
                     <Text as='p'>LOJA</Text>
                     <Text as='p'>FUNÇÕES</Text>
                 </Text>
-                <Text as='hr' className='border-gray-base/30 w-full mt-4 pb-2'/>
-                {loading ? (
-                    <Text as='p'>Carregando cursos...</Text>
-                ) : (
-                    cursos.map(curso => (
-                    <Text 
-                        as='div'
-                        key={curso.id}
-                    >
+                <Text as='hr' className='border-gray-base/30 w-full mt-4'/>
+                <Text as='div' className='max-h-[400px] overflow-y-auto'>
+                    {loading ? (
+                        <Text as='p'>Carregando cursos...</Text>
+                    ) : (
+                        cursos.map(curso => (
                         <Text 
-                            as='div' 
-                            className='grid grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] text-gray-text mt-3' 
+                            as='div'
+                            key={curso.id}
                         >
-                            <Text as='p'>{curso.nomeCurso}</Text>
-                            <Text as='p'>{curso.culinarista}</Text>
-                            <Text as='p'>{layoutData(curso.data)}</Text>
-                            <Text as='p'>{curso.hora}</Text>
-                            <Text as='p'>{curso.loja}</Text>
-                            <Text as='div' className='flex gap-3'>
-                                <Button 
-                                    className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
-                                    onClick={() => removeCourse(curso.id)}
-                                >
-                                    <Trash />
-                                </Button>
-                                <Button 
-                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                    onClick={() => handleEditCourse(curso.id)}
-                                >
-                                    <Edit />
-                                </Button>
-                                <Button 
-                                    className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
-                                    onClick={() => handleInscricoesCurso(curso.id)}
-                                >
-                                    <Users />
-                                </Button>
+                            <Text 
+                                as='div' 
+                                className='grid grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] text-gray-text  p-2 items-center' 
+                            >
+                                <Text as='p'>{curso.nomeCurso}</Text>
+                                <Text as='p'>{curso.culinarista}</Text>
+                                <Text as='p'>{layoutDataInput(curso.data)}</Text>
+                                <Text as='p'>{curso.hora}</Text>
+                                <Text as='p'>{curso.loja}</Text>
+                                <Text as='div' className='flex gap-3 justify-center h-full'>
+                                    <Button 
+                                        className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
+                                        onClick={() => removeCourse(curso.id)}
+                                    >
+                                        <Trash />
+                                    </Button>
+                                    <Button 
+                                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                        onClick={() => handleEditCourse(curso.id)}
+                                    >
+                                        <Edit />
+                                    </Button>
+                                    <Button 
+                                        className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
+                                        onClick={() => handleInscricoesCurso(curso.id)}
+                                    >
+                                        <Users />
+                                    </Button>
+                                </Text>
                             </Text>
+                            <Text as='hr' className='border-gray-base/30 w-full'/>
                         </Text>
-                        <Text as='hr' className='border-gray-base/30 w-full'/>
-                    </Text>
-                )))}
+                    )))}
+                </Text>
             </CardDash>
             <CardDash as='div' className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                 <Text as='p' className='font-bold text-gray-text mb-4'>CADASTRE UMA CULINARISTA</Text>
@@ -685,19 +783,17 @@ export default function CoursesRegister() {
                 </Text>
             </CardDash>
             <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                <Text as='div' className='font-bold text-gray-text'>
-                    <Text>CULINARISTAS ATIVAS</Text>
-                    <Text as='div' className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3'>
+                <Text as='div' className='text-gray-text'>
+                    <Text as='p' className='font-bold'>CULINARISTAS ATIVAS</Text>
+                    <Text as='div' className='grid grid-cols-[1fr_1fr_0.8fr_0.7fr_0.8fr] text-gray-text mt-3 font-bold'>
                         <Text as='p'>NOME</Text>
                         <Text as='p'>INDUSTRIA</Text>
-                        <Text as='p'>TELEFONE</Text>
-                        <Text as='p'>INSTAGRAM</Text>
                         <Text as='p'>LOJAS</Text>
                         <Text as='p'>CADASTRO</Text>
                         <Text as='p'>FUNÇOES</Text>
                     </Text>
                     <Text as='hr' className='border-gray-base/30 w-full mt-4 pb-2'/>
-                    <Text as='div'>
+                    <Text as='div' className='max-h-[400px] overflow-y-auto'>
                         {culinaristas.map(c => (
                             <Text 
                                 as='div'
@@ -705,14 +801,12 @@ export default function CoursesRegister() {
                             >
                                 <Text 
                                     as='div' 
-                                    className='grid grid-cols-[1fr_1fr_0.5fr_0.5fr_0.8fr_0.5fr_0.5fr] text-gray-text mt-3'
+                                    className='grid grid-cols-[1fr_1fr_0.8fr_0.7fr_0.8fr] text-gray-text p-2 items-center'
                                 >
                                     <Text as='p'>{c.nomeCulinarista}</Text>
                                     <Text as='p'>{c.industria}</Text>
-                                    <Text as='p'>{c.telefone}</Text>
-                                    <Text as='p'>{c.instagram}</Text>
-                                    <Text as='p'>{c.lojas}</Text>
-                                    <Text as='p'>{c.dataCadastro}</Text>
+                                    <Text as='p'>{c.lojas.length > 1 ? 'Prado e Teresopolis' : c.lojas}</Text>
+                                    <Text as='p'>{layoutDataSistem(c.dataCadastro)}</Text>
                                     <Text as='div' className='flex gap-3'>
                                         <Button 
                                             className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
@@ -722,7 +816,7 @@ export default function CoursesRegister() {
                                         </Button>
                                         <Button 
                                             className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                            //onClick={() => removeCulinarian(c.id)}
+                                            onClick={() => handleEditCulinarian(c.id)}
                                         >
                                             <Edit />
                                         </Button>
@@ -738,7 +832,7 @@ export default function CoursesRegister() {
                 width='90%'
                 maxWidth='800px'
                 height='auto'
-                isOpen={step === 'edit'}
+                isOpen={step === 'editCourse'}
                 onClose={() => closeModal()}
             >   
                 <Text as='div' className='text-xl font-semibold mb-4'>
@@ -844,14 +938,14 @@ export default function CoursesRegister() {
             </Modal>
             <Modal
                 width='90%'
-                maxWidth='1000px'
+                maxWidth='1200px'
                 height='auto'
                 isOpen={step === 'inscricoes'}
                 onClose={() => closeModal()}
             >
                 <Text 
                     as='div'
-                    className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] mb-5 font-semibold'
+                    className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] font-bold text-gray-text'
                 >
                     <Text as='p'>ASSENTO</Text>
                     <Text as='p'>NOME</Text>
@@ -861,10 +955,10 @@ export default function CoursesRegister() {
                     <Text as='p'>INSCRICAO</Text>
                     <Text as='p'>FUNÇÕES</Text>
                 </Text>
-                <Text as='hr' className='border-gray-base/30 w-full mb-4'/>
+                <Text as='hr' className='border-gray-base/30 w-full mt-3'/>
                 <Text 
                     as='div'
-                    className='flex flex-col gap-3'
+                    className='flex flex-col gap-3 h-[400px] max-h-[70%] overflow-y-auto'
                 >
                     {inscricoes.length === 0 
                         ? <Text 
@@ -881,19 +975,23 @@ export default function CoursesRegister() {
                                 >
                                     <Text
                                         as='div'
-                                        className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] text-center'
+                                        className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] text-gray-text items-center p-2'
                                     >
                                         <Text as='p'>{inscricao.assento}</Text>
                                         <Text as='p'>{inscricao.nome}</Text>
                                         <Text as='p'>{inscricao.cpf}</Text>
                                         <Text as='p'>{inscricao.celular}</Text>
                                         <Text 
-                                            as='p'
-                                            className={`p-1 text-white font-semibold rounded-md ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
+                                            as='div'
                                         >
-                                            {inscricao.status}
+                                            <Text 
+                                                as='p' 
+                                                className={`p-2 w-20 text-white font-semibold rounded-md text-center ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
+                                            >
+                                                {inscricao.status}
+                                            </Text>
                                         </Text>
-                                        <Text as='p'>{layoutData(inscricao.dataInscricao)}</Text>
+                                        <Text as='p'>{layoutDataSistem(inscricao.dataInscricao)}</Text>
                                         <Text as='div' className='flex gap-3'>
                                             <Button
                                                 className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
@@ -914,6 +1012,25 @@ export default function CoursesRegister() {
                             )
                     })}
                 </Text>
+            </Modal>
+            <Modal
+                width='90%'
+                maxWidth='1200px'
+                height='auto'
+                isOpen={step === 'editCulinarian'}
+                onClose={() => closeModal()}
+            >
+                <Input
+                    type='text'
+                    value={culinarianEditar.nomeCulinarista}
+                    onChange={e => setCulinarianEditar({ ...culinarianEditar, nomeCulinarista: e.target.value})}
+                >
+                </Input>
+                <Button
+                    onClick={() => editarCulinarian()}
+                >
+                    Salvar edição
+                </Button>
             </Modal>
         </Text>
     )

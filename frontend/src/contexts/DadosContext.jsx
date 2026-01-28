@@ -1,6 +1,6 @@
 // React
 import { createContext, useEffect, useState } from 'react';
-import { getCourses, deleteCourse, getCulinaristas, deleteCulinarista, putCourse } from '../api/courses.service';
+import { getCourses, deleteCourse, getCulinaristas, deleteCulinarista, putCourse, putCulinarista } from '../api/courses.service';
 
 export const DadosContext = createContext();
 
@@ -65,6 +65,31 @@ export function DadosProvider({ children }) {
             setCulinaristas(prev => prev.filter(c => c.id !== id))
         } catch(erro) {
             console.error('Erro ao deletar culinarista', erro)
+        }
+    }
+
+    async function editCulinarian(formData) {
+        try {
+            await putCulinarista(formData.get('id'), formData)
+
+            setCulinaristas(prev => 
+                prev.map(culinaristas =>
+                    culinaristas.id === formData.get('id')
+                    ? {
+                        id: formData.get('id'),
+                        nomeCulinarista: formData.get('nomeCulinarista'),
+                        cpf: formData.get('cpf'),
+                        instagram: formData.get('instagram'),
+                        industria: formData.get('industria'),
+                        telefone: formData.get('telefone'),
+                        cursoAtual: formData.get('cursoAtual'),
+                        lojas: formData.get('lojas'),
+                        cursos: formData.get('cursos'),
+                    }
+                    : culinaristas
+                ))
+        } catch(err) {
+            console.log('Erro ao editar culinarista', err)
         }
     }
 
@@ -165,6 +190,7 @@ export function DadosProvider({ children }) {
                 editCourse,
                 addRegisterClient,
                 addCulinarian,
+                editCulinarian,
                 culinaristas,
                 removeCulinarian
             }}

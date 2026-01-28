@@ -245,5 +245,85 @@
     "assento": 3,
     "status": "verificar",
     "dataInscricao": "2026-01-27T18:10:12.142Z"
+  },
+  {
+    "id": "69b591e9-6173-4659-bfaf-379b519c2c59",
+    "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 10,
+    "status": "pago",
+    "dataInscricao": "2026-01-28T14:19:51.557Z"
+  },
+  {
+    "id": "ed834f1d-f0d4-435c-ac59-d74f82d8471f",
+    "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
+    "nome": "b",
+    "cpf": "b",
+    "celular": "b",
+    "assento": 9,
+    "status": "pago",
+    "dataInscricao": "2026-01-28T14:19:57.942Z"
+  },
+  {
+    "id": "3fce99e0-9916-428f-b618-53a533f01d8d",
+    "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
+    "nome": "b",
+    "cpf": "n",
+    "celular": "n",
+    "assento": 1,
+    "status": "verificar",
+    "dataInscricao": "2026-01-28T14:21:39.129Z"
+  },
+  {
+    "id": "a8636d2f-b168-4567-b9f4-63f4fad81a40",
+    "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
+    "nome": "l",
+    "cpf": "l",
+    "celular": "l",
+    "assento": 5,
+    "status": "verificar",
+    "dataInscricao": "2026-01-28T14:21:44.368Z"
+  },
+  {
+    "id": "61a23427-ad65-4d7e-868c-c2cc0f0c6c44",
+    "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
+    "nome": "ç",
+    "cpf": "kl",
+    "celular": "a",
+    "assento": 15,
+    "status": "verificar",
+    "dataInscricao": "2026-01-28T14:21:52.176Z"
+  },
+  {
+    "id": "917d56b7-d632-4c5c-bdda-508e2904c45b",
+    "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
+    "nome": "sdasd",
+    "cpf": "adas",
+    "celular": "asdas",
+    "assento": 12,
+    "status": "verificar",
+    "dataInscricao": "2026-01-28T14:25:41.494Z"
+  },
+  {
+    "id": "41def872-0b70-4253-8bd5-f6b52421d483",
+    "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
+    "nome": "asdas",
+    "cpf": "asdada",
+    "celular": "asdasda",
+    "assento": 16,
+    "status": "verificar",
+    "dataInscricao": "2026-01-28T14:25:46.181Z"
+  },
+  {
+    "id": "7a8b0bff-0e43-40f3-a209-15de4714b725",
+    "cursoId": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
+    "nome": "hjhj",
+    "cpf": "jhjhj",
+    "celular": "hjjh",
+    "assento": 14,
+    "status": "verificar",
+    "dataInscricao": "2026-01-28T14:25:52.684Z"
   }
 ]
