@@ -162,15 +162,26 @@ router.delete('/:id', (req, res) => {
   try {
     const { id } = req.params;
     const inscricoes = safeRead(inscricoesPath);
+    const assentos = safeRead(assentosPath);
     const index = inscricoes.findIndex(i => i.id === id);
     if (index === -1) {
       return res.status(404).json({ message: 'Inscrição não encontrada' });
     }
+     const inscricao = inscricoes[index];
+
+    // liberar assento associado
+    const cadeira = assentos.find(
+      a => a.cursoId === inscricao.cursoId && a.id === inscricao.assento
+    );
+    if (cadeira) {
+      cadeira.status = 'livre';
+    }
 
     inscricoes.splice(index, 1);
+    safeWrite(assentosPath, assentos);
     safeWrite(inscricoesPath, inscricoes);
 
-    res.json({ message: 'Inscrição removida com sucesso' });
+    res.json({ message: 'Inscrição e assento removido' });
   } catch (err) {
     console.error('ERRO AO DELETAR INSCRIÇÃO:', err);
     res.status(500).json({ message: 'Erro interno no servidor' });
