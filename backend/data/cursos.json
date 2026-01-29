@@ -83,16 +83,28 @@
   },
   {
     "id": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "nomeCurso": "cba",
+    "nomeCurso": "cbac",
     "culinarista": "a",
     "categoria": "c",
     "duracao": "c",
     "data": "2026-01-01",
     "hora": "15:55",
     "loja": "Prado",
-    "valor": "2",
+    "valor": 2,
     "fotos": [
       "/uploads/cursos/1769540098927-Imagem_2026-01-16_10-56-09.png"
     ]
+  },
+  {
+    "id": "77a70fe0-c92d-4dc8-972b-20ae84c3678b",
+    "nomeCurso": "acv",
+    "culinarista": "a",
+    "categoria": "a",
+    "duracao": "a",
+    "data": "2026-01-21",
+    "hora": "14:04",
+    "loja": "Teresopolis",
+    "valor": "2",
+    "fotos": []
   }
 ]

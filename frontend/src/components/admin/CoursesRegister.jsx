@@ -321,15 +321,6 @@ export default function CoursesRegister() {
             console.log('Erro ao enviar edição', err)
         }
     }
-    
-    useEffect(() => {
-        console.log(
-            'useEffect CursoAtual', cursoAtual)
-    }, [cursoAtual]);
-    useEffect(() => {
-        console.log(
-            'useEffect CurlinarianEditar', culinarianEditar)
-    }, [culinarianEditar]);
 
     // ============== PUT ==============
 
@@ -833,6 +824,12 @@ export default function CoursesRegister() {
                                             onClick={() => handleEditCulinarian(c.id)}
                                         >
                                             <Edit />
+                                        </Button>
+                                        <Button 
+                                            className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
+                                            // onClick={() => handleInscricoesCurso(curso.id)}
+                                        >
+                                            <Users />
                                         </Button>
                                     </Text>
                                 </Text>
