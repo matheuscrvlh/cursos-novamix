@@ -121,6 +121,7 @@ export default function CoursesRegister() {
         addCulinarian(formData);
 
         setFormCulinarian({
+            id: '',
             nomeCulinarista: '',
             cpf: '',
             instagram: '',
@@ -283,22 +284,23 @@ export default function CoursesRegister() {
         });
     }
 
-    async function editarCulinarian(culinarianEditar) {
+    async function editarCulinarian() {
         try {
             const formData = new FormData()
 
+            formData.append('id', culinarianEditar.id);
             formData.append('nomeCulinarista', culinarianEditar.nomeCulinarista);
             formData.append('cpf', culinarianEditar.cpf);
             formData.append('instagram', culinarianEditar.instagram);
             formData.append('industria', culinarianEditar.industria);
             formData.append('telefone', culinarianEditar.telefone);
-            formData.append('cursoAtual', culinarianEditar.cursoAtual);
             formData.append('lojas', culinarianEditar.lojas);
             formData.append('cursos', culinarianEditar.cursos);
 
             await editCulinarian(formData);
 
             setCulinarianEditar ({
+                id: '',
                 nomeCulinarista: '',
                 cpf: '',
                 instagram: '',
@@ -378,6 +380,9 @@ export default function CoursesRegister() {
 
     // layout para datas que vieram do sistema
     function layoutDataSistem(data) {
+        if(data === undefined) {
+            return
+        }
         const dataFiltrada = data.split('T')[0];
         const [ano, mes, dia] = dataFiltrada.split('-')
         return `${dia}/${mes}/${ano}`;
@@ -407,8 +412,9 @@ export default function CoursesRegister() {
             setStep('close');
             return
         
-        } else if (setStep === 'editCulinarian') {
+        } else if (step === 'editCulinarian') {
             setCulinarianEditar({
+                id: '',
                 nomeCulinarista: '',
                 cpf: '',
                 instagram: '',
@@ -1015,22 +1021,122 @@ export default function CoursesRegister() {
             </Modal>
             <Modal
                 width='90%'
-                maxWidth='1200px'
+                maxWidth='800px'
                 height='auto'
                 isOpen={step === 'editCulinarian'}
                 onClose={() => closeModal()}
             >
-                <Input
-                    type='text'
-                    value={culinarianEditar.nomeCulinarista}
-                    onChange={e => setCulinarianEditar({ ...culinarianEditar, nomeCulinarista: e.target.value})}
+                <Text as='p' className='font-semibold text-xl mb-5'>Editar Culinarista</Text>
+                <Text
+                    as='div'
+                    className='flex flex-wrap gap-4'
                 >
-                </Input>
-                <Button
-                    onClick={() => editarCulinarian()}
-                >
-                    Salvar edição
-                </Button>
+                    <Text as='div'>
+                        <Text as='p'>Nome</Text>
+                        <Input
+                            type='text'
+                            value={culinarianEditar.nomeCulinarista}
+                            onChange={e => setCulinarianEditar({ ...culinarianEditar, nomeCulinarista: e.target.value})}
+                        />
+                    </Text>
+                    <Text 
+                        as='div'>
+                        <Text as='p'>Cpf</Text>
+                        <Input
+                            type='text'
+                            value={culinarianEditar.cpf}
+                            onChange={e => setCulinarianEditar({ ...culinarianEditar, cpf: e.target.value})}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Industria</Text>
+                        <Input
+                            type='text'
+                            value={culinarianEditar.industria}
+                            onChange={e => setCulinarianEditar({ ...culinarianEditar, industria: e.target.value})}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Telefone</Text>
+                        <Input
+                            type='text'
+                            value={culinarianEditar.telefone}
+                            onChange={e => setCulinarianEditar({ ...culinarianEditar, telefone: e.target.value})}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Instagram</Text>
+                        <Input
+                            type='text'
+                            value={culinarianEditar.instagram}
+                            onChange={e => setCulinarianEditar({ ...culinarianEditar, instagram: e.target.value})}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Lojas</Text>
+                        <Input
+                            type='text'
+                            value={culinarianEditar.lojas}
+                            onChange={e => setCulinarianEditar({ ...culinarianEditar, lojas: e.target.value})}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Cursos</Text>
+                        <Input
+                            type='text'
+                            value={culinarianEditar.cursoAtual}
+                            onChange={e => setCulinarianEditar({ ...culinarianEditar, cursoAtual: e.target.value})}
+                        />
+                    </Text>
+                    <Button
+                        onClick={() => setCulinarianEditar({
+                            ...culinarianEditar,
+                            cursos: [
+                                ...culinarianEditar.cursos,
+                                culinarianEditar.cursoAtual
+                            ],
+                            cursoAtual: ''
+                        })
+                        }
+                    >
+                        <Plus />
+                    </Button>
+                    <Text as='div' className='w-full'>
+                        <Text as='div' className='flex gap-3'>
+                            {Array.isArray(culinarianEditar.cursos) &&
+                                culinarianEditar.cursos.map((curso, index) => (
+                                    <Text 
+                                        as='div'
+                                        key={index}
+                                    >
+                                        <Text 
+                                            as='p'
+                                            className='bg-orange-base p-3 rounded-md text-white'
+                                        >
+                                            {curso} 
+                                        </Text>
+                                        <Button
+                                            onClick={() => setCulinarianEditar({
+                                                ...culinarianEditar,
+                                                cursos: culinarianEditar.cursos.filter((_, i) => 
+                                                    i !== index 
+                                                )
+                                            })}
+                                        >
+                                            <X />
+                                        </Button>
+                                    </Text>
+                                ))
+                            }   
+                        </Text>
+                    </Text>
+                    <Button
+                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white w-full'
+                        onClick={() => editarCulinarian()}
+                    >
+                        Salvar Edições
+                    </Button>
+                </Text>
             </Modal>
         </Text>
     )
