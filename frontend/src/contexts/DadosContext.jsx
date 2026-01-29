@@ -83,8 +83,9 @@ export function DadosProvider({ children }) {
                         industria: formData.get('industria'),
                         telefone: formData.get('telefone'),
                         cursoAtual: formData.get('cursoAtual'),
-                        lojas: formData.get('lojas'),
-                        cursos: formData.get('cursos'),
+                        lojas: JSON.parse(formData.get('lojas')),
+                        cursos: JSON.parse(formData.get('cursos')),
+                        dataCadastro: formData.get('dataCadastro'),
                     }
                     : culinaristas
                 ))

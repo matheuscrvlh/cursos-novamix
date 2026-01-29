@@ -34,10 +34,10 @@ export function deleteCulinarista(id) {
     });
 }
 
-export function putCulinarista(id, body) {
+export function putCulinarista(id, formData) {
     return request(`/culinaristas/${id}`, {
         method: 'PUT',
-        body: JSON.stringify(body)
+        body: formData
     });
 }
 

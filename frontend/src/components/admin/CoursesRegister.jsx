@@ -57,13 +57,14 @@ export default function CoursesRegister() {
     });
 
     // ======= STATE CULINARISTAS
+    const [cursoAtual, setCursoAtual] = useState('');
+
     const [formCulinarian, setFormCulinarian] = useState({
         nomeCulinarista: '',
         cpf: '',
         instagram: '',
         industria: '',
         telefone: '',
-        cursoAtual: '',
         lojas: [],
         cursos: [],
         foto: null
@@ -75,10 +76,10 @@ export default function CoursesRegister() {
         instagram: '',
         industria: '',
         telefone: '',
-        cursoAtual: '',
         lojas: [],
         cursos: [],
-        foto: null
+        foto: null,
+        dataCadastro: ''
     });
 
     // ======= STATE ASSENTOS
@@ -223,7 +224,7 @@ export default function CoursesRegister() {
             valor: '',
             duracao: '',
             categoria: '',
-            ativo: 'true'
+            ativo: 'true',
         });
 
         setStep('close');
@@ -277,10 +278,10 @@ export default function CoursesRegister() {
             instagram: culinaristaFiltrada.instagram,
             industria: culinaristaFiltrada.industria,
             telefone: culinaristaFiltrada.telefone,
-            cursoAtual: culinaristaFiltrada.cursoAtual,
             lojas: culinaristaFiltrada.lojas,
             cursos: culinaristaFiltrada.cursos,
-            foto: culinaristaFiltrada.foto
+            foto: culinaristaFiltrada.foto,
+            dataCadastro: culinaristaFiltrada.dataCadastro
         });
     }
 
@@ -294,8 +295,9 @@ export default function CoursesRegister() {
             formData.append('instagram', culinarianEditar.instagram);
             formData.append('industria', culinarianEditar.industria);
             formData.append('telefone', culinarianEditar.telefone);
-            formData.append('lojas', culinarianEditar.lojas);
-            formData.append('cursos', culinarianEditar.cursos);
+            formData.append('lojas', JSON.stringify(culinarianEditar.lojas));
+            formData.append('cursos', JSON.stringify(culinarianEditar.cursos));
+            formData.append('dataCadastro', culinarianEditar.dataCadastro);
 
             await editCulinarian(formData);
 
@@ -309,7 +311,8 @@ export default function CoursesRegister() {
                 cursoAtual: '',
                 lojas: [],
                 cursos: [],
-                foto: null
+                foto: null,
+                dataCadastro: ''
             });
 
             setStep('close')
@@ -320,8 +323,13 @@ export default function CoursesRegister() {
     }
     
     useEffect(() => {
-        console.log('culinarianEditar')
-    }, [culinarianEditar])
+        console.log(
+            'useEffect CursoAtual', cursoAtual)
+    }, [cursoAtual]);
+    useEffect(() => {
+        console.log(
+            'useEffect CurlinarianEditar', culinarianEditar)
+    }, [culinarianEditar]);
 
     // ============== PUT ==============
 
@@ -936,7 +944,7 @@ export default function CoursesRegister() {
                     </Text>
                 </Text>
                 <Button
-                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                    className='w-full bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white mt-5'
                     onClick={() => editarCourse()}
                 >
                     Salvar Edições
@@ -1026,10 +1034,10 @@ export default function CoursesRegister() {
                 isOpen={step === 'editCulinarian'}
                 onClose={() => closeModal()}
             >
-                <Text as='p' className='font-semibold text-xl mb-5'>Editar Culinarista</Text>
+                <Text as='p' className='font-semibold text-xl mb-5 text-gray-text'>Editar Culinarista</Text>
                 <Text
                     as='div'
-                    className='flex flex-wrap gap-4'
+                    className='flex flex-wrap gap-4 text-gray-text'
                 >
                     <Text as='div'>
                         <Text as='p'>Nome</Text>
@@ -1074,48 +1082,76 @@ export default function CoursesRegister() {
                     </Text>
                     <Text as='div'>
                         <Text as='p'>Lojas</Text>
-                        <Input
-                            type='text'
-                            value={culinarianEditar.lojas}
-                            onChange={e => setCulinarianEditar({ ...culinarianEditar, lojas: e.target.value})}
-                        />
+                        <Text 
+                            as='select'
+                            className='w-[200px] h-[40px] border border-gray-base rounded-md'
+                            value={''}
+                            onChange={e => setCulinarianEditar({
+                                ...culinarianEditar,
+                                lojas: e.target.value.includes(',')
+                                ? e.target.value.split(',')
+                                : [e.target.value]
+                            })}
+                        >
+                            <Text as='option' value=''>Selecione a loja</Text>
+                            <Text as='option' value='Prado'>Prado</Text>
+                            <Text as='option' value='Teresopolis'>Teresopolis</Text>
+                            <Text as='option' value='Prado,Teresopolis'>Prado e Teresopolis</Text>
+                        </Text>
                     </Text>
-                    <Text as='div'>
-                        <Text as='p'>Cursos</Text>
-                        <Input
-                            type='text'
-                            value={culinarianEditar.cursoAtual}
-                            onChange={e => setCulinarianEditar({ ...culinarianEditar, cursoAtual: e.target.value})}
-                        />
+                    <Text as='hr' className='border-gray-base/30 w-full'/>
+                    <Text as='div' className='flex flex-col'>
+                        <Text as='p'>Cursos que executa</Text>
+                        <Text 
+                            as='div'
+                            className='flex gap-3 text-gray-dark'
+                        >
+                            <Input
+                                width='250px'
+                                height='40px'
+                                value={cursoAtual}
+                                onChange={e => setCursoAtual(e.target.value)}
+                            />
+                            <Button
+                                className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                onClick={() => {
+                                    setCulinarianEditar(prev => ({
+                                        ...prev,
+                                        cursos: [
+                                            ...prev.cursos,
+                                            cursoAtual
+                                        ]
+                                    }))
+                                    setCursoAtual('')
+                                }}
+                            >
+                                <Plus />
+                            </Button>
+                        </Text>
                     </Text>
-                    <Button
-                        onClick={() => setCulinarianEditar({
-                            ...culinarianEditar,
-                            cursos: [
-                                ...culinarianEditar.cursos,
-                                culinarianEditar.cursoAtual
-                            ],
-                            cursoAtual: ''
-                        })
-                        }
-                    >
-                        <Plus />
-                    </Button>
+                    
                     <Text as='div' className='w-full'>
                         <Text as='div' className='flex gap-3'>
-                            {Array.isArray(culinarianEditar.cursos) &&
-                                culinarianEditar.cursos.map((curso, index) => (
+                            {culinarianEditar.cursos.map((curso, index) => (
                                     <Text 
                                         as='div'
                                         key={index}
+                                        className="relative flex items-center"
                                     >
                                         <Text 
                                             as='p'
-                                            className='bg-orange-base p-3 rounded-md text-white'
+                                            className="bg-orange-base px-4 py-2 text-white rounded-md"
                                         >
                                             {curso} 
                                         </Text>
                                         <Button
+                                            className="
+                                                absolute -top-2 -right-2
+                                                flex items-center justify-center
+                                                w-5 h-5 text-xs
+                                                bg-black text-white
+                                                rounded-full cursor-pointer font-bold
+                                            "
                                             onClick={() => setCulinarianEditar({
                                                 ...culinarianEditar,
                                                 cursos: culinarianEditar.cursos.filter((_, i) => 
@@ -1123,7 +1159,7 @@ export default function CoursesRegister() {
                                                 )
                                             })}
                                         >
-                                            <X />
+                                            <Text>X</Text>
                                         </Button>
                                     </Text>
                                 ))

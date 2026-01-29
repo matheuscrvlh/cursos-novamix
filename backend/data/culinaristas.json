@@ -84,7 +84,8 @@
     ],
     "cursos": [
       "a",
-      "b"
+      "b",
+      "c"
     ],
     "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
     "dataCadastro": "2026-01-24T12:35:02.232Z"
@@ -217,16 +218,23 @@
   },
   {
     "id": "c2621e94-27ad-416b-b945-d6cda182aeb3",
-    "nomeCulinarista": "b",
-    "cpf": "b",
+    "nomeCulinarista": "baa",
+    "cpf": "ba",
     "industria": "b",
     "telefone": "b",
     "instagram": "b",
     "lojas": [
-      "Prado"
+      "Prado",
+      "Teresopolis"
     ],
     "cursos": [
-      "q"
+      "q",
+      "c",
+      "cccvvbb",
+      "bbb",
+      "cvb",
+      "bvc",
+      "dasdasds"
     ],
     "foto": "/uploads/culinaristas/1769555448183-Gemini_Generated_Image_ruyyh3ruyyh3ruyy.png",
     "dataCadastro": "2026-01-27T23:10:48.194Z"
