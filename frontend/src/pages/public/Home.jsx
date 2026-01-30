@@ -157,20 +157,62 @@ export default function Home() {
                 >
                     {/* Banner responsivo */}
                     <Text
-                        as="img"
-                        src={bannerHome}
-                        alt="Cursos Novamix"
-                        className="
-                            w-full 
-                            max-h-[140px] 
-                             object-contain 
-                             mb-4
-                         " />
+                        as="section"
+                        className="w-full overflow-hidden bg-orange-base"
+                    >
+                        <Text
+                            as="div"
+                            className="
+                                    w-full
+                                    min-h-[180px]
+                                    sm:min-h-[220px]
+                                    md:min-h-[300px]
+                                    lg:min-h-[360px]
+                                    bg-no-repeat
+                                    bg-cover
+                                    bg-right
+                                    md:bg-center
+                                    "
+                            style={{
+                                backgroundImage: `url(${bannerHome})`,
+                                backgroundPosition: '43% center'
+                            }}
+                        />
+                    </Text>
                 </Text>
 
-                <Text as='div' className='bg-gray text-blue-base w-full text-center text-2xl md:text-3xl font-bold pt-8 md:pt-12'>
-                    <Text as='h1' id='cursos'>Nossos Cursos</Text>
-                </Text>
+               <Text
+                    as="div"
+                    className="
+                            bg-gray
+                            w-full
+                            text-center
+                            py-10
+                        "
+                    >
+                    <Text
+                        as="h1"
+                        id="cursos"
+                        className="
+                                text-blue-base
+                                text-2xl
+                                md:text-3xl
+                                font-bold
+                                tracking-wide
+                                relative
+                                inline-block
+                                after:content-['']
+                                after:block
+                                after:w-16
+                                after:h-[3px]
+                                after:bg-orange-base
+                                after:mx-auto
+                                after:mt-3
+                                "
+                    >
+                        Nossos Cursos
+                    </Text>
+                    </Text>
 
                 {/* Grid de cursos responsivo */}
                 <Text as='div' className='bg-gray flex justify-center w-full pt-6 pb-20 md:pb-30 px-4'>
@@ -278,10 +320,10 @@ export default function Home() {
                                         as='p'
                                         key={assento.id}
                                         className={`p-2 rounded-full text-center font-semibold text-white text-sm ${isReservado
-                                                ? 'bg-gray-base cursor-not-allowed'
-                                                : isSelecionado
-                                                    ? 'bg-gray-dark cursor-pointer'
-                                                    : 'bg-orange-base cursor-pointer'
+                                            ? 'bg-gray-base cursor-not-allowed'
+                                            : isSelecionado
+                                                ? 'bg-gray-dark cursor-pointer'
+                                                : 'bg-orange-base cursor-pointer'
                                             }`}
                                         onClick={() => {
                                             if (isReservado) return;
