@@ -12,23 +12,24 @@ export default function CourseCard({
   valor,
   vagasLivres,
   vagasReservadas,
+  className,
   onClick
 }) {
   return (
     <Text
       as="div"
-      className="
+      className={`
         bg-white
         rounded-xl
-        w-full
-        max-w-[300px]
         min-h-[380px]
+        max-h-[550px]
         flex
         flex-col
         shadow-md
         hover:shadow-lg
         transition-shadow
-      "
+        ${className || ''}
+      `}
     >
       {/* IMAGEM */}
       <Text as="div" className="relative rounded-t-xl h-[200px] overflow-hidden">

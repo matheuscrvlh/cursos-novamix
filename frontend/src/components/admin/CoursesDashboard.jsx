@@ -147,6 +147,7 @@ export default function CoursesDashboard() {
                                         vagasLivres={vagas.livres}
                                         vagasReservadas={vagas.reservadas}
                                         valor={curso.valor}
+                                        className='min-w-[300px]'
                                         imagem={
                                             curso.fotos?.length
                                                 ? curso.fotos[0]
@@ -184,6 +185,7 @@ export default function CoursesDashboard() {
                                     industria={culinarista.industria}
                                     telefone={culinarista.telefone}
                                     instagram={culinarista.instagram}
+                                    className='min-w-[300px]'
                                     lojas={
                                         culinarista.lojas.length === 0
                                             ? 'Nenhuma'

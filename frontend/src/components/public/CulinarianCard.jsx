@@ -8,13 +8,16 @@ export default function CulinarianCard({
     instagram,
     lojas,
     cursos,
+    className,
     onClick
 
 }) {
     return (
         <Text
             as='div'
-            className='bg-white rounded-xl max-w-[300px] min-w-[250px] min-h-[380px] flex flex-col shadow-md hover:shadow-lg transition-shadow'
+            className={`bg-white rounded-xl max-w-[300px] min-w-[250px] min-h-[380px] flex flex-col shadow-md
+             hover:shadow-lg transition-shadow
+             ${className || ''}`}
         >
             <Text as='div' className='relative rounded-md h-[200px] overflow-hidden'>
                 <Text 
