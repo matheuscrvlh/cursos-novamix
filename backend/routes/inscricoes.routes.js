@@ -88,6 +88,16 @@ router.get('/curso/:cursoId', (req, res) => {
   }
 });
 
+router.get('/', (req, res) => {
+  try {
+    const inscricoes = safeRead(inscricoesPath);
+    res.json(inscricoes);
+  } catch (err) {
+    console.error('ERRO AO OBTER INSCRIÇÕES:', err);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+});
+
 router.put('/:id', (req, res) => {
   try {
     const { id } = req.params;

@@ -10,6 +10,11 @@ export function getInscricoes(cursoId) {
     return request(`/inscricoes/curso/${cursoId}`);
 }
 
+// ======= INSCRICOES
+export function getInscricoesTotais() {
+    return request('/inscricoes');
+}
+
 export function deleteInscricoes(inscricaoId) {
     return request(`/inscricoes/${inscricaoId}`, {
         method: 'DELETE'

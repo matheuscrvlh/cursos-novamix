@@ -10,7 +10,7 @@ import CourseCard from '../../components/public/CourseCard'
 import CulinarianCard from '../public/CulinarianCard';
 
 // SERVICES
-import { getAssentos } from '../../api/courses.service';
+import { getAssentos, getInscricoesTotais } from '../../api/courses.service';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -19,12 +19,15 @@ export default function CoursesDashboard() {
     const {
         cursos,
         loading,
-        culinaristas
+        culinaristas,
     } = useContext(DadosContext);
 
     // ========= STATE VAGAS ========= 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);
+
+    // ========= STATE INSCRICOES ========= 
+    const [inscricoes, setInscricoes] = useState([]);
 
     // ====== FUNCOES
     // layout data
@@ -37,7 +40,6 @@ export default function CoursesDashboard() {
         const [ano, mes, dia] = data.split('-')
         return new Date(ano, mes - 1, dia)
     }
-
 
     // buscar vagas livres e reservadas
     useEffect(() => {
@@ -62,6 +64,22 @@ export default function CoursesDashboard() {
         loadVagas();
     }, [cursos, refreshVagas]);
 
+    useEffect(() => {
+        async function pegarInscricoes() {
+            try {
+                // inscricoes em geral
+                const data = await getInscricoesTotais();
+                const inscricoesPagas = data.filter(i => i.status === 'pago').length;
+                const inscricoesVerificar = data.filter(i => i.status === 'verificar').length;
+                
+                return setInscricoes({pagas: inscricoesPagas, verificar: inscricoesVerificar})
+            } catch(err) {
+                console.log('Nao foi possivel pegar as inscricoes', err);
+            }
+        }
+        pegarInscricoes()
+    }, [])
+
     return (
         <Text as='section' className='flex flex-col gap-20 mt-10'>
             {/* ======== INFO CARDS ==========*/}
@@ -71,8 +89,8 @@ export default function CoursesDashboard() {
                         <CardDash>
                             <Text>Cursos Ativos</Text>
                             {cursos.length}
-                            <p>Inscricoes pagas:</p>
-                            <p>Inscricoes a verificar:</p>
+                            <p>Inscricoes pagas:{inscricoes.pagas}</p>
+                            <p>Inscricoes a verificar:{inscricoes.verificar}</p>
                         </CardDash>
                         <CardDash>
                             <Text>Cursos Concluidos</Text>

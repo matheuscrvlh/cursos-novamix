@@ -233,7 +233,7 @@
     "cpf": "063.582.007-20",
     "celular": "+55 22988114263",
     "assento": 3,
-    "status": "verificar",
+    "status": "pago",
     "dataInscricao": "2026-01-27T18:06:19.261Z"
   },
   {
@@ -243,7 +243,7 @@
     "cpf": "a",
     "celular": "a",
     "assento": 3,
-    "status": "verificar",
+    "status": "pago",
     "dataInscricao": "2026-01-27T18:10:12.142Z"
   },
   {
