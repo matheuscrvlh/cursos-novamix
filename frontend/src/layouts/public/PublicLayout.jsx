@@ -15,36 +15,49 @@ export default function PublicLayout({ children }) {
       className="min-h-screen w-full flex flex-col bg-gray"
     >
       {/* ================= HEADER ================= */}
-      <Text as="header" className="w-full bg-orange-light text-white">
+      <Text as="header" className="
+        w-full text-white bg-orange-base
+        md:bg-orange-light
+      ">
         <Text
           as="div"
           className="
             max-w-[1400px]
             mx-auto
-            px-4
-            py-4
             flex
             flex-col
-            gap-3
             md:flex-row
             md:items-center
             md:justify-between
+            md:px-4
+            md:py-4
           "
         >
-          <Text as="p" className="font-semibold text-center text-sm md:text-base">
+          <Text as="p" className="
+            font-semibold text-center text-sm bg-orange-light w-[100vw] p-4 
+            md:text-base md:p-0 md:hidden
+          ">
             Venha fazer parte dos Cursos NovaMix
           </Text>
-
-          <Text as="div" className="flex justify-center gap-3 md:gap-4">
+          <Text as="div" className="
+            flex gap-3 justify-between px-7 py-4
+            md:justify-between md:px-5 md:py-0 md:w-full 
+          ">
             <Text
               as="a"
               href="https://lojanovamix.com.br"
-              className="flex items-center gap-2 text-xs md:text-sm"
-            >
+              className="flex items-center gap-2 text-xs w-full
+              md:text-sm md:w-auto
+              ">
               <Text as="img" src={stores} alt="Nossas Lojas" className="w-5 h-5 md:w-6 md:h-6" />
               <Text as="span">Nossas Lojas</Text>
             </Text>
-
+            <Text as="p" className="
+              font-semibold bg-orange-light w-auto min-w-[320px] hidden text-base p-0 mt-1 text-lg
+              hidden md:inline
+            ">
+              Venha fazer parte dos Cursos NovaMix
+            </Text>
             <Text
               as="a"
               href="https://api.whatsapp.com/send?phone=5522998336225"
@@ -60,12 +73,17 @@ export default function PublicLayout({ children }) {
                 py-2
                 rounded-md
                 text-xs
-                md:text-sm
+                md:w-full md:max-w-[230px] md:text-sm
                 whitespace-nowrap
               "
             >
               <Text as="img" src={whatsapp} alt="WhatsApp" className="h-[18px] md:h-[22px]" />
-              <Text as="span" className="font-semibold">
+              <Text 
+                as="p" 
+                className="
+                  font-semibold w-full
+                  hidden md:inline
+                ">
                 Atendimento WhatsApp
               </Text>
             </Text>

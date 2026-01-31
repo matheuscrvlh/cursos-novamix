@@ -10,6 +10,9 @@ import Text from '../../components/Text'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
 
+// HOOKS
+import { useThemeColor } from '../../hooks/useThemeColor'
+
 // Images
 import { bannerLogin } from '../../assets/images/banner'
 import { logoNm } from '../../assets/images/logos'
@@ -24,7 +27,7 @@ export default function Login() {
 
     function Login() {
         if(form.user === 'admin' & form.password === 'admin') {
-            navigate('/cursos');
+            navigate('/dashboard');
             setForm({
                 user: '',
                 password: ''
@@ -37,6 +40,9 @@ export default function Login() {
     function Sair() {
         navigate('/')
     }
+
+    // FUNDO PAGINA
+    useThemeColor('#FF8D0A');
 
     return (
         <Text as='main' className='w-full min-h-screen flex relative overflow-hidden'>

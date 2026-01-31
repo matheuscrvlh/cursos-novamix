@@ -22,7 +22,7 @@
   {
     "id": 5,
     "cursoId": "4fa2de49-f068-486c-987a-29208f486db1",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 6,
@@ -32,7 +32,7 @@
   {
     "id": 7,
     "cursoId": "4fa2de49-f068-486c-987a-29208f486db1",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 8,
@@ -137,7 +137,7 @@
   {
     "id": 4,
     "cursoId": "001d1b85-93e7-4097-82b6-514354e551d1",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 5,
@@ -152,7 +152,7 @@
   {
     "id": 7,
     "cursoId": "001d1b85-93e7-4097-82b6-514354e551d1",
-    "status": "livre"
+    "status": "reservado"
   },
   {
     "id": 8,
@@ -1317,6 +1317,126 @@
   {
     "id": 24,
     "cursoId": "eaf562f8-9e9b-46e2-b145-413312c146ae",
+    "status": "livre"
+  },
+  {
+    "id": 1,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 2,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 3,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "reservado"
+  },
+  {
+    "id": 4,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "reservado"
+  },
+  {
+    "id": 5,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 6,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 7,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 8,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 9,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 10,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 11,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 12,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 13,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 14,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 15,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 16,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 17,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 18,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 19,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 20,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 21,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 22,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 23,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
+    "status": "livre"
+  },
+  {
+    "id": 24,
+    "cursoId": "6784228d-dea6-41e3-932d-8d9976f288dd",
     "status": "livre"
   }
 ]

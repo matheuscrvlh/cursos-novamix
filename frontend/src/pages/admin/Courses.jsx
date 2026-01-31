@@ -4,6 +4,9 @@ import { useContext, useState, useEffect } from 'react';
 // HEAD
 import { Head } from '../../components/Head'
 
+// HOOKS
+import { useThemeColor } from '../../hooks/useThemeColor';
+
 // Components
 import Input from '../../components/Input'
 import Text from '../../components/Text'
@@ -17,7 +20,10 @@ import TopBar from '../../layouts/admin/TopBar'
 
 export default function Courses() {
     // ======= STATE COMPONENTS
-    const [ view, setView ] = useState('dashboard')
+    const [ view, setView ] = useState('dashboard');
+    
+    // FUNDO PAGINA
+    useThemeColor('#F5F5F5');
 
     return (
         <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>

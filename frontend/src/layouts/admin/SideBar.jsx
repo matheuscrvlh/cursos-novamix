@@ -45,19 +45,19 @@ export default function SideBar() {
             </button>
 
             {/* apenas para mobile */}
-            <div
+            <Text as='div'
                 className={`
                     lg:hidden fixed inset-0 bg-black transition-opacity duration-300
                     ${isMenuOpen ? 'opacity-50 z-30 pointer-events-auto' : 'opacity-0 pointer-events-none'}
                 `}
                 onClick={closeMenu}
-            ></div>
+            ></Text>
 
             {/* Sidebar */}
             <Text 
                 as='aside' 
                 className={`
-                    flex flex-col h-screen bg-white shadow-sm
+                    flex flex-col h-[100dvh] bg-white shadow-sm
                     fixed top-0 left-0 w-[280px]
                     transition-transform duration-300 ease-in-out
                     lg:w-[15%]

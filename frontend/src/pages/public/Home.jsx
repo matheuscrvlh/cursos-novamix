@@ -7,6 +7,9 @@ import { DadosContext } from '../../contexts/DadosContext';
 // SERVICES
 import { getAssentos } from '../../api/courses.service';
 
+// HOOKS
+import { useThemeColor } from '../../hooks/useThemeColor';
+
 // HEAD 
 import { Head } from '../../components/Head'
 
@@ -82,8 +85,6 @@ export default function Home() {
         getAssentos(cursoSelecionado)
             .then(setAssentos)
             .catch(console.error)
-
-        console.log(assentos)
     }, [cursoSelecionado])
 
     // =========  FUNCOES MODAL ========= 
@@ -146,6 +147,9 @@ export default function Home() {
         loadVagas();
     }, [cursos, refreshVagas]);
 
+    // FUNDO PAGINA
+    useThemeColor('#FF8D0A');
+
     return (
         <PublicLayout>
             <Head title='Loja Novamix | Cursos' />
@@ -164,14 +168,13 @@ export default function Home() {
                             as="div"
                             className="
                                     w-full
-                                    min-h-[180px]
-                                    sm:min-h-[220px]
-                                    md:min-h-[300px]
-                                    lg:min-h-[360px]
+                                    min-h-[160px]
                                     bg-no-repeat
                                     bg-cover
                                     bg-right
-                                    md:bg-center
+                                    sm:min-h-[180px]
+                                    md:min-h-[300px] md:bg-center
+                                    lg:min-h-[360px]
                                     "
                             style={{
                                 backgroundImage: `url(${bannerHome})`,
@@ -184,32 +187,18 @@ export default function Home() {
                <Text
                     as="div"
                     className="
-                            bg-gray
-                            w-full
-                            text-center
-                            py-10
+                            bg-gray w-full text-center pt-6 pb-5
+                            md:pt-12 md:pb-6
                         "
                     >
                     <Text
                         as="h1"
                         id="cursos"
                         className="
-                                text-blue-base
-                                text-2xl
+                                text-blue-base text-2xl font-bold tracking-wide relative inline-block
                                 md:text-3xl
-                                font-bold
-                                tracking-wide
-                                relative
-                                inline-block
-                                after:content-['']
-                                after:block
-                                after:w-16
-                                after:h-[3px]
-                                after:bg-orange-base
-                                after:mx-auto
-                                after:mt-3
-                                "
-                    >
+                                after:content-[''] after:block after:w-16 after:h-[3px] after:bg-orange-base after:mx-auto after:mt-3
+                        ">
                         Nossos Cursos
                     </Text>
                     </Text>
@@ -235,6 +224,7 @@ export default function Home() {
                                     vagasReservadas={vagas.reservadas}
                                     valor={curso.valor}
                                     onClick={() => openForm(curso.id)}
+                                    className='max-w-[350px] min-w-[20vw] w-[300px]'
                                     imagem={
                                         curso.fotos?.length
                                             ? curso.fotos[0]
@@ -310,7 +300,7 @@ export default function Home() {
                             Balcão
                         </Text>
                         {/* Grid de assentos responsivo */}
-                        <Text as='div' className='grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2'>
+                        <Text as='div' className='grid grid-cols-6 gap-2'>
                             {assentos.map(assento => {
                                 const isReservado = assento.status === 'reservado';
                                 const isSelecionado = form.assento === assento.id;

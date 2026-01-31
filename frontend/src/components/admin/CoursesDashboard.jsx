@@ -85,8 +85,11 @@ export default function CoursesDashboard() {
                 const cursosConcluidos = dataCursos.filter(c => 
                     layoutData(c.data) < hoje
                 ).length;
+                const cursosAtivos = dataCursos.filter(c => 
+                    layoutData(c.data) > hoje || layoutData(c.data) === hoje
+                ).length;
                 // STATE CURSOS
-                setFiltroCursos({cursosHoje: contagemCursosHoje, cursosConcluidos: cursosConcluidos})
+                setFiltroCursos({cursosHoje: contagemCursosHoje, cursosConcluidos: cursosConcluidos, cursosAtivos: cursosAtivos})
 
                 // =============================================
                 // INSCRICOES
@@ -113,37 +116,71 @@ export default function CoursesDashboard() {
     }, [])
 
     return (
-        <Text as='section' className='flex flex-col gap-20 mt-10'>
+        <Text as='section' className='
+            flex flex-col gap-10 mt-10 w-[92dvw]
+            md:gap-20 md:w-[78vw]
+        '>
             {/* ======== INFO CARDS ==========*/}
             <Text as='section' className='w-full'>
-                <Text as='article' className='flex gap-7'>
-                    <Text as='div' className='grid grid-cols-2 gap-7 w-[50%] h-[350px]'>
+                <Text as='article' className='
+                    flex flex-col gap-7
+                    md:flex-row md:gap-7
+                '>
+                    <Text as='div' className='
+                        grid grid-cols-2 gap-7 w-full h-auto
+                        md:grid-cols-2 md:w-[50%] md:h-[350px]
+                    '>
                         <CardDash>
-                            <Text>Cursos Ativos</Text>
-                            {cursos.length || ''}
-                            <p>Inscricoes totais pagas:{inscricoes.pagas || ''}</p>
-                            <p>Inscricoes totais a verificar:{inscricoes.verificar || ''}</p>
+                            <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
+                                <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{filtroCursos.cursosAtivos === '' ? 'Nenhum' : filtroCursos.cursosAtivos}</Text>
+                                <Text as='p' className='mb-auto text-gray-text'>Cursos Ativos</Text>
+                            </Text>
+                            
                         </CardDash>
                         <CardDash>
-                            <Text as='p'>Cursos Concluidos: {filtroCursos.cursosConcluidos || ''}</Text>
-                                
-
+                            <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
+                                <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{cursos.length > 0 ? cursos.length : 'Nenhum'}</Text>
+                                <Text as='p' className='mb-auto text-gray-text'>Cursos Totais</Text>
+                            </Text>
                         </CardDash>
                         <CardDash>
-                            <Text as='p'>Cursos Hoje: {filtroCursos.cursosHoje || ''}</Text>
-                            <Text as='p'>Inscricoes de hoje pagas:{inscricoes.hojePagas || ''}</Text>
-                            <Text as='p'>Inscricoes de hoje a verificar:{inscricoes.hojeVerificar || ''}</Text>
+                            <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
+                                <Text as='p' className='font-semibold text-6xl mt-auto text-red-base'>{filtroCursos.cursosHoje > 0 ? filtroCursos.cursosHoje : 'Nenhum'}</Text>
+                                <Text as='p' className='mb-auto text-gray-text'>Cursos Hoje</Text>
+                            </Text>
                         </CardDash>
                         <CardDash>
-                            <p>a</p>
+                            <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
+                                <Text as='p' className='font-semibold text-6xl mt-auto text-green-base'>{filtroCursos.cursosConcluidos === '' ? 'Nenhum' : filtroCursos.cursosConcluidos}</Text>
+                                <Text as='p' className='mb-auto text-gray-text'>Cursos Concluidos</Text>
+                            </Text>
                         </CardDash>
                     </Text>
-                    <Text as='div' className='flex gap-7 w-[50%] h-[350px]'>
-                        <CardDash className='w-[50%]'>
-                            <p>a</p>
+                    <Text as='div' className='
+                        flex gap-7
+                        md:w-[50%] md:h-[350px]
+                    '>
+                        <CardDash className='w-[50%] flex flex-col justify-center items-center'>
+                            <Text as='div' className='w-full flex flex-col text-center'>
+                                <Text as='p' className='font-bold text-2xl text-gray-text mb-4'>TOTAIS</Text>
+                                <Text as='p' className='font-semibold text-4xl text-green-base'>{inscricoes.pagas === '' ? 'Nenhuma' : inscricoes.pagas}</Text>
+                                <Text as='p'>Inscricoes pagas</Text> 
+                            </Text>
+                            <Text as='div' className='w-full flex flex-col text-center mt-4'>
+                                <Text as='p' className='font-semibold text-4xl text-red-base'>{inscricoes.verificar === '' ? '' : inscricoes.verificar}</Text>
+                                <Text as='p'>Inscricoes a verificar</Text>
+                            </Text>
                         </CardDash>
-                        <CardDash className='w-[50%]'>
-                            <p>a</p>
+                        <CardDash className='w-[50%] flex flex-col justify-center items-center'>
+                            <Text as='div' className='w-full flex flex-col text-center mt-4'>
+                                <Text as='p' className='font-bold text-2xl text-gray-text mb-4'>HOJE</Text>
+                                <Text as='p' className='font-semibold text-4xl text-green-base'>{inscricoes.hojePagas === '' ? '' : inscricoes.hojePagas}</Text>
+                                <Text as='p'>Inscricoes pagas</Text> 
+                            </Text>
+                            <Text as='div' className='w-full flex flex-col text-center mt-4'>
+                                <Text as='p' className='font-semibold text-4xl text-red-base'>{inscricoes.hojeVerificar === '' ? '' : inscricoes.hojeVerificar}</Text>
+                                <Text as='p'>Inscricoes a verificar</Text>
+                            </Text>
                         </CardDash>
                     </Text>
                 </Text>
@@ -156,7 +193,7 @@ export default function CoursesDashboard() {
                         <Text
                             as='div'
                             className="
-                                w-[78vw]
+                                w-[100dvw]
                                 max-h-[600px]
                                 h-full
                                 flex
@@ -164,6 +201,7 @@ export default function CoursesDashboard() {
                                 overflow-x-auto
                                 overflow-y-hidden
                                 whitespace-nowrap
+                                md:w-[81vw]
                             "
                         >
                             {cursos.map(curso => {
@@ -203,13 +241,15 @@ export default function CoursesDashboard() {
                     <Text
                         as='div'
                         className="
-                            w-[78vw]
+                            w-[100dvw]
                             max-h-[600px]
+                            h-full
                             flex
                             gap-4
                             overflow-x-auto
                             overflow-y-hidden
                             whitespace-nowrap
+                            md:w-[81vw]
                         "
                     >
                         {culinaristas.map(culinarista => {

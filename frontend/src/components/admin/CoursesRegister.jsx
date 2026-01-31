@@ -436,7 +436,10 @@ export default function CoursesRegister() {
     // ============== FUNCOES ==============
 
     return (
-        <Text as='article' className='flex flex-col gap-10 mt-10'>
+        <Text as='section' className='
+                    flex flex-col gap-10 mt-10 w-[92dvw]
+                    md:gap-20 md:w-[78vw]
+                '>
             <CardDash className='bg-white h-[200px] w-full h-full rounded-md p-10 shadow-sm'>
                 <Text as='p' className='font-bold text-gray-text'>CADASTRE UM CURSO</Text>
                 <Text as='div' className='flex flex-wrap w-full gap-[20px] mt-[30px]'>
@@ -445,7 +448,7 @@ export default function CoursesRegister() {
                         <Input 
                             type='text'
                             placeholder='Curso'
-                            width='400px'
+                            width='250px'
                             height='40px'
                             value={form.nomeCurso}
                             onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
@@ -542,6 +545,7 @@ export default function CoursesRegister() {
                         <Text>Imagem</Text>  
                         <Input 
                             type='file'
+                            width='100%'
                             accept='image/png, image/jpeg'
                             onChange={(e) => {
                                 const file = e.target.files[0];
@@ -728,6 +732,7 @@ export default function CoursesRegister() {
                                 onClick={() => {
                                     if(!formCulinarian.cursoAtual) {
                                         alert('Preencha o campo.')
+                                        return
                                     }
                                     setFormCulinarian({ 
                                         ...formCulinarian,
