@@ -335,5 +335,25 @@
     "assento": 3,
     "status": "pago",
     "dataInscricao": "2026-01-29T17:02:45.386Z"
+  },
+  {
+    "id": "51be5479-f5ee-42e8-a57c-da446d38dc68",
+    "cursoId": "6f160b0f-1f0e-4078-87e3-057b80623039",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 3,
+    "status": "pago",
+    "dataInscricao": "2026-01-31T00:24:37.291Z"
+  },
+  {
+    "id": "e61617cf-d3c2-4df6-b7f1-4c93ed914605",
+    "cursoId": "db2d51df-ab61-4aba-8eeb-dbc3425461e0",
+    "nome": "b",
+    "cpf": "b",
+    "celular": "b",
+    "assento": 1,
+    "status": "verificar",
+    "dataInscricao": "2026-01-31T00:24:42.185Z"
   }
 ]

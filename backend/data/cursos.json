@@ -6,10 +6,12 @@
     "data": "2026-01-15",
     "hora": "14:00",
     "loja": "Prado",
-    "valor": "4,99",
+    "valor": 4,
     "fotos": [
       "/uploads/cursos/2081e126-2b99-4f14-8887-a6e022d4b8e7.jpeg"
-    ]
+    ],
+    "categoria": "a",
+    "duracao": "1"
   },
   {
     "id": "001d1b85-93e7-4097-82b6-514354e551d1",
@@ -106,5 +108,47 @@
     "loja": "Teresopolis",
     "valor": "2",
     "fotos": []
+  },
+  {
+    "id": "db2d51df-ab61-4aba-8eeb-dbc3425461e0",
+    "nomeCurso": "a",
+    "culinarista": "a",
+    "categoria": "a",
+    "duracao": "1",
+    "data": "2026-01-30",
+    "hora": "21:11",
+    "loja": "Prado",
+    "valor": "1",
+    "fotos": [
+      "/uploads/cursos/1769818179828-banner (2).png"
+    ]
+  },
+  {
+    "id": "6f160b0f-1f0e-4078-87e3-057b80623039",
+    "nomeCurso": "bcb",
+    "culinarista": "baa",
+    "categoria": "b",
+    "duracao": "2",
+    "data": "2026-01-30",
+    "hora": "21:23",
+    "loja": "Teresopolis",
+    "valor": "2",
+    "fotos": [
+      "/uploads/cursos/1769818880483-Gemini_Generated_Image_ruyyh3ruyyh3ruyy.png"
+    ]
+  },
+  {
+    "id": "eaf562f8-9e9b-46e2-b145-413312c146ae",
+    "nomeCurso": "A",
+    "culinarista": "a",
+    "categoria": "null",
+    "duracao": "1",
+    "data": "2026-01-29",
+    "hora": "21:58",
+    "loja": "Prado",
+    "valor": 1,
+    "fotos": [
+      "/uploads/cursos/1769821052552-Gemini_Generated_Image_ruyyh3ruyyh3ruyy.png"
+    ]
   }
 ]

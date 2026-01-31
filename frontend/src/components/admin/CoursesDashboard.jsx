@@ -10,7 +10,7 @@ import CourseCard from '../../components/public/CourseCard'
 import CulinarianCard from '../public/CulinarianCard';
 
 // SERVICES
-import { getAssentos, getInscricoesTotais } from '../../api/courses.service';
+import { getAssentos, getCourses, getInscricoesTotais } from '../../api/courses.service';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -28,6 +28,9 @@ export default function CoursesDashboard() {
 
     // ========= STATE INSCRICOES ========= 
     const [inscricoes, setInscricoes] = useState([]);
+
+    // ========= STATE CURSOS HOJE ========= 
+    const [filtroCursos, setFiltroCursos] = useState([]);
 
     // ====== FUNCOES
     // layout data
@@ -65,19 +68,48 @@ export default function CoursesDashboard() {
     }, [cursos, refreshVagas]);
 
     useEffect(() => {
-        async function pegarInscricoes() {
+        const hoje = new Date().toLocaleDateString('PT-BR');
+
+        async function buscarDadosDashboard() {
             try {
-                // inscricoes em geral
-                const data = await getInscricoesTotais();
-                const inscricoesPagas = data.filter(i => i.status === 'pago').length;
-                const inscricoesVerificar = data.filter(i => i.status === 'verificar').length;
+                // CONSULTA
+                const dataInscricoes = await getInscricoesTotais();
+                const dataCursos = await getCourses();
+
+                // CURSOS
+                const cursosHojeFiltrados = dataCursos.filter(c => layoutData(c.data) === hoje);
+
+                const contagemCursosHoje = cursosHojeFiltrados.length
+                const idCursosHoje = cursosHojeFiltrados.map(c => c.id)
+
+                const cursosConcluidos = dataCursos.filter(c => 
+                    layoutData(c.data) < hoje
+                ).length;
+                // STATE CURSOS
+                setFiltroCursos({cursosHoje: contagemCursosHoje, cursosConcluidos: cursosConcluidos})
+
+                // =============================================
+                // INSCRICOES
+                const inscricoesPagas = dataInscricoes.filter(i => i.status === 'pago').length;
+                const inscricoesVerificar = dataInscricoes.filter(i => i.status === 'verificar').length;
+
+                const inscricoesHojePagas = dataInscricoes.filter(i => 
+                    i.status === 'pago' &&
+                    idCursosHoje.includes(i.cursoId)
+                ).length;
                 
-                return setInscricoes({pagas: inscricoesPagas, verificar: inscricoesVerificar})
+                const inscricoesHojeVerificar = dataInscricoes.filter(i => 
+                    i.status === 'verificar' &&
+                    idCursosHoje.includes(i.cursoId)
+                ).length;
+                // STATE INSCRICOES
+                setInscricoes({pagas: inscricoesPagas, verificar: inscricoesVerificar, hojePagas: inscricoesHojePagas, hojeVerificar: inscricoesHojeVerificar})
+
             } catch(err) {
                 console.log('Nao foi possivel pegar as inscricoes', err);
             }
         }
-        pegarInscricoes()
+        buscarDadosDashboard() 
     }, [])
 
     return (
@@ -88,33 +120,19 @@ export default function CoursesDashboard() {
                     <Text as='div' className='grid grid-cols-2 gap-7 w-[50%] h-[350px]'>
                         <CardDash>
                             <Text>Cursos Ativos</Text>
-                            {cursos.length}
-                            <p>Inscricoes pagas:{inscricoes.pagas}</p>
-                            <p>Inscricoes a verificar:{inscricoes.verificar}</p>
+                            {cursos.length || ''}
+                            <p>Inscricoes totais pagas:{inscricoes.pagas || ''}</p>
+                            <p>Inscricoes totais a verificar:{inscricoes.verificar || ''}</p>
                         </CardDash>
                         <CardDash>
-                            <Text>Cursos Concluidos</Text>
-                                {cursos
-                                .filter(c => {
-                                    const hoje = new Date()
-                                    hoje.setHours(0,0,0,0)
-
-                                    const dataCurso = parseDateISO(c.data)
-
-                                    return dataCurso < hoje
-                                })
-                                .map(c => (
-                                    <Text key={c.id}>
-                                    {c.nomeCurso}
-                                    </Text>
-                                ))
-                                }
+                            <Text as='p'>Cursos Concluidos: {filtroCursos.cursosConcluidos || ''}</Text>
+                                
 
                         </CardDash>
                         <CardDash>
-                            <Text>Cursos Hoje</Text>
-                            <p>Inscricoes pagas:</p>
-                            <p>Inscricoes a verificar:</p>
+                            <Text as='p'>Cursos Hoje: {filtroCursos.cursosHoje || ''}</Text>
+                            <Text as='p'>Inscricoes de hoje pagas:{inscricoes.hojePagas || ''}</Text>
+                            <Text as='p'>Inscricoes de hoje a verificar:{inscricoes.hojeVerificar || ''}</Text>
                         </CardDash>
                         <CardDash>
                             <p>a</p>
