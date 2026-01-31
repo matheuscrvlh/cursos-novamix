@@ -187,7 +187,7 @@ export default function Home() {
                <Text
                     as="div"
                     className="
-                            bg-gray w-full text-center pt-6 pb-5
+                            bg-gray w-full text-center pt-10
                             md:pt-12 md:pb-6
                         "
                     >
