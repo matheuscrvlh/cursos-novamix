@@ -3,8 +3,6 @@ import Text from "./Text"
 export default function Input({
         type = 'text',
         placeholder = '',
-        width,
-        height,
         value,
         onChange,
         className = '',
@@ -17,8 +15,7 @@ export default function Input({
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            style={{ width, height }}
-            className={`p-2 border border-gray-base rounded-md text-gray-text ${className}`}
+            className={`p-2 border border-gray-base rounded-md text-gray-text ${className || ''}`}
             {...props}
         />
     )

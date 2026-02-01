@@ -132,26 +132,38 @@ export default function CoursesDashboard() {
                     '>
                         <CardDash>
                             <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{filtroCursos.cursosAtivos === '' ? 'Nenhum' : filtroCursos.cursosAtivos}</Text>
+                                {filtroCursos.cursosAtivos === '' 
+                                    ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                    : <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{filtroCursos.cursosAtivos}</Text>
+                                }
                                 <Text as='p' className='mb-auto text-gray-text'>Cursos Ativos</Text>
                             </Text>
                             
                         </CardDash>
                         <CardDash>
                             <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{cursos.length > 0 ? cursos.length : 'Nenhum'}</Text>
+                                {cursos.length > 0 
+                                    ? <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{cursos.length}</Text>
+                                    : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                }
                                 <Text as='p' className='mb-auto text-gray-text'>Cursos Totais</Text>
                             </Text>
                         </CardDash>
                         <CardDash>
                             <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                <Text as='p' className='font-semibold text-6xl mt-auto text-red-base'>{filtroCursos.cursosHoje > 0 ? filtroCursos.cursosHoje : 'Nenhum'}</Text>
+                                {filtroCursos.cursosHoje > 0
+                                    ? <Text as='p' className='font-semibold text-6xl mt-auto text-green-base'>{filtroCursos.cursosHoje}</Text>
+                                    : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                }
                                 <Text as='p' className='mb-auto text-gray-text'>Cursos Hoje</Text>
                             </Text>
                         </CardDash>
                         <CardDash>
                             <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                <Text as='p' className='font-semibold text-6xl mt-auto text-green-base'>{filtroCursos.cursosConcluidos === '' ? 'Nenhum' : filtroCursos.cursosConcluidos}</Text>
+                                {filtroCursos.cursosConcluidos === '' 
+                                    ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                    : <Text as='p' className='font-semibold text-6xl mt-auto text-red-base'>{filtroCursos.cursosConcluidos}</Text>
+                                }
                                 <Text as='p' className='mb-auto text-gray-text'>Cursos Concluidos</Text>
                             </Text>
                         </CardDash>

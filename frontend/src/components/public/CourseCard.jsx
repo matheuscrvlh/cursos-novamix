@@ -32,7 +32,10 @@ export default function CourseCard({
       `}
     >
       {/* IMAGEM */}
-      <Text as="div" className="relative rounded-t-xl h-[200px] overflow-hidden">
+      <Text 
+        as="div" 
+        className="relative rounded-t-xl h-[200px] overflow-hidden"
+      >
         <Text
           as="p"
           className="

@@ -175,6 +175,7 @@ export default function Home() {
                                     sm:min-h-[180px]
                                     md:min-h-[300px] md:bg-center
                                     lg:min-h-[360px]
+                                    xl:min-h-[400px]
                                     "
                             style={{
                                 backgroundImage: `url(${bannerHome})`,
@@ -205,7 +206,13 @@ export default function Home() {
 
                 {/* Grid de cursos responsivo */}
                 <Text as='div' className='bg-gray flex justify-center w-full pt-6 pb-20 md:pb-30 px-4'>
-                    <Text as='div' className='max-w-[1400px] justify-items-center w-full bg-gray grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6'>
+                    <Text as='div' className='
+                        max-w-[1400px] w-full justify-items-center bg-gray grid grid-cols-1 gap-4 
+                        sm:grid-cols-2 
+                        lg:grid-cols-3 
+                        xl:grid-cols-4 
+                        md:gap-6
+                    '>
                         {cursos.map(curso => {
                             const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
@@ -224,7 +231,7 @@ export default function Home() {
                                     vagasReservadas={vagas.reservadas}
                                     valor={curso.valor}
                                     onClick={() => openForm(curso.id)}
-                                    className='max-w-[350px] min-w-[20vw] w-[300px]'
+                                    className='w-[90vw] min-w-[300px] sm:w-[45vw] lg:w-[30vw] xl:w-[17vw]'
                                     imagem={
                                         curso.fotos?.length
                                             ? curso.fotos[0]
