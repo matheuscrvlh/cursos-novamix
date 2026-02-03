@@ -238,5 +238,37 @@
     ],
     "foto": "/uploads/culinaristas/1769555448183-Gemini_Generated_Image_ruyyh3ruyyh3ruyy.png",
     "dataCadastro": "2026-01-27T23:10:48.194Z"
+  },
+  {
+    "id": "44797ad3-708a-4724-8c88-107d6685fc63",
+    "nomeCulinarista": "a",
+    "cpf": "a",
+    "industria": "a",
+    "telefone": "a",
+    "instagram": "a",
+    "lojas": [
+      "Prado"
+    ],
+    "cursos": [
+      "a"
+    ],
+    "foto": "/uploads/culinaristas/1769985802636-Culinarista.png",
+    "dataCadastro": "2026-02-01T22:43:22.649Z"
+  },
+  {
+    "id": "543afb8b-003c-4815-974c-60ac15ca4749",
+    "nomeCulinarista": "Celia Lima",
+    "cpf": "123.123.122-20",
+    "industria": "Mavalério",
+    "telefone": "22222222222222",
+    "instagram": "celiaconfeiteira",
+    "lojas": [
+      "Teresopolis"
+    ],
+    "cursos": [
+      "aaa"
+    ],
+    "foto": null,
+    "dataCadastro": "2026-02-01T22:43:49.632Z"
   }
 ]

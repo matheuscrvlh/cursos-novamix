@@ -162,5 +162,19 @@
     "loja": "Prado",
     "valor": "1",
     "fotos": []
+  },
+  {
+    "id": "9f539560-750c-4bf1-9d12-51d25c62b6d8",
+    "nomeCurso": "a",
+    "culinarista": "a",
+    "categoria": "a",
+    "duracao": "a",
+    "data": "2026-02-26",
+    "hora": "21:35",
+    "loja": "Prado",
+    "valor": "1",
+    "fotos": [
+      "/uploads/cursos/1770078744252-banner (2).png"
+    ]
   }
 ]
