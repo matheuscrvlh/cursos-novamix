@@ -298,6 +298,10 @@ export default function CoursesRegister() {
             formData.append('cursos', JSON.stringify(culinarianEditar.cursos));
             formData.append('dataCadastro', culinarianEditar.dataCadastro);
 
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value); // veja se instagram, telefone e industria estão corretos
+            }
+
             await editCulinarian(formData);
 
             setCulinarianEditar ({
@@ -320,6 +324,10 @@ export default function CoursesRegister() {
             console.log('Erro ao enviar edição', err)
         }
     }
+
+    useEffect(() => {
+        console.log(culinarianEditar)
+    }, [culinarianEditar])
 
     // ============== PUT ==============
 
@@ -729,7 +737,7 @@ export default function CoursesRegister() {
                     <Text as='div' className='flex flex-col text-gray-dark'>
                         <Text>Industria</Text> 
                         <Input   
-                            placeholder='Insdustria'
+                            placeholder='Industria'
                             className='w-full h-[40px]'
                             value={formCulinarian.industria}
                             onChange={e => setFormCulinarian({ ...formCulinarian, industria: e.target.value})}

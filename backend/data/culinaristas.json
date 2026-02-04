@@ -1,8 +1,8 @@
 [
   {
     "id": "aaaac1b7b71c4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
+    "nomeCulinarista": "aaa",
+    "cpf": "aa",
     "industria": "a",
     "telefone": "a",
     "instagram": "a",
@@ -110,8 +110,8 @@
   },
   {
     "id": "abb-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
+    "nomeCulinarista": "ab",
+    "cpf": "av",
     "industria": "a",
     "telefone": "a",
     "instagram": "a",
@@ -266,7 +266,8 @@
       "Prado"
     ],
     "cursos": [
-      "aaa"
+      "aaa",
+      "a"
     ],
     "foto": "/uploads/culinaristas/1770164348993-Culinarista.png",
     "dataCadastro": "2026-02-04T00:19:09.002Z"
