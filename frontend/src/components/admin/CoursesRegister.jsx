@@ -13,7 +13,7 @@ import Modal from '../public/Modal';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
-import { getAssentos, getInscricoes, putInscricoes, deleteInscricoes } from '../../api/courses.service';
+import { getAssentos, getInscricoes, putInscricoes, deleteInscricoes, getCulinaristas } from '../../api/courses.service';
 
 export default function CoursesRegister() {
     const { 
@@ -269,7 +269,6 @@ export default function CoursesRegister() {
         setStep('editCulinarian');
 
         const culinaristaFiltrada = culinaristas.find(culinarista => culinarista.id === culinaristaId);
-        console.log(culinaristaFiltrada)
 
         setCulinarianEditar({
             id: culinaristaFiltrada.id,
@@ -355,6 +354,32 @@ export default function CoursesRegister() {
         }
     }
 
+    // view culinarista
+    async function handleViewCulinarian(culinarianId) {
+        try {
+            setStep('viewCulinarian');
+
+            const data = await getCulinaristas();
+            const culinaristaFiltrada = data.find(c => c.id === culinarianId);
+
+            setCulinarianEditar({
+                id: culinaristaFiltrada.id,
+                nomeCulinarista: culinaristaFiltrada.nomeCulinarista,
+                cpf: culinaristaFiltrada.cpf,
+                instagram: culinaristaFiltrada.instagram,
+                industria: culinaristaFiltrada.industria,
+                telefone: culinaristaFiltrada.telefone,
+                lojas: culinaristaFiltrada.lojas,
+                cursos: culinaristaFiltrada.cursos,
+                foto: culinaristaFiltrada.foto,
+                dataCadastro: culinaristaFiltrada.dataCadastro
+            });
+
+        } catch(err) {
+            console.log('Erro ao visualizar culinarista', err)
+        }
+    }
+
     // ======== Toggle loja Culinarista
     function handleToggleLoja(loja) {
         setFormCulinarian(prev => {
@@ -410,6 +435,23 @@ export default function CoursesRegister() {
 
             setStep('close');
             return
+
+        } else if(step === 'viewCulinarian') {
+        setCulinarianEditar({
+                id: '',
+                nomeCulinarista: '',
+                cpf: '',
+                instagram: '',
+                industria: '',
+                telefone: '',
+                cursoAtual: '',
+                lojas: [],
+                cursos: [],
+                foto: null
+            });
+
+        setStep('close');
+        return
         
         } else if (step === 'editCulinarian') {
             setCulinarianEditar({
@@ -872,7 +914,7 @@ export default function CoursesRegister() {
                                         </Button>
                                         <Button 
                                             className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
-                                            // onClick={() => handleInscricoesCurso(curso.id)}
+                                            onClick={() => handleViewCulinarian(c.id)}
                                         >
                                             <Users />
                                         </Button>
@@ -905,7 +947,7 @@ export default function CoursesRegister() {
                                         </Button>
                                         <Button 
                                             className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
-                                            // onClick={() => handleInscricoesCurso(curso.id)}
+                                            onClick={() => handleViewCulinarian(c.id)}
                                         >
                                             <Users />
                                         </Button>
@@ -1310,6 +1352,31 @@ export default function CoursesRegister() {
                     >
                         Salvar Edições
                     </Button>
+                </Text>
+            </Modal>
+            <Modal
+                width='90%'
+                maxWidth='800px'
+                height='auto'
+                isOpen={step === 'viewCulinarian'}
+                onClose={() => closeModal()}
+            >
+                <Text as='p' className='font-semibold text-xl mb-5 text-gray-text'>Perfil da Culinarista</Text>
+                <Text
+                    as='div'
+                    className='flex flex-wrap gap-4 text-gray-text'
+                >
+                    <Text as='img' 
+                        src={culinarianEditar.foto}
+                    />
+                    <Text>Nome: {culinarianEditar.nomeCulinarista}</Text>
+                    <Text>Cpf: {culinarianEditar.cpf}</Text>
+                    <Text>Industria: {culinarianEditar.industria}</Text>
+                    <Text>Telefone: {culinarianEditar.telefone}</Text>
+                    <Text>Instagram: {culinarianEditar.instagram}</Text>
+                    <Text>Lojas: {culinarianEditar.lojas}</Text>
+                    <Text>Cursos: {culinarianEditar.cursos}</Text>
+                    <Text>Data Cadastro: {culinarianEditar.dataCadastro}</Text>
                 </Text>
             </Modal>
         </Text>

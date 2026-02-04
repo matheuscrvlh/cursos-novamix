@@ -24,7 +24,7 @@ export default function CulinarianCard({
                     as='p'
                     className='absolute top-2 text-white right-2 bg-orange-base rounded-md p-2 text-sm md:text-base font-semibold z-10'
                 >
-                    {`R$ ${culinarista}`}
+                    {`${culinarista}`}
                 </Text>
                 {imagem ? (
                     <Text

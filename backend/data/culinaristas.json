@@ -256,19 +256,19 @@
     "dataCadastro": "2026-02-01T22:43:22.649Z"
   },
   {
-    "id": "543afb8b-003c-4815-974c-60ac15ca4749",
-    "nomeCulinarista": "Celia Lima",
-    "cpf": "123.123.122-20",
-    "industria": "Mavalério",
-    "telefone": "22222222222222",
-    "instagram": "celiaconfeiteira",
+    "id": "92e33cd8-200e-4714-aed1-f60d16117cbd",
+    "nomeCulinarista": "a",
+    "cpf": "a",
+    "industria": "a",
+    "telefone": "a",
+    "instagram": "a",
     "lojas": [
-      "Teresopolis"
+      "Prado"
     ],
     "cursos": [
       "aaa"
     ],
-    "foto": null,
-    "dataCadastro": "2026-02-01T22:43:49.632Z"
+    "foto": "/uploads/culinaristas/1770164348993-Culinarista.png",
+    "dataCadastro": "2026-02-04T00:19:09.002Z"
   }
 ]
