@@ -82,7 +82,14 @@ router.put('/:id', uploadCulinaristas.single('foto'), (req, res) => {
     ...culinaristas[index],
     nomeCulinarista:
       req.body.nomeCulinarista ?? culinaristas[index].nomeCulinarista,
-    cpf: req.body.cpf ?? culinaristas[index].cpf,
+    cpf: 
+      req.body.cpf ?? culinaristas[index].cpf,
+    instagram: 
+      req.body.instagram ?? culinaristas[index].instagram,
+    telefone: 
+      req.body.telefone ?? culinaristas[index].telefone,
+    industria: 
+      req.body.industria ?? culinaristas[index].industria,
     lojas: req.body.lojas
       ? JSON.parse(req.body.lojas)
       : culinaristas[index].lojas,

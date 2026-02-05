@@ -91,6 +91,9 @@ export default function CoursesRegister() {
     // ======= STATE MODAL
     const [ step, setStep ] = useState('close')
 
+    // ======= STATE PREVIEW
+    const [ previewImagemCulinarista, setPreviewImagemCulinarista ] = useState();
+
     // ============== STATES ==============
 
     // ============== POST ==============
@@ -282,6 +285,10 @@ export default function CoursesRegister() {
             foto: culinaristaFiltrada.foto,
             dataCadastro: culinaristaFiltrada.dataCadastro
         });
+
+        if (typeof culinaristaFiltrada.foto === 'string') {
+            setPreviewImagemCulinarista(culinaristaFiltrada.foto)
+        }
     }
 
     async function editarCulinarian() {
@@ -298,11 +305,13 @@ export default function CoursesRegister() {
             formData.append('cursos', JSON.stringify(culinarianEditar.cursos));
             formData.append('dataCadastro', culinarianEditar.dataCadastro);
 
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value); // veja se instagram, telefone e industria estão corretos
-            }
+            if (culinarianEditar.foto) {
+                formData.append('foto', culinarianEditar.foto)
+            };
 
             await editCulinarian(formData);
+
+            const culinaristaAtualizada = await editCulinarian(formData);
 
             setCulinarianEditar ({
                 id: '',
@@ -314,7 +323,6 @@ export default function CoursesRegister() {
                 cursoAtual: '',
                 lojas: [],
                 cursos: [],
-                foto: null,
                 dataCadastro: ''
             });
 
@@ -328,6 +336,9 @@ export default function CoursesRegister() {
     useEffect(() => {
         console.log(culinarianEditar)
     }, [culinarianEditar])
+    useEffect(() => {
+        console.log(previewImagemCulinarista)
+    }, [previewImagemCulinarista])
 
     // ============== PUT ==============
 
@@ -474,6 +485,8 @@ export default function CoursesRegister() {
                 cursos: [],
                 foto: null
             });
+
+            setPreviewImagemCulinarista(null)
 
             setStep('close');
             return
@@ -1227,6 +1240,37 @@ export default function CoursesRegister() {
                     as='div'
                     className='flex flex-wrap gap-4 text-gray-text'
                 >
+                    <Text as='div' className='flex gap-10'>
+                        <Text 
+                            as='img' 
+                            src={previewImagemCulinarista} 
+                            className=' w-[30%] rounded-xl'
+                        />
+                        <Text as='div'>
+                            <Text as='p'>Alterar Foto</Text>
+                            <Input
+                                type='file'
+                                accept='image/png, image/jpeg'
+                                onChange={(e) => {
+                                    const file = e.target.files[0]
+                                    if (!file) return
+
+                                    if(!file.type.startsWith('image/')) {
+                                        alert('Selecione uma imagem válida');
+                                        return
+                                    }
+
+                                    setCulinarianEditar((prev) => ({
+                                        ...prev,
+                                        foto: file,
+                                    }))
+
+                                    const previewURL = URL.createObjectURL(file)
+                                    setPreviewImagemCulinarista(previewURL)
+                                }}
+                            />
+                        </Text>
+                    </Text>
                     <Text as='div'>
                         <Text as='p'>Nome</Text>
                         <Input
