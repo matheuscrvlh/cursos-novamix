@@ -42,6 +42,9 @@ export default function Home() {
         assento: ''
     })
 
+    // ========= STATE CURSOS ========= 
+    const [cursosAtuais, setCursosAtuais] = useState([]);
+
     // ========= STATE VAGAS ========= 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);
@@ -147,6 +150,23 @@ export default function Home() {
         loadVagas();
     }, [cursos, refreshVagas]);
 
+    // PEGAR CURSOS ATUAIS
+    useEffect(() => {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        const cursosFiltrados = cursos.filter(c => {
+            if (!c.data) return false;
+
+            const dataCurso = new Date(c.data);
+            dataCurso.setHours(0, 0, 0, 0);
+
+            return dataCurso >= hoje;
+        });
+
+        setCursosAtuais(cursosFiltrados);
+    }, [cursos]);
+
     // FUNDO PAGINA
     useThemeColor('#FF8D0A');
 
@@ -213,7 +233,7 @@ export default function Home() {
                         xl:grid-cols-4 
                         md:gap-6
                     '>
-                        {cursos.map(curso => {
+                        {cursosAtuais.map(curso => {
                             const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
                             return (

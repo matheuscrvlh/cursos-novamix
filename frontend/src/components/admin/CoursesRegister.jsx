@@ -339,7 +339,6 @@ export default function CoursesRegister() {
     useEffect(() => {
         console.log(previewImagemCulinarista)
     }, [previewImagemCulinarista])
-
     // ============== PUT ==============
 
     // ============== DELETE ==============
@@ -1418,8 +1417,10 @@ export default function CoursesRegister() {
                     as='div'
                     className='flex flex-wrap gap-4 text-gray-text'
                 >
-                    <Text as='img' 
+                    <Text
+                        as='img' 
                         src={culinarianEditar.foto}
+                        className='w-[30%]'
                     />
                     <Text>Nome: {culinarianEditar.nomeCulinarista}</Text>
                     <Text>Cpf: {culinarianEditar.cpf}</Text>
