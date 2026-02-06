@@ -28,7 +28,7 @@ router.post('/', (req, res) => {
     const { cursoId, nome, cpf, celular, assento } = req.body;
 
     // validaçao básica
-    if (!cursoId || !nome || !cpf || !celular || assento === undefined) {
+    if (!cursoId || !nome || !cpf || !celular || !formaPagamento || assento === undefined) {
       return res.status(400).json({ message: 'Dados incompletos' });
     }
 
@@ -60,7 +60,8 @@ router.post('/', (req, res) => {
       celular,
       assento: assentoId,
       status: 'verificar',
-      dataInscricao: new Date().toISOString()
+      dataInscricao: new Date().toISOString(),
+      formaPagamento
     };
 
     inscricoes.push(novaInscricao);
@@ -101,7 +102,7 @@ router.get('/', (req, res) => {
 router.put('/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const { nome, cpf, celular, assento, status } = req.body;
+    const { nome, cpf, celular, assento, status, formaPagamento } = req.body;
 
     const inscricoes = safeRead(inscricoesPath);
     const assentos = safeRead(assentosPath);
@@ -153,7 +154,8 @@ router.put('/:id', (req, res) => {
       nome: nome ?? inscricaoAtual.nome,
       cpf: cpf ?? inscricaoAtual.cpf,
       celular: celular ?? inscricaoAtual.celular,
-      status: status ?? inscricaoAtual.status
+      status: status ?? inscricaoAtual.status,
+      formaPagamento: formaPagamento ?? inscricaoAtual.formaPagamento
     };
 
     safeWrite(assentosPath, assentos);
