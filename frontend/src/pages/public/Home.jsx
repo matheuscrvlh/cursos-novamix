@@ -58,7 +58,7 @@ export default function Home() {
 
     // =========  CADASTRO CLIENTE ========= 
     function handleSubmit() {
-        if (!form.nome || !form.cpf || !form.celular) {
+        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
             alert('Preencha todos os campos.')
             return;
         }
@@ -68,6 +68,7 @@ export default function Home() {
             nome: form.nome,
             cpf: form.cpf,
             celular: form.celular,
+            formaPagamento: form.formaPagamento,
             assento: form.assento
         });
 
@@ -76,6 +77,7 @@ export default function Home() {
             nome: '',
             cpf: '',
             celular: '',
+            formaPagamento: '',
             assento: ''
         });
     }
@@ -98,7 +100,7 @@ export default function Home() {
     }
 
     const openAssento = () => {
-        if (!form.nome || !form.cpf || !form.celular) {
+        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
             alert('Preencha todos os campos.')
             return;
         }
@@ -115,7 +117,7 @@ export default function Home() {
 
     const closeModal = () => {
         setStep(null)
-        setForm({ cursoId: '', nome: '', cpf: '', telefone: '', assento: '' })
+        setForm({ cursoId: '', nome: '', cpf: '', telefone: '', formaPagamento: '', assento: '' })
         setCursoSelecionado('')
         setRefreshVagas(prev => prev + 1);
     }
@@ -299,6 +301,17 @@ export default function Home() {
                             value={form.celular}
                             onChange={e => setForm({ ...form, celular: e.target.value })}
                         />
+                        <Text
+                            as='select'
+                            className='w-full h-[40px] border border-gray-base rounded-md'
+                            value={form.formaPagamento}
+                            onChange={e => setForm({ ...form, formaPagamento: e.target.value })}
+                        >
+                            <Text as='option' value=''>Forma de Pagamento</Text>
+                            <Text as='option' value='dinheiro'>Dinheiro</Text>
+                            <Text as='option' value='caixa'>Caixa</Text>
+                            <Text as='option' value='link'>Link</Text>
+                        </Text>
                         <Button
                             className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                             onClick={openAssento}

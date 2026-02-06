@@ -25,7 +25,7 @@ const safeWrite = (filePath, data) => {
 
 router.post('/', (req, res) => {
   try {
-    const { cursoId, nome, cpf, celular, assento } = req.body;
+    const { cursoId, nome, cpf, celular, assento, formaPagamento } = req.body;
 
     // validaçao básica
     if (!cursoId || !nome || !cpf || !celular || !formaPagamento || assento === undefined) {
@@ -59,9 +59,9 @@ router.post('/', (req, res) => {
       cpf,
       celular,
       assento: assentoId,
+      formaPagamento,
       status: 'verificar',
       dataInscricao: new Date().toISOString(),
-      formaPagamento
     };
 
     inscricoes.push(novaInscricao);

@@ -253,6 +253,7 @@
     "cpf": "a",
     "celular": "a",
     "assento": 10,
+    "formaPagamento": "link",
     "status": "pago",
     "dataInscricao": "2026-01-28T14:19:51.557Z"
   },
@@ -372,8 +373,9 @@
     "nome": "A",
     "cpf": "A",
     "celular": "A",
+    "formaPagamento": "link",
     "assento": 7,
-    "status": "verificar",
+    "status": "pago",
     "dataInscricao": "2026-01-31T11:25:50.345Z"
   },
   {
@@ -415,5 +417,26 @@
     "assento": 4,
     "status": "verificar",
     "dataInscricao": "2026-01-31T13:53:55.201Z"
+  },
+  {
+    "id": "9ae4fb89-793e-41c8-9938-2bf08c8bf208",
+    "cursoId": "9f539560-750c-4bf1-9d12-51d25c62b6d8",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 16,
+    "status": "verificar",
+    "dataInscricao": "2026-02-06T18:50:08.031Z"
+  },
+  {
+    "id": "46d7e4d1-13e1-4d67-85ca-10db81b7ca27",
+    "cursoId": "9f539560-750c-4bf1-9d12-51d25c62b6d8",
+    "nome": "a",
+    "cpf": "a",
+    "celular": "a",
+    "assento": 21,
+    "formaPagamento": "caixa",
+    "status": "verificar",
+    "dataInscricao": "2026-02-06T19:06:42.469Z"
   }
 ]

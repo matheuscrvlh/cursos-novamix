@@ -248,6 +248,7 @@ export default function CoursesRegister() {
                 nome: inscricaoFiltrada.nome,
                 cpf: inscricaoFiltrada.cpf,
                 celular: inscricaoFiltrada.celular,
+                formaPagamento: inscricaoFiltrada.formaPagamento,
                 assento: inscricaoFiltrada.assento,
                 dataInscricao: inscricaoFiltrada.dataInscricao,
                 status: novoStatus
@@ -1124,6 +1125,7 @@ export default function CoursesRegister() {
                                         <Text as='p'>Nome: {inscricao.nome}</Text>
                                         <Text as='p'>CPF: {inscricao.cpf}</Text>
                                         <Text as='p'>Telefone: {inscricao.celular}</Text>
+                                        <Text as='p'>Pagamento: {inscricao.formaPagamento}</Text>
                                         <Text as='p'>Data: {layoutDataSistem(inscricao.dataInscricao)}</Text>
                                         <Text 
                                             as='div'
@@ -1159,12 +1161,13 @@ export default function CoursesRegister() {
                 {/* DESKTOP */}
                 <Text 
                     as='div'
-                    className='hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] font-bold text-gray-text'
+                    className='hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] font-bold text-gray-text'
                 >
                     <Text as='p'>ASSENTO</Text>
                     <Text as='p'>NOME</Text>
                     <Text as='p'>CPF</Text>
                     <Text as='p'>CELULAR</Text>
+                    <Text as='p'>PAGAMENTO</Text>
                     <Text as='p'>STATUS</Text>
                     <Text as='p'>INSCRICAO</Text>
                     <Text as='p'>FUNÇÕES</Text>
@@ -1189,12 +1192,13 @@ export default function CoursesRegister() {
                                 >
                                     <Text
                                         as='div'
-                                        className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr] text-gray-text items-center p-2'
+                                        className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] text-gray-text items-center p-2'
                                     >
                                         <Text as='p'>{inscricao.assento}</Text>
                                         <Text as='p'>{inscricao.nome}</Text>
                                         <Text as='p'>{inscricao.cpf}</Text>
                                         <Text as='p'>{inscricao.celular}</Text>
+                                        <Text as='p'>{inscricao.formaPagamento}</Text>
                                         <Text 
                                             as='div'
                                         >
