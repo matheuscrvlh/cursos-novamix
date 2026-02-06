@@ -79,6 +79,12 @@ export default function SideBar() {
                     <LinkSideBar to='/cursos' onClick={closeMenu}>
                         Cursos
                     </LinkSideBar>
+                    <LinkSideBar to='/inscricoes' onClick={closeMenu}>
+                        Inscrições
+                    </LinkSideBar>
+                    <LinkSideBar to='/culinaristas' onClick={closeMenu}>
+                        Culinaristas
+                    </LinkSideBar>
                 </Text>
 
                 <Link

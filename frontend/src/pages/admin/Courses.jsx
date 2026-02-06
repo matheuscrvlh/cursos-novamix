@@ -8,7 +8,6 @@ import { Head } from '../../components/Head'
 import { useThemeColor } from '../../hooks/useThemeColor';
 
 // Components
-import Input from '../../components/Input'
 import Text from '../../components/Text'
 import Button from '../../components/Button';
 import CoursesDashboard from '../../components/admin/CoursesDashboard';
