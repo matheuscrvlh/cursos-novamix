@@ -368,17 +368,6 @@
     "dataInscricao": "2026-01-31T11:19:53.170Z"
   },
   {
-    "id": "bd165bb9-5535-4974-abc9-fcaa8abe21ea",
-    "cursoId": "4fa2de49-f068-486c-987a-29208f486db1",
-    "nome": "A",
-    "cpf": "A",
-    "celular": "A",
-    "formaPagamento": "link",
-    "assento": 7,
-    "status": "pago",
-    "dataInscricao": "2026-01-31T11:25:50.345Z"
-  },
-  {
     "id": "bc8443eb-6d65-49b9-b3db-8f86837500d2",
     "cursoId": "001d1b85-93e7-4097-82b6-514354e551d1",
     "nome": "A",

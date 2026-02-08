@@ -1,13 +1,16 @@
+// ======== REACT
 import { Routes, Route } from 'react-router-dom'
+
+// ======== PAGES
 import Home from './pages/public/Home'
 import Login from './pages/admin/Login'
 import Dashboard from './pages/admin/Dashboard'
 import Courses from './pages/admin/Courses'
 import Registrations from './pages/admin/Registrations'
 import Culinarian from './pages/admin/Culinarian'
+import Industries from './pages/admin/Industries'
 
-function App() {
-
+export default function App() {
   return (
     <Routes>
         <Route path='/' element={<Home />} />
@@ -16,8 +19,7 @@ function App() {
         <Route path='/cursos' element={<Courses />} />
         <Route path='/inscricoes' element={<Registrations />} />
         <Route path='/culinaristas' element={<Culinarian />} />
+        <Route path='/industrias' element={<Industries />} />
     </Routes>
   )
 }
-
-export default App

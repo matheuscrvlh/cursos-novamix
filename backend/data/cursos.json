@@ -1,7 +1,7 @@
 [
   {
     "id": "4fa2de49-f068-486c-987a-29208f486db1",
-    "nomeCurso": "Pizza Brownie",
+    "nomeCurso": "Pizza BrownieA",
     "culinarista": "Flávia Macedo",
     "data": "2026-01-15",
     "hora": "14:00",
@@ -58,13 +58,13 @@
   {
     "id": "918f8923-bb96-4382-8eff-816b7ff62ea3",
     "nomeCurso": "Bolo de Pote Brilhoso",
-    "culinarista": "Valéria Lima",
+    "culinarista": "a",
     "categoria": "Doces",
     "duracao": "2h",
     "data": "2026-01-29",
     "hora": "09:40",
     "loja": "Prado",
-    "valor": "4,99",
+    "valor": 4,
     "fotos": [
       "/uploads/cursos/2081e126-2b99-4f14-8887-a6e022d4b8e7.jpeg"
     ]
@@ -124,46 +124,6 @@
     ]
   },
   {
-    "id": "6f160b0f-1f0e-4078-87e3-057b80623039",
-    "nomeCurso": "bcb",
-    "culinarista": "baa",
-    "categoria": "b",
-    "duracao": "2",
-    "data": "2026-01-30",
-    "hora": "21:23",
-    "loja": "Teresopolis",
-    "valor": "2",
-    "fotos": [
-      "/uploads/cursos/1769818880483-Gemini_Generated_Image_ruyyh3ruyyh3ruyy.png"
-    ]
-  },
-  {
-    "id": "eaf562f8-9e9b-46e2-b145-413312c146ae",
-    "nomeCurso": "A",
-    "culinarista": "a",
-    "categoria": "null",
-    "duracao": "1",
-    "data": "2026-01-29",
-    "hora": "21:58",
-    "loja": "Prado",
-    "valor": 1,
-    "fotos": [
-      "/uploads/cursos/1769821052552-Gemini_Generated_Image_ruyyh3ruyyh3ruyy.png"
-    ]
-  },
-  {
-    "id": "6784228d-dea6-41e3-932d-8d9976f288dd",
-    "nomeCurso": "a",
-    "culinarista": "a",
-    "categoria": "a",
-    "duracao": "a",
-    "data": "2026-01-31",
-    "hora": "10:19",
-    "loja": "Prado",
-    "valor": "1",
-    "fotos": []
-  },
-  {
     "id": "9f539560-750c-4bf1-9d12-51d25c62b6d8",
     "nomeCurso": "a",
     "culinarista": "a",
@@ -175,6 +135,34 @@
     "valor": "1",
     "fotos": [
       "/uploads/cursos/1770078744252-banner (2).png"
+    ]
+  },
+  {
+    "id": "5de2afef-2472-48eb-9a1c-74e1e29bfa8f",
+    "nomeCurso": "A",
+    "culinarista": "a",
+    "categoria": "A",
+    "duracao": "1",
+    "data": "2026-02-24",
+    "hora": "09:50",
+    "loja": "Prado",
+    "valor": "1",
+    "fotos": [
+      "/uploads/cursos/1770554898881-Gemini_Generated_Image_e30be3e30be3e30b.png"
+    ]
+  },
+  {
+    "id": "e52f3c36-adfd-4315-b1c2-2157a79d9e0c",
+    "nomeCurso": "A",
+    "culinarista": "a",
+    "categoria": "1",
+    "duracao": "1",
+    "data": "2026-02-20",
+    "hora": "09:51",
+    "loja": "Prado",
+    "valor": "1",
+    "fotos": [
+      "/uploads/cursos/1770554953945-Gemini_Generated_Image_e30be3e30be3e30b.png"
     ]
   }
 ]

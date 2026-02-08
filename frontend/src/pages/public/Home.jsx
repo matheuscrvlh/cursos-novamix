@@ -29,6 +29,7 @@ import { bannerHome } from '../../assets/images/banner/'
 export default function Home() {
     const {
         cursos,
+        culinaristas,
         loading,
         addRegisterClient
     } = useContext(DadosContext);
@@ -40,10 +41,19 @@ export default function Home() {
         cpf: '',
         telefone: '',
         assento: ''
-    })
+    });
+
+    // ========= STATE CURSOS ========= 
+    const [filters, setFilters] = useState({
+        dataInicial: '',
+        dataFinal: '',
+        loja: '',
+        culinarista: ''
+    });
 
     // ========= STATE CURSOS ========= 
     const [cursosAtuais, setCursosAtuais] = useState([]);
+    const [cursosFiltrados, setCursosFiltrados] = useState([]);
 
     // ========= STATE VAGAS ========= 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
@@ -169,6 +179,17 @@ export default function Home() {
         setCursosAtuais(cursosFiltrados);
     }, [cursos]);
 
+    // FILTRAR CURSOS
+    useEffect(() => {
+            const filtrados = cursosAtuais
+                .filter(c =>  !filters.dataInicial || new Date(c.data) >= new Date(filters.dataInicial) )
+                .filter(c => !filters.dataFinal || new Date(c.data) <= new Date(filters.dataFinal) )
+                .filter(c => !filters.loja || c.loja === filters.loja )
+                .filter(c => !filters.culinarista || c.culinarista === filters.culinarista)
+            setCursosFiltrados(filtrados)
+    }, [filters, cursosAtuais])
+    
+
     // FUNDO PAGINA
     useThemeColor('#FF8D0A');
 
@@ -225,7 +246,59 @@ export default function Home() {
                         Nossos Cursos
                     </Text>
                     </Text>
-
+                    <Text 
+                        as='div'
+                        className='bg-gray flex justify-center gap-8'
+                    >       
+                        <Text as='div'>
+                            <Text as='p'>Data Inicial</Text>
+                            <Input
+                                type='date'
+                                className='bg-white'
+                                value={filters.dataInicial}
+                                onChange={e => setFilters({ ...filters, dataInicial: e.target.value })}
+                            />
+                        </Text>
+                        <Text as='div'>
+                            <Text as='p'>Data Final</Text>
+                            <Input
+                                type='date'
+                                className='bg-white'
+                                value={filters.dataFinal}
+                                onChange={e => setFilters({ ...filters, dataFinal: e.target.value })}
+                            />
+                        </Text>
+                        <Text as='div'>
+                            <Text as='p'>Loja</Text>
+                            <Text 
+                                as='select'
+                                className='bg-white'
+                                value={filters.loja}
+                                onChange={e => setFilters({ ...filters, loja: e.target.value })}
+                            >
+                                <Text as='option' value=''>Loja</Text>
+                                <Text as='option' value='Prado'>Prado</Text>
+                                <Text as='option' value='Teresopolis'>Teresópolis</Text>
+                                <Text as='option' value='Prado,Teresopolis'>Todas</Text>
+                            </Text>
+                        </Text>
+                        <Text as='div'>
+                            <Text as='p'>Culinarista</Text>
+                            <Text 
+                                as='select'
+                                className='bg-white'
+                                value={filters.culinarista}
+                                onChange={e => setFilters({ ...filters, culinarista: e.target.value })}
+                            >
+                                <Text as='option' value=''>Culinarista</Text>
+                                {culinaristas.map(c => {
+                                    return (
+                                        <Text key={c.id} as='option' value={c.nomeCulinarista}>{c.nomeCulinarista}</Text>
+                                    )
+                                })}
+                            </Text>
+                        </Text>
+                    </Text>
                 {/* Grid de cursos responsivo */}
                 <Text as='div' className='bg-gray flex justify-center w-full pt-6 pb-20 md:pb-30 px-4'>
                     <Text as='div' className='
@@ -235,7 +308,7 @@ export default function Home() {
                         xl:grid-cols-4 
                         md:gap-6
                     '>
-                        {cursosAtuais.map(curso => {
+                        {cursosFiltrados.map(curso => {
                             const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
                             return (
