@@ -139,7 +139,7 @@ export default function Dashboard() {
                                 '>
                                     <CardDash>
                                         <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {filtroCursos.cursosAtivos === '' 
+                                            {!filtroCursos.cursosAtivos
                                                 ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
                                                 : <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{filtroCursos.cursosAtivos}</Text>
                                             }
@@ -167,7 +167,7 @@ export default function Dashboard() {
                                     </CardDash>
                                     <CardDash>
                                         <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {filtroCursos.cursosConcluidos === '' 
+                                            {!filtroCursos.cursosConcluidos 
                                                 ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
                                                 : <Text as='p' className='font-semibold text-6xl mt-auto text-red-base'>{filtroCursos.cursosConcluidos}</Text>
                                             }
@@ -182,22 +182,22 @@ export default function Dashboard() {
                                     <CardDash className='w-[50%] flex flex-col justify-center items-center'>
                                         <Text as='div' className='w-full flex flex-col text-center'>
                                             <Text as='p' className='font-bold text-2xl text-gray-text mb-4'>TOTAIS</Text>
-                                            <Text as='p' className='font-semibold text-4xl text-green-base'>{inscricoes.pagas === '' ? 'Nenhuma' : inscricoes.pagas}</Text>
+                                            <Text as='p' className='font-semibold text-4xl text-green-base'>{!inscricoes.pagas ? '0' : inscricoes.pagas}</Text>
                                             <Text as='p'>Inscricoes pagas</Text> 
                                         </Text>
                                         <Text as='div' className='w-full flex flex-col text-center mt-4'>
-                                            <Text as='p' className='font-semibold text-4xl text-red-base'>{inscricoes.verificar === '' ? '' : inscricoes.verificar}</Text>
+                                            <Text as='p' className='font-semibold text-4xl text-red-base'>{!inscricoes.verificar ? '0' : inscricoes.verificar}</Text>
                                             <Text as='p'>Inscricoes a verificar</Text>
                                         </Text>
                                     </CardDash>
                                     <CardDash className='w-[50%] flex flex-col justify-center items-center'>
                                         <Text as='div' className='w-full flex flex-col text-center mt-4'>
                                             <Text as='p' className='font-bold text-2xl text-gray-text mb-4'>HOJE</Text>
-                                            <Text as='p' className='font-semibold text-4xl text-green-base'>{inscricoes.hojePagas === '' ? '' : inscricoes.hojePagas}</Text>
+                                            <Text as='p' className='font-semibold text-4xl text-green-base'>{!inscricoes.hojePagas ? '0' : inscricoes.hojePagas}</Text>
                                             <Text as='p'>Inscricoes pagas</Text> 
                                         </Text>
                                         <Text as='div' className='w-full flex flex-col text-center mt-4'>
-                                            <Text as='p' className='font-semibold text-4xl text-red-base'>{inscricoes.hojeVerificar === '' ? '' : inscricoes.hojeVerificar}</Text>
+                                            <Text as='p' className='font-semibold text-4xl text-red-base'>{!inscricoes.hojeVerificar ? '0' : inscricoes.hojeVerificar}</Text>
                                             <Text as='p'>Inscricoes a verificar</Text>
                                         </Text>
                                     </CardDash>
@@ -209,7 +209,60 @@ export default function Dashboard() {
                             <Text as='h2' className='font-bold text-gray-text text-2xl'>CURSOS</Text>
                             <Text as='article' className='flex flex-col gap-5'>
                                 <Text as='div'>
-                                    <Text
+                                    {cursos.length === 0 
+                                        ? <Text as='p'>Nenhum curso encontrado</Text>
+                                        : <Text
+                                                as='div'
+                                                className="
+                                                    w-[100dvw]
+                                                    max-h-[600px]
+                                                    h-full
+                                                    flex
+                                                    gap-4
+                                                    overflow-x-auto
+                                                    overflow-y-hidden
+                                                    whitespace-nowrap
+                                                    md:w-[81vw]
+                                                "
+                                            >
+                                                {cursos.map(curso => {
+                                                    const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
+
+                                                    return (
+                                                        <CourseCard
+                                                            key={curso.id}
+                                                            id={curso.id}
+                                                            curso={curso.nomeCurso}
+                                                            data={layoutData(curso.data)}
+                                                            horario={curso.hora}
+                                                            loja={curso.loja}
+                                                            culinarista={curso.culinarista}
+                                                            duracao={curso.duracao}
+                                                            categoria={curso.categoria}
+                                                            vagasLivres={vagas.livres}
+                                                            vagasReservadas={vagas.reservadas}
+                                                            valor={curso.valor}
+                                                            className='min-w-[300px]'
+                                                            imagem={
+                                                                curso.fotos?.length
+                                                                    ? curso.fotos[0]
+                                                                    : null
+                                                            }
+                                                        />
+                                                    )
+                                                })}
+                                            </Text>
+                                        }
+                                </Text>
+                            </Text>
+                        </Text>
+                        {/* ======== CULINARISTAS ==========*/}
+                        <Text as='section' className='flex flex-col gap-3'>
+                            <Text as='h2' className='font-bold text-gray-text text-2xl'>CULINARISTAS</Text>
+                            <Text as='article'>
+                                {culinaristas.length === 0 
+                                    ? <Text as='p'>Nenhuma culinarista encontrada</Text>
+                                    : <Text
                                         as='div'
                                         className="
                                             w-[100dvw]
@@ -223,83 +276,36 @@ export default function Dashboard() {
                                             md:w-[81vw]
                                         "
                                     >
-                                        {cursos.map(curso => {
-                                            const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
+                                        {culinaristas.map(culinarista => {
 
                                             return (
-                                                <CourseCard
-                                                    key={curso.id}
-                                                    id={curso.id}
-                                                    curso={curso.nomeCurso}
-                                                    data={layoutData(curso.data)}
-                                                    horario={curso.hora}
-                                                    loja={curso.loja}
-                                                    culinarista={curso.culinarista}
-                                                    duracao={curso.duracao}
-                                                    categoria={curso.categoria}
-                                                    vagasLivres={vagas.livres}
-                                                    vagasReservadas={vagas.reservadas}
-                                                    valor={curso.valor}
+                                                <CulinarianCard
+                                                    key={culinarista.id}
+                                                    culinarista={culinarista.nomeCulinarista}
+                                                    industria={culinarista.industria}
+                                                    telefone={culinarista.telefone}
+                                                    instagram={culinarista.instagram}
                                                     className='min-w-[300px]'
+                                                    lojas={
+                                                        culinarista.lojas.length === 0
+                                                            ? 'Nenhuma'
+                                                            : culinarista.lojas
+                                                    }
+                                                    cursos={
+                                                        culinarista.cursos.length === 0
+                                                            ? 'Nenhum'
+                                                            : culinarista.cursos
+                                                    }
                                                     imagem={
-                                                        curso.fotos?.length
-                                                            ? curso.fotos[0]
-                                                            : null
+                                                        culinarista.foto === null
+                                                            ? null
+                                                            : culinarista.foto
                                                     }
                                                 />
                                             )
                                         })}
                                     </Text>
-                                </Text>
-                            </Text>
-                        </Text>
-                        {/* ======== CULINARISTAS ==========*/}
-                        <Text as='section' className='flex flex-col gap-3'>
-                            <Text as='h2' className='font-bold text-gray-text text-2xl'>CULINARISTAS</Text>
-                            <Text as='article'>
-                                <Text
-                                    as='div'
-                                    className="
-                                        w-[100dvw]
-                                        max-h-[600px]
-                                        h-full
-                                        flex
-                                        gap-4
-                                        overflow-x-auto
-                                        overflow-y-hidden
-                                        whitespace-nowrap
-                                        md:w-[81vw]
-                                    "
-                                >
-                                    {culinaristas.map(culinarista => {
-
-                                        return (
-                                            <CulinarianCard
-                                                key={culinarista.id}
-                                                culinarista={culinarista.nomeCulinarista}
-                                                industria={culinarista.industria}
-                                                telefone={culinarista.telefone}
-                                                instagram={culinarista.instagram}
-                                                className='min-w-[300px]'
-                                                lojas={
-                                                    culinarista.lojas.length === 0
-                                                        ? 'Nenhuma'
-                                                        : culinarista.lojas
-                                                }
-                                                cursos={
-                                                    culinarista.cursos.length === 0
-                                                        ? 'Nenhum'
-                                                        : culinarista.cursos
-                                                }
-                                                imagem={
-                                                    culinarista.foto === null
-                                                        ? null
-                                                        : culinarista.foto
-                                                }
-                                            />
-                                        )
-                                    })}
-                                </Text>
+                                }
                             </Text>
                         </Text>
                     </Text>

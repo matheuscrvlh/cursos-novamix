@@ -287,7 +287,7 @@ export default function Culinarian() {
                 <Text as='section' className='
                     flex flex-col gap-10 mt-10 w-[92dvw]
                     md:gap-20 lg:w-[78vw]
-                '> ,
+                '>
                     <CardDash as='div' className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-gray-text mb-4'>CADASTRE UMA CULINARISTA</Text>
                         <Text as='div' className='flex flex-wrap gap-3'>
