@@ -6,6 +6,7 @@ const cursosRoutes = require('./routes/cursos.routes');
 const assentosRoutes = require('./routes/assentos.routes');
 const inscricoesRoutes = require('./routes/inscricoes.routes');
 const culinaristasRoutes = require('./routes/culinaristas.routes');
+const industriasRoutes = require('./routes/industrias.routes');
 const app = express();
 
 app.use(cors());

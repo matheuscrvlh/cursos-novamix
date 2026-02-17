@@ -78,7 +78,7 @@ router.post('/', uploadIndustria.single('image'), (req, res) => {
   }
 });
 
-router.put('/:id', upload.single('imagem'), (req, res) => {
+router.put('/:id', uploadIndustria.single('imagem'), (req, res) => {
   try {
     const industrias = safeRead();
     const index = industrias.findIndex(i => i.id === req.params.id);
