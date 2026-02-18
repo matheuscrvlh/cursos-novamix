@@ -19,7 +19,13 @@ import TopBar from '../../layouts/admin/TopBar'
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
-import { getAssentos, getInscricoes, putInscricoes, deleteInscricoes, getCulinaristas } from '../../api/courses.service';
+import { 
+        getAssentos,
+        getInscricoes, 
+        putInscricoes, 
+        deleteInscricoes, 
+        getInscricoesTotais 
+    } from '../../api/courses.service';
 
 export default function Registrations() {
     // ============== STATES ==============
@@ -27,7 +33,11 @@ export default function Registrations() {
     const [ assentos, setAssentos ] = useState([])
 
     // ======= STATE INSCRICOES
+    const [ inscricoesTotais, setInscricoesTotais ] = useState([]);
+    const [ loadingInscricoesTotais, setLoadingInscricoesTotais ] = useState(true)
+    
     const [ inscricoes, setInscricoes ] = useState([])
+    const [ loadingInscricoes, setLoadingInscricoes ] = useState([])
 
     // ======= STATE MODAL
     const [ step, setStep ] = useState('close')
@@ -105,6 +115,21 @@ export default function Registrations() {
     }
     // ============== HANDLES ==============
 
+    // ============== ONLOAD ==============
+    useEffect(() => {
+            getInscricoesTotais()
+            .then(inscricoes => {
+                setInscricoesTotais(inscricoes)
+            })
+            .catch(err => {
+                console.log('Erro ao buscar todas inscricoes', err)
+            })
+            .finally(() => {
+                setLoadingInscricoesTotais(false)
+            })
+        }, [])
+    // ============== ONLOAD ==============
+
     // ============== FUNCOES ==============
     // layout para datas que vieram do input
     function layoutDataInput(data) {
@@ -163,6 +188,94 @@ export default function Registrations() {
                     md:gap-20 lg:w-[78vw]
                 '>
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
+                        <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>INSCRIÇÕES</Text>
+                        <Text as='div' className='
+                                grid-cols-[0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] font-bold text-gray-text
+                                hidden md:grid
+                            '
+                        >
+                            <Text as='p'>CURSO</Text>
+                            <Text as='p'>DATA CURSO</Text>
+                            <Text as='p'>NOME</Text>
+                            <Text as='p'>ASSENTO</Text>
+                            <Text as='p'>STATUS</Text>
+                            <Text as='p'>PAGAMENTO</Text>
+                            <Text as='p'>FUNÇÕES</Text>
+                        </Text>
+                        <Text as='hr' className='border-gray-base/30 w-full mt-4'/>
+                        <Text as='div' className='max-h-[400px] overflow-y-auto'>
+                            { 
+                                inscricoesTotais.map(i => (
+                                    <Text 
+                                        as='div'
+                                        key={i.id}
+                                    >
+                                        {/* MOBILE */}
+                                        <Text 
+                                            as='div' 
+                                            className='
+                                                p-3 text-gray-text
+                                                md:hidden
+                                            ' 
+                                        >
+                                            <Text as='p'>a fazer</Text>
+                                            <Text as='p'>a fazer</Text>
+                                            <Text as='p'>Nome: {i.nome}</Text>
+                                            <Text as='p'>Assento: {i.assento}</Text>
+                                            <Text as='p'>Status: {i.status}</Text>
+                                            <Text as='p'>Pagamento: {i.formaPagamento}</Text>
+                                            <Text as='div' className='flex gap-3 h-full mt-3'>
+                                                <Button 
+                                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-base/80 hover:shadow-md text-white'
+                                                    // onClick={}
+                                                >
+                                                    <Edit />
+                                                </Button>
+                                                <Button 
+                                                    className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-base/80 hover:shadow-md text-white'
+                                                    // onClick={() => handleInscricoesCurso(i.id)}
+                                                >
+                                                    <Trash />
+                                                </Button>
+                                            </Text>
+                                        </Text>
+                                        
+                                        {/* DESKTOP */}
+                                        <Text 
+                                            as='div' 
+                                            className='
+                                                grid-cols-[0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] text-gray-text  p-2 items-center
+                                                md:grid hidden
+                                            ' 
+                                        >
+                                            <Text as='p'>a fazer</Text>
+                                            <Text as='p'>a fazer</Text>
+                                            <Text as='p'>{i.nome}</Text>
+                                            <Text as='p'>{i.assento}</Text>
+                                            <Text as='p'>{i.status}</Text>
+                                            <Text as='p'>{i.formaPagamento}</Text>
+                                            <Text as='div' className='flex gap-3 justify-center h-full'>
+                                                <Button 
+                                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-base/80 hover:shadow-md text-white'
+                                                    // onClick={() => handleInscricoesCurso(i.id)}
+                                                >
+                                                    <Edit />
+                                                </Button>
+                                                <Button 
+                                                    className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-base/80 hover:shadow-md text-white'
+                                                    // onClick={() => handleInscricoesCurso(i.id)}
+                                                >
+                                                    <Trash />
+                                                </Button>
+                                            </Text>
+                                        </Text>
+                                        <Text as='hr' className='border-gray-base/30 w-full'/>
+                                    </Text>
+                                ))
+                            }
+                        </Text>
+                    </CardDash>
+                    <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>CURSOS ATIVOS</Text>
                         <Text as='div' className='
                                 grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] font-bold text-gray-text
@@ -177,6 +290,9 @@ export default function Registrations() {
                             <Text as='p'>FUNÇÕES</Text>
                         </Text>
                         <Text as='hr' className='border-gray-base/30 w-full mt-4'/>
+                        <Text as='div' className='max-h-[400px] overflow-y-auto'>
+
+                        </Text>
                         <Text as='div' className='max-h-[400px] overflow-y-auto'>
                             {loading ? (
                                 <Text as='p'>Carregando cursos...</Text>

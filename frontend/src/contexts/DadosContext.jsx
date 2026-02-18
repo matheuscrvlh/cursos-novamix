@@ -1,6 +1,15 @@
-// React
+// REACT
 import { createContext, useEffect, useState } from 'react';
-import { getCourses, deleteCourse, getCulinaristas, deleteCulinarista, putCourse, putCulinarista } from '../api/courses.service';
+
+// SERVICES
+import { 
+        getCourses, 
+        deleteCourse, 
+        getCulinaristas, 
+        deleteCulinarista, 
+        putCourse, 
+        putCulinarista, 
+    } from '../api/courses.service';
 
 export const DadosContext = createContext();
 
