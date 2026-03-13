@@ -248,13 +248,15 @@ export default function Home() {
                     </Text>
                     <Text 
                         as='div'
-                        className='bg-gray flex justify-center gap-8'
-                    >       
+                        className='
+                            bg-gray flex flex-col justify-center items-center gap-8 pt-10
+                            md:flex-row md:pt-0
+                    '>        
                         <Text as='div'>
                             <Text as='p'>Data Inicial</Text>
                             <Input
                                 type='date'
-                                className='bg-white'
+                                className='bg-white cursor-pointer'
                                 value={filters.dataInicial}
                                 onChange={e => setFilters({ ...filters, dataInicial: e.target.value })}
                             />
@@ -263,16 +265,15 @@ export default function Home() {
                             <Text as='p'>Data Final</Text>
                             <Input
                                 type='date'
-                                className='bg-white'
+                                className='bg-white cursor-pointer'
                                 value={filters.dataFinal}
                                 onChange={e => setFilters({ ...filters, dataFinal: e.target.value })}
                             />
                         </Text>
-                        <Text as='div'>
-                            <Text as='p'>Loja</Text>
+                        <Text as='div' className='mt-auto'>
                             <Text 
                                 as='select'
-                                className='bg-white'
+                                className='bg-white w-39 h-10 p-2 border border-black/50 rounded-md cursor-pointer'
                                 value={filters.loja}
                                 onChange={e => setFilters({ ...filters, loja: e.target.value })}
                             >
@@ -282,11 +283,10 @@ export default function Home() {
                                 <Text as='option' value='Prado,Teresopolis'>Todas</Text>
                             </Text>
                         </Text>
-                        <Text as='div'>
-                            <Text as='p'>Culinarista</Text>
+                        <Text as='div' className='mt-auto'>
                             <Text 
                                 as='select'
-                                className='bg-white'
+                                className='bg-white w-39 h-10 p-2 border border-black/50 rounded-md cursor-pointer'
                                 value={filters.culinarista}
                                 onChange={e => setFilters({ ...filters, culinarista: e.target.value })}
                             >
@@ -300,42 +300,55 @@ export default function Home() {
                         </Text>
                     </Text>
                 {/* Grid de cursos responsivo */}
-                <Text as='div' className='bg-gray flex justify-center w-full pt-6 pb-20 md:pb-30 px-4'>
-                    <Text as='div' className='
-                        max-w-[1400px] w-full justify-items-center bg-gray grid grid-cols-1 gap-4 
-                        sm:grid-cols-2 
-                        lg:grid-cols-3 
-                        xl:grid-cols-4 
-                        md:gap-6
-                    '>
-                        {cursosFiltrados.map(curso => {
-                            const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
+                <Text as='div' className='
+                    bg-gray flex justify-center w-full pt-6 pb-20 px-4
+                    md:pb-30 
+                '>
+                    {cursosFiltrados.length === 0
+                    ? ( <Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
+                            <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
+                            <Text as='p'>Favor tente com outros filtros.</Text>
+                        </Text> 
+                    ) : (
+                        <Text
+                            as='div'
+                            className='
+                                max-w-350 w-full justify-items-center bg-gray grid grid-cols-1 gap-4
+                                sm:grid-cols-2
+                                lg:grid-cols-3
+                                xl:grid-cols-4
+                                md:gap-6
+                            '
+                        >
+                            {cursosFiltrados.map(curso => {
+                                const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
-                            return (
-                                <CourseCard
-                                    key={curso.id}
-                                    id={curso.id}
-                                    curso={curso.nomeCurso}
-                                    data={layoutData(curso.data)}
-                                    horario={curso.hora}
-                                    loja={curso.loja}
-                                    culinarista={curso.culinarista}
-                                    duracao={curso.duracao}
-                                    categoria={curso.categoria}
-                                    vagasLivres={vagas.livres}
-                                    vagasReservadas={vagas.reservadas}
-                                    valor={curso.valor}
-                                    onClick={() => openForm(curso.id)}
-                                    className='w-[90vw] min-w-[300px] sm:w-[45vw] lg:w-[30vw] xl:w-[17vw]'
-                                    imagem={
-                                        curso.fotos?.length
-                                            ? curso.fotos[0]
-                                            : null
-                                    }
-                                />
-                            )
-                        })}
-                    </Text>
+                                return (
+                                    <CourseCard
+                                        key={curso.id}
+                                        id={curso.id}
+                                        curso={curso.nomeCurso}
+                                        data={layoutData(curso.data)}
+                                        horario={curso.hora}
+                                        loja={curso.loja}
+                                        culinarista={curso.culinarista}
+                                        duracao={curso.duracao}
+                                        categoria={curso.categoria}
+                                        vagasLivres={vagas.livres}
+                                        vagasReservadas={vagas.reservadas}
+                                        valor={curso.valor}
+                                        onClick={() => openForm(curso.id)}
+                                        className='w-[80vw] min-w-[300px] 
+                                            sm:w-[45vw] 
+                                            lg:w-[30vw] 
+                                            xl:w-[17vw]
+                                        '
+                                        imagem={curso.fotos?.length ? curso.fotos[0] : null}
+                                    />
+                                );
+                            })}
+                        </Text>
+                    )}
                 </Text>
 
                 {/* Modal de formulário - responsivo */}

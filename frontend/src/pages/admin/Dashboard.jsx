@@ -122,7 +122,7 @@ export default function Dashboard() {
             <SideBar />
            <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Dashboard'} />
-                <Text as='div' className='h-full w-full flex flex-col font-semibold gap-3 text-center justify-center mt-50%'>
+                <Text as='div' className='w-full flex flex-col font-semibold gap-3 text-center justify-center mt-50%'>
                     <Text as='section' className='
                         flex flex-col gap-10 mt-10 w-[92dvw]
                         md:gap-20 md:w-[78vw]
