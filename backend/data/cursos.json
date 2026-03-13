@@ -136,33 +136,5 @@
     "fotos": [
       "/uploads/cursos/1770078744252-banner (2).png"
     ]
-  },
-  {
-    "id": "5de2afef-2472-48eb-9a1c-74e1e29bfa8f",
-    "nomeCurso": "A",
-    "culinarista": "a",
-    "categoria": "A",
-    "duracao": "1",
-    "data": "2026-02-24",
-    "hora": "09:50",
-    "loja": "Prado",
-    "valor": "1",
-    "fotos": [
-      "/uploads/cursos/1770554898881-Gemini_Generated_Image_e30be3e30be3e30b.png"
-    ]
-  },
-  {
-    "id": "e52f3c36-adfd-4315-b1c2-2157a79d9e0c",
-    "nomeCurso": "A",
-    "culinarista": "a",
-    "categoria": "1",
-    "duracao": "1",
-    "data": "2026-02-20",
-    "hora": "09:51",
-    "loja": "Prado",
-    "valor": "1",
-    "fotos": [
-      "/uploads/cursos/1770554953945-Gemini_Generated_Image_e30be3e30be3e30b.png"
-    ]
   }
 ]

@@ -34,26 +34,11 @@ router.get('/:id', (req, res) => {
     res.json(industria);
 });
 
-router.post('/', uploadIndustria.single('image'), (req, res) => {
-  try {
-    const {
-      razaoSocial,
-      nome,
-      cnpj,
-      email,
-      telefone,
-      endereco,
-      instagram,
-      site
-    } = req.body;
-    
-    if (!razaoSocial || !nome){
-      return res.status(400).json({ message: 'Razão Social e Nome são obrigatórios' });
-    }
+router.post('/', uploadIndustria.single('foto'), (req, res) => {
 
-    const industrias = safeRead();
-
-   const novaIndustria = {
+    const industrias = safeRead(industriasPath);
+    const { razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site } = req.body;
+    const novaIndustria = {
       id: uuidv4(),
       razaoSocial,
       nome,
@@ -63,24 +48,23 @@ router.post('/', uploadIndustria.single('image'), (req, res) => {
       endereco: endereco || '',
       instagram: instagram || '',
       site: site || '',
-      imagem: req.file
-        ? `/uploads/industrias/${req.file.filename}`
-        : null,
+      foto: req.file ? `/uploads/industrias/${req.file.filename}` : null,
       dataCadastro: new Date().toISOString()
     };
 
     industrias.push(novaIndustria);
-    safeWrite(induastrias);
+
+    safeWrite(industriasPath, industrias);
+
     res.status(201).json(novaIndustria);
-  } catch (error) {
-    console.error('Erro ao criar indústria:', error);
-    res.status(500).json({ message: 'Erro ao criar indústria' });
-  }
+
 });
 
 router.put('/:id', uploadIndustria.single('imagem'), (req, res) => {
   try {
-    const industrias = safeRead();
+
+    const industrias = safeRead(industriasPath);
+
     const index = industrias.findIndex(i => i.id === req.params.id);
 
     if (index === -1) {
@@ -89,7 +73,6 @@ router.put('/:id', uploadIndustria.single('imagem'), (req, res) => {
       });
     }
 
-    // apagar imagem antiga
     if (req.file && industrias[index].imagem) {
       const oldPath = path.join(__dirname, '..', industrias[index].imagem);
 
@@ -113,7 +96,7 @@ router.put('/:id', uploadIndustria.single('imagem'), (req, res) => {
         : industrias[index].imagem
     };
 
-    safeWrite(industrias);
+    safeWrite(industriasPath, industrias);
 
     res.json(industrias[index]);
 
@@ -125,7 +108,9 @@ router.put('/:id', uploadIndustria.single('imagem'), (req, res) => {
 
 router.delete('/:id', (req, res) => {
   try {
-    const industrias = safeRead();
+
+    const industrias = safeRead(industriasPath);
+
     const index = industrias.findIndex(i => i.id === req.params.id);
 
     if (index === -1) {
@@ -145,7 +130,8 @@ router.delete('/:id', (req, res) => {
     }
 
     industrias.splice(index, 1);
-    safeWrite(industrias);
+
+    safeWrite(industriasPath, industrias);
 
     res.status(204).send();
 

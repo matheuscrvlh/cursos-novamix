@@ -106,6 +106,7 @@ router.put('/:id', uploadCursos.array('fotos', 5), (req, res) => {
 router.delete('/:id', (req, res) => {
   const cursos = safeRead(cursosPath);
   const assentos = safeRead(assentosPath);
+  const inscricoes = safeRead(inscricoesPath);
 
   const cursoIndex = cursos.findIndex(c => c.id === req.params.id);
 
@@ -128,6 +129,11 @@ router.delete('/:id', (req, res) => {
   // romover curso
   cursos.splice(cursoIndex, 1);
 
+  // remover inscrições
+  const inscricoesAtualizadas = inscricoes.filter(
+    i => i.cursoId !== req.params.id
+  );
+
   // remove assentos
   const assentosAtualizados = assentos.filter(
     a => a.cursoId !== req.params.id
@@ -135,6 +141,7 @@ router.delete('/:id', (req, res) => {
 
   write(cursosPath, cursos);
   write(assentosPath, assentosAtualizados);
+  write(inscricoesPath, inscricoesAtualizadas);
 
   return res.status(204).send();
 });

@@ -20,7 +20,7 @@ app.use('/api/cursos', cursosRoutes);
 app.use('/api/assentos', assentosRoutes);
 app.use('/api/inscricoes', inscricoesRoutes);
 app.use('/api/culinaristas', culinaristasRoutes);
-app.use('/api/industria', industriasRoutes);
+app.use('/api/industrias', industriasRoutes);
 
 app.listen(3001, () => {
   console.log('Backend torando na porta 3001');

@@ -270,5 +270,19 @@
     ],
     "foto": "/uploads/culinaristas/1770557355442-Gemini_Generated_Image_e30be3e30be3e30b.png",
     "dataCadastro": "2026-02-08T13:29:15.445Z"
+  },
+  {
+    "id": "ef97c96e-3531-4a1c-ac26-ac64d0e5c20a",
+    "nomeCulinarista": "dagoberto",
+    "cpf": "444444444",
+    "industria": "novamix",
+    "telefone": "2222222222",
+    "instagram": "@dagoberto",
+    "lojas": [
+      "Prado"
+    ],
+    "cursos": [],
+    "foto": "/uploads/culinaristas/1771590107974-Captura de tela 2026-02-11 151025.png",
+    "dataCadastro": "2026-02-20T12:21:47.980Z"
   }
 ]
