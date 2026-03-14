@@ -10,6 +10,7 @@ const router = express.Router();
 
 const cursosPath = path.join(__dirname, '../data/cursos.json');
 const assentosPath = path.join(__dirname, '../data/assentos.json');
+const inscricoesPath = path.join(__dirname, '../data/inscricoes.json');
 
 const safeRead = (filePath) => {
   if (!fs.existsSync(filePath)) {

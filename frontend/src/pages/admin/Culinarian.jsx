@@ -68,11 +68,7 @@ export default function Culinarian() {
     // ============== POST ==============
     // ======= CADASTRO CULINARISTA
     function handleSubmitCulinarian() {
-        if(
-            !formCulinarian.nomeCulinarista 
-            || !formCulinarian.cpf 
-            ) 
-        {
+        if(!formCulinarian.nomeCulinarista || !formCulinarian.cpf) {
             alert('Preencha os campos.');
             return
         }
@@ -557,11 +553,18 @@ export default function Culinarian() {
                             className='flex flex-wrap gap-4 text-gray-text'
                         >
                             <Text as='div' className='flex gap-10'>
-                                <Text 
-                                    as='img' 
-                                    src={previewImagemCulinarista} 
-                                    className=' w-[30%] rounded-xl'
-                                />
+                                {culinarianEditar.foto === null 
+                                    ?   <Text as='p'
+                                            className='w-[40%] min-h-[50%] p-8 bg-gray'
+                                        >
+                                            Nenhuma Foto Cadastrada
+                                        </Text>
+                                    :   <Text
+                                            as='img' 
+                                            src={culinarianEditar.foto}
+                                            className='w-[30%]'
+                                        />
+                                }
                                 <Text as='div'>
                                     <Text as='p'>Alterar Foto</Text>
                                     <Input
@@ -733,11 +736,18 @@ export default function Culinarian() {
                             as='div'
                             className='flex flex-wrap gap-4 text-gray-text'
                         >
-                            <Text
-                                as='img' 
-                                src={culinarianEditar.foto}
-                                className='w-[30%]'
-                            />
+                            {culinarianEditar.foto === null 
+                                ?   <Text as='p'
+                                        className='w-[40%] h-[20%] p-8 bg-gray'
+                                    >
+                                        Nenhuma Foto Cadastrada
+                                    </Text>
+                                :   <Text
+                                        as='img' 
+                                        src={culinarianEditar.foto}
+                                        className='w-[30%]'
+                                    />
+                            }
                             <Text>Nome: {culinarianEditar.nomeCulinarista}</Text>
                             <Text>Cpf: {culinarianEditar.cpf}</Text>
                             <Text>Industria: {culinarianEditar.industria}</Text>

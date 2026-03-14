@@ -1,140 +1,30 @@
 [
   {
-    "id": "4fa2de49-f068-486c-987a-29208f486db1",
-    "nomeCurso": "Pizza BrownieA",
+    "id": "e90f83f2-1000-4937-b40b-3964797c90d7",
+    "nomeCurso": "Decorações em Ovos de Páscoa",
+    "culinarista": "Lorena Santos",
+    "categoria": "null",
+    "duracao": "-",
+    "data": "2026-03-21",
+    "hora": "10:00",
+    "loja": "Prado",
+    "valor": 4.99,
+    "fotos": [
+      "/uploads/cursos/1773414159851-decoraÃ§Ã£o em ovos de pascoa.jpeg"
+    ]
+  },
+  {
+    "id": "e774a291-4e23-4b54-a5ac-390e2b637f4f",
+    "nomeCurso": "Ovo de Colher Casca de Brownie",
     "culinarista": "Flávia Macedo",
-    "data": "2026-01-15",
-    "hora": "14:00",
-    "loja": "Prado",
-    "valor": 4,
-    "fotos": [
-      "/uploads/cursos/2081e126-2b99-4f14-8887-a6e022d4b8e7.jpeg"
-    ],
-    "categoria": "a",
-    "duracao": "1"
-  },
-  {
-    "id": "001d1b85-93e7-4097-82b6-514354e551d1",
-    "nomeCurso": "Docinhos Neon",
-    "culinarista": "Valéria Sato",
-    "data": "2026-01-07",
-    "hora": "14:00",
-    "loja": "Teresopolis",
-    "valor": 4,
-    "fotos": [
-      "/uploads/cursos/d6f150e0-df19-4d1a-b9f5-961cfe28e171.jpeg"
-    ],
     "categoria": "null",
-    "duracao": "undefined"
-  },
-  {
-    "id": "1f73519a-de92-41c5-b5f8-fe73b6d74146",
-    "nomeCurso": "Pão de Mel",
-    "culinarista": "Lorena Borges",
-    "categoria": "Teste",
-    "duracao": "2h",
-    "data": "2026-01-23",
+    "duracao": "-",
+    "data": "2026-03-14",
     "hora": "14:00",
     "loja": "Prado",
-    "valor": "4,99",
+    "valor": 30,
     "fotos": [
-      "/uploads/cursos/e87b0ae5-15d5-4b68-8b14-0086cd53fc63.jpeg"
-    ]
-  },
-  {
-    "id": "3d246548-abf8-47c5-9471-c6119b58900b",
-    "nomeCurso": "Morango do Amor",
-    "culinarista": "Thais Vargas",
-    "categoria": "Salgados",
-    "duracao": "2h",
-    "data": "2026-01-17",
-    "hora": "12:59",
-    "loja": "Prado",
-    "valor": 4,
-    "fotos": [
-      "/uploads/cursos/c17da79e-aae7-49a7-b9eb-87e8cfac2382.jpeg"
-    ]
-  },
-  {
-    "id": "918f8923-bb96-4382-8eff-816b7ff62ea3",
-    "nomeCurso": "Bolo de Pote Brilhoso",
-    "culinarista": "a",
-    "categoria": "Doces",
-    "duracao": "2h",
-    "data": "2026-01-29",
-    "hora": "09:40",
-    "loja": "Prado",
-    "valor": 4,
-    "fotos": [
-      "/uploads/cursos/2081e126-2b99-4f14-8887-a6e022d4b8e7.jpeg"
-    ]
-  },
-  {
-    "id": "837bfb6c-48d7-4387-8dee-b4d1b3d2c5bc",
-    "nomeCurso": "aaaaaaaa",
-    "culinarista": "a",
-    "categoria": "null",
-    "duracao": "a",
-    "data": "2026-01-16",
-    "hora": "20:17",
-    "loja": "Teresopolis",
-    "valor": 22,
-    "fotos": [
-      "/uploads/cursos/0cb03e63-6b5d-47bf-9add-a5f27aa97f10.png"
-    ]
-  },
-  {
-    "id": "7c860fb5-24f2-4b62-98bb-02a14dc02b9f",
-    "nomeCurso": "cbac",
-    "culinarista": "a",
-    "categoria": "c",
-    "duracao": "c",
-    "data": "2026-01-01",
-    "hora": "15:55",
-    "loja": "Prado",
-    "valor": 2,
-    "fotos": [
-      "/uploads/cursos/1769540098927-Imagem_2026-01-16_10-56-09.png"
-    ]
-  },
-  {
-    "id": "77a70fe0-c92d-4dc8-972b-20ae84c3678b",
-    "nomeCurso": "acv",
-    "culinarista": "a",
-    "categoria": "a",
-    "duracao": "a",
-    "data": "2026-01-21",
-    "hora": "14:04",
-    "loja": "Teresopolis",
-    "valor": "2",
-    "fotos": []
-  },
-  {
-    "id": "db2d51df-ab61-4aba-8eeb-dbc3425461e0",
-    "nomeCurso": "a",
-    "culinarista": "a",
-    "categoria": "a",
-    "duracao": "1",
-    "data": "2026-01-30",
-    "hora": "21:11",
-    "loja": "Prado",
-    "valor": "1",
-    "fotos": [
-      "/uploads/cursos/1769818179828-banner (2).png"
-    ]
-  },
-  {
-    "id": "9f539560-750c-4bf1-9d12-51d25c62b6d8",
-    "nomeCurso": "a",
-    "culinarista": "a",
-    "categoria": "a",
-    "duracao": "a",
-    "data": "2026-02-26",
-    "hora": "21:35",
-    "loja": "Prado",
-    "valor": "1",
-    "fotos": [
-      "/uploads/cursos/1770078744252-banner (2).png"
+      "/uploads/cursos/1773414218786-ovo de colher.jpeg"
     ]
   }
 ]

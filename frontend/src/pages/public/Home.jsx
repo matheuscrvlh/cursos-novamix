@@ -196,7 +196,7 @@ export default function Home() {
     return (
         <PublicLayout>
             <Head title='Loja Novamix | Cursos' />
-            <Text as='section' className='bg-orange-banner'>
+            <Text as='section' className='bg-gray'>
                 <Text
                     as='a'
                     href='#cursos'
@@ -249,14 +249,17 @@ export default function Home() {
                     <Text 
                         as='div'
                         className='
-                            bg-gray flex flex-col justify-center items-center gap-8 pt-10
-                            md:flex-row md:pt-0
+                            bg-gray grid grid-cols-2 place-items-center gap-2 pt-7 pb-5 w-fit mx-auto
+                            sm:grid-cols-4 
+                            md:gap-8
                     '>        
                         <Text as='div'>
                             <Text as='p'>Data Inicial</Text>
                             <Input
                                 type='date'
-                                className='bg-white cursor-pointer'
+                                className='bg-white cursor-pointer w-[40vw] 
+                                    sm:w-40
+                                '
                                 value={filters.dataInicial}
                                 onChange={e => setFilters({ ...filters, dataInicial: e.target.value })}
                             />
@@ -265,7 +268,9 @@ export default function Home() {
                             <Text as='p'>Data Final</Text>
                             <Input
                                 type='date'
-                                className='bg-white cursor-pointer'
+                                className='bg-white cursor-pointer w-[40vw]
+                                    sm:w-40
+                                '
                                 value={filters.dataFinal}
                                 onChange={e => setFilters({ ...filters, dataFinal: e.target.value })}
                             />
@@ -273,7 +278,9 @@ export default function Home() {
                         <Text as='div' className='mt-auto'>
                             <Text 
                                 as='select'
-                                className='bg-white w-39 h-10 p-2 border border-black/50 rounded-md cursor-pointer'
+                                className='bg-white w-[40vw] h-11 p-2 border border-black/50 rounded-md cursor-pointer
+                                    sm:w-40
+                                '
                                 value={filters.loja}
                                 onChange={e => setFilters({ ...filters, loja: e.target.value })}
                             >
@@ -286,7 +293,9 @@ export default function Home() {
                         <Text as='div' className='mt-auto'>
                             <Text 
                                 as='select'
-                                className='bg-white w-39 h-10 p-2 border border-black/50 rounded-md cursor-pointer'
+                                className='bg-white w-[40vw] h-11 p-2 border border-black/50 rounded-md cursor-pointer
+                                    sm:w-40
+                                '
                                 value={filters.culinarista}
                                 onChange={e => setFilters({ ...filters, culinarista: e.target.value })}
                             >
@@ -389,7 +398,7 @@ export default function Home() {
                         />
                         <Text
                             as='select'
-                            className='w-full h-[40px] border border-gray-base rounded-md'
+                            className='w-full h-[40px] p-2 border border-gray-base rounded-md'
                             value={form.formaPagamento}
                             onChange={e => setForm({ ...form, formaPagamento: e.target.value })}
                         >

@@ -1,288 +1,34 @@
 [
   {
-    "id": "aaaac1b7b71c4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "aaa",
-    "cpf": "aa",
-    "industria": "aa",
-    "telefone": "ab",
-    "instagram": "ab",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "uploads/culinaristas/1770253405045-Culinarista.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "c1baaa771c4-8df3-4750-b261-d05899ad18be",
+    "id": "93be4cb7-cb4f-463f-b1bd-45d948813182",
     "nomeCulinarista": "a",
     "cpf": "a",
     "industria": "a",
     "telefone": "a",
     "instagram": "a",
     "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "uploads/culinaristas/1770252230084-Gemini_Generated_Image_e30be3e30be3e30b.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "caa1b771c4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "uploads/culinaristas/1770252493322-Culinarista.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "c1b77aaaaa1c4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "c1b771aaac4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b",
-      "c"
-    ],
-    "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "baa-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "abb-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "ab",
-    "cpf": "av",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "c1ab771c4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "ca1b771c4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "c1ba771c4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "c1b771ac4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "c1b77a1c4-8df3-4750-b261-d05899ad18be",
-    "nomeCulinarista": "a",
-    "cpf": "a",
-    "industria": "a",
-    "telefone": "a",
-    "instagram": "a",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "a",
-      "b"
-    ],
-    "foto": "/uploads/culinaristas/4950cdcf-881a-4d9c-9819-3eaa8bf20f75.png",
-    "dataCadastro": "2026-01-24T12:35:02.232Z"
-  },
-  {
-    "id": "c2621e94-27ad-416b-b945-d6cda182aeb3",
-    "nomeCulinarista": "baaCCC",
-    "cpf": "ba",
-    "industria": "b",
-    "telefone": "b",
-    "instagram": "b",
-    "lojas": [
-      "Prado",
-      "Teresopolis"
-    ],
-    "cursos": [
-      "q",
-      "c",
-      "cccvvbb",
-      "bbb",
-      "cvb",
-      "bvc",
-      "dasdasds"
-    ],
-    "foto": "/uploads/culinaristas/1769555448183-Gemini_Generated_Image_ruyyh3ruyyh3ruyy.png",
-    "dataCadastro": "2026-01-27T23:10:48.194Z"
-  },
-  {
-    "id": "e0d504b2-b57e-4968-ae9e-d9b501670d53",
-    "nomeCulinarista": "n",
-    "cpf": "n",
-    "industria": "n",
-    "telefone": "n",
-    "instagram": "n",
-    "lojas": [
-      "Teresopolis"
+      "Prado"
     ],
     "cursos": [
       "a"
     ],
-    "foto": "/uploads/culinaristas/1770553763308-Culinarista.png",
-    "dataCadastro": "2026-02-08T12:29:23.319Z"
+    "foto": "/uploads/culinaristas/1773490436411-Gemini_Generated_Image_5cnknm5cnknm5cnk.png",
+    "dataCadastro": "2026-03-14T12:13:56.437Z"
   },
   {
-    "id": "adf98dbb-470b-45bc-bb43-a371fc2c2d26",
-    "nomeCulinarista": "CCB",
-    "cpf": "A",
-    "industria": "A",
-    "telefone": "A",
-    "instagram": "A",
+    "id": "3b63ec7d-c726-4632-90ca-d09e2d97e6d2",
+    "nomeCulinarista": "a",
+    "cpf": "a",
+    "industria": "a",
+    "telefone": "a",
+    "instagram": "a",
     "lojas": [
       "Prado"
     ],
     "cursos": [
-      "A"
+      "a"
     ],
-    "foto": "/uploads/culinaristas/1770557355442-Gemini_Generated_Image_e30be3e30be3e30b.png",
-    "dataCadastro": "2026-02-08T13:29:15.445Z"
-  },
-  {
-    "id": "ef97c96e-3531-4a1c-ac26-ac64d0e5c20a",
-    "nomeCulinarista": "dagoberto",
-    "cpf": "444444444",
-    "industria": "novamix",
-    "telefone": "2222222222",
-    "instagram": "@dagoberto",
-    "lojas": [
-      "Prado"
-    ],
-    "cursos": [],
-    "foto": "/uploads/culinaristas/1771590107974-Captura de tela 2026-02-11 151025.png",
-    "dataCadastro": "2026-02-20T12:21:47.980Z"
+    "foto": null,
+    "dataCadastro": "2026-03-14T14:44:33.781Z"
   }
 ]
