@@ -232,7 +232,7 @@ export default function Home() {
                     as="div"
                     className="
                             bg-gray w-full text-center pt-10
-                            md:pt-12 md:pb-6
+                            md:pt-12 
                         "
                     >
                     <Text
@@ -241,7 +241,6 @@ export default function Home() {
                         className="
                                 text-blue-base text-2xl font-bold tracking-wide relative inline-block
                                 md:text-3xl
-                                after:content-[''] after:block after:w-16 after:h-[3px] after:bg-orange-base after:mx-auto after:mt-3
                         ">
                         Nossos Cursos
                     </Text>

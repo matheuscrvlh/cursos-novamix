@@ -46,6 +46,21 @@ export function DadosProvider({ children }) {
         })
     }, [])
 
+    // ============  GET  ============
+    async function updateCourses() {
+        try {
+            await getCourses()
+                    .then(data => {
+                        setCursos(data)
+                    });
+
+        } catch (error) {
+            console.log('Erro ao atualizar Cursos', error);
+            alert('Erro ao atualizar Cursos', error)
+        }
+    }
+    // ============  GET  ============
+
     // ============  CULINARISTAS  ============
     async function addCulinarian(formData) {
         try {
@@ -167,24 +182,8 @@ export function DadosProvider({ children }) {
         try {
             await putCourse(formData.get('id'), formData) 
 
-            setCursos(prev => 
-                prev.map(curso => 
-                    curso.id === formData.get('id') 
-                    ?   {
-                            id: formData.get('id'),
-                            nomeCurso: formData.get('nomeCurso'),
-                            data: formData.get('data'),
-                            hora: formData.get('hora'),
-                            loja: formData.get('loja'),
-                            culinarista: formData.get('culinarista'),
-                            valor: formData.get('valor'),
-                            duracao: formData.get('duracao'),
-                            categoria: formData.get('catergoria'),
-                            ativo: formData.get('ativo')
-                        }
-                    : curso
-            )
-        );
+            await updateCourses();
+
         } catch (err) {
             console.error('Erro ao editar curso', err)
             alert('Erro ao editar curso')

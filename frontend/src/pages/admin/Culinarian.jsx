@@ -561,7 +561,7 @@ export default function Culinarian() {
                                         </Text>
                                     :   <Text
                                             as='img' 
-                                            src={culinarianEditar.foto}
+                                            src={previewImagemCulinarista ?? culinarianEditar.foto}
                                             className='w-[30%]'
                                         />
                                 }

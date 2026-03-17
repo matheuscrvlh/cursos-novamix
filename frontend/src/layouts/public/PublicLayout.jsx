@@ -49,8 +49,8 @@ export default function PublicLayout({ children }) {
               className="flex items-center gap-2 text-xs w-full
               md:text-sm md:w-auto
               ">
-              <Text as="img" src={stores} alt="Nossas Lojas" className="w-5 h-5 md:w-6 md:h-6" />
-              <Text as="span">Nossas Lojas</Text>
+              <Text as="img" src={stores} alt="Nossas Lojas" className="w-5 h-5 md:w-8 md:h-8" />
+              <Text as="span" className='text-lg'>Nossas Lojas</Text>
             </Text>
             <Text as="p" className="
               font-semibold bg-orange-light w-auto min-w-[320px] hidden text-base p-0 mt-1 text-lg
@@ -97,22 +97,20 @@ export default function PublicLayout({ children }) {
       </Text>
 
       {/* ================= FOOTER ================= */}
-      <Text as="footer" className="w-full mt-auto">
-        <Text as="div" className="h-[8px] bg-gray-dark w-full" />
-
+      <Text as="footer" className="w-full mt-auto bg-orange-base">
         <Text
           as="div"
-          className="bg-orange-base text-white px-4 py-6 text-sm md:text-base"
+          className="bg-orange-base text-white px-6 py-8 pl-20 text-sm md:text-lg"
         >
           <Text as="p">
             CNPJ: 19.303.867/0001-44 – NOVAMIX FOOD SERVICE COMÉRCIO DE ALIMENTOS LTDA
           </Text>
 
-          <Text as="p" className="mt-2">
+          <Text as="p">
             Avenida Governador Roberto Silveira, 1700 – Prado – Nova Friburgo/RJ
           </Text>
 
-          <Text as="p" className="mt-2">
+          <Text as="p" className="mt-4">
             Imagens meramente ilustrativas. Preços e disponibilidade podem variar.
           </Text>
         </Text>
@@ -123,7 +121,8 @@ export default function PublicLayout({ children }) {
             bg-orange-light
             text-white
             px-4
-            py-4
+            py-6
+            pl-20
             flex
             flex-col
             gap-3
@@ -132,7 +131,7 @@ export default function PublicLayout({ children }) {
           "
         >
           <Text as="p" className="text-center md:text-left text-sm md:text-base">
-            © 2023 Novamix Food Service Comércio de Alimentos Ltda.
+            © 2023 Novamix Food Service Comércio de Alimentos Ltda. Todos os direitos reservados.
           </Text>
 
           <Link

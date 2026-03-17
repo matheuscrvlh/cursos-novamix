@@ -20,7 +20,7 @@ import TopBar from '../../layouts/admin/TopBar'
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
-import { getAssentos, getInscricoes, putInscricoes, deleteInscricoes, getCulinaristas } from '../../api/courses.service';
+import { getAssentos, getCulinaristas } from '../../api/courses.service';
 
 export default function Courses() {
 
@@ -49,17 +49,18 @@ export default function Courses() {
         valor: '',
         duracao: '',
         categoria: '',
+        imagem: null,
         ativo: 'true'
     });
 
     // ======= STATE ASSENTOS
     const [ assentos, setAssentos ] = useState([])
 
-    // ======= STATE INSCRICOES
-    const [ inscricoes, setInscricoes ] = useState([])
-
     // ======= STATE MODAL
     const [ step, setStep ] = useState('close')
+
+    // ======= STATE PREVIEW IMAGEM
+    const [ previewImagemCurso, setPreviewImagemCurso ] = useState(null)
     // ============== STATES ==============
 
     // DADOS CONTEXT
@@ -132,8 +133,13 @@ export default function Courses() {
             valor: cursoFiltrado.valor,
             duracao: cursoFiltrado.duracao,
             categoria: cursoFiltrado.categoria,
+            fotos: cursoFiltrado.fotos[0],
             ativo: cursoFiltrado.ativo
         });
+
+        if (cursoFiltrado.fotos?.[0]) {
+            setPreviewImagemCurso(cursoFiltrado.fotos[0])
+        }
     }
 
     function editarCourse() {
@@ -150,6 +156,10 @@ export default function Courses() {
         formData.append('categoria', cursoEditar.categoria);
         formData.append('ativo', cursoEditar.ativo);
 
+        if (cursoEditar.fotos) {
+            formData.append('fotos', cursoEditar.fotos)
+        };
+
         editCourse(formData);
 
         setCursoEditar({
@@ -162,77 +172,12 @@ export default function Courses() {
             valor: '',
             duracao: '',
             categoria: '',
+            fotos: '',
             ativo: 'true',
         });
 
         setStep('close');
     }
-
-    async function handleEditInscricao(inscricaoId) {
-        try {
-            const inscricaoFiltrada = inscricoes.find(inscricao =>
-                inscricao.id === inscricaoId
-            )
-
-            const novoStatus = inscricaoFiltrada.status === 'verificar' ? 'pago' : 'verificar';
-
-            const inscricaoAlterada = {
-                id: inscricaoFiltrada.id,
-                cursoId: inscricaoFiltrada.cursoId,
-                nome: inscricaoFiltrada.nome,
-                cpf: inscricaoFiltrada.cpf,
-                celular: inscricaoFiltrada.celular,
-                formaPagamento: inscricaoFiltrada.formaPagamento,
-                assento: inscricaoFiltrada.assento,
-                dataInscricao: inscricaoFiltrada.dataInscricao,
-                status: novoStatus
-            };
-
-            setInscricoes(prev => 
-                prev.map(inscricao => 
-                    inscricao.id === inscricaoAlterada.id
-                    ? inscricaoAlterada
-                    : inscricao
-                )
-            );
-
-            putInscricoes(inscricaoAlterada.id, inscricaoAlterada);
-        } catch(err) {
-            console.log('Erro ao editar inscricao', err)
-        }
-    }
-
-    // ============== DELETE ==============
-    async function deletarInscricao(inscricaoId) {
-        try {
-            await deleteInscricoes(inscricaoId)
-            
-            setInscricoes(prev => 
-                prev.filter(inscricao => inscricao.id != inscricaoId)
-            );
-
-        } catch(err) {
-            console.log('Erro ao deletar inscrição', err)
-        }
-    }
-    // ============== DELETE ==============
-
-    // ============== HANDLES ==============
-    // ======== INSCRICOES CURSO
-    async function handleInscricoesCurso(cursoId) {
-        try{
-            setStep('inscricoes');
-
-            const assentos = await getAssentos(cursoId);
-            const inscricoes = await getInscricoes(cursoId);
-            setAssentos(assentos);
-            setInscricoes(inscricoes);
-        
-        } catch(err) {
-            console.log(err)
-        }
-    }
-    // ============== HANDLES ==============
 
     // ============== FUNCOES ==============
     // layout para datas que vieram do input
@@ -241,24 +186,8 @@ export default function Courses() {
         return `${dia}/${mes}/${ano}`;
     }
 
-    // layout para datas que vieram do sistema
-    function layoutDataSistem(data) {
-        if(data === undefined) {
-            return
-        }
-        const dataFiltrada = data.split('T')[0];
-        const [ano, mes, dia] = dataFiltrada.split('-')
-        return `${dia}/${mes}/${ano}`;
-    }
-
     function closeModal() {
-        if(step === 'inscricoes') {
-            setAssentos([]);
-            setInscricoes([]);
-            setStep('close');
-            return
-
-        } if(step === 'editCourse') {
+        if(step === 'editCourse') {
             setCursoEditar({
                 id: '',
                 nomeCurso: '',
@@ -271,6 +200,8 @@ export default function Courses() {
                 categoria: '',
                 ativo: 'true'
             });
+
+            setPreviewImagemCurso(null)
 
             setStep('close');
             return
@@ -467,12 +398,6 @@ export default function Courses() {
                                             >
                                                 <Edit />
                                             </Button>
-                                            <Button 
-                                                className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
-                                                onClick={() => handleInscricoesCurso(curso.id)}
-                                            >
-                                                <Users />
-                                            </Button>
                                         </Text>
                                     </Text>
                                     
@@ -502,12 +427,6 @@ export default function Courses() {
                                             >
                                                 <Edit />
                                             </Button>
-                                            <Button 
-                                                className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
-                                                onClick={() => handleInscricoesCurso(curso.id)}
-                                            >
-                                                <Users />
-                                            </Button>
                                         </Text>
                                     </Text>
                                     <Text as='hr' className='border-gray-base/30 w-full'/>
@@ -525,6 +444,44 @@ export default function Courses() {
                         <Text as='div' className='text-xl font-bold mb-4 text-gray-text'>
                             <Text>Editar Curso</Text>
                             <Text as='hr' className='border-gray-base/30 w-full mt-3'/>
+                        </Text>
+                        <Text as='div' className='flex gap-10'>
+                            {cursoEditar.fotos === null 
+                                ?   <Text as='p'
+                                        className='w-[40%] min-h-[50%] p-8 bg-gray'
+                                    >
+                                        Nenhuma Foto Cadastrada
+                                    </Text>
+                                :   <Text
+                                        as='img' 
+                                        src={previewImagemCurso || cursoEditar.fotos}
+                                        className='w-[30%]'
+                                    />
+                            }
+                            <Text as='div'>
+                                <Text as='p'>Alterar Foto</Text>
+                                <Input
+                                    type='file'
+                                    accept='image/png, image/jpeg'
+                                    onChange={(e) => {
+                                        const file = e.target.files[0]
+                                        if (!file) return
+
+                                        if(!file.type.startsWith('image/')) {
+                                            alert('Selecione uma imagem válida');
+                                            return
+                                        }
+
+                                        setCursoEditar((prev) => ({
+                                            ...prev,
+                                            fotos: file,
+                                        }))
+
+                                        const previewURL = URL.createObjectURL(file)
+                                        setPreviewImagemCurso(previewURL)
+                                    }}
+                                />
+                            </Text>
                         </Text>
                         <Text className='flex flex-wrap gap-3'>
                             <Text as='div'>
@@ -604,19 +561,6 @@ export default function Courses() {
                                     onChange={e => setCursoEditar({ ...cursoEditar, categoria: e.target.value })}
                                 />
                             </Text>
-                            <Text as='div'>
-                                <Text as='p'>Imagem</Text>
-                                <Input
-                                    type='file'
-                                    accept='imagem/png, image/jpeg'
-                                    className='w-full h-[40px]'
-                                    value={cursoEditar.fotos}
-                                    onChange={(e) => {
-                                            const file = e.target.files[0];
-                                            if (!file) return;
-                                        }}
-                                />
-                            </Text>
                         </Text>
                         <Button
                             className='w-full bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white mt-5'
@@ -624,147 +568,6 @@ export default function Courses() {
                         >
                             Salvar Edições
                         </Button>
-                    </Modal>
-                    <Modal
-                        width='90%'
-                        maxWidth='1200px'
-                        height='auto'
-                        isOpen={step === 'inscricoes'}
-                        onClose={() => closeModal()}
-                    >   
-                        {/* MOBILE */}
-                        <Text as='p' className='md:hidden text-xl font-bold mb-4 text-gray-text'>INSCRIÇÕES</Text>
-                        <Text as='hr' className='md:hidden border-gray-base/30 w-full mt-3'/>
-                        <Text 
-                            as='div'
-                            className='flex md:hidden flex-col gap-3 h-[90dvh] max-h-[70%] overflow-y-auto'
-                        >
-                            {inscricoes.length === 0 
-                                ? <Text 
-                                    className='mr-auto ml-auto p-10'
-                                    key={1}
-                                >
-                                    Nenhuma inscrição encontrada
-                                </Text> 
-                                : inscricoes.map(inscricao => {
-                                    return (
-                                        <Text 
-                                            as='div'
-                                            key={inscricao.id}
-                                        >
-                                            <Text
-                                                as='div'
-                                                className=' text-gray-text items-center p-3'
-                                            >
-                                                <Text as='p'>Assento: {inscricao.assento}</Text>
-                                                <Text as='p'>Nome: {inscricao.nome}</Text>
-                                                <Text as='p'>CPF: {inscricao.cpf}</Text>
-                                                <Text as='p'>Telefone: {inscricao.celular}</Text>
-                                                <Text as='p'>Pagamento: {inscricao.formaPagamento}</Text>
-                                                <Text as='p'>Data: {layoutDataSistem(inscricao.dataInscricao)}</Text>
-                                                <Text 
-                                                    as='div'
-                                                >
-                                                    <Text 
-                                                        as='p' 
-                                                        className={`p-2 w-20 mt-3 text-white font-semibold rounded-md text-center ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
-                                                    >
-                                                        {inscricao.status}
-                                                    </Text>
-                                                </Text>
-                                                <Text as='div' className='flex gap-3 mt-3'>
-                                                    <Button
-                                                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                                        onClick={() => handleEditInscricao(inscricao.id)}
-                                                    >
-                                                        <Edit />
-                                                    </Button>
-                                                    <Button
-                                                        className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
-                                                        onClick={() => deletarInscricao(inscricao.id)}
-                                                    >
-                                                        <Trash />
-                                                    </Button>
-                                                </Text>
-                                            </Text>
-                                            <Text as='hr' className='border-gray-base/30 w-full'/>
-                                        </Text>
-                                    )
-                            })}
-                        </Text>
-
-                        {/* DESKTOP */}
-                        <Text 
-                            as='div'
-                            className='hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] font-bold text-gray-text'
-                        >
-                            <Text as='p'>ASSENTO</Text>
-                            <Text as='p'>NOME</Text>
-                            <Text as='p'>CPF</Text>
-                            <Text as='p'>CELULAR</Text>
-                            <Text as='p'>PAGAMENTO</Text>
-                            <Text as='p'>STATUS</Text>
-                            <Text as='p'>INSCRICAO</Text>
-                            <Text as='p'>FUNÇÕES</Text>
-                        </Text>
-                        <Text as='hr' className='border-gray-base/30 w-full mt-3'/>
-                        <Text 
-                            as='div'
-                            className='hidden md:flex flex-col gap-3 h-[400px] max-h-[70%] overflow-y-auto'
-                        >
-                            {inscricoes.length === 0 
-                                ? <Text 
-                                    className='mr-auto ml-auto p-10'
-                                    key={1}
-                                >
-                                    Nenhuma inscrição encontrada
-                                </Text> 
-                                : inscricoes.map(inscricao => {
-                                    return (
-                                        <Text 
-                                            as='div'
-                                            key={inscricao.id}
-                                        >
-                                            <Text
-                                                as='div'
-                                                className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] text-gray-text items-center p-2'
-                                            >
-                                                <Text as='p'>{inscricao.assento}</Text>
-                                                <Text as='p'>{inscricao.nome}</Text>
-                                                <Text as='p'>{inscricao.cpf}</Text>
-                                                <Text as='p'>{inscricao.celular}</Text>
-                                                <Text as='p'>{inscricao.formaPagamento}</Text>
-                                                <Text 
-                                                    as='div'
-                                                >
-                                                    <Text 
-                                                        as='p' 
-                                                        className={`p-2 w-20 text-white font-semibold rounded-md text-center ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
-                                                    >
-                                                        {inscricao.status}
-                                                    </Text>
-                                                </Text>
-                                                <Text as='p'>{layoutDataSistem(inscricao.dataInscricao)}</Text>
-                                                <Text as='div' className='flex gap-3'>
-                                                    <Button
-                                                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                                        onClick={() => handleEditInscricao(inscricao.id)}
-                                                    >
-                                                        <Edit />
-                                                    </Button>
-                                                    <Button
-                                                        className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
-                                                        onClick={() => deletarInscricao(inscricao.id)}
-                                                    >
-                                                        <Trash />
-                                                    </Button>
-                                                </Text>
-                                            </Text>
-                                            <Text as='hr' className='border-gray-base/30 w-full'/>
-                                        </Text>
-                                    )
-                            })}
-                        </Text>
                     </Modal>
                 </Text>
             </Text>
