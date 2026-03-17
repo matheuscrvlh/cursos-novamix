@@ -636,7 +636,7 @@ export default function Culinarian() {
                                 <Text 
                                     as='select'
                                     className='w-[200px] h-[40px] border border-gray-base rounded-md'
-                                    value={''}
+                                    value={culinarianEditar.lojas?.join(',') || ''}
                                     onChange={e => setCulinarianEditar({
                                         ...culinarianEditar,
                                         lojas: e.target.value.includes(',')
