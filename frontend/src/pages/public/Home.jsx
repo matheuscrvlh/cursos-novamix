@@ -402,9 +402,7 @@ export default function Home() {
                             onChange={e => setForm({ ...form, formaPagamento: e.target.value })}
                         >
                             <Text as='option' value=''>Forma de Pagamento</Text>
-                            <Text as='option' value='dinheiro'>Dinheiro</Text>
-                            <Text as='option' value='caixa'>Caixa</Text>
-                            <Text as='option' value='link'>Link</Text>
+                            <Text as='option' value='link'>Link de Pagamento</Text>
                         </Text>
                         <Button
                             className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'

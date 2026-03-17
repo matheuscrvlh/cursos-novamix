@@ -351,7 +351,7 @@ export default function Courses() {
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>CURSOS</Text>
                         <Text as='div' className='
-                                grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] font-bold text-gray-text
+                                grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] font-bold text-gray-text
                                 hidden md:grid
                             '
                         >
@@ -405,7 +405,7 @@ export default function Courses() {
                                     <Text 
                                         as='div' 
                                         className='
-                                            grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] text-gray-text  p-2 items-center
+                                            grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] text-gray-text  p-2 items-center
                                             md:grid hidden
                                         ' 
                                     >

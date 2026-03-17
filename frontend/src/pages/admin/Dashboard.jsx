@@ -122,7 +122,7 @@ export default function Dashboard() {
             <SideBar />
            <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Dashboard'} />
-                <Text as='div' className='w-full flex flex-col font-semibold gap-3 text-center justify-center mt-50%'>
+                <Text as='div' className='w-full flex flex-col font-semibold gap-3 justify-center mt-50%'>
                     <Text as='section' className='
                         flex flex-col gap-10 mt-10 w-[92dvw]
                         md:gap-20 md:w-[78vw]
@@ -206,7 +206,7 @@ export default function Dashboard() {
                         </Text>
                         {/* ======== CURSOS ==========*/}
                         <Text as='section' className='flex flex-col gap-3'>
-                            <Text as='h2' className='font-bold text-gray-text text-2xl'>CURSOS</Text>
+                            <Text as='h2' className='font-bold text-gray-text text-center text-2xl'>CURSOS</Text>
                             <Text as='article' className='flex flex-col gap-5'>
                                 <Text as='div'>
                                     {cursos.length === 0 
@@ -218,11 +218,12 @@ export default function Dashboard() {
                                                     max-h-[600px]
                                                     h-full
                                                     flex
-                                                    gap-4
+                                                    gap-2
                                                     overflow-x-auto
                                                     overflow-y-hidden
                                                     whitespace-nowrap
                                                     md:w-[81vw]
+                                                    p-4
                                                 "
                                             >
                                                 {cursos.map(curso => {
@@ -242,7 +243,7 @@ export default function Dashboard() {
                                                             vagasLivres={vagas.livres}
                                                             vagasReservadas={vagas.reservadas}
                                                             valor={curso.valor}
-                                                            className='min-w-[300px]'
+                                                            className='min-w-[300px] scale-90'
                                                             imagem={
                                                                 curso.fotos?.length
                                                                     ? curso.fotos[0]
@@ -258,7 +259,7 @@ export default function Dashboard() {
                         </Text>
                         {/* ======== CULINARISTAS ==========*/}
                         <Text as='section' className='flex flex-col gap-3'>
-                            <Text as='h2' className='font-bold text-gray-text text-2xl'>CULINARISTAS</Text>
+                            <Text as='h2' className='font-bold text-gray-text text-2xl text-center'>CULINARISTAS</Text>
                             <Text as='article'>
                                 {culinaristas.length === 0 
                                     ? <Text as='p'>Nenhuma culinarista encontrada</Text>
@@ -269,11 +270,12 @@ export default function Dashboard() {
                                             max-h-[600px]
                                             h-full
                                             flex
-                                            gap-4
+                                            gap-2
                                             overflow-x-auto
                                             overflow-y-hidden
                                             whitespace-nowrap
                                             md:w-[81vw]
+                                            p-4
                                         "
                                     >
                                         {culinaristas.map(culinarista => {
@@ -285,7 +287,7 @@ export default function Dashboard() {
                                                     industria={culinarista.industria}
                                                     telefone={culinarista.telefone}
                                                     instagram={culinarista.instagram}
-                                                    className='min-w-[300px]'
+                                                    className='min-w-[300px] scale-90'
                                                     lojas={
                                                         culinarista.lojas.length === 0
                                                             ? 'Nenhuma'

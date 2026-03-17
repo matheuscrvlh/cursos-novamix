@@ -58,6 +58,10 @@ export default function Registrations() {
                 prev.filter(inscricao => inscricao.id != inscricaoId)
             );
 
+            setInscricoesTotais(prev => 
+                prev.filter(inscricao => inscricao.id != inscricaoId )
+            );
+
         } catch(err) {
             console.log('Erro ao deletar inscrição', err)
         }
@@ -101,6 +105,48 @@ export default function Registrations() {
             };
 
             setInscricoes(prev => 
+                prev.map(inscricao => 
+                    inscricao.id === inscricaoAlterada.id
+                    ? inscricaoAlterada
+                    : inscricao
+                )
+            );
+
+            setInscricoesTotais(prev => 
+                prev.map(inscricao => 
+                    inscricao.id === inscricaoAlterada.id
+                    ? inscricaoAlterada
+                    : inscricao
+                )
+            );
+
+            putInscricoes(inscricaoAlterada.id, inscricaoAlterada);
+        } catch(err) {
+            console.log('Erro ao editar inscricao', err)
+        }
+    }
+
+    async function handleEditInscricoesTotais(inscricaoId) {
+        try {
+            const inscricaoFiltrada = inscricoesTotais.find(inscricao =>
+                inscricao.id === inscricaoId
+            )
+
+            const novoStatus = inscricaoFiltrada.status === 'verificar' ? 'pago' : 'verificar';
+
+            const inscricaoAlterada = {
+                id: inscricaoFiltrada.id,
+                cursoId: inscricaoFiltrada.cursoId,
+                nome: inscricaoFiltrada.nome,
+                cpf: inscricaoFiltrada.cpf,
+                celular: inscricaoFiltrada.celular,
+                formaPagamento: inscricaoFiltrada.formaPagamento,
+                assento: inscricaoFiltrada.assento,
+                dataInscricao: inscricaoFiltrada.dataInscricao,
+                status: novoStatus
+            };
+
+            setInscricoesTotais(prev => 
                 prev.map(inscricao => 
                     inscricao.id === inscricaoAlterada.id
                     ? inscricaoAlterada
@@ -190,7 +236,7 @@ export default function Registrations() {
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>INSCRIÇÕES</Text>
                         <Text as='div' className='
-                                grid-cols-[0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] font-bold text-gray-text
+                                grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] font-bold text-gray-text
                                 hidden md:grid
                             '
                         >
@@ -233,7 +279,7 @@ export default function Registrations() {
                                                 </Button>
                                                 <Button 
                                                     className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-base/80 hover:shadow-md text-white'
-                                                    // onClick={() => handleInscricoesCurso(i.id)}
+                                                    onClick={() => deletarInscricao(i.id)}
                                                 >
                                                     <Trash />
                                                 </Button>
@@ -244,26 +290,36 @@ export default function Registrations() {
                                         <Text 
                                             as='div' 
                                             className='
-                                                grid-cols-[0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] text-gray-text  p-2 items-center
+                                                grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] text-gray-text  p-2 items-center
                                                 md:grid hidden
                                             ' 
                                         >
-                                            <Text as='p'>a fazer</Text>
-                                            <Text as='p'>a fazer</Text>
+                                            <Text as='p'>{cursos.find(c => c.id === i.cursoId)?.nomeCurso}</Text>
+                                            <Text as='p'>
+                                                {cursos.find(c => c.id === i.cursoId)?.data 
+                                                    ? layoutDataInput(cursos.find(c => c.id === i.cursoId).data) 
+                                                    : '-'
+                                                }
+                                            </Text>
                                             <Text as='p'>{i.nome}</Text>
                                             <Text as='p'>{i.assento}</Text>
-                                            <Text as='p'>{i.status}</Text>
+                                            <Text 
+                                                as='p' 
+                                                className={`p-2 w-20 text-white font-semibold rounded-md text-center ${i.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
+                                            >
+                                                {i.status}
+                                            </Text>
                                             <Text as='p'>{i.formaPagamento}</Text>
                                             <Text as='div' className='flex gap-3 justify-center h-full'>
                                                 <Button 
                                                     className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-base/80 hover:shadow-md text-white'
-                                                    // onClick={() => handleInscricoesCurso(i.id)}
+                                                    onClick={() => handleEditInscricoesTotais(i.id)}
                                                 >
                                                     <Edit />
                                                 </Button>
                                                 <Button 
                                                     className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-base/80 hover:shadow-md text-white'
-                                                    // onClick={() => handleInscricoesCurso(i.id)}
+                                                    onClick={() => deletarInscricao(i.id)}
                                                 >
                                                     <Trash />
                                                 </Button>
@@ -276,9 +332,9 @@ export default function Registrations() {
                         </Text>
                     </CardDash>
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                        <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>CURSOS</Text>
+                        <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>INSCRIÇÕES POR CURSOS</Text>
                         <Text as='div' className='
-                                grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] font-bold text-gray-text
+                                grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] font-bold text-gray-text
                                 hidden md:grid
                             '
                         >
@@ -329,7 +385,7 @@ export default function Registrations() {
                                     <Text 
                                         as='div' 
                                         className='
-                                            grid-cols-[0.7fr_0.5fr_0.5fr_0.5fr_0.8fr_1fr] text-gray-text  p-2 items-center
+                                            grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] text-gray-text  p-2 items-center
                                             md:grid hidden
                                         ' 
                                     >

@@ -447,7 +447,7 @@ export default function Culinarian() {
                     </CardDash>
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
                         <Text as='div' className='text-gray-text'>
-                            <Text as='p' className='font-bold'>CULINARISTAS ATIVAS</Text>
+                            <Text as='p' className='font-bold'>CULINARISTAS</Text>
                             <Text as='div' className='
                                 grid-cols-[1fr_1fr_0.8fr_0.7fr_0.8fr] text-gray-text mt-3 font-bold
                                 hidden md:grid

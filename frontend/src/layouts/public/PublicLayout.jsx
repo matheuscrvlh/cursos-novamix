@@ -49,8 +49,8 @@ export default function PublicLayout({ children }) {
               className="flex items-center gap-2 text-xs w-full
               md:text-sm md:w-auto
               ">
-              <Text as="img" src={stores} alt="Nossas Lojas" className="w-5 h-5 md:w-8 md:h-8" />
-              <Text as="span" className='text-lg'>Nossas Lojas</Text>
+              <Text as="img" src={stores} alt="Nossas Lojas" className="w-6 h-6 md:w-8 md:h-8" />
+              <Text as="span" className='text-sm md:text-lg'>Nossas Lojas</Text>
             </Text>
             <Text as="p" className="
               font-semibold bg-orange-light w-auto min-w-[320px] hidden text-base p-0 mt-1 text-lg
@@ -100,8 +100,10 @@ export default function PublicLayout({ children }) {
       <Text as="footer" className="w-full mt-auto bg-orange-base">
         <Text
           as="div"
-          className="bg-orange-base text-white px-6 py-8 pl-20 text-sm md:text-lg"
-        >
+          className="
+            bg-orange-base text-white px-6 py-8 text-sm
+            md:pl-20 md:text-lg
+          ">
           <Text as="p">
             CNPJ: 19.303.867/0001-44 – NOVAMIX FOOD SERVICE COMÉRCIO DE ALIMENTOS LTDA
           </Text>
@@ -122,12 +124,12 @@ export default function PublicLayout({ children }) {
             text-white
             px-4
             py-6
-            pl-20
             flex
             flex-col
             gap-3
             md:flex-row
             md:items-center
+            md:pl-20
           "
         >
           <Text as="p" className="text-center md:text-left text-sm md:text-base">
