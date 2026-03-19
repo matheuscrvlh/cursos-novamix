@@ -1,72 +1,160 @@
-import { request } from './http'
+const URL = '/api'
 
-// ======= ASSENTOS
-export function getAssentos(cursoId) {
-    return request(`/assentos/${cursoId}`);
+export async function postCourses(data) {
+    try {
+        const res = await fetch(`${URL}/cursos`, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+
+        return res.json()
+
+    } catch(err) {
+        console.error('Erro ao adicionar Curso:', err);
+    }
+}
+// =========== GET 
+export async function getCourses() {
+    try {
+        const res = await fetch((`${URL}/cursos`), {
+            method: 'GET'
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao buscar Cursos:', err);
+    }
 }
 
-// ======= INSCRICOES
-export function getInscricoes(cursoId) {
-    return request(`/inscricoes/curso/${cursoId}`);
+export async function getAssentos(cursoId) {
+    try {
+        const res = await fetch((`${URL}/assentos/${cursoId}`), {
+            method: 'GET'
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao buscar Assentos:', err);
+    }
 }
 
-// ======= INSCRICOES
-export function getInscricoesTotais() {
-    return request('/inscricoes');
+export async function getInscricoes(cursoId) {
+    try {
+        const res = await fetch((`${URL}/inscricoes/curso/${cursoId}`), {
+            method: 'GET'
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao buscar Inscricoes por Curso:', err);
+    }
 }
 
-export function deleteInscricoes(inscricaoId) {
-    return request(`/inscricoes/${inscricaoId}`, {
-        method: 'DELETE'
-    });
+export async function getInscricoesTotais() {
+    try {
+        const res = await fetch((`${URL}/inscricoes`), {
+            method: 'GET'
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao buscar Inscricoes Totais:', err);
+    }
 }
 
-export function putInscricoes(cursoId, body) {
-    return request(`/inscricoes/${cursoId}`, {
-        method: 'PUT',
-        body: JSON.stringify(body)
-    });
+export async function getCulinaristas() {
+    try {
+        const res = await fetch((`${URL}/culinaristas`), {
+            method: 'GET'
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao buscar Culinaristas:', err);
+    }
+}
+// =========== GET 
+
+// =========== PUT
+export async function putInscricoes(cursoId, body) {
+    try {
+        const res = await fetch((`${URL}/inscricoes/${cursoId}`), {
+            method: 'PUT',
+            body: JSON.stringify(body)
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao editar Inscricao:', err);
+    }
 }
 
-// ======= CULINARISTAS
-export function getCulinaristas() {
-    return request(`/culinaristas`)
+export async function putCulinarista(culinarianId, formData) {
+    try {
+        const res = await fetch((`${URL}/culinaristas/${culinarianId}`), {
+            method: 'PUT',
+            body: formData
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao editar Culinarista:', err);
+    }
 }
 
-export function deleteCulinarista(id) {
-    return request(`/culinaristas/${id}`, {
-        method: 'DELETE' 
-    });
+export async function putCourse(cursoId, body) {
+    try {
+        const res = await fetch((`${URL}/cursos/${cursoId}`), {
+            method: 'PUT',
+            body: body
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao editar Curso:', err);
+    }
+}
+// =========== PUT  
+
+// =========== DELETE 
+export async function deleteInscricao(inscricaoId) {
+    try {
+        await fetch((`${URL}/inscricoes/${inscricaoId}`), {
+            method: 'DELETE'
+        });
+
+    } catch (err) {
+        console.error('Erro ao deletar Inscricao:', err);
+    }
 }
 
-export function putCulinarista(id, formData) {
-    return request(`/culinaristas/${id}`, {
-        method: 'PUT',
-        body: formData
-    });
+export async function deleteCulinarista(culinarianId) {
+    try {
+        await fetch((`${URL}/culinaristas/${culinarianId}`), {
+            method: 'DELETE'
+        });
+
+    } catch (err) {
+        console.error('Erro ao deletar Culinarista:', err);
+    }
 }
 
-// ======= CURSOS
-export function getCourses() {
-    return request('/cursos');
-}
+export async function deleteCourse(cursoId) {
+    try {
+        await fetch((`${URL}/cursos/${cursoId}`), {
+            method: 'DELETE'
+        });
 
-export function postCourses(data) {
-    return request('/cursos', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    });
+    } catch (err) {
+        console.error('Erro ao deletar Culinarista:', err);
+    }
 }
-
-export function deleteCourse(id) {
-    return request(`/cursos/${id}`, {
-        method: 'DELETE'
-    })
-}
-
-export function putCourse(id, data) {
-    return request(`/cursos/${id}`, {
-        method: 'PUT',
-        body: data
-    });
-}
+// =========== DELETE

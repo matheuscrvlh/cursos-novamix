@@ -3,21 +3,30 @@ import { createContext, useEffect, useState } from 'react';
 
 // SERVICES
 import { 
-        getCourses, 
-        deleteCourse, 
-        getCulinaristas, 
-        deleteCulinarista, 
+        postCourses,
+        getCourses,
+        getAssentos,
+        getInscricoes,
+        getInscricoesTotais,
+        getCulinaristas,
         putCourse, 
         putCulinarista, 
+        putInscricoes,
+        deleteCourse, 
+        deleteCulinarista, 
+        deleteInscricao,
     } from '../api/courses.service';
 
 export const DadosContext = createContext();
 
 export function DadosProvider({ children }) {
+    // ======= STATES
     const [cursos, setCursos] = useState([]);
     const [culinaristas, setCulinaristas] = useState([]);
     const [loading, setLoading] = useState(true);
+    // ======= STATES
 
+    // ========= ONLOAD
     // CURSOS
     useEffect(() => {
         getCourses()
@@ -45,6 +54,7 @@ export function DadosProvider({ children }) {
             setLoading(false)
         })
     }, [])
+    // ========= ONLOAD
 
     // ============  GET  ============
     async function updateCourses() {
@@ -61,7 +71,49 @@ export function DadosProvider({ children }) {
     }
     // ============  GET  ============
 
-    // ============  CULINARISTAS  ============
+
+    // ============  POST  ============
+    async function addCourses(formData) {
+        try {
+            const response = await fetch(`/api/cursos`, {
+                method: 'POST',
+                body: formData, // direto no formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro ao criar curso');
+            }
+
+            const novoCurso = await response.json();
+
+            setCursos(prev => [...prev, novoCurso]);
+        } catch (error) {
+            console.error('Erro ao adicionar curso:', error);
+            alert('Erro ao adicionar curso');
+        }
+    }
+
+    async function addRegisterClient(data) {
+        try {
+            const response = await fetch(`/api/inscricoes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || 'Erro ao cadastrar na vaga')
+            }
+
+        } catch (error) {
+            console.error('Erro ao se cadastrar na vaga:', error);
+            alert('Erro ao cadastrar-se na vaga.', error)
+        }
+    }
+
     async function addCulinarian(formData) {
         try {
             const response = await fetch(`/api/culinaristas`, {
@@ -81,6 +133,20 @@ export function DadosProvider({ children }) {
             alert('Erro ao cadastrar culinarista', error)
         }
     }
+    // ============  POST  ============
+
+    // ============  DELETE  ============
+    async function removeCourse(id) {
+        try {
+            await deleteCourse(id);
+
+            // atualiza global
+            setCursos(prev => prev.filter(curso => curso.id !== id));
+        } catch (err) {
+            console.error('Erro ao remover curso', err);
+            alert('Erro ao remover curso');
+        }
+    }
 
     async function removeCulinarian(id) {
         try {
@@ -91,7 +157,9 @@ export function DadosProvider({ children }) {
             console.error('Erro ao deletar culinarista', erro)
         }
     }
+    // ============  DELETE  ============
 
+    // ============  PUT  ============
     async function editCulinarian(formData) {
         try {
             await putCulinarista(formData.get('id'), formData)
@@ -119,65 +187,6 @@ export function DadosProvider({ children }) {
         }
     }
 
-
-    // ============   SE CADASTRAR (CLIENTE)   ============ 
-    async function addRegisterClient(data) {
-        try {
-            const response = await fetch(`/api/inscricoes`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'Erro ao cadastrar na vaga')
-            }
-
-        } catch (error) {
-            console.error('Erro ao se cadastrar na vaga:', error);
-            alert('Erro ao cadastrar-se na vaga.', error)
-        }
-    }
-
-    // ============   CURSOS   ============ 
-    // add course
-    async function addCourses(formData) {
-        try {
-            const response = await fetch(`/api/cursos`, {
-                method: 'POST',
-                body: formData, // direto no formData
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao criar curso');
-            }
-
-            const novoCurso = await response.json();
-
-            setCursos(prev => [...prev, novoCurso]);
-        } catch (error) {
-            console.error('Erro ao adicionar curso:', error);
-            alert('Erro ao adicionar curso');
-        }
-    }
-
-    // remove course
-    async function removeCourse(id) {
-        try {
-            await deleteCourse(id);
-
-            // atualiza global
-            setCursos(prev => prev.filter(curso => curso.id !== id));
-        } catch (err) {
-            console.error('Erro ao remover curso', err);
-            alert('Erro ao remover curso');
-        }
-    }
-
-    // edit course
     async function editCourse(formData) {
         try {
             await putCourse(formData.get('id'), formData) 
@@ -189,6 +198,7 @@ export function DadosProvider({ children }) {
             alert('Erro ao editar curso')
         }
     }
+    // ============  PUT  ============
 
     return (
         <DadosContext.Provider

@@ -20,7 +20,6 @@ import TopBar from '../../layouts/admin/TopBar'
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
-import { getAssentos, getCulinaristas } from '../../api/courses.service';
 
 export default function Courses() {
 

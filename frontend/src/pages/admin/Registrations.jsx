@@ -23,7 +23,7 @@ import {
         getAssentos,
         getInscricoes, 
         putInscricoes, 
-        deleteInscricoes, 
+        deleteInscricao, 
         getInscricoesTotais 
     } from '../../api/courses.service';
 
@@ -52,7 +52,7 @@ export default function Registrations() {
     // ============== DELETE ==============
     async function deletarInscricao(inscricaoId) {
         try {
-            await deleteInscricoes(inscricaoId)
+            await deleteInscricao(inscricaoId)
             
             setInscricoes(prev => 
                 prev.filter(inscricao => inscricao.id != inscricaoId)
