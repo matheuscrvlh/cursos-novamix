@@ -1,8 +1,36 @@
 const URL = '/api'
 
-export async function postCourses(data) {
+export async function postCourse(formData) {
     try {
         const res = await fetch(`${URL}/cursos`, {
+            method: "POST",
+            body: formData
+        });
+
+        return res.json()
+
+    } catch(err) {
+        console.error('Erro ao adicionar Curso:', err);
+    }
+}
+
+export async function postCulinarian(formData) {
+    try {
+        const res = await fetch(`${URL}/culinaristas`, {
+            method: "POST",
+            body: formData
+        });
+
+        return res.json()
+
+    } catch(err) {
+        console.error('Erro ao adicionar Curso:', err);
+    }
+}
+
+export async function postIndustry(data) {
+    try {
+        const res = await fetch(`${URL}/industrias`, {
             method: "POST",
             body: JSON.stringify(data)
         });
@@ -10,7 +38,24 @@ export async function postCourses(data) {
         return res.json()
 
     } catch(err) {
-        console.error('Erro ao adicionar Curso:', err);
+        console.error('Erro ao adicionar Industria:', err);
+    }
+}
+
+export async function postEnrollment(data) {
+    try {
+        const res = await fetch(`${URL}/inscricoes`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+
+        return res.json()
+
+    } catch(err) {
+        console.error('Erro ao adicionar Inscricao:', err);
     }
 }
 // =========== GET 
@@ -66,7 +111,7 @@ export async function getInscricoesTotais() {
     }
 }
 
-export async function getCulinaristas() {
+export async function getCulinarians() {
     try {
         const res = await fetch((`${URL}/culinaristas`), {
             method: 'GET'
@@ -78,12 +123,25 @@ export async function getCulinaristas() {
         console.error('Erro ao buscar Culinaristas:', err);
     }
 }
+
+export async function getIndustries() {
+    try {
+        const res = await fetch((`${URL}/industrias`), {
+            method: 'GET'
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao buscar Industrias:', err);
+    }
+}
 // =========== GET 
 
 // =========== PUT
-export async function putInscricoes(cursoId, body) {
+export async function putInscricoes(inscricaoId, body) {
     try {
-        const res = await fetch((`${URL}/inscricoes/${cursoId}`), {
+        const res = await fetch((`${URL}/inscricoes/${inscricaoId}`), {
             method: 'PUT',
             body: JSON.stringify(body)
         });
@@ -95,7 +153,7 @@ export async function putInscricoes(cursoId, body) {
     }
 }
 
-export async function putCulinarista(culinarianId, formData) {
+export async function putCulinarian(culinarianId, formData) {
     try {
         const res = await fetch((`${URL}/culinaristas/${culinarianId}`), {
             method: 'PUT',
@@ -122,6 +180,20 @@ export async function putCourse(cursoId, body) {
         console.error('Erro ao editar Curso:', err);
     }
 }
+
+export async function putIndustry(industryId, body) {
+    try {
+        const res = await fetch((`${URL}/industrias/${industryId}`), {
+            method: 'PUT',
+            body: JSON.stringify(body)
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao editar Industria:', err);
+    }
+}
 // =========== PUT  
 
 // =========== DELETE 
@@ -136,7 +208,7 @@ export async function deleteInscricao(inscricaoId) {
     }
 }
 
-export async function deleteCulinarista(culinarianId) {
+export async function deleteCulinarian(culinarianId) {
     try {
         await fetch((`${URL}/culinaristas/${culinarianId}`), {
             method: 'DELETE'
@@ -155,6 +227,17 @@ export async function deleteCourse(cursoId) {
 
     } catch (err) {
         console.error('Erro ao deletar Culinarista:', err);
+    }
+}
+
+export async function deleteIndustry(industryId) {
+    try {
+        await fetch((`${URL}/industrias/${industryId}`), {
+            method: 'DELETE'
+        });
+
+    } catch (err) {
+        console.error('Erro ao deletar Industria:', err);
     }
 }
 // =========== DELETE

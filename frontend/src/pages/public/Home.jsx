@@ -5,7 +5,7 @@ import { useContext, useState, useEffect } from 'react';
 import { DadosContext } from '../../contexts/DadosContext';
 
 // SERVICES
-import { getAssentos } from '../../api/courses.service';
+import { postEnrollment, getAssentos } from '../../api/courses.service';
 
 // HOOKS
 import { useThemeColor } from '../../hooks/useThemeColor';
@@ -30,8 +30,6 @@ export default function Home() {
     const {
         cursos,
         culinaristas,
-        loading,
-        addRegisterClient
     } = useContext(DadosContext);
 
     // ========= STATE CADASTRO CLIENTE  ========= 
@@ -73,7 +71,7 @@ export default function Home() {
             return;
         }
 
-        addRegisterClient({
+        postEnrollment({
             cursoId: form.cursoId,
             nome: form.nome,
             cpf: form.cpf,

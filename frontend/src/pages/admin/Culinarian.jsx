@@ -20,14 +20,13 @@ import Modal from '../../components/public/Modal';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
-import { getCulinaristas } from '../../api/courses.service';
 
 export default function Culinarian() {
     const { 
+            culinaristas,
             addCulinarian,
             removeCulinarian,
             editCulinarian,
-            culinaristas
         } = useContext(DadosContext);
     
     // ============== STATES ==============
@@ -178,7 +177,7 @@ export default function Culinarian() {
         try {
             setStep('viewCulinarian');
 
-            const data = await getCulinaristas();
+            const data = culinaristas;
             const culinaristaFiltrada = data.find(c => c.id === culinarianId);
 
             setCulinarianEditar({

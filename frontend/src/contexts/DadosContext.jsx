@@ -3,18 +3,21 @@ import { createContext, useEffect, useState } from 'react';
 
 // SERVICES
 import { 
-        postCourses,
+        postCourse,
+        postCulinarian,
+        postIndustry,
+
         getCourses,
-        getAssentos,
-        getInscricoes,
-        getInscricoesTotais,
-        getCulinaristas,
-        putCourse, 
-        putCulinarista, 
-        putInscricoes,
+        getCulinarians,
+        getIndustries,
+
+        putCourse,
+        putCulinarian, 
+        putIndustry,
+
         deleteCourse, 
-        deleteCulinarista, 
-        deleteInscricao,
+        deleteCulinarian, 
+        deleteIndustry,
     } from '../api/courses.service';
 
 export const DadosContext = createContext();
@@ -23,7 +26,12 @@ export function DadosProvider({ children }) {
     // ======= STATES
     const [cursos, setCursos] = useState([]);
     const [culinaristas, setCulinaristas] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [industrias, setIndustrias] = useState([]);
+
+    // ======= States loading
+    const [loadingCourses, setLoadingCourses] = useState(true);
+    const [loadingCulinarian, setLoadingCulinarian] = useState(true);
+    const [loadingIndustries, setLoadingIndustries] = useState(true);
     // ======= STATES
 
     // ========= ONLOAD
@@ -37,26 +45,33 @@ export function DadosProvider({ children }) {
                 console.error('Erro ao buscar cursos', err)
             })
             .finally(() => {
-                setLoading(false)
+                setLoadingCulinarian(false)
             });
+
+        getCulinarians()
+            .then(data => {
+                setCulinaristas(data)
+            })
+            .catch(err => {
+                console.error('Erro ao buscar Culinaristas', err)
+            })
+            .finally(() => {
+                setLoadingCulinarian(false)
+            })
+
+        getIndustries()
+            .then(data => {
+                setIndustrias(data)
+            })
+            .catch(err => {
+                console.error('Erro ao buscar Industrias', err)
+            })
+            .finally(() => {
+                setLoadingIndustries(false)
+            })
     }, []);
 
-    // CULINARISTAS
-    useEffect(() => {
-        getCulinaristas()
-        .then(data => {
-            setCulinaristas(data)
-        })
-        .catch(err => {
-            console.error('Erro ao buscar culinaristas', err)
-        })
-        .finally(() => {
-            setLoading(false)
-        })
-    }, [])
-    // ========= ONLOAD
-
-    // ============  GET  ============
+    // ============  UPDATE  ============
     async function updateCourses() {
         try {
             await getCourses()
@@ -69,100 +84,66 @@ export function DadosProvider({ children }) {
             alert('Erro ao atualizar Cursos', error)
         }
     }
-    // ============  GET  ============
+    // ============  UPDATE  ============
 
 
     // ============  POST  ============
     async function addCourses(formData) {
         try {
-            const response = await fetch(`/api/cursos`, {
-                method: 'POST',
-                body: formData, // direto no formData
-            });
+            const res = await postCourse(formData)
 
-            if (!response.ok) {
-                throw new Error('Erro ao criar curso');
-            }
-
-            const novoCurso = await response.json();
-
+            const novoCurso = await res;
             setCursos(prev => [...prev, novoCurso]);
+
         } catch (error) {
             console.error('Erro ao adicionar curso:', error);
             alert('Erro ao adicionar curso');
         }
     }
 
-    async function addRegisterClient(data) {
-        try {
-            const response = await fetch(`/api/inscricoes`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'Erro ao cadastrar na vaga')
-            }
-
-        } catch (error) {
-            console.error('Erro ao se cadastrar na vaga:', error);
-            alert('Erro ao cadastrar-se na vaga.', error)
-        }
-    }
-
     async function addCulinarian(formData) {
         try {
-            const response = await fetch(`/api/culinaristas`, {
-                method: 'POST',
-                body: formData, // direto no formData
-            });
+            const res = await postCulinarian(formData)
 
-            if(!response.ok) {
-                throw new Error('Erro ao cadastrar culinarista')
-            }
-
-            const novaCulinarista = await response.json();
-
+            const novaCulinarista = await res;
             setCulinaristas(prev => [...prev, novaCulinarista])
+
         } catch (error) {
             console.log('Erro ao cadastrar culinarista', error);
             alert('Erro ao cadastrar culinarista', error)
         }
     }
+
+    async function addIndustry(formData) {
+        try {
+            const res = await postIndustry(formData)
+
+            const novaIndustria = await res;
+            setIndustrias(prev => [...prev, novaIndustria])
+
+        } catch (error) {
+            console.log('Erro ao cadastrar Industria', error);
+            alert('Erro ao cadastrar industria', error)
+        }
+    }
     // ============  POST  ============
 
-    // ============  DELETE  ============
-    async function removeCourse(id) {
-        try {
-            await deleteCourse(id);
-
-            // atualiza global
-            setCursos(prev => prev.filter(curso => curso.id !== id));
-        } catch (err) {
-            console.error('Erro ao remover curso', err);
-            alert('Erro ao remover curso');
-        }
-    }
-
-    async function removeCulinarian(id) {
-        try {
-            await deleteCulinarista(id)
-
-            setCulinaristas(prev => prev.filter(c => c.id !== id))
-        } catch(erro) {
-            console.error('Erro ao deletar culinarista', erro)
-        }
-    }
-    // ============  DELETE  ============
-
     // ============  PUT  ============
+    async function editCourse(formData) {
+        try {
+            await putCourse(formData.get('id'), formData) 
+
+            await updateCourses();
+
+        } catch (err) {
+            console.error('Erro ao editar curso', err)
+            alert('Erro ao editar curso')
+        }
+    }
+
     async function editCulinarian(formData) {
         try {
-            await putCulinarista(formData.get('id'), formData)
+            await putCulinarian(formData.get('id'), formData)
 
             setCulinaristas(prev => 
                 prev.map(culinaristas =>
@@ -187,32 +168,92 @@ export function DadosProvider({ children }) {
         }
     }
 
-    async function editCourse(formData) {
+    async function editIndustry(formData) {
         try {
-            await putCourse(formData.get('id'), formData) 
+            await putIndustry(formData.get('id'), formData)
 
-            await updateCourses();
-
-        } catch (err) {
-            console.error('Erro ao editar curso', err)
-            alert('Erro ao editar curso')
+            // editar industrias
+            setIndustrias(prev => 
+                prev.map(industrias =>
+                    industrias.id === formData.get('id')
+                    ? {
+                        id: formData.get('id'),
+                        nomeCulinarista: formData.get('nomeCulinarista'),
+                        cpf: formData.get('cpf'),
+                        instagram: formData.get('instagram'),
+                        industria: formData.get('industria'),
+                        telefone: formData.get('telefone'),
+                        cursoAtual: formData.get('cursoAtual'),
+                        lojas: JSON.parse(formData.get('lojas')),
+                        cursos: JSON.parse(formData.get('cursos')),
+                        dataCadastro: formData.get('dataCadastro'),
+                        foto: formData.get('foto'),
+                    }
+                    : industrias
+                ))
+        } catch(err) {
+            console.log('Erro ao editar Industrias', err)
         }
     }
     // ============  PUT  ============
+
+    // ============  DELETE  ============
+    async function removeCourse(cursoId) {
+        try {
+            await deleteCourse(cursoId);
+
+            setCursos(prev => prev.filter(curso => curso.id !== cursoId));
+
+        } catch (err) {
+            console.error('Erro ao remover curso', err);
+            alert('Erro ao remover curso');
+        }
+    }
+
+    async function removeCulinarian(culinarianId) {
+        try {
+            await deleteCulinarian(culinarianId)
+
+            setCulinaristas(prev => prev.filter(c => c.id !== culinarianId))
+
+        } catch(erro) {
+            console.error('Erro ao deletar culinarista', erro)
+        }
+    }
+
+    async function removeIndustry(industryId) {
+        try {
+            await deleteIndustry(industryId)
+
+            setIndustrias(prev => prev.filter(c => c.id !== industryId))
+
+        } catch(erro) {
+            console.error('Erro ao deletar Industria', erro)
+        }
+    }
+    // ============  DELETE  ============
 
     return (
         <DadosContext.Provider
             value={{
                 cursos,
-                loading,
-                addCourses,
-                removeCourse,
-                editCourse,
-                addRegisterClient,
-                addCulinarian,
-                editCulinarian,
                 culinaristas,
-                removeCulinarian
+                industrias,
+                loadingCourses,
+                loadingCulinarian,
+                loadingIndustries,
+
+                addCourses,
+                addCulinarian,
+                addIndustry,
+
+                editCourse,
+                editCulinarian,
+                editIndustry,
+
+                removeCourse,
+                removeCulinarian,
+                removeIndustry,
             }}
         >
             {children}

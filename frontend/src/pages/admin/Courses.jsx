@@ -1,11 +1,11 @@
 // react
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState } from 'react';
 
 // HEAD
 import { Head } from '../../components/Head'
 
 // LUCIDE ICONS
-import { Trash, Edit, Users, Plus, X } from 'lucide-react';
+import { Trash, Edit } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
@@ -22,6 +22,16 @@ import TopBar from '../../layouts/admin/TopBar'
 import { DadosContext } from '../../contexts/DadosContext';
 
 export default function Courses() {
+
+    // DADOS CONTEXT
+    const { 
+            cursos,
+            loading, 
+            addCourses, 
+            removeCourse,
+            editCourse,
+            culinaristas
+        } = useContext(DadosContext);
 
     // ============== STATES ==============
     // ======= STATE CURSOS
@@ -52,25 +62,12 @@ export default function Courses() {
         ativo: 'true'
     });
 
-    // ======= STATE ASSENTOS
-    const [ assentos, setAssentos ] = useState([])
-
     // ======= STATE MODAL
     const [ step, setStep ] = useState('close')
 
     // ======= STATE PREVIEW IMAGEM
     const [ previewImagemCurso, setPreviewImagemCurso ] = useState(null)
     // ============== STATES ==============
-
-    // DADOS CONTEXT
-    const { 
-            cursos,
-            loading, 
-            addCourses, 
-            removeCourse,
-            editCourse,
-            culinaristas
-        } = useContext(DadosContext);
 
 
     // ============== POST ==============
