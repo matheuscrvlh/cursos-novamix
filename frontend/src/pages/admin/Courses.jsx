@@ -33,6 +33,7 @@ export default function Courses() {
             culinaristas
         } = useContext(DadosContext);
 
+
     // ============== STATES ==============
     // ======= STATE CURSOS
     const [form, setForm] = useState({
@@ -68,7 +69,6 @@ export default function Courses() {
     // ======= STATE PREVIEW IMAGEM
     const [ previewImagemCurso, setPreviewImagemCurso ] = useState(null)
     // ============== STATES ==============
-
 
     // ============== POST ==============
     // ======= CADASTRO CURSOS

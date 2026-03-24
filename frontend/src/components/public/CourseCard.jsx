@@ -77,7 +77,7 @@ export default function CourseCard({
       {/* TÍTULO */}
       <Text
         as="h1"
-        className="text-blue-base font-bold text-lg md:text-xl p-4 line-clamp-2"
+        className="text-gray-dark font-bold text-xl md:text-2xl p-4 line-clamp-2"
       >
         {curso}
       </Text>

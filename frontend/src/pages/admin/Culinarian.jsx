@@ -6,7 +6,7 @@ import SideBar from '../../layouts/admin/SideBar'
 import TopBar from '../../layouts/admin/TopBar'
 
 // React
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState } from 'react';
 
 // LUCIDE ICONS
 import { Trash, Edit, Users, Plus, X } from 'lucide-react';
@@ -61,7 +61,6 @@ export default function Culinarian() {
 
     // ======= STATE PREVIEW
     const [ previewImagemCulinarista, setPreviewImagemCulinarista ] = useState();
-
     // ============== STATES ==============
 
     // ============== POST ==============
@@ -148,8 +147,6 @@ export default function Culinarian() {
 
             await editCulinarian(formData);
 
-            const culinaristaAtualizada = await editCulinarian(formData);
-
             setCulinarianEditar ({
                 id: '',
                 nomeCulinarista: '',
@@ -214,12 +211,6 @@ export default function Culinarian() {
     // ============== HANDLES ==============
 
     // ============== FUNCOES ==============
-    // layout para datas que vieram do input
-    function layoutDataInput(data) {
-        const [ano, mes, dia] = data.split('-');
-        return `${dia}/${mes}/${ano}`;
-    }
-
     // layout para datas que vieram do sistema
     function layoutDataSistem(data) {
         if(data === undefined) {
@@ -273,6 +264,7 @@ export default function Culinarian() {
         }
     }
     // ============== FUNCOES ==============
+
     return (
         <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <Head title='Admin | Culinaristas'/>

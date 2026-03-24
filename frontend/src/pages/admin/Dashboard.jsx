@@ -15,7 +15,7 @@ import CourseCard from '../../components/public/CourseCard'
 import CulinarianCard from '../../components/public/CulinarianCard';
 
 // SERVICES
-import { getAssentos, getCourses, getInscricoesTotais } from '../../api/courses.service';
+import { getAssentos, getCourses, getInscricoesTotais } from '../../api/services';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';

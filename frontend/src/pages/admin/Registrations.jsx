@@ -25,7 +25,7 @@ import {
         putInscricoes, 
         deleteInscricao, 
         getInscricoesTotais 
-    } from '../../api/courses.service';
+    } from '../../api/services';
 
 export default function Registrations() {
     // ============== STATES ==============

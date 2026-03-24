@@ -18,7 +18,7 @@ import {
         deleteCourse, 
         deleteCulinarian, 
         deleteIndustry,
-    } from '../api/courses.service';
+    } from '../api/services';
 
 export const DadosContext = createContext();
 

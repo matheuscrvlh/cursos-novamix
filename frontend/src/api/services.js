@@ -139,12 +139,15 @@ export async function getIndustries() {
 // =========== GET 
 
 // =========== PUT
-export async function putInscricoes(inscricaoId, body) {
+export async function putInscricoes(inscricaoId, data) {
     try {
         const res = await fetch((`${URL}/inscricoes/${inscricaoId}`), {
             method: 'PUT',
-            body: JSON.stringify(body)
-        });
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }); 
 
         return res.json()
 

@@ -1,11 +1,14 @@
 // React 
 import { useContext, useState, useEffect } from 'react';
 
+// ICONS
+import { Menu } from 'lucide-react'
+
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
 
 // SERVICES
-import { postEnrollment, getAssentos } from '../../api/courses.service';
+import { postEnrollment, getAssentos } from '../../api/services';
 
 // HOOKS
 import { useThemeColor } from '../../hooks/useThemeColor';
@@ -25,6 +28,7 @@ import PublicLayout from '../../layouts/public/PublicLayout'
 
 // Images
 import { bannerHome } from '../../assets/images/banner/'
+import ModalFilters from '../../components/public/ModalFilters';
 
 export default function Home() {
     const {
@@ -41,7 +45,7 @@ export default function Home() {
         assento: ''
     });
 
-    // ========= STATE CURSOS ========= 
+    // ========= STATE FILTERS ========= 
     const [filters, setFilters] = useState({
         dataInicial: '',
         dataFinal: '',
@@ -63,6 +67,7 @@ export default function Home() {
 
     // ========= STATE MODAL ========= 
     const [step, setStep] = useState(null)
+    const [showModalFilters, setShowModalFilters ] = useState(false)
 
     // =========  CADASTRO CLIENTE ========= 
     function handleSubmit() {
@@ -229,85 +234,121 @@ export default function Home() {
                <Text
                     as="div"
                     className="
-                            bg-gray w-full text-center pt-10
-                            md:pt-12 
-                        "
-                    >
+                        bg-gray w-full text-center pt-10
+                        md:pt-15 
+                    "
+                >
                     <Text
                         as="h1"
                         id="cursos"
                         className="
-                                text-blue-base text-2xl font-bold tracking-wide relative inline-block
+                                text-gray-dark text-2xl font-bold tracking-wide relative inline-block
                                 md:text-3xl
                         ">
                         Nossos Cursos
                     </Text>
-                    </Text>
+                </Text>
+
+                {/* FILTERS MOBILE */}
+                <Text 
+                    as='div' 
+                    className='
+                        flex justify-end w-[87vw] pt-5
+                        md:hidden
+                    '
+                >
                     <Text 
                         as='div'
+                        onClick={() => setShowModalFilters(!showModalFilters)}
                         className='
-                            bg-gray grid grid-cols-2 place-items-center gap-2 pt-7 pb-5 w-fit mx-auto
-                            sm:grid-cols-4 
-                            md:gap-8
-                    '>        
-                        <Text as='div'>
-                            <Text as='p'>Data Inicial</Text>
-                            <Input
-                                type='date'
-                                className='bg-white cursor-pointer w-[40vw] 
-                                    sm:w-40
-                                '
-                                value={filters.dataInicial}
-                                onChange={e => setFilters({ ...filters, dataInicial: e.target.value })}
-                            />
-                        </Text>
-                        <Text as='div'>
-                            <Text as='p'>Data Final</Text>
-                            <Input
-                                type='date'
-                                className='bg-white cursor-pointer w-[40vw]
-                                    sm:w-40
-                                '
-                                value={filters.dataFinal}
-                                onChange={e => setFilters({ ...filters, dataFinal: e.target.value })}
-                            />
-                        </Text>
-                        <Text as='div' className='mt-auto'>
-                            <Text 
-                                as='select'
-                                className='bg-white w-[40vw] h-11 p-2 border border-black/50 rounded-md cursor-pointer
-                                    sm:w-40
-                                '
-                                value={filters.loja}
-                                onChange={e => setFilters({ ...filters, loja: e.target.value })}
-                            >
-                                <Text as='option' value=''>Loja</Text>
-                                <Text as='option' value='Prado'>Prado</Text>
-                                <Text as='option' value='Teresopolis'>Teresópolis</Text>
-                                <Text as='option' value='Prado,Teresopolis'>Todas</Text>
-                            </Text>
-                        </Text>
-                        <Text as='div' className='mt-auto'>
-                            <Text 
-                                as='select'
-                                className='bg-white w-[40vw] h-11 p-2 border border-black/50 rounded-md cursor-pointer
-                                    sm:w-40
-                                '
-                                value={filters.culinarista}
-                                onChange={e => setFilters({ ...filters, culinarista: e.target.value })}
-                            >
-                                <Text as='option' value=''>Culinarista</Text>
-                                {culinaristas.map(c => {
-                                    return (
-                                        <Text key={c.id} as='option' value={c.nomeCulinarista}>{c.nomeCulinarista}</Text>
-                                    )
-                                })}
-                            </Text>
+                            flex gap-2 items-center text-white bg-orange-base px-5 py-2 rounded-xl cursor-pointer font-bold
+                            hover:bg-orange-light transition
+                        '
+                    >
+                        <Text as='p'>Filtros</Text>
+                        <Menu 
+                            className='
+                            w-6 h-6 
+                            '
+                        />
+                    </Text>
+                </Text>
+                {showModalFilters && 
+                    <ModalFilters
+                        isOpen={showModalFilters}
+                        nameModal={'Filtros Cursos'}
+                        onClose={() => setShowModalFilters(!showModalFilters)}
+                    >
+                            
+                    </ModalFilters>
+                }
+
+                {/* FILTERS DESKTOP */}
+                <Text 
+                    as='div'
+                    className='
+                        hidden bg-gray place-items-center gap-2 pt-7 pb-5 w-fit mx-auto
+                        sm:grid sm:grid-cols-4 
+                        md:gap-8
+                '>        
+                    <Text as='div'>
+                        <Text as='p'>Data Inicial</Text>
+                        <Input
+                            type='date'
+                            className='bg-white cursor-pointer w-[40vw] 
+                                sm:w-40
+                            '
+                            value={filters.dataInicial}
+                            onChange={e => setFilters({ ...filters, dataInicial: e.target.value })}
+                        />
+                    </Text>
+                    <Text as='div'>
+                        <Text as='p'>Data Final</Text>
+                        <Input
+                            type='date'
+                            className='bg-white cursor-pointer w-[40vw]
+                                sm:w-40
+                            '
+                            value={filters.dataFinal}
+                            onChange={e => setFilters({ ...filters, dataFinal: e.target.value })}
+                        />
+                    </Text>
+                    <Text as='div' className='mt-auto'>
+                        <Text 
+                            as='select'
+                            className='bg-white w-[40vw] h-11 p-2 border border-black/50 rounded-md cursor-pointer
+                                sm:w-40
+                            '
+                            value={filters.loja}
+                            onChange={e => setFilters({ ...filters, loja: e.target.value })}
+                        >
+                            <Text as='option' value=''>Loja</Text>
+                            <Text as='option' value='Prado'>Prado</Text>
+                            <Text as='option' value='Teresopolis'>Teresópolis</Text>
                         </Text>
                     </Text>
+                    <Text as='div' className='mt-auto'>
+                        <Text 
+                            as='select'
+                            className='bg-white w-[40vw] h-11 p-2 border border-black/50 rounded-md cursor-pointer
+                                sm:w-40
+                            '
+                            value={filters.culinarista}
+                            onChange={e => setFilters({ ...filters, culinarista: e.target.value })}
+                        >
+                            <Text as='option' value=''>Culinarista</Text>
+                            {culinaristas.map(c => {
+                                return (
+                                    <Text key={c.id} as='option' value={c.nomeCulinarista}>{c.nomeCulinarista}</Text>
+                                )
+                            })}
+                        </Text>
+                    </Text>
+                </Text>
+
                 {/* Grid de cursos responsivo */}
                 <Text as='div' className='
-                    bg-gray flex justify-center w-full pt-6 pb-20 px-4
+                    bg-gray flex justify-center w-full pt-3 pb-20 px-4
                     md:pb-30 
                 '>
                     {cursosFiltrados.length === 0
