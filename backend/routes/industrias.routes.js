@@ -35,32 +35,35 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', uploadIndustria.single('foto'), (req, res) => {
+    try {
+      const industrias = safeRead(industriasPath);
+      const { razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site } = req.body;
+      const novaIndustria = {
+        id: uuidv4(),
+        razaoSocial,
+        nome,
+        cnpj: cnpj || '',
+        telefone: telefone || '',
+        email: email || '',
+        endereco: endereco || '',
+        instagram: instagram || '',
+        site: site || '',
+        foto: req.file ? `/uploads/industrias/${req.file.filename}` : null,
+        dataCadastro: new Date().toISOString()
+      };
 
-    const industrias = safeRead(industriasPath);
-    const { razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site } = req.body;
-    const novaIndustria = {
-      id: uuidv4(),
-      razaoSocial,
-      nome,
-      cnpj: cnpj || '',
-      telefone: telefone || '',
-      email: email || '',
-      endereco: endereco || '',
-      instagram: instagram || '',
-      site: site || '',
-      foto: req.file ? `/uploads/industrias/${req.file.filename}` : null,
-      dataCadastro: new Date().toISOString()
-    };
+      industrias.push(novaIndustria);
 
-    industrias.push(novaIndustria);
+      safeWrite(industriasPath, industrias);
 
-    safeWrite(industriasPath, industrias);
+      res.status(201).json(novaIndustria);
 
-    res.status(201).json(novaIndustria);
-
+    } catch (err) {
+      console.log(err)
+    }
 });
 
-router.put('/:id', uploadIndustria.single('imagem'), (req, res) => {
+router.put('/:id', uploadIndustria.single('foto'), (req, res) => {
   try {
 
     const industrias = safeRead(industriasPath);
@@ -73,8 +76,8 @@ router.put('/:id', uploadIndustria.single('imagem'), (req, res) => {
       });
     }
 
-    if (req.file && industrias[index].imagem) {
-      const oldPath = path.join(__dirname, '..', industrias[index].imagem);
+    if (req.file && industrias[index].foto) {
+      const oldPath = path.join(__dirname, '..', industrias[index].foto);
 
       if (fs.existsSync(oldPath)) {
         fs.unlinkSync(oldPath);
@@ -91,9 +94,9 @@ router.put('/:id', uploadIndustria.single('imagem'), (req, res) => {
       endereco: req.body.endereco ?? industrias[index].endereco,
       instagram: req.body.instagram ?? industrias[index].instagram,
       site: req.body.site ?? industrias[index].site,
-      imagem: req.file
+      foto: req.file
         ? `/uploads/industrias/${req.file.filename}`
-        : industrias[index].imagem
+        : industrias[index].foto
     };
 
     safeWrite(industriasPath, industrias);
@@ -121,8 +124,8 @@ router.delete('/:id', (req, res) => {
 
     const industria = industrias[index];
 
-    if (industria.imagem) {
-      const imgPath = path.join(__dirname, '..', industria.imagem);
+    if (industria.foto) {
+      const imgPath = path.join(__dirname, '..', industria.foto);
 
       if (fs.existsSync(imgPath)) {
         fs.unlinkSync(imgPath);

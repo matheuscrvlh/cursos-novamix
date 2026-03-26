@@ -170,27 +170,13 @@ export function DadosProvider({ children }) {
 
     async function editIndustry(formData) {
         try {
-            await putIndustry(formData.get('id'), formData)
+        const updated = await putIndustry(formData.get('id'), formData);
 
-            // editar industrias
-            setIndustrias(prev => 
-                prev.map(industrias =>
-                    industrias.id === formData.get('id')
-                    ? {
-                        id: formData.get('id'),
-                        nomeCulinarista: formData.get('nomeCulinarista'),
-                        cpf: formData.get('cpf'),
-                        instagram: formData.get('instagram'),
-                        industria: formData.get('industria'),
-                        telefone: formData.get('telefone'),
-                        cursoAtual: formData.get('cursoAtual'),
-                        lojas: JSON.parse(formData.get('lojas')),
-                        cursos: JSON.parse(formData.get('cursos')),
-                        dataCadastro: formData.get('dataCadastro'),
-                        foto: formData.get('foto'),
-                    }
-                    : industrias
-                ))
+        setIndustrias(prev =>
+            prev.map(i =>
+                i.id === updated.id ? updated : i
+            )
+        );
         } catch(err) {
             console.log('Erro ao editar Industrias', err)
         }

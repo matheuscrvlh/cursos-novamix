@@ -28,11 +28,11 @@ export async function postCulinarian(formData) {
     }
 }
 
-export async function postIndustry(data) {
+export async function postIndustry(formData) {
     try {
         const res = await fetch(`${URL}/industrias`, {
             method: "POST",
-            body: JSON.stringify(data)
+            body: formData
         });
 
         return res.json()
@@ -184,11 +184,11 @@ export async function putCourse(cursoId, body) {
     }
 }
 
-export async function putIndustry(industryId, body) {
+export async function putIndustry(industryId, formData) {
     try {
         const res = await fetch((`${URL}/industrias/${industryId}`), {
             method: 'PUT',
-            body: JSON.stringify(body)
+            body: formData
         });
 
         return res.json()
