@@ -15,7 +15,8 @@ import CourseCard from '../../components/public/CourseCard'
 import CulinarianCard from '../../components/public/CulinarianCard';
 
 // SERVICES
-import { getAssentos, getCourses, getInscricoesTotais } from '../../api/services';
+import { getSeats, getTotalEnrollment } from '../../api/enrollment.services';
+import { getCourses } from '../../api/courses.services';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -53,7 +54,7 @@ export default function Dashboard() {
 
             await Promise.all(
                 cursos.map(async (curso) => {
-                    const assentos = await getAssentos(curso.id);
+                    const assentos = await getSeats(curso.id);
                     resultado[curso.id] = {
                         livres: assentos.filter(v => v.status === 'livre').length,
                         reservadas: assentos.filter(v => v.status === 'reservado').length
@@ -74,7 +75,7 @@ export default function Dashboard() {
         async function buscarDadosDashboard() {
             try {
                 // CONSULTA
-                const dataInscricoes = await getInscricoesTotais();
+                const dataInscricoes = await getTotalEnrollment();
                 const dataCursos = await getCourses();
 
                 // CURSOS

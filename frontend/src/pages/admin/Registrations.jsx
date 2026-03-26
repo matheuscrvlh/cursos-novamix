@@ -17,15 +17,11 @@ import Modal from '../../components/public/Modal';
 import SideBar from '../../layouts/admin/SideBar'
 import TopBar from '../../layouts/admin/TopBar'
 
+// SERVICES
+import { getSeats, getEnrollment, getTotalEnrollment, putEnrollment, deleteEnrollment } from '../../api/enrollment.services';
+
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
-import { 
-        getAssentos,
-        getInscricoes, 
-        putInscricoes, 
-        deleteInscricao, 
-        getInscricoesTotais 
-    } from '../../api/services';
 
 export default function Registrations() {
     // ============== STATES ==============
@@ -52,7 +48,7 @@ export default function Registrations() {
     // ============== DELETE ==============
     async function deletarInscricao(inscricaoId) {
         try {
-            await deleteInscricao(inscricaoId)
+            await deleteEnrollment(inscricaoId)
             
             setInscricoes(prev => 
                 prev.filter(inscricao => inscricao.id != inscricaoId)
@@ -74,8 +70,8 @@ export default function Registrations() {
         try{
             setStep('inscricoes');
 
-            const assentos = await getAssentos(cursoId);
-            const inscricoes = await getInscricoes(cursoId);
+            const assentos = await getSeats(cursoId);
+            const inscricoes = await getEnrollment(cursoId);
             setAssentos(assentos);
             setInscricoes(inscricoes);
         
@@ -120,7 +116,7 @@ export default function Registrations() {
                 )
             );
 
-            putInscricoes(inscricaoAlterada.id, inscricaoAlterada);
+            putEnrollment(inscricaoAlterada.id, inscricaoAlterada);
         } catch(err) {
             console.log('Erro ao editar inscricao', err)
         }
@@ -154,7 +150,7 @@ export default function Registrations() {
                 )
             );
 
-            putInscricoes(inscricaoAlterada.id, inscricaoAlterada);
+            putEnrollment(inscricaoAlterada.id, inscricaoAlterada);
         } catch(err) {
             console.log('Erro ao editar inscricao', err)
         }
@@ -163,7 +159,7 @@ export default function Registrations() {
 
     // ============== ONLOAD ==============
     useEffect(() => {
-            getInscricoesTotais()
+            getTotalEnrollment()
             .then(inscricoes => {
                 setInscricoesTotais(inscricoes)
             })

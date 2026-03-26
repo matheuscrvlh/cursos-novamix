@@ -49,7 +49,7 @@ export default function PublicLayout({ children }) {
               md:text-sm md:w-auto
               ">
               <Text as="img" src={stores} alt="Nossas Lojas" className="w-6 h-6 md:w-8 md:h-8" />
-              <Text as="span" className='text-sm md:text-lg'>Nossas Lojas</Text>
+              <Text as="span" className='text-sm md:text-base'>Nossas Lojas</Text>
             </Text>
             <Text as="p" className="
               font-semibold bg-orange-light w-auto min-w-[320px] hidden text-base p-0 mt-1 text-lg
@@ -72,7 +72,7 @@ export default function PublicLayout({ children }) {
                 py-2
                 rounded-md
                 text-xs
-                md:w-full md:max-w-[230px] md:text-sm
+                md:w-auto md:text-sm
                 whitespace-nowrap
               "
             >

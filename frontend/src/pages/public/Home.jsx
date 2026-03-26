@@ -1,4 +1,4 @@
-// React 
+// REACT 
 import { useContext, useState, useEffect } from 'react';
 
 // ICONS
@@ -8,34 +8,38 @@ import { Menu } from 'lucide-react'
 import { DadosContext } from '../../contexts/DadosContext';
 
 // SERVICES
-import { postEnrollment, getAssentos } from '../../api/services';
+import { postEnrollment, getSeats } from '../../api/enrollment.services';
 
 // HOOKS
 import { useThemeColor } from '../../hooks/useThemeColor';
 
+// COMPONENTS
+import Text from '../../components/Text'
+import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
+import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
+import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
+
+// SECTIONS
+import CoursesSections from '../../sections/home/CoursesSections';
+
+// LAYOUTS
+import PublicLayout from '../../layouts/public/PublicLayout'
+
 // HEAD 
 import { Head } from '../../components/Head'
 
-// Components
-import Text from '../../components/Text'
-import CourseCard from '../../components/public/CourseCard'
-import Modal from '../../components/public/Modal';
-import Input from '../../components/Input'
-import Button from '../../components/Button';
-
-//Layouts
-import PublicLayout from '../../layouts/public/PublicLayout'
-
-// Images
+// IMAGES
 import { bannerHome } from '../../assets/images/banner/'
 import ModalFilters from '../../components/public/ModalFilters';
 
 export default function Home() {
+
     const {
         cursos,
         culinaristas,
     } = useContext(DadosContext);
 
+    // ========= STATES  =========
     // ========= STATE CADASTRO CLIENTE  ========= 
     const [form, setForm] = useState({
         cursoId: '',
@@ -69,7 +73,8 @@ export default function Home() {
     const [step, setStep] = useState(null)
     const [showModalFilters, setShowModalFilters ] = useState(false)
 
-    // =========  CADASTRO CLIENTE ========= 
+    // ========= FUNCOES  =========
+    // =========  FUNCOES CADASTRO CLIENTE ========= 
     function handleSubmit() {
         if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
             alert('Preencha todos os campos.')
@@ -100,47 +105,12 @@ export default function Home() {
             return
         }
 
-        getAssentos(cursoSelecionado)
+        getSeats(cursoSelecionado)
             .then(setAssentos)
             .catch(console.error)
     }, [cursoSelecionado])
 
-    // =========  FUNCOES MODAL ========= 
-    const openForm = (cursoId) => {
-        setForm(prev => ({ ...prev, cursoId }))
-        setStep('form')
-        setCursoSelecionado(cursoId)
-    }
-
-    const openAssento = () => {
-        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
-            alert('Preencha todos os campos.')
-            return;
-        }
-        setStep('assento')
-    }
-
-    const openConfirmacao = () => {
-        if (!form.assento) {
-            alert('Marque algum assento.');
-            return
-        }
-        setStep('confirmacao')
-    }
-
-    const closeModal = () => {
-        setStep(null)
-        setForm({ cursoId: '', nome: '', cpf: '', telefone: '', formaPagamento: '', assento: '' })
-        setCursoSelecionado('')
-        setRefreshVagas(prev => prev + 1);
-    }
-
     // ====== FUNCOES
-    // layout data
-    function layoutData(data) {
-        const [ano, mes, dia] = data.split('-');
-        return `${dia}/${mes}/${ano}`;
-    }
 
     // buscar vagas livres e reservadas
     useEffect(() => {
@@ -151,7 +121,7 @@ export default function Home() {
 
             await Promise.all(
                 cursos.map(async (curso) => {
-                    const assentos = await getAssentos(curso.id);
+                    const assentos = await getSeats(curso.id);
                     resultado[curso.id] = {
                         livres: assentos.filter(v => v.status === 'livre').length,
                         reservadas: assentos.filter(v => v.status === 'reservado').length
@@ -191,8 +161,47 @@ export default function Home() {
                 .filter(c => !filters.culinarista || c.culinarista === filters.culinarista)
             setCursosFiltrados(filtrados)
     }, [filters, cursosAtuais])
-    
 
+    // LIMPAR FILTROS
+    function clearFilters() {
+        setFilters({
+            dataInicial: '',
+            dataFinal: '',
+            loja: '',
+            culinarista: ''
+        })
+    }
+
+    // =========  FUNCOES MODAL ========= 
+    const openForm = (cursoId) => {
+        setForm(prev => ({ ...prev, cursoId }))
+        setStep('form')
+        setCursoSelecionado(cursoId)
+    }
+
+    const openAssento = () => {
+        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
+            alert('Preencha todos os campos.')
+            return;
+        }
+        setStep('assento')
+    }
+
+    const openConfirmacao = () => {
+        if (!form.assento) {
+            alert('Marque algum assento.');
+            return
+        }
+        setStep('confirmacao')
+    }
+
+    const closeModal = () => {
+        setStep(null)
+        setForm({ cursoId: '', nome: '', cpf: '', telefone: '', formaPagamento: '', assento: '' })
+        setCursoSelecionado('')
+        setRefreshVagas(prev => prev + 1);
+    }
+    
     // FUNDO PAGINA
     useThemeColor('#FF8D0A');
 
@@ -205,7 +214,6 @@ export default function Home() {
                     href='#cursos'
                     className='block w-full'
                 >
-                    {/* Banner responsivo */}
                     <Text
                         as="section"
                         className="w-full overflow-hidden bg-orange-base"
@@ -230,310 +238,66 @@ export default function Home() {
                         />
                     </Text>
                 </Text>
-
-               <Text
-                    as="div"
-                    className="
-                        bg-gray w-full text-center pt-10
-                        md:pt-15 
-                    "
-                >
-                    <Text
-                        as="h1"
-                        id="cursos"
-                        className="
-                                text-gray-dark text-2xl font-bold tracking-wide relative inline-block
-                                md:text-3xl
-                        ">
-                        Nossos Cursos
-                    </Text>
-                </Text>
-
-                {/* FILTERS MOBILE */}
                 <Text 
-                    as='div' 
+                    as='div'
                     className='
-                        flex justify-end w-[87vw] pt-5
-                        md:hidden
+                        w-full px-[5vw]
                     '
                 >
-                    <Text 
-                        as='div'
-                        onClick={() => setShowModalFilters(!showModalFilters)}
-                        className='
-                            flex gap-2 items-center text-white bg-orange-base px-5 py-2 rounded-xl cursor-pointer font-bold
-                            hover:bg-orange-light transition
-                        '
-                    >
-                        <Text as='p'>Filtros</Text>
-                        <Menu 
-                            className='
-                            w-6 h-6 
-                            '
-                        />
-                    </Text>
+
+                    {/* ======== CURSOS ======== */}
+                    <CoursesSections
+                        cursosFiltrados={cursosFiltrados}
+                        vagasPorCurso={vagasPorCurso}
+                        openForm={openForm}
+                        showModalFilters={showModalFilters}
+                        setShowModalFilters={setShowModalFilters}
+                    />
+
                 </Text>
+
+                {/* ======== MODAL FORM ======== */}
+                <ModalEnrollmentForm
+                    isOpen={step === 'form'}
+                    onClick={() => openAssento()}
+                    onClose={() => closeModal()}
+                    form={form}
+                    setForm={setForm}
+                />
+
+                {/* ======== MODAL ASSENTOS */}
+                <ModalEnrollmentSeats
+                    isOpen={step === 'assento'}
+                    onClick={() => {
+                        handleSubmit()
+                        openConfirmacao()
+                    }}
+                    onClose={closeModal}
+                    form={form}
+                    setForm={setForm}
+                    assentos={assentos}
+                />
+
+                {/* ======== MODAL SUCESS ======== */}
+                <ModalEnrollmentSucess
+                    isOpen={step === 'confirmacao'}
+                    onClick={() => closeModal()}
+                    onClose={closeModal}
+                />
+
+                {/* ======== MODAL FILTERS ======== */}
                 {showModalFilters && 
                     <ModalFilters
                         isOpen={showModalFilters}
                         nameModal={'Filtros Cursos'}
                         onClose={() => setShowModalFilters(!showModalFilters)}
-                    >
-                            
-                    </ModalFilters>
+                        filters={filters}
+                        setFilters={setFilters}
+                        culinaristas={culinaristas}
+                        clear={() => clearFilters()}
+                    />
                 }
 
-                {/* FILTERS DESKTOP */}
-                <Text 
-                    as='div'
-                    className='
-                        hidden bg-gray place-items-center gap-2 pt-7 pb-5 w-fit mx-auto
-                        sm:grid sm:grid-cols-4 
-                        md:gap-8
-                '>        
-                    <Text as='div'>
-                        <Text as='p'>Data Inicial</Text>
-                        <Input
-                            type='date'
-                            className='bg-white cursor-pointer w-[40vw] 
-                                sm:w-40
-                            '
-                            value={filters.dataInicial}
-                            onChange={e => setFilters({ ...filters, dataInicial: e.target.value })}
-                        />
-                    </Text>
-                    <Text as='div'>
-                        <Text as='p'>Data Final</Text>
-                        <Input
-                            type='date'
-                            className='bg-white cursor-pointer w-[40vw]
-                                sm:w-40
-                            '
-                            value={filters.dataFinal}
-                            onChange={e => setFilters({ ...filters, dataFinal: e.target.value })}
-                        />
-                    </Text>
-                    <Text as='div' className='mt-auto'>
-                        <Text 
-                            as='select'
-                            className='bg-white w-[40vw] h-11 p-2 border border-black/50 rounded-md cursor-pointer
-                                sm:w-40
-                            '
-                            value={filters.loja}
-                            onChange={e => setFilters({ ...filters, loja: e.target.value })}
-                        >
-                            <Text as='option' value=''>Loja</Text>
-                            <Text as='option' value='Prado'>Prado</Text>
-                            <Text as='option' value='Teresopolis'>Teresópolis</Text>
-                        </Text>
-                    </Text>
-                    <Text as='div' className='mt-auto'>
-                        <Text 
-                            as='select'
-                            className='bg-white w-[40vw] h-11 p-2 border border-black/50 rounded-md cursor-pointer
-                                sm:w-40
-                            '
-                            value={filters.culinarista}
-                            onChange={e => setFilters({ ...filters, culinarista: e.target.value })}
-                        >
-                            <Text as='option' value=''>Culinarista</Text>
-                            {culinaristas.map(c => {
-                                return (
-                                    <Text key={c.id} as='option' value={c.nomeCulinarista}>{c.nomeCulinarista}</Text>
-                                )
-                            })}
-                        </Text>
-                    </Text>
-                </Text>
-
-                {/* Grid de cursos responsivo */}
-                <Text as='div' className='
-                    bg-gray flex justify-center w-full pt-3 pb-20 px-4
-                    md:pb-30 
-                '>
-                    {cursosFiltrados.length === 0
-                    ? ( <Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
-                            <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
-                            <Text as='p'>Favor tente com outros filtros.</Text>
-                        </Text> 
-                    ) : (
-                        <Text
-                            as='div'
-                            className='
-                                max-w-350 w-full justify-items-center bg-gray grid grid-cols-1 gap-8
-                                sm:grid-cols-2
-                                lg:grid-cols-3
-                                xl:grid-cols-4
-                                md:gap-6
-                            '
-                        >
-                            {cursosFiltrados.map(curso => {
-                                const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
-
-                                return (
-                                    <CourseCard
-                                        key={curso.id}
-                                        id={curso.id}
-                                        curso={curso.nomeCurso}
-                                        data={layoutData(curso.data)}
-                                        horario={curso.hora}
-                                        loja={curso.loja}
-                                        culinarista={curso.culinarista}
-                                        duracao={curso.duracao}
-                                        categoria={curso.categoria}
-                                        vagasLivres={vagas.livres}
-                                        vagasReservadas={vagas.reservadas}
-                                        valor={curso.valor}
-                                        onClick={() => openForm(curso.id)}
-                                        className='w-[80vw] min-w-[300px] 
-                                            sm:w-[45vw] 
-                                            lg:w-[30vw] 
-                                            xl:w-[17vw]
-                                        '
-                                        imagem={curso.fotos?.length ? curso.fotos[0] : null}
-                                    />
-                                );
-                            })}
-                        </Text>
-                    )}
-                </Text>
-
-                {/* Modal de formulário - responsivo */}
-                <Modal
-                    width='90%'
-                    maxWidth='500px'
-                    height='auto'
-                    isOpen={step === 'form'}
-                    onClose={closeModal}
-                >
-                    <Text as='div' className='flex flex-col gap-3 h-full'>
-                        <Text as='p' className='font-semibold mb-3 text-center text-lg md:text-xl mt-auto'>
-                            Digite suas informações para cadastramos você!
-                        </Text>
-                        <Input
-                            type='text'
-                            width='100%'
-                            height='40px'
-                            placeholder='Nome completo'
-                            value={form.nome}
-                            onChange={e => setForm({ ...form, nome: e.target.value })}
-                        />
-                        <Input
-                            type='text'
-                            width='100%'
-                            height='40px'
-                            placeholder='CPF'
-                            value={form.cpf}
-                            onChange={e => setForm({ ...form, cpf: e.target.value })}
-                        />
-                        <Input
-                            type='text'
-                            width='100%'
-                            height='40px'
-                            placeholder='Telefone'
-                            value={form.celular}
-                            onChange={e => setForm({ ...form, celular: e.target.value })}
-                        />
-                        <Text
-                            as='select'
-                            className='w-full h-[40px] p-2 border border-gray-base rounded-md'
-                            value={form.formaPagamento}
-                            onChange={e => setForm({ ...form, formaPagamento: e.target.value })}
-                        >
-                            <Text as='option' value=''>Forma de Pagamento</Text>
-                            <Text as='option' value='link'>Link de Pagamento</Text>
-                        </Text>
-                        <Button
-                            className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
-                            onClick={openAssento}
-                        >
-                            Enviar
-                        </Button>
-                    </Text>
-                </Modal>
-
-                {/* Modal de assentos - responsivo */}
-                <Modal
-                    width='90%'
-                    maxWidth='600px'
-                    height='auto'
-                    isOpen={step === 'assento'}
-                    onClose={closeModal}
-                >
-                    <Text as='div' className='flex flex-col gap-3 h-full'>
-                        <Text as='p' className='font-semibold text-center text-lg md:text-xl mt-auto'>
-                            Escolha seu assento para assistir ao curso
-                        </Text>
-                        <Text
-                            as='div'
-                            className='bg-gray-base rounded-sm p-4 md:p-6 text-center text-white font-semibold mb-6 md:mb-10'
-                        >
-                            Balcão
-                        </Text>
-                        {/* Grid de assentos responsivo */}
-                        <Text as='div' className='grid grid-cols-6 gap-2'>
-                            {assentos.map(assento => {
-                                const isReservado = assento.status === 'reservado';
-                                const isSelecionado = form.assento === assento.id;
-
-                                return (
-                                    <Text
-                                        as='p'
-                                        key={assento.id}
-                                        className={`p-2 rounded-full text-center font-semibold text-white text-sm ${isReservado
-                                            ? 'bg-gray-base cursor-not-allowed'
-                                            : isSelecionado
-                                                ? 'bg-gray-dark cursor-pointer'
-                                                : 'bg-orange-base cursor-pointer'
-                                            }`}
-                                        onClick={() => {
-                                            if (isReservado) return;
-
-                                            setForm(prev => ({
-                                                ...prev,
-                                                assento: assento.id
-                                            }));
-                                        }}
-                                    >
-                                        {assento.id}
-                                    </Text>
-                                )
-                            })}
-                        </Text>
-                        <Button
-                            className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
-                            onClick={() => {
-                                handleSubmit()
-                                openConfirmacao()
-                            }}
-                        >
-                            Enviar
-                        </Button>
-                    </Text>
-                </Modal>
-
-                {/* Modal de confirmação - responsivo */}
-                <Modal
-                    width='90%'
-                    maxWidth='400px'
-                    height='auto'
-                    isOpen={step === 'confirmacao'}
-                    onClose={closeModal}
-                >
-                    <Text
-                        as='div'
-                        className='flex flex-col w-full h-full font-semibold p-2 gap-3 text-center'
-                    >
-                        <Text as='p' className='text-lg md:text-xl'>Você foi cadastrado(a)!</Text>
-                        <Text as='p' className='text-lg md:text-xl'>Entraremos em contato para finalizar seu pagamento.</Text>
-                        <Button
-                            className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
-                            onClick={() => closeModal()}
-                        >
-                            Sair
-                        </Button>
-                    </Text>
-                </Modal>
             </Text>
         </PublicLayout>
     )

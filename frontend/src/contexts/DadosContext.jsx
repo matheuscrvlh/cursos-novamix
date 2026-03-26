@@ -1,24 +1,30 @@
 // REACT
 import { createContext, useEffect, useState } from 'react';
 
-// SERVICES
-import { 
-        postCourse,
-        postCulinarian,
-        postIndustry,
+// ======== SERVICES
+// COURSES SERVICES
+import {
+    postCourse,
+    getCourses,
+    putCourse,
+    deleteCourse,
+} from '../api/courses.services';
 
-        getCourses,
-        getCulinarians,
-        getIndustries,
+// CULINARIANS SERVICES
+import {
+    postCulinarian,
+    getCulinarians,
+    putCulinarian,
+    deleteCulinarian,
+} from '../api/culinarians.services';
 
-        putCourse,
-        putCulinarian, 
-        putIndustry,
-
-        deleteCourse, 
-        deleteCulinarian, 
-        deleteIndustry,
-    } from '../api/services';
+// INDUSTRIES SERVICES
+import {
+    postIndustry,
+    getIndustries,
+    putIndustry,
+    deleteIndustry,
+} from '../api/industries.services';
 
 export const DadosContext = createContext();
 

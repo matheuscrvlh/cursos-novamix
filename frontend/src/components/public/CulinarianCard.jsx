@@ -20,7 +20,7 @@ export default function CulinarianCard({
              ${className || ''}`}
         >
             <Text as='div' className='relative rounded-md h-[200px] overflow-hidden'>
-                <Text 
+                <Text
                     as='p'
                     className='absolute top-2 text-white right-2 bg-orange-base rounded-md p-2 text-sm md:text-base font-semibold z-10'
                 >
