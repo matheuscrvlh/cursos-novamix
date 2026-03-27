@@ -21,7 +21,7 @@ import { getCourses } from '../../api/courses.services';
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
 
-export default function Dashboard() {
+export default function DashboardAdmin() {
     // ========= STATE VAGAS ========= 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);

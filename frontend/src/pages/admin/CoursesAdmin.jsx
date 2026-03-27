@@ -21,7 +21,7 @@ import TopBar from '../../layouts/admin/TopBar'
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
 
-export default function Courses() {
+export default function CoursesAdmin() {
 
     // DADOS CONTEXT
     const { 

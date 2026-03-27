@@ -3,23 +3,25 @@ import { Routes, Route } from 'react-router-dom'
 
 // ======== PAGES
 import Home from './pages/public/Home'
+import Courses from './pages/public/Courses'
 import Login from './pages/admin/Login'
-import Dashboard from './pages/admin/Dashboard'
-import Courses from './pages/admin/Courses'
-import Registrations from './pages/admin/Registrations'
-import Culinarian from './pages/admin/Culinarian'
-import Industries from './pages/admin/Industries'
+import DashboardAdmin from './pages/admin/DashboardAdmin'
+import CoursesAdmin from './pages/admin/CoursesAdmin'
+import RegistrationsAdmin from './pages/admin/RegistrationsAdmin'
+import CulinarianAdmin from './pages/admin/CulinarianAdmin'
+import IndustriesAdmin from './pages/admin/IndustriesAdmin'
 
 export default function App() {
   return (
     <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/cursos' element={<Courses />} />
-        <Route path='/inscricoes' element={<Registrations />} />
-        <Route path='/culinaristas' element={<Culinarian />} />
-        <Route path='/industrias' element={<Industries />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/dashboardAdmin' element={<DashboardAdmin />} />
+        <Route path='/cursosAdmin' element={<CoursesAdmin />} />
+        <Route path='/inscricoesAdmin' element={<RegistrationsAdmin />} />
+        <Route path='/culinaristasAdmin' element={<CulinarianAdmin />} />
+        <Route path='/industriasAdmin' element={<IndustriesAdmin />} />
     </Routes>
   )
 }

@@ -27,7 +27,7 @@ export default function Login() {
 
     function Login() {
         if(form.user === 'admin' & form.password === 'admin') {
-            navigate('/dashboard');
+            navigate('/dashboardAdmin');
             setForm({
                 user: '',
                 password: ''

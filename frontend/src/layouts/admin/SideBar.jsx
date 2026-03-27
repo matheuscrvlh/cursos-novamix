@@ -73,19 +73,19 @@ export default function SideBar() {
                 />
                 
                 <Text as='nav' className='flex flex-col w-[80%] ml-auto mr-auto gap-3 mt-8'>
-                    <LinkSideBar to='/dashboard' onClick={closeMenu}>
+                    <LinkSideBar to='/dashboardAdmin' onClick={closeMenu}>
                         Dashboard
                     </LinkSideBar>
-                    <LinkSideBar to='/cursos' onClick={closeMenu}>
+                    <LinkSideBar to='/cursosAdmin' onClick={closeMenu}>
                         Cursos
                     </LinkSideBar>
-                    <LinkSideBar to='/inscricoes' onClick={closeMenu}>
+                    <LinkSideBar to='/inscricoesAdmin' onClick={closeMenu}>
                         Inscrições
                     </LinkSideBar>
-                    <LinkSideBar to='/culinaristas' onClick={closeMenu}>
+                    <LinkSideBar to='/culinaristasAdmin' onClick={closeMenu}>
                         Culinaristas
                     </LinkSideBar>
-                    <LinkSideBar to='/industrias' onClick={closeMenu}>
+                    <LinkSideBar to='/industriasAdmin' onClick={closeMenu}>
                         Industrias
                     </LinkSideBar>
                 </Text>

@@ -21,7 +21,7 @@ import Modal from '../../components/public/Modal';
 // Context
 import { DadosContext } from '../../contexts/DadosContext';
 
-export default function Industries() {
+export default function IndustriesAdmin() {
     const { 
         industrias,
         addIndustry,

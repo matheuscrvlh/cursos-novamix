@@ -9,7 +9,7 @@ import CourseCard from "../../components/public/CourseCard";
 // ICONS
 import { Menu } from "lucide-react";
 
-export default function CoursesSections({
+export default function AllCoursesSections({
     cursosFiltrados,
     vagasPorCurso,
     openForm,
@@ -62,7 +62,7 @@ export default function CoursesSections({
 
             {/* ======== CURSOS ======== */}
             <Text as='div' className='
-                bg-gray flex justify-center w-full pb-10
+                bg-gray flex justify-center w-full pb-20
             '>
                 {cursosFiltrados.length === 0
                     ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
@@ -80,7 +80,7 @@ export default function CoursesSections({
                             md:gap-6
                         '
                         >
-                            {cursosFiltrados.slice(0, 4).map(curso => {
+                            {cursosFiltrados.map(curso => {
                                 const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
                                 return (
@@ -109,21 +109,7 @@ export default function CoursesSections({
                             })}
                         </Text>
                     )}
-            </Text>
-            <Text as='div' className='
-                flex w-full justify-center pb-20
-                md:pb-30
-            '>  
-                <Link to={'/cursos'}>
-                    <Button className='
-                        bg-orange-base text-white hover:bg-orange-light px-6 py-2 
-                        cursor-pointer transition
-                    '>
-                        Ver todos
-                    </Button>
-                </Link>
-            </Text>
-            
+            </Text> 
         </Text>
     )
 }

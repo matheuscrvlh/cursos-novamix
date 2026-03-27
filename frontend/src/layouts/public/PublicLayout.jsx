@@ -42,15 +42,14 @@ export default function PublicLayout({ children }) {
             flex gap-3 justify-between px-7 py-4
             md:justify-between md:px-5 md:py-0 md:w-full 
           ">
-            <Text
-              as="a"
-              href="https://lojanovamix.com.br"
+            <Link
+              to={'/'}
               className="flex items-center gap-2 text-xs w-full
               md:text-sm md:w-auto
               ">
               <Text as="img" src={stores} alt="Nossas Lojas" className="w-6 h-6 md:w-8 md:h-8" />
-              <Text as="span" className='text-sm md:text-base'>Nossas Lojas</Text>
-            </Text>
+              <Text as="span" className='text-sm md:text-base'>Home</Text>
+            </Link>
             <Text as="p" className="
               font-semibold bg-orange-light w-auto min-w-[320px] hidden text-base p-0 mt-1 text-lg
               hidden md:inline

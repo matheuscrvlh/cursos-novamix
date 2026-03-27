@@ -21,7 +21,7 @@ import Modal from '../../components/public/Modal';
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
 
-export default function Culinarian() {
+export default function CulinarianAdmin() {
     const { 
             culinaristas,
             addCulinarian,

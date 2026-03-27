@@ -23,7 +23,7 @@ import { getSeats, getEnrollment, getTotalEnrollment, putEnrollment, deleteEnrol
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
 
-export default function Registrations() {
+export default function RegistrationsAdmin() {
     // ============== STATES ==============
     // ======= STATE ASSENTOS
     const [ assentos, setAssentos ] = useState([])
