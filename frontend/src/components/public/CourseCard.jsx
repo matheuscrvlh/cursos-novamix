@@ -20,6 +20,8 @@ export default function CourseCard({
       as="div"
       className={`
         bg-white
+        w-75
+        max-w-150
         rounded-xl
         min-h-[380px]
         max-h-[550px]

@@ -4,6 +4,8 @@ import { Routes, Route } from 'react-router-dom'
 // ======== PAGES
 import Home from './pages/public/Home'
 import Courses from './pages/public/Courses'
+import Culinarians from './pages/public/Culinarians'
+
 import Login from './pages/admin/Login'
 import DashboardAdmin from './pages/admin/DashboardAdmin'
 import CoursesAdmin from './pages/admin/CoursesAdmin'
@@ -16,6 +18,8 @@ export default function App() {
     <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/cursos' element={<Courses />} />
+        <Route path='/culinaristas' element={<Culinarians />} />
+
         <Route path='/login' element={<Login />} />
         <Route path='/dashboardAdmin' element={<DashboardAdmin />} />
         <Route path='/cursosAdmin' element={<CoursesAdmin />} />

@@ -9,7 +9,7 @@ import CourseCard from "../../components/public/CourseCard";
 // ICONS
 import { Menu } from "lucide-react";
 
-export default function CoursesSections({
+export default function ChildrensCoursesSections({
     cursosFiltrados,
     vagasPorCurso,
     openForm,
@@ -24,8 +24,8 @@ export default function CoursesSections({
     }
 
     return (
-        <Text as='section' className='w-full pt-15'>
-
+        <Text as='section' className='w-full'>
+        
             {/* ======== FILTERS ======== */}
             <Text
                 as='div'
@@ -39,7 +39,7 @@ export default function CoursesSections({
                                 text-lg font-bold text-gray-dark
                                 md:text-3xl
                             '>
-                        NOSSOS CURSOS
+                        CURSOS INFANTIS
                     </Text>
                 </Text>
                 <Text
@@ -54,27 +54,21 @@ export default function CoursesSections({
                     <Text as='p'>Filtros</Text>
                     <Menu
                         className='
-                             w-6 h-6 
+                                w-6 h-6 
                         '
                     />
                 </Text>
             </Text>
 
             {/* ======== CURSOS ======== */}
-            <Text 
-                as='div' 
-                className='
-                    bg-gray flex justify-center w-full pb-10
+            <Text as='div' className='
+                bg-gray flex justify-center w-full pb-10
             '>
                 {cursosFiltrados.length === 0
-                    ?  (<Text 
-                            as='div' 
-                            className='
-                                flex flex-col items-center justify-center w-full text-center mt-25 mb-25
-                        '>
-                            <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
-                            <Text as='p'>Favor tente com outros filtros.</Text>
-                        </Text>
+                    ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
+                        <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
+                        <Text as='p'>Favor tente com outros filtros.</Text>
+                    </Text>
                     ) : (
                         <Text
                             as='div'
@@ -110,8 +104,8 @@ export default function CoursesSections({
                                     />
                                 );
                             })}
-                    </Text>
-                )}
+                        </Text>
+                    )}
             </Text>
 
             {/* ======== BUTTON ======== */}

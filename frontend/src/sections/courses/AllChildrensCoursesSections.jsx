@@ -9,7 +9,7 @@ import CourseCard from "../../components/public/CourseCard";
 // ICONS
 import { Menu } from "lucide-react";
 
-export default function CoursesSections({
+export default function AllChildrensCoursesSections({
     cursosFiltrados,
     vagasPorCurso,
     openForm,
@@ -24,14 +24,14 @@ export default function CoursesSections({
     }
 
     return (
-        <Text as='section' className='w-full pt-15'>
+        <Text as='section' className='w-full'>
 
             {/* ======== FILTERS ======== */}
             <Text
                 as='div'
                 className='
-                            flex justify-between items-baseline-last pb-5 w-[80%] mx-auto
-                            md:w-[80vw]
+                            flex justify-between items-baseline-last pt-15 pb-5 w-[87%] mx-auto
+                            md:w-[98%]
                         '
             >
                 <Text as='div'>
@@ -61,31 +61,26 @@ export default function CoursesSections({
             </Text>
 
             {/* ======== CURSOS ======== */}
-            <Text 
-                as='div' 
-                className='
-                    bg-gray flex justify-center w-full pb-10
+            <Text as='div' className='
+                bg-gray flex justify-center w-full pb-20
             '>
                 {cursosFiltrados.length === 0
-                    ?  (<Text 
-                            as='div' 
-                            className='
-                                flex flex-col items-center justify-center w-full text-center mt-25 mb-25
-                        '>
-                            <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
-                            <Text as='p'>Favor tente com outros filtros.</Text>
-                        </Text>
+                    ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
+                        <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
+                        <Text as='p'>Favor tente com outros filtros.</Text>
+                    </Text>
                     ) : (
                         <Text
                             as='div'
                             className='
-                                bg-gray grid grid-cols-1 gap-10 justify-items-center
-                                sm:grid-cols-2
-                                lg:grid-cols-3
-                                xl:grid-cols-4
+                            max-w-350 w-full justify-items-center bg-gray grid grid-cols-1 gap-8
+                            sm:grid-cols-2
+                            lg:grid-cols-3
+                            xl:grid-cols-4
+                            md:gap-6
                         '
                         >
-                            {cursosFiltrados.slice(0, 4).map(curso => {
+                            {cursosFiltrados.map(curso => {
                                 const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
                                 return (
@@ -103,31 +98,18 @@ export default function CoursesSections({
                                         vagasReservadas={vagas.reservadas}
                                         valor={curso.valor}
                                         onClick={() => openForm(curso.id)}
-                                        className='
-                                                w-full max-w-[380px]
-                                        '
+                                        className='w-[80vw] min-w-[300px] 
+                                        sm:w-[45vw] 
+                                        lg:w-[30vw] 
+                                        xl:w-[17vw]
+                                    '
                                         imagem={curso.fotos?.length ? curso.fotos[0] : null}
                                     />
                                 );
                             })}
-                    </Text>
-                )}
-            </Text>
-
-            {/* ======== BUTTON ======== */}
-            <Text as='div' className='
-                flex w-full justify-center
-            '>  
-                <Link to={'/cursos'}>
-                    <Button className='
-                        bg-orange-base text-white hover:bg-orange-light px-6 py-2 
-                        cursor-pointer transition
-                    '>
-                        Ver todos
-                    </Button>
-                </Link>
-            </Text>
-            
+                        </Text>
+                    )}
+            </Text> 
         </Text>
     )
 }

@@ -24,14 +24,14 @@ export default function AllCoursesSections({
     }
 
     return (
-        <Text as='section'>
-
+        <Text as='section' className='w-full pt-15'>
+        
             {/* ======== FILTERS ======== */}
             <Text
                 as='div'
                 className='
-                            flex justify-between items-baseline-last pt-15 pb-5 w-[87%] mx-auto
-                            md:w-[98%]
+                            flex justify-between items-baseline-last pb-5 w-[80%] mx-auto
+                            md:w-[80vw]
                         '
             >
                 <Text as='div'>
@@ -54,62 +54,59 @@ export default function AllCoursesSections({
                     <Text as='p'>Filtros</Text>
                     <Menu
                         className='
-                             w-6 h-6 
+                                w-6 h-6 
                         '
                     />
                 </Text>
             </Text>
 
             {/* ======== CURSOS ======== */}
-            <Text as='div' className='
-                bg-gray flex justify-center w-full pb-20
-            '>
-                {cursosFiltrados.length === 0
-                    ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
+            {cursosFiltrados.length === 0
+                ?  (<Text 
+                        as='div' 
+                        className='
+                            flex flex-col items-center justify-center w-full text-center mt-25
+                    '>
                         <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
                         <Text as='p'>Favor tente com outros filtros.</Text>
                     </Text>
-                    ) : (
-                        <Text
-                            as='div'
-                            className='
-                            max-w-350 w-full justify-items-center bg-gray grid grid-cols-1 gap-8
-                            sm:grid-cols-2
-                            lg:grid-cols-3
-                            xl:grid-cols-4
-                            md:gap-6
+                ) : (
+                    <Text
+                        as='div'
+                        className='
+                                bg-gray grid grid-cols-1 gap-10 justify-items-center
+                                sm:grid-cols-2
+                                lg:grid-cols-3
+                                xl:grid-cols-4
                         '
-                        >
-                            {cursosFiltrados.map(curso => {
-                                const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
+                    >
+                        {cursosFiltrados.map(curso => {
+                            const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
-                                return (
-                                    <CourseCard
-                                        key={curso.id}
-                                        id={curso.id}
-                                        curso={curso.nomeCurso}
-                                        data={layoutData(curso.data)}
-                                        horario={curso.hora}
-                                        loja={curso.loja}
-                                        culinarista={curso.culinarista}
-                                        duracao={curso.duracao}
-                                        categoria={curso.categoria}
-                                        vagasLivres={vagas.livres}
-                                        vagasReservadas={vagas.reservadas}
-                                        valor={curso.valor}
-                                        onClick={() => openForm(curso.id)}
-                                        className='w-[80vw] min-w-[300px] 
-                                        sm:w-[45vw] 
-                                        lg:w-[30vw] 
-                                        xl:w-[17vw]
+                            return (
+                                <CourseCard
+                                    key={curso.id}
+                                    id={curso.id}
+                                    curso={curso.nomeCurso}
+                                    data={layoutData(curso.data)}
+                                    horario={curso.hora}
+                                    loja={curso.loja}
+                                    culinarista={curso.culinarista}
+                                    duracao={curso.duracao}
+                                    categoria={curso.categoria}
+                                    vagasLivres={vagas.livres}
+                                    vagasReservadas={vagas.reservadas}
+                                    valor={curso.valor}
+                                    onClick={() => openForm(curso.id)}
+                                    className='
+                                            w-full max-w-[380px]
                                     '
-                                        imagem={curso.fotos?.length ? curso.fotos[0] : null}
-                                    />
-                                );
-                            })}
-                        </Text>
-                    )}
-            </Text> 
+                                    imagem={curso.fotos?.length ? curso.fotos[0] : null}
+                                />
+                            );
+                        })}
+                    </Text>
+                )}
         </Text>
     )
 }

@@ -205,57 +205,27 @@ export default function Courses() {
     // FUNDO PAGINA
     useThemeColor('#FF8D0A');
 
+    // ROLAR TELA AO TOPO
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth'})
+    }, [])
+
     return (
-        <PublicLayout>
+        <PublicLayout bannerHome={bannerHome}>
             <Head title='Loja Novamix | Cursos' />
-            <Text as='section' className='bg-gray'>
-                <Text
-                    as='a'
-                    href='#cursos'
-                    className='block w-full'
-                >
-                    <Text
-                        as="section"
-                        className="w-full overflow-hidden bg-orange-base"
-                    >
-                        <Text
-                            as="div"
-                            className="
-                                    w-full
-                                    min-h-[160px]
-                                    bg-no-repeat
-                                    bg-cover
-                                    bg-right
-                                    sm:min-h-[180px]
-                                    md:min-h-[300px] md:bg-center
-                                    lg:min-h-[360px]
-                                    xl:min-h-[400px]
-                                    "
-                            style={{
-                                backgroundImage: `url(${bannerHome})`,
-                                backgroundPosition: '43% center'
-                            }}
-                        />
-                    </Text>
-                </Text>
-                <Text 
-                    as='div'
-                    className='
-                        w-full px-[5vw]
-                    '
-                >
+            <Text as='section' className='bg-gray w-[80vw] mx-auto mb-15'>
 
-                    {/* ======== CURSOS ======== */}
-                    <AllCoursesSections
-                        cursosFiltrados={cursosFiltrados}
-                        vagasPorCurso={vagasPorCurso}
-                        openForm={openForm}
-                        showModalFilters={showModalFilters}
-                        setShowModalFilters={setShowModalFilters}
-                    />
+                {/* ================= CONTEUDO ================= */}
+                {/* ======== CURSOS ======== */}
+                <AllCoursesSections
+                    cursosFiltrados={cursosFiltrados}
+                    vagasPorCurso={vagasPorCurso}
+                    openForm={openForm}
+                    showModalFilters={showModalFilters}
+                    setShowModalFilters={setShowModalFilters}
+                />
 
-                </Text>
-
+                {/* ================= MODAIS ================= */}
                 {/* ======== MODAL FORM ======== */}
                 <ModalEnrollmentForm
                     isOpen={step === 'form'}

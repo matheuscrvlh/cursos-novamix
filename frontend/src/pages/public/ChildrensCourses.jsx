@@ -20,10 +20,7 @@ import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnroll
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
 
 // SECTIONS
-import CoursesSections from '../../sections/home/CoursesSections';
-import CategoriesSections from '../../sections/home/CategoriesSections';
-import ChildrensCoursesSections from '../../sections/home/ChildrensCoursesSections';
-import CulinariansSections from '../../sections/home/CulinariansSections';
+import AllCoursesSections from '../../sections/courses/AllCoursesSections';
 
 // LAYOUTS
 import PublicLayout from '../../layouts/public/PublicLayout'
@@ -35,7 +32,7 @@ import { Head } from '../../components/Head'
 import { bannerHome } from '../../assets/images/banner/'
 import ModalFilters from '../../components/public/ModalFilters';
 
-export default function Home() {
+export default function ChildrensCourses() {
 
     const {
         cursos,
@@ -208,36 +205,24 @@ export default function Home() {
     // FUNDO PAGINA
     useThemeColor('#FF8D0A');
 
+    // ROLAR TELA AO TOPO
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth'})
+    }, [])
+
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Loja Novamix | Cursos' />
-            <Text as='section' className='bg-gray w-[80vw] mx-auto mb-15'>
-                
+            <Text as='section' className='bg-gray'>
+
                 {/* ================= CONTEUDO ================= */}
                 {/* ======== CURSOS ======== */}
-                <CoursesSections
+                <AllCoursesSections
                     cursosFiltrados={cursosFiltrados}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
                     showModalFilters={showModalFilters}
                     setShowModalFilters={setShowModalFilters}
-                />
-
-                {/* ======== CATEGORIAS ======== */}
-                <CategoriesSections />
-
-                {/* ======== CURSOS INFANTIS ======== */}
-                <ChildrensCoursesSections
-                    cursosFiltrados={cursosFiltrados}
-                    vagasPorCurso={vagasPorCurso}
-                    openForm={openForm}
-                    showModalFilters={showModalFilters}
-                    setShowModalFilters={setShowModalFilters}
-                />
-
-                {/* ======== CURSOS INFANTIS ======== */}
-                <CulinariansSections 
-                    culinaristas={culinaristas}
                 />
 
                 {/* ================= MODAIS ================= */}

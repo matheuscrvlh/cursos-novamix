@@ -7,7 +7,7 @@ import Text from '../../components/Text'
 // Images
 import { stores, whatsapp } from '../../assets/images/icons'
 
-export default function PublicLayout({ children }) {
+export default function PublicLayout({ children, bannerHome }) {
   return (
     <Text
       as="main"
@@ -91,6 +91,35 @@ export default function PublicLayout({ children }) {
 
       {/* ================= CONTEÚDO ================= */}
       <Text as="section" className="flex-grow w-full">
+        <Text
+            as='a'
+            href='#cursos'
+            className='block w-full'
+        >
+            <Text
+                as="section"
+                className="w-full overflow-hidden bg-orange-base"
+            >
+                <Text
+                    as="div"
+                    className="
+                            w-full
+                            min-h-[160px]
+                            bg-no-repeat
+                            bg-cover
+                            bg-right
+                            sm:min-h-[180px]
+                            md:min-h-[300px] md:bg-center
+                            lg:min-h-[360px]
+                            xl:min-h-[400px]
+                            "
+                    style={{
+                        backgroundImage: `url(${bannerHome})`,
+                        backgroundPosition: '43% center'
+                    }}
+                />
+            </Text>
+        </Text>
         {children}
       </Text>
 
