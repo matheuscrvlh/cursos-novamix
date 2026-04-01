@@ -1,9 +1,6 @@
 // REACT 
 import { useContext, useState, useEffect } from 'react';
 
-// ICONS
-import { Menu } from 'lucide-react'
-
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
 
@@ -24,6 +21,8 @@ import CoursesSections from '../../sections/home/CoursesSections';
 import CategoriesSections from '../../sections/home/CategoriesSections';
 import ChildrensCoursesSections from '../../sections/home/ChildrensCoursesSections';
 import CulinariansSections from '../../sections/home/CulinariansSections';
+import IndustriesSections from '../../sections/home/IndustriesSections';
+import LocationSections from '../../sections/home/LocationSections';
 
 // LAYOUTS
 import PublicLayout from '../../layouts/public/PublicLayout'
@@ -40,6 +39,7 @@ export default function Home() {
     const {
         cursos,
         culinaristas,
+        industrias,
     } = useContext(DadosContext);
 
     // ========= STATES  =========
@@ -211,7 +211,7 @@ export default function Home() {
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Loja Novamix | Cursos' />
-            <Text as='section' className='bg-gray w-[80vw] mx-auto mb-15'>
+            <Text as='section' className='bg-gray mb-20'>
                 
                 {/* ================= CONTEUDO ================= */}
                 {/* ======== CURSOS ======== */}
@@ -235,10 +235,18 @@ export default function Home() {
                     setShowModalFilters={setShowModalFilters}
                 />
 
-                {/* ======== CURSOS INFANTIS ======== */}
+                {/* ======== CULINARISTAS ======== */}
                 <CulinariansSections 
                     culinaristas={culinaristas}
                 />
+
+                {/* ======== INDUSTRIAS ======== */}
+                <IndustriesSections
+                    industrias={industrias}
+                />
+
+                {/* ======== LOCALIZAÇÃO ======== */}
+                <LocationSections/>
 
                 {/* ================= MODAIS ================= */}
                 {/* ======== MODAL FORM ======== */}

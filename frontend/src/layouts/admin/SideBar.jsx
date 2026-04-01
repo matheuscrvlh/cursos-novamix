@@ -7,7 +7,7 @@ import { Menu, X } from 'lucide-react'
 // Components
 import Text from '../../components/Text'
 import LinkSideBar from '../../components/admin/LinkSideBar'
-import ConfirmModal from '../../components/public/ModalConfirm'
+import ConfirmModal from '../../components/admin/ModalConfirm'
 
 // Images
 import { logoNm } from '../../assets/images/logos/'

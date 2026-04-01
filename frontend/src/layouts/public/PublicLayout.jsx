@@ -149,7 +149,9 @@ export default function PublicLayout({ children, bannerHome }) {
           className="
             bg-orange-light
             text-white
-            px-4
+            justify-between
+            w-full
+            px-6
             py-6
             flex
             flex-col
@@ -157,26 +159,24 @@ export default function PublicLayout({ children, bannerHome }) {
             md:flex-row
             md:items-center
             md:pl-20
+            md:px-15
           "
         >
           <Text as="p" className="text-center md:text-left text-sm md:text-base">
             © 2023 Novamix Food Service Comércio de Alimentos Ltda. Todos os direitos reservados.
           </Text>
-
-          <Link
-            to="/login"
-            className="
-                bg-orange-base
-                rounded
-                px-4
-                py-2
-                text-center
-                text-sm
-                md:ml-auto
-            "
-          >
-            Administrativo
-          </Link>
+          <Text as='div' className='flex md:gap-7 items-center md:text-xl'>
+            <Text as='p' className='text-base'>Desenvolvido por</Text>
+            <Text as='a' href='https://mthcode.com.br' target='_blank' className='font-bold cursor-pointer'>MTHCODE</Text>
+            <Text 
+              as='a' 
+              href='https://www.linkedin.com/in/rodrigo-schuab-628798249?utm_source=share_via&utm_content=profile&utm_medium=member_ios' 
+              target='_blank' 
+              className='font-bold cursor-pointer'
+            >
+              RodSchuab
+            </Text>
+          </Text>
         </Text>
       </Text>
     </Text>

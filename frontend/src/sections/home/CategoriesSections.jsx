@@ -9,7 +9,7 @@ import { cursos, culinaristas, cursosInfantis, industrias } from '../../assets/i
 
 export default function CategoriesSections() {
     return (
-        <Text as='section' className='flex flex-col w-full items-center mb-35 mt-35'>
+        <Text as='section' className='flex flex-col w-[80vw] mx-auto items-center mb-35 mt-35'>
             <Text 
                 as='div' 
                 className='grid grid-cols-4 w-[50vw] justify-center gap-10 text-center text-gray-dark'

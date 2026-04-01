@@ -24,7 +24,7 @@ export default function CoursesSections({
     }
 
     return (
-        <Text as='section' className='w-full pt-15'>
+        <Text as='section' className='w-[80vw] mx-auto pt-15'>
 
             {/* ======== FILTERS ======== */}
             <Text

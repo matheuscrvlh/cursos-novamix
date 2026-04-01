@@ -24,7 +24,7 @@ export default function ChildrensCoursesSections({
     }
 
     return (
-        <Text as='section' className='w-full'>
+        <Text as='section' className='w-[80vw] mx-auto'>
         
             {/* ======== FILTERS ======== */}
             <Text
