@@ -26,6 +26,14 @@ import {
     deleteIndustry,
 } from '../api/industries.services';
 
+// CHILDREN SERVICES
+import {
+    postChildren,
+    getChildren,
+    putChildren,
+    deleteChildren,
+} from '../api/children.services';
+
 export const DadosContext = createContext();
 
 export function DadosProvider({ children }) {
@@ -33,11 +41,13 @@ export function DadosProvider({ children }) {
     const [cursos, setCursos] = useState([]);
     const [culinaristas, setCulinaristas] = useState([]);
     const [industrias, setIndustrias] = useState([]);
+    const [cursosInfantis, setCursosInfantis] = useState([]);
 
     // ======= States loading
     const [loadingCourses, setLoadingCourses] = useState(true);
     const [loadingCulinarian, setLoadingCulinarian] = useState(true);
     const [loadingIndustries, setLoadingIndustries] = useState(true);
+    const [loadingChildren, setLoadingChildren] = useState(true);
     // ======= STATES
 
     // ========= ONLOAD
@@ -63,6 +73,17 @@ export function DadosProvider({ children }) {
             })
             .finally(() => {
                 setLoadingCulinarian(false)
+            })
+
+        getChildren()
+           .then(data => {
+               setCursosInfantis(data)
+            })
+            .catch(err => {
+                console.error('Erro ao buscar Cursos Infantis', err)
+            })
+            .finally(() => {
+                setLoadingChildren(false)
             })
 
         getIndustries()
@@ -106,6 +127,17 @@ export function DadosProvider({ children }) {
             alert('Erro ao adicionar curso');
         }
     }
+
+    async function addCursoInfantil(formData) {
+        try {
+            const res = await postChildren(formData);
+
+            setCursosInfantis(prev => [...prev, res]);
+
+        } catch (error) {
+            console.error('Erro ao cadastrar curso infantil', error);
+        }
+}
 
     async function addCulinarian(formData) {
         try {
@@ -174,6 +206,21 @@ export function DadosProvider({ children }) {
         }
     }
 
+    async function editCursoInfantil(formData) {
+        try {
+            const updated = await putChildren(formData.get('id'), formData);
+
+            setCursosInfantis(prev =>
+                prev.map(c =>
+                    c.id === updated.id ? updated : c
+                )
+            );
+
+        } catch (err) {
+            console.error('Erro ao editar curso infantil', err);
+        }
+    }
+
     async function editIndustry(formData) {
         try {
         const updated = await putIndustry(formData.get('id'), formData);
@@ -199,6 +246,19 @@ export function DadosProvider({ children }) {
         } catch (err) {
             console.error('Erro ao remover curso', err);
             alert('Erro ao remover curso');
+        }
+    }
+
+    async function removeCursoInfantil(id) {
+        try {
+            await deleteChildren(id);
+
+            setCursosInfantis(prev =>
+                prev.filter(c => c.id !== id)
+            );
+
+        } catch (err) {
+            console.error('Erro ao deletar curso infantil', err);
         }
     }
 
@@ -231,21 +291,26 @@ export function DadosProvider({ children }) {
                 cursos,
                 culinaristas,
                 industrias,
+                cursosInfantis,
                 loadingCourses,
                 loadingCulinarian,
                 loadingIndustries,
+                loadingChildren,
 
                 addCourses,
                 addCulinarian,
                 addIndustry,
+                addCursoInfantil,
 
                 editCourse,
                 editCulinarian,
                 editIndustry,
+                editCursoInfantil,
 
                 removeCourse,
                 removeCulinarian,
                 removeIndustry,
+                removeCursoInfantil,
             }}
         >
             {children}
