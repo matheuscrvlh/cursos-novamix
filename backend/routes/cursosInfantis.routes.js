@@ -45,6 +45,8 @@ router.post('/', uploadCursosInfantis.array('fotos', 5), (req, res) => {
     const cursos = safeRead(cursosPath);
     const assentos = safeRead(assentosPath);
 
+    console.log(req.body)
+
     const cursoId = uuidv4();
 
     const fotos = req.files
@@ -52,12 +54,6 @@ router.post('/', uploadCursosInfantis.array('fotos', 5), (req, res) => {
       : [];
 
     const valor = parseFloat(req.body.valor);
-
-    if (isNaN(valor)) {
-      return res.status(400).json({
-        message: 'Valor do curso inválido'
-      });
-    }
 
     const novoCurso = {
       id: cursoId,

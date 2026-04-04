@@ -36,15 +36,17 @@ import ModalFilters from '../../components/public/ModalFilters';
 
 export default function Home() {
 
+    // CONTEXT
     const {
         cursos,
+        cursosInfantis,
         culinaristas,
         industrias,
     } = useContext(DadosContext);
 
     // ========= STATES  =========
     // ========= STATE CADASTRO CLIENTE  ========= 
-    const [form, setForm] = useState({
+    const [enrollment, setEnrollment] = useState({
         cursoId: '',
         nome: '',
         cpf: '',
@@ -52,8 +54,16 @@ export default function Home() {
         assento: ''
     });
 
-    // ========= STATE FILTERS ========= 
-    const [filters, setFilters] = useState({
+    // ========= STATE FILTERS CURSOS ========= 
+    const [filtersCourses, setFiltersCourses] = useState({
+        dataInicial: '',
+        dataFinal: '',
+        loja: '',
+        culinarista: ''
+    });
+
+    // ========= STATE FILTERS CURSOS INFANTIS ========= 
+    const [filtersChildrensCourses, setFiltersChildrensCourses] = useState({
         dataInicial: '',
         dataFinal: '',
         loja: '',
@@ -64,9 +74,15 @@ export default function Home() {
     const [cursosAtuais, setCursosAtuais] = useState([]);
     const [cursosFiltrados, setCursosFiltrados] = useState([]);
 
+    const [cursosInfantisAtuais, setCursosInfantisAtuais] = useState([]);
+    const [cursosInfantisFiltrados, setCursosInfantisFiltrados] = useState([]);
+
     // ========= STATE VAGAS ========= 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);
+
+    const [vagasPorCursoInfantil, setVagasPorCursoInfantil] = useState({});
+    const [refreshVagasInfantis, setRefreshVagasInfantis] = useState(0);
 
     // ========= STATE ASSENTOS ========= 
     const [cursoSelecionado, setCursoSelecionado] = useState('');
@@ -76,29 +92,28 @@ export default function Home() {
     const [step, setStep] = useState(null)
     const [showModalFilters, setShowModalFilters ] = useState(false)
 
-    // ========= FUNCOES  =========
-    // =========  FUNCOES CADASTRO CLIENTE ========= 
-    function handleSubmit() {
-        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
+    // ====== FUNCOES
+    function handleSubmitCourse() {
+        if (!enrollment.nome || !enrollment.cpf || !enrollment.celular || !enrollment.formaPagamento) {
             alert('Preencha todos os campos.')
             return;
         }
 
         postEnrollment({
-            cursoId: form.cursoId,
-            nome: form.nome,
-            cpf: form.cpf,
-            celular: form.celular,
-            formaPagamento: form.formaPagamento,
-            assento: form.assento
+            cursoId: enrollment.cursoId,
+            nome: enrollment.nome,
+            cpf: enrollment.cpf,
+            celular: enrollment.celular,
+            formaPagamento: enrollment.formaPagamento,
+            assento: enrollment.assento
         });
 
-        setForm({
+    ({
             cursoId: '',
             nome: '',
             cpf: '',
             celular: '',
-            formaPagamento: '',
+            formaPagamento: '', 
             assento: ''
         });
     }
@@ -113,8 +128,7 @@ export default function Home() {
             .catch(console.error)
     }, [cursoSelecionado])
 
-    // ====== FUNCOES
-
+    // ========= FUNCOES CURSOS =========
     // buscar vagas livres e reservadas
     useEffect(() => {
         if (!cursos.length) return;
@@ -158,16 +172,78 @@ export default function Home() {
     // FILTRAR CURSOS
     useEffect(() => {
             const filtrados = cursosAtuais
-                .filter(c =>  !filters.dataInicial || new Date(c.data) >= new Date(filters.dataInicial) )
-                .filter(c => !filters.dataFinal || new Date(c.data) <= new Date(filters.dataFinal) )
-                .filter(c => !filters.loja || c.loja === filters.loja )
-                .filter(c => !filters.culinarista || c.culinarista === filters.culinarista)
+                .filter(c =>  !filtersCourses.dataInicial || new Date(c.data) >= new Date(filtersCourses.dataInicial) )
+                .filter(c => !filtersCourses.dataFinal || new Date(c.data) <= new Date(filtersCourses.dataFinal) )
+                .filter(c => !filtersCourses.loja || c.loja === filtersCourses.loja )
+                .filter(c => !filtersCourses.culinarista || c.culinarista === filtersCourses.culinarista)
             setCursosFiltrados(filtrados)
-    }, [filters, cursosAtuais])
+    }, [filtersCourses, cursosAtuais])
 
     // LIMPAR FILTROS
     function clearFilters() {
-        setFilters({
+        setFiltersCourses({
+            dataInicial: '',
+            dataFinal: '',
+            loja: '',
+            culinarista: ''
+        })
+    }
+
+    // ========= FUNCOES CURSOS INFANTIS =========
+    // buscar vagas livres e reservadas
+    useEffect(() => {
+        if (!cursosInfantis.length) return;
+
+        async function loadVagas() {
+            const resultado = {};
+
+            await Promise.all(
+                cursosInfantis.map(async (curso) => {
+                    const assentos = await getSeats(curso.id);
+                    console.log(assentos)
+                    resultado[curso.id] = {
+                        livres: assentos.filter(v => v.status === 'livre').length,
+                        reservadas: assentos.filter(v => v.status === 'reservado').length
+                    };
+                })
+            );
+
+            setVagasPorCursoInfantil(resultado);
+        }
+
+        loadVagas();
+    }, [cursosInfantis, refreshVagasInfantis]);
+
+    // PEGAR CURSOS ATUAIS
+    useEffect(() => {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        const cursosFiltrados = cursosInfantis.filter(c => {
+            if (!c.data) return false;
+
+            const dataCurso = new Date(c.data);
+            dataCurso.setHours(0, 0, 0, 0);
+
+            return dataCurso >= hoje;
+        });
+
+        setCursosInfantisAtuais(cursosFiltrados);
+    }, [cursosInfantis]);
+
+    // FILTRAR CURSOS
+    useEffect(() => {
+            const filtrados = cursosInfantisAtuais
+                .filter(c =>  !filtersCourses.dataInicial || new Date(c.data) >= new Date(filtersCourses.dataInicial) )
+                .filter(c => !filtersCourses.dataFinal || new Date(c.data) <= new Date(filtersCourses.dataFinal) )
+                .filter(c => !filtersCourses.loja || c.loja === filtersCourses.loja )
+                .filter(c => !filtersCourses.culinarista || c.culinarista === filtersCourses.culinarista)
+            setCursosInfantisFiltrados(filtrados)
+    }, [filtersChildrensCourses, cursosInfantisAtuais])
+
+    // LIMPAR FILTROS
+    function clearChildrenFilters() {
+        setFiltersChildrensCourses({
             dataInicial: '',
             dataFinal: '',
             loja: '',
@@ -177,13 +253,14 @@ export default function Home() {
 
     // =========  FUNCOES MODAL ========= 
     const openForm = (cursoId) => {
-        setForm(prev => ({ ...prev, cursoId }))
+        setEnrollment(prev => ({ ...prev, cursoId }))
         setStep('form')
         setCursoSelecionado(cursoId)
+        console.log(step)
     }
 
     const openAssento = () => {
-        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
+        if (!enrollment.nome || !enrollment.cpf || !enrollment.celular || !enrollment.formaPagamento) {
             alert('Preencha todos os campos.')
             return;
         }
@@ -191,7 +268,7 @@ export default function Home() {
     }
 
     const openConfirmacao = () => {
-        if (!form.assento) {
+        if (!enrollment.assento) {
             alert('Marque algum assento.');
             return
         }
@@ -200,9 +277,10 @@ export default function Home() {
 
     const closeModal = () => {
         setStep(null)
-        setForm({ cursoId: '', nome: '', cpf: '', telefone: '', formaPagamento: '', assento: '' })
+        setEnrollment({ cursoId: '', nome: '', cpf: '', telefone: '', formaPagamento: '', assento: '' })
         setCursoSelecionado('')
         setRefreshVagas(prev => prev + 1);
+        setRefreshVagasInfantis(prev => prev + 1);
     }
     
     // FUNDO PAGINA
@@ -228,8 +306,8 @@ export default function Home() {
 
                 {/* ======== CURSOS INFANTIS ======== */}
                 <ChildrensCoursesSections
-                    cursosFiltrados={cursosFiltrados}
-                    vagasPorCurso={vagasPorCurso}
+                    cursosInfantisFiltrados={cursosInfantisFiltrados}
+                    vagasPorCursoInfantil={vagasPorCursoInfantil}
                     openForm={openForm}
                     showModalFilters={showModalFilters}
                     setShowModalFilters={setShowModalFilters}
@@ -254,20 +332,20 @@ export default function Home() {
                     isOpen={step === 'form'}
                     onClick={() => openAssento()}
                     onClose={() => closeModal()}
-                    form={form}
-                    setForm={setForm}
+                    enrollment={enrollment}
+                    setEnrollment={setEnrollment}
                 />
 
                 {/* ======== MODAL ASSENTOS */}
                 <ModalEnrollmentSeats
                     isOpen={step === 'assento'}
                     onClick={() => {
-                        handleSubmit()
+                        handleSubmitCourse()
                         openConfirmacao()
                     }}
                     onClose={closeModal}
-                    form={form}
-                    setForm={setForm}
+                    enrollment={enrollment}
+                    setEnrollment={setEnrollment}
                     assentos={assentos}
                 />
 
@@ -284,10 +362,13 @@ export default function Home() {
                         isOpen={showModalFilters}
                         nameModal={'Filtros Cursos'}
                         onClose={() => setShowModalFilters(!showModalFilters)}
-                        filters={filters}
-                        setFilters={setFilters}
+                        filtersCourses={filtersCourses}
+                        setFiltersCourses={setFiltersCourses}
                         culinaristas={culinaristas}
-                        clear={() => clearFilters()}
+                        clear={() => {
+                            clearFilters()
+                            clearChildrenFilters()
+                        }}
                     />
                 }
             </Text>

@@ -12,7 +12,7 @@ import CoursesAdmin from './pages/admin/CoursesAdmin'
 import RegistrationsAdmin from './pages/admin/RegistrationsAdmin'
 import CulinarianAdmin from './pages/admin/CulinarianAdmin'
 import IndustriesAdmin from './pages/admin/IndustriesAdmin'
-import CursosInfantis from './pages/admin/childrenAdmin'
+import ChildrenAdmin from './pages/admin/ChildrenAdmin'
 
 export default function App() {
   return (
@@ -27,7 +27,7 @@ export default function App() {
         <Route path='/inscricoesAdmin' element={<RegistrationsAdmin />} />
         <Route path='/culinaristasAdmin' element={<CulinarianAdmin />} />
         <Route path='/industriasAdmin' element={<IndustriesAdmin />} />
-        <Route path='/cursos-infantis' element={<CursosInfantis />} />
+        <Route path='/infantisAdmin' element={<ChildrenAdmin />} />
     </Routes>
   )
 }

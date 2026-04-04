@@ -10,8 +10,8 @@ import CourseCard from "../../components/public/CourseCard";
 import { Menu } from "lucide-react";
 
 export default function ChildrensCoursesSections({
-    cursosFiltrados,
-    vagasPorCurso,
+    cursosInfantisFiltrados,
+    vagasPorCursoInfantil,
     openForm,
     showModalFilters,
     setShowModalFilters
@@ -64,7 +64,7 @@ export default function ChildrensCoursesSections({
             <Text as='div' className='
                 bg-gray flex justify-center w-full pb-10
             '>
-                {cursosFiltrados.length === 0
+                {cursosInfantisFiltrados.length === 0
                     ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
                         <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
                         <Text as='p'>Favor tente com outros filtros.</Text>
@@ -79,8 +79,8 @@ export default function ChildrensCoursesSections({
                                 xl:grid-cols-4
                         '
                         >
-                            {cursosFiltrados.slice(0, 4).map(curso => {
-                                const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
+                            {cursosInfantisFiltrados.slice(0, 4).map(curso => {
+                                const vagas = vagasPorCursoInfantil[curso.id] || { livres: 0, reservadas: 0 };
 
                                 return (
                                     <CourseCard

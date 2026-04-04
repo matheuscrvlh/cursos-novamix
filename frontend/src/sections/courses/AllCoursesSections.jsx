@@ -1,9 +1,5 @@
-// REACT
-import { Link } from 'react-router-dom'
-
 // COMPONENTS
 import Text from "../../components/Text"
-import Button from "../../components/Button";
 import CourseCard from "../../components/public/CourseCard";
 
 // ICONS

@@ -30,6 +30,7 @@ export default function CourseCard({
         shadow-md
         hover:shadow-lg
         transition-shadow
+        md:min-w-[300px]
         ${className || ''}
       `}
     >

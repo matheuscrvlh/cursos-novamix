@@ -79,6 +79,9 @@ export default function SideBar() {
                     <LinkSideBar to='/cursosAdmin' onClick={closeMenu}>
                         Cursos
                     </LinkSideBar>
+                    <LinkSideBar to ='/infantisAdmin' onClick={closeMenu}>
+                        Cursos Infantis
+                    </LinkSideBar>
                     <LinkSideBar to='/inscricoesAdmin' onClick={closeMenu}>
                         Inscrições
                     </LinkSideBar>
@@ -87,9 +90,6 @@ export default function SideBar() {
                     </LinkSideBar>
                     <LinkSideBar to='/industriasAdmin' onClick={closeMenu}>
                         Industrias
-                    </LinkSideBar>
-                    <LinkSideBar to ='/cursos-infantis' onClick={closeMenu}>
-                        Cursos Infantis
                     </LinkSideBar>
                 </Text>
 

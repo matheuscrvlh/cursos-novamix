@@ -21,7 +21,7 @@ import TopBar from '../../layouts/admin/TopBar'
 // Context
 import { DadosContext } from '../../contexts/DadosContext';
 
-export default function CursosInfantisAdmin() {
+export default function ChildrensAdmin() {
 
     const { 
         cursosInfantis = [],
@@ -230,8 +230,8 @@ export default function CursosInfantisAdmin() {
                         <Text className='font-bold text-gray-text'>CURSOS INFANTIS</Text>
 
                         <Text className='mt-4 max-h-[400px] overflow-y-auto'>
-                            {cursosInfantis.map(c => (
-                                <Text key={c.id}
+                            {cursosInfantis.map((c, i) => (
+                                <Text key={i}
                                     className='flex justify-between items-center p-2 border-b text-gray-text'
                                 >
                                     <Text>

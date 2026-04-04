@@ -7,6 +7,8 @@ export async function postChildren(formData) {
             method: "POST",
             body: formData
         }); 
+
+        console.log(res)
         return res.json()
 
     } catch(err) {

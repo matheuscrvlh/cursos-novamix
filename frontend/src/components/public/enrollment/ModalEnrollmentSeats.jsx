@@ -9,8 +9,8 @@ export default function ModalEnrollmentSeats({
     isOpen,
     onClick,
     onClose,
-    form,
-    setForm,
+    enrollment,
+    setEnrollment,
     assentos,
     ...props
 }) {
@@ -63,7 +63,7 @@ export default function ModalEnrollmentSeats({
                     <Text as='div' className='grid grid-cols-6 gap-2'>
                         {assentos.map(assento => {
                             const isReservado = assento.status === 'reservado';
-                            const isSelecionado = form.assento === assento.id;
+                            const isSelecionado = enrollment.assento === assento.id;
 
                             return (
                                 <Text
@@ -78,7 +78,7 @@ export default function ModalEnrollmentSeats({
                                     onClick={() => {
                                         if (isReservado) return;
 
-                                        setForm(prev => ({
+                                        setEnrollment(prev => ({
                                             ...prev,
                                             assento: assento.id
                                         }));

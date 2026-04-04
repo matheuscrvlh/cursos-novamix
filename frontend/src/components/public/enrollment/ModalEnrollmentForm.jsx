@@ -10,8 +10,8 @@ export default function ModalEnrollmentForm({
     isOpen,
     onClick,
     onClose,
-    form,
-    setForm,
+    enrollment,
+    setEnrollment,
     ...props
 }) {
     useEffect(() => {
@@ -57,30 +57,30 @@ export default function ModalEnrollmentForm({
                         width='100%'
                         height='40px'
                         placeholder='Nome completo'
-                        value={form.nome}
-                        onChange={e => setForm({ ...form, nome: e.target.value })}
+                        value={enrollment.nome}
+                        onChange={e => setEnrollment({ ...enrollment, nome: e.target.value })}
                     />
                     <Input
                         type='text'
                         width='100%'
                         height='40px'
                         placeholder='CPF'
-                        value={form.cpf}
-                        onChange={e => setForm({ ...form, cpf: e.target.value })}
+                        value={enrollment.cpf}
+                        onChange={e => setEnrollment({ ...enrollment, cpf: e.target.value })}
                     />
                     <Input
                         type='text'
                         width='100%'
                         height='40px'
                         placeholder='Telefone'
-                        value={form.celular}
-                        onChange={e => setForm({ ...form, celular: e.target.value })}
+                        value={enrollment.celular}
+                        onChange={e => setEnrollment({ ...enrollment, celular: e.target.value })}
                     />
                     <Text
                         as='select'
                         className='w-full h-[40px] p-2 border border-gray-base rounded-md'
-                        value={form.formaPagamento}
-                        onChange={e => setForm({ ...form, formaPagamento: e.target.value })}
+                        value={enrollment.formaPagamento}
+                        onChange={e => setEnrollment({ ...enrollment, formaPagamento: e.target.value })}
                     >
                         <Text as='option' value=''>Forma de Pagamento</Text>
                         <Text as='option' value='link'>Link de Pagamento</Text>
