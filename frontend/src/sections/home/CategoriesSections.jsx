@@ -22,12 +22,14 @@ export default function CategoriesSections() {
                         <p className='font-bold mr-2'>Cursos</p>
                     </div>
                 </Link>
-                <div as='div' className='flex flex-col gap-4 cursor-pointer items-center'>
-                    <div className='w-[180px] h-[180px] rounded-full bg-orange-base'>
-                        <img src={cursosInfantis} alt="Cursos Infantis" className='rounded-full -translate-y-2 -translate-x-2'/>
+                <Link to={'/cursosInfantis'}>
+                    <div as='div' className='flex flex-col gap-4 cursor-pointer items-center'>
+                        <div className='w-[180px] h-[180px] rounded-full bg-orange-base'>
+                            <img src={cursosInfantis} alt="Cursos Infantis" className='rounded-full -translate-y-2 -translate-x-2'/>
+                        </div>
+                        <p className='font-bold mr-2'>Cursos Infantis</p>
                     </div>
-                    <p className='font-bold mr-2'>Cursos Infantis</p>
-                </div>
+                </Link>
                 <Link to={'/culinaristas'}>
                     <div as='div' className='flex flex-col gap-4 cursor-pointer items-center'>
                         <div className='w-[180px] h-[180px] rounded-full bg-orange-base'>
@@ -36,12 +38,14 @@ export default function CategoriesSections() {
                         <p className='font-bold mr-2'>Culinaristas</p>
                     </div>
                 </Link>
-                <div as='div' className='flex flex-col gap-4 cursor-pointer items-center'>
-                    <div className='w-[180px] h-[180px] rounded-full bg-orange-base'>
-                        <img src={industrias} alt="Industrias" className='rounded-full -translate-y-2 -translate-x-2'/>
+                <Link to={'/industrias'}>
+                    <div as='div' className='flex flex-col gap-4 cursor-pointer items-center'>
+                        <div className='w-[180px] h-[180px] rounded-full bg-orange-base'>
+                            <img src={industrias} alt="Industrias" className='rounded-full -translate-y-2 -translate-x-2'/>
+                        </div>
+                        <p className='font-bold mr-2'>Industrias Parceiras</p>
                     </div>
-                    <p className='font-bold mr-2'>Industrias Parceiras</p>
-                </div>
+                </Link>
             </Text>
         </Text>
     )

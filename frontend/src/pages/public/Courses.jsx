@@ -213,7 +213,7 @@ export default function Courses() {
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Loja Novamix | Cursos' />
-            <Text as='section' className='bg-gray w-[80vw] mx-auto mb-15'>
+            <Text as='section' className='bg-gray mb-20'>
 
                 {/* ================= CONTEUDO ================= */}
                 {/* ======== CURSOS ======== */}
@@ -231,8 +231,8 @@ export default function Courses() {
                     isOpen={step === 'form'}
                     onClick={() => openAssento()}
                     onClose={() => closeModal()}
-                    form={form}
-                    setForm={setForm}
+                    enrollment={form}
+                    setEnrollment={setForm}
                 />
 
                 {/* ======== MODAL ASSENTOS */}
@@ -243,8 +243,8 @@ export default function Courses() {
                         openConfirmacao()
                     }}
                     onClose={closeModal}
-                    form={form}
-                    setForm={setForm}
+                    enrollment={form}
+                    setEnrollment={setForm}
                     assentos={assentos}
                 />
 
@@ -261,8 +261,8 @@ export default function Courses() {
                         isOpen={showModalFilters}
                         nameModal={'Filtros Cursos'}
                         onClose={() => setShowModalFilters(!showModalFilters)}
-                        filters={filters}
-                        setFilters={setFilters}
+                        filtersCourses={filters}
+                        setFiltersCourses={setFilters}
                         culinaristas={culinaristas}
                         clear={() => clearFilters()}
                     />

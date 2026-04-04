@@ -24,7 +24,7 @@ export default function CulinariansSections({ culinaristas }) {
                     text-lg font-bold text-gray-dark
                     md:text-3xl
                 '>
-                    CULINARISTAS PARCEIRAS
+                    CULINARISTAS PARCEIROS
                 </Text>
                 <Text as='div' className='grid grid-cols-4 gap-10 w-full h-full mt-5'>
                     {culinaristas.slice(0,4).map((c, i) => (
@@ -34,7 +34,7 @@ export default function CulinariansSections({ culinaristas }) {
                             </Text>
                             <Text as='div' className='flex justify-between bg-white w-full rounded-b-xl p-4 items-center'> 
                                 <Text as='p' className='font-semibold text-lg text-gray-dark'>{c.nomeCulinarista}</Text>
-                                <Text as='p' className='bg-gray-base text-white rounded-2xl px-6 py-2'>{c.lojas.length === 2 ? 'Prado e Teresópolis' : c.lojas}</Text>
+                                <Text as='p' className='bg-gray-base text-white text-sm rounded-2xl px-6 py-2'>{c.lojas.length === 2 ? 'Prado e Teresópolis' : c.lojas}</Text>
                             </Text>
                         </Text>
                     ))}

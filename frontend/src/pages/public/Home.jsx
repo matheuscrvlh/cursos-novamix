@@ -200,7 +200,6 @@ export default function Home() {
             await Promise.all(
                 cursosInfantis.map(async (curso) => {
                     const assentos = await getSeats(curso.id);
-                    console.log(assentos)
                     resultado[curso.id] = {
                         livres: assentos.filter(v => v.status === 'livre').length,
                         reservadas: assentos.filter(v => v.status === 'reservado').length
@@ -234,10 +233,10 @@ export default function Home() {
     // FILTRAR CURSOS
     useEffect(() => {
             const filtrados = cursosInfantisAtuais
-                .filter(c =>  !filtersCourses.dataInicial || new Date(c.data) >= new Date(filtersCourses.dataInicial) )
-                .filter(c => !filtersCourses.dataFinal || new Date(c.data) <= new Date(filtersCourses.dataFinal) )
-                .filter(c => !filtersCourses.loja || c.loja === filtersCourses.loja )
-                .filter(c => !filtersCourses.culinarista || c.culinarista === filtersCourses.culinarista)
+                .filter(c =>  !filtersChildrensCourses.dataInicial || new Date(c.data) >= new Date(filtersChildrensCourses.dataInicial) )
+                .filter(c => !filtersChildrensCourses.dataFinal || new Date(c.data) <= new Date(filtersChildrensCourses.dataFinal) )
+                .filter(c => !filtersChildrensCourses.loja || c.loja === filtersChildrensCourses.loja )
+                .filter(c => !filtersChildrensCourses.culinarista || c.culinarista === filtersChildrensCourses.culinarista)
             setCursosInfantisFiltrados(filtrados)
     }, [filtersChildrensCourses, cursosInfantisAtuais])
 
@@ -356,7 +355,7 @@ export default function Home() {
                     onClose={closeModal}
                 />
 
-                {/* ======== MODAL FILTERS ======== */}
+                {/* ======== MODAL FILTERS CURSOS ======== */}
                 {showModalFilters && 
                     <ModalFilters
                         isOpen={showModalFilters}
@@ -367,6 +366,20 @@ export default function Home() {
                         culinaristas={culinaristas}
                         clear={() => {
                             clearFilters()
+                        }}
+                    />
+                }
+
+                {/* ======== MODAL FILTERS CURSOS INFANTIS ======== */}
+                {showModalFilters && 
+                    <ModalFilters
+                        isOpen={showModalFilters}
+                        nameModal={'Filtros Cursos Infantis'}
+                        onClose={() => setShowModalFilters(!showModalFilters)}
+                        filtersCourses={filtersChildrensCourses}
+                        setFiltersCourses={setFiltersChildrensCourses}
+                        culinaristas={culinaristas}
+                        clear={() => {
                             clearChildrenFilters()
                         }}
                     />

@@ -112,7 +112,7 @@ export default function ChildrensCoursesSections({
             <Text as='div' className='
                 flex w-full justify-center
             '>  
-                <Link to={'/cursos'}>
+                <Link to={'/cursosInfantis'}>
                     <Button className='
                         bg-orange-base text-white hover:bg-orange-light px-6 py-2 
                         cursor-pointer transition

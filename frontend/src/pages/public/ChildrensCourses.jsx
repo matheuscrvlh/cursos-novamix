@@ -1,9 +1,6 @@
 // REACT 
 import { useContext, useState, useEffect } from 'react';
 
-// ICONS
-import { Menu } from 'lucide-react'
-
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
 
@@ -20,7 +17,7 @@ import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnroll
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
 
 // SECTIONS
-import AllCoursesSections from '../../sections/courses/AllCoursesSections';
+import AllChildrensCoursesSections from '../../sections/childrens/AllChildrensCoursesSections';
 
 // LAYOUTS
 import PublicLayout from '../../layouts/public/PublicLayout'
@@ -35,7 +32,7 @@ import ModalFilters from '../../components/public/ModalFilters';
 export default function ChildrensCourses() {
 
     const {
-        cursos,
+        cursosInfantis,
         culinaristas,
     } = useContext(DadosContext);
 
@@ -114,13 +111,13 @@ export default function ChildrensCourses() {
 
     // buscar vagas livres e reservadas
     useEffect(() => {
-        if (!cursos.length) return;
+        if (!cursosInfantis.length) return;
 
         async function loadVagas() {
             const resultado = {};
 
             await Promise.all(
-                cursos.map(async (curso) => {
+                cursosInfantis.map(async (curso) => {
                     const assentos = await getSeats(curso.id);
                     resultado[curso.id] = {
                         livres: assentos.filter(v => v.status === 'livre').length,
@@ -133,14 +130,14 @@ export default function ChildrensCourses() {
         }
 
         loadVagas();
-    }, [cursos, refreshVagas]);
+    }, [cursosInfantis, refreshVagas]);
 
     // PEGAR CURSOS ATUAIS
     useEffect(() => {
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
 
-        const cursosFiltrados = cursos.filter(c => {
+        const cursosFiltrados = cursosInfantis.filter(c => {
             if (!c.data) return false;
 
             const dataCurso = new Date(c.data);
@@ -150,7 +147,7 @@ export default function ChildrensCourses() {
         });
 
         setCursosAtuais(cursosFiltrados);
-    }, [cursos]);
+    }, [cursosInfantis]);
 
     // FILTRAR CURSOS
     useEffect(() => {
@@ -212,12 +209,12 @@ export default function ChildrensCourses() {
 
     return (
         <PublicLayout bannerHome={bannerHome}>
-            <Head title='Loja Novamix | Cursos' />
-            <Text as='section' className='bg-gray'>
+            <Head title='Loja Novamix | Cursos Infantis' />
+            <Text as='section' className='bg-gray mb-20'>
 
                 {/* ================= CONTEUDO ================= */}
                 {/* ======== CURSOS ======== */}
-                <AllCoursesSections
+                <AllChildrensCoursesSections
                     cursosFiltrados={cursosFiltrados}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
@@ -231,8 +228,8 @@ export default function ChildrensCourses() {
                     isOpen={step === 'form'}
                     onClick={() => openAssento()}
                     onClose={() => closeModal()}
-                    form={form}
-                    setForm={setForm}
+                    enrollment={form}
+                    setEnrollment={setForm}
                 />
 
                 {/* ======== MODAL ASSENTOS */}
@@ -243,8 +240,8 @@ export default function ChildrensCourses() {
                         openConfirmacao()
                     }}
                     onClose={closeModal}
-                    form={form}
-                    setForm={setForm}
+                    enrollment={form}
+                    setEnrollment={setForm}
                     assentos={assentos}
                 />
 
@@ -261,8 +258,8 @@ export default function ChildrensCourses() {
                         isOpen={showModalFilters}
                         nameModal={'Filtros Cursos'}
                         onClose={() => setShowModalFilters(!showModalFilters)}
-                        filters={filters}
-                        setFilters={setFilters}
+                        filtersCourses={filters}
+                        setFiltersCourses={setFilters}
                         culinaristas={culinaristas}
                         clear={() => clearFilters()}
                     />

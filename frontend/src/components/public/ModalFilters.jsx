@@ -14,8 +14,8 @@ export default function ModalFilters({
     onClose,
     isOpen,
     culinaristas,
-    filters,
-    setFilters,
+    filtersCourses,
+    setFiltersCourses,
     clear
 }) {
 
@@ -53,8 +53,8 @@ export default function ModalFilters({
                         <Input
                             type='date'
                             className='bg-white cursor-pointer w-[90%]'
-                            value={filters.dataInicial}
-                            onChange={e => setFilters({ ...filters, dataInicial: e.target.value })}
+                            value={filtersCourses.dataInicial}
+                            onChange={e => setFiltersCourses({ ...filtersCourses, dataInicial: e.target.value })}
                         />
                     </Text>
                     <Text as='div'>
@@ -62,16 +62,16 @@ export default function ModalFilters({
                         <Input
                             type='date'
                             className='bg-white cursor-pointer w-[90%]'
-                            value={filters.dataFinal}
-                            onChange={e => setFilters({ ...filters, dataFinal: e.target.value })}
+                            value={filtersCourses.dataFinal}
+                            onChange={e => setFiltersCourses({ ...filtersCourses, dataFinal: e.target.value })}
                         />
                     </Text>
                     <Text as='div' className='mt-auto'>
                         <Text
                             as='select'
                             className='bg-white w-[90%] h-11 p-2 border border-black/50 rounded-md cursor-pointer'            
-                            value={filters.loja}
-                            onChange={e => setFilters({ ...filters, loja: e.target.value })}
+                            value={filtersCourses.loja}
+                            onChange={e => setFiltersCourses({ ...filtersCourses, loja: e.target.value })}
                         >
                             <Text as='option' value=''>Loja</Text>
                             <Text as='option' value='Prado'>Prado</Text>
@@ -82,8 +82,8 @@ export default function ModalFilters({
                         <Text
                             as='select'
                             className='bg-white w-[90%] h-11 p-2 border border-black/50 rounded-md cursor-pointer'
-                            value={filters.culinarista}
-                            onChange={e => setFilters({ ...filters, culinarista: e.target.value })}
+                            value={filtersCourses.culinarista}
+                            onChange={e => setFiltersCourses({ ...filtersCourses, culinarista: e.target.value })}
                         >
                             <Text as='option' value=''>Culinarista</Text>
                             {culinaristas.map(c => {

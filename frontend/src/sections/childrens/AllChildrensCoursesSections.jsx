@@ -20,7 +20,7 @@ export default function AllChildrensCoursesSections({
     }
 
     return (
-        <Text as='section' className='w-full'>
+        <Text as='section' className='w-[80vw] mx-auto pt-15'>
 
             {/* ======== FILTERS ======== */}
             <Text
@@ -35,7 +35,7 @@ export default function AllChildrensCoursesSections({
                                 text-lg font-bold text-gray-dark
                                 md:text-3xl
                             '>
-                        NOSSOS CURSOS
+                        NOSSOS CURSOS INFANTIS
                     </Text>
                 </Text>
                 <Text
