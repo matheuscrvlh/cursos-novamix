@@ -18,19 +18,9 @@ export default function CourseCard({
   return (
     <Text
       as="div"
-      className={`
-        bg-white
-        w-75
-        max-w-150
-        rounded-xl
-        min-h-[380px]
-        max-h-[550px]
-        flex
-        flex-col
-        shadow-md
-        hover:shadow-lg
-        transition-shadow
+      className={`bg-white w-75 max-w-150 rounded-xl min-h-[380px] max-h-[550px] flex flex-col shadow-md
         md:min-w-[300px]
+        hover:shadow-lg transition-shadow
         ${className || ''}
       `}
     >
@@ -42,19 +32,8 @@ export default function CourseCard({
         <Text
           as="p"
           className="
-            absolute
-            top-2
-            right-2
-            bg-orange-base
-            text-white
-            rounded-md
-            px-2
-            py-1
-            mx-auto
-            text-sm
-            md:text-base
-            font-semibold
-            z-10
+            absolute top-2 right-2 bg-orange-base text-white rounded-md px-2 py-1 mx-auto text-sm font-semibold z-10
+            md:text-base 
           "
         >
           R$ {valor}

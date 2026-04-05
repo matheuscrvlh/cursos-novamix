@@ -1,8 +1,6 @@
-// REACT
-import { useEffect, useState } from "react"
-
 // COMPONENTS
 import Text from "../../components/Text"
+import CulinarianCard from "../../components/public/CulinarianCard"
 
 export default function AllCulinariansSections({ culinaristas }) {
 
@@ -18,16 +16,13 @@ export default function AllCulinariansSections({ culinaristas }) {
                     CULINARISTAS PARCEIROS
                 </Text>
                 <Text as='div' className='grid grid-cols-4 gap-10 w-full h-full mt-5'>
-                    {culinaristas.map((c, i) => (
-                        <Text as='div' key={i} className='h-full rounded-xl shadow-md'>
-                            <Text as='div' className='w-auto h-80 rounded-t-xl'>
-                                <Text as='img' src={c.foto} className='w-full h-full object-cover rounded-t-xl'/>
-                            </Text>
-                            <Text as='div' className='flex justify-between bg-white w-full rounded-b-xl p-4 items-center'> 
-                                <Text as='p' className='font-semibold text-lg text-gray-dark'>{c.nomeCulinarista}</Text>
-                                <Text as='p' className='bg-gray-base text-white text-sm rounded-2xl px-6 py-2'>{c.lojas.length === 2 ? 'Prado e Teresópolis' : c.lojas}</Text>
-                            </Text>
-                        </Text>
+                    {culinaristas.map(c => (
+                        <CulinarianCard
+                            id={c.id}
+                            foto={c.foto}
+                            nomeCulinarista={c.nomeCulinarista}
+                            lojas={c.lojas}
+                        />
                     ))}
                 </Text>
             </Text>

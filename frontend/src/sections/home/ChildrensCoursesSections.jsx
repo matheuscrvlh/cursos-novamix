@@ -24,7 +24,7 @@ export default function ChildrensCoursesSections({
     }
 
     return (
-        <Text as='section' className='w-[80vw] mx-auto'>
+        <Text as='section' className='md:w-[80vw] md:mx-auto'>
         
             {/* ======== FILTERS ======== */}
             <Text
@@ -37,7 +37,7 @@ export default function ChildrensCoursesSections({
                 <Text as='div'>
                     <Text as='p' className='
                                 text-lg font-bold text-gray-dark
-                                md:text-3xl
+                                md:text-3xl md:px-1
                             '>
                         CURSOS INFANTIS
                     </Text>
@@ -73,8 +73,9 @@ export default function ChildrensCoursesSections({
                         <Text
                             as='div'
                             className='
-                                bg-gray grid grid-cols-1 gap-10 justify-items-center
-                                sm:grid-cols-2
+                                bg-gray flex overflow-x-auto gap-10 justify-items-center
+                                px-10 pb-3
+                                sm:grid-cols-2 sm:overflow-x-hidden sm:px-2 sm:pb-4
                                 lg:grid-cols-3
                                 xl:grid-cols-4
                         '
@@ -98,7 +99,7 @@ export default function ChildrensCoursesSections({
                                         valor={curso.valor}
                                         onClick={() => openForm(curso.id)}
                                         className='
-                                                w-full max-w-[380px]
+                                                w-full min-w-73 max-w-[380px]
                                         '
                                         imagem={curso.fotos?.length ? curso.fotos[0] : null}
                                     />

@@ -12,7 +12,7 @@ import { useContext, useState, useEffect } from 'react';
 import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import CourseCard from '../../components/public/CourseCard'
-import CulinarianCard from '../../components/public/CulinarianCard';
+import CulinarianCard from '../../components/admin/CulinarianCard';
 
 // SERVICES
 import { getSeats, getTotalEnrollment } from '../../api/enrollment.services';

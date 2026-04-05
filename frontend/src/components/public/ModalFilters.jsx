@@ -32,7 +32,7 @@ export default function ModalFilters({
 
     return (
         <Text as='div' className={`
-            fixed flex justify-end bg-black/70 top-0 w-dvw h-dvh z-50
+            fixed flex justify-end bg-black/40 top-0 w-dvw h-dvh z-50
             transition-opacity duration-300
             ${isOpen ? 'opacity-100' : 'opacity-0'}
         `}>

@@ -7,43 +7,41 @@ import { bannerCulinarista } from "../../assets/images/banner"
 // COMPONENTS
 import Text from "../../components/Text"
 import Button from '../../components/Button'
+import CulinarianCard from '../../components/public/CulinarianCard'
 
 export default function CulinariansSections({ culinaristas }) {
 
     return (
-        <Text as='section' className='w-full mt-20 mb-25'>
+        <Text as='section' className='w-full mt-20 mb-20'>
 
             {/* ========== BANNER =========== */}
-            <Text as='div' className='w-[99dvw]'>
-                <Text as='img' src={bannerCulinarista} className='w-full'></Text>
+            <Text as='div' className=' md:w-[99dvw]'>
+                <Text as='img' src={bannerCulinarista} className='min-h-25 object-cover w-full'></Text>
             </Text>
 
             {/* ========== CULINARISTAS =========== */}
-            <Text as='div' className='w-[80vw] mx-auto mt-20'>
+            <Text as='div' className='mt-10 md:mt-20 md:w-[80vw] md:mx-auto'>
                 <Text as='p' className='
-                    text-lg font-bold text-gray-dark
-                    md:text-3xl
+                    text-lg pl-10 font-bold text-gray-dark
+                    md:text-3xl md:pl-0 md:px-2
                 '>
                     CULINARISTAS PARCEIROS
                 </Text>
-                <Text as='div' className='grid grid-cols-4 gap-10 w-full h-full mt-5'>
-                    {culinaristas.slice(0,4).map((c, i) => (
-                        <Text as='div' key={i} className='h-full rounded-xl shadow-md'>
-                            <Text as='div' className='w-auto h-80 rounded-t-xl'>
-                                <Text as='img' src={c.foto} className='w-full h-full object-cover rounded-t-xl'/>
-                            </Text>
-                            <Text as='div' className='flex justify-between bg-white w-full rounded-b-xl p-4 items-center'> 
-                                <Text as='p' className='font-semibold text-lg text-gray-dark'>{c.nomeCulinarista}</Text>
-                                <Text as='p' className='bg-gray-base text-white text-sm rounded-2xl px-6 py-2'>{c.lojas.length === 2 ? 'Prado e Teresópolis' : c.lojas}</Text>
-                            </Text>
-                        </Text>
+                <Text as='div' className='flex overflow-x-auto gap-10 w-screen px-10 pb-5 h-full mt-5 md:w-full md:grid md:grid-cols-4 md:overflow-x-hidden md:px-1'>
+                    {culinaristas.slice(0,4).map(c => (
+                        <CulinarianCard
+                            id={c.id}
+                            foto={c.foto}
+                            nomeCulinarista={c.nomeCulinarista}
+                            lojas={c.lojas}
+                        />
                     ))}
                 </Text>
             </Text>
 
             {/* ========== BUTTON =========== */}
             <Text as='div' className='
-                flex w-full justify-center mt-10
+                flex w-full justify-center mt-5 md:mt-10
             '>  
                 <Link to={'/culinaristas'}>
                     <Button className='
