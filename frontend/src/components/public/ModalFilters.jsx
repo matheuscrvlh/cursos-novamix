@@ -37,7 +37,7 @@ export default function ModalFilters({
             ${isOpen ? 'opacity-100' : 'opacity-0'}
         `}>
             <Text as='div' className={`
-                bg-white w-[90dvw] h-full p-5
+                bg-white w-[60dvw] h-full p-5
                 transform transition-transform duration-300 ease-in-out
                 md:w-[25vw]
                 ${isOpen ? 'translate-x-0' : 'translate-x-full'}
@@ -46,30 +46,30 @@ export default function ModalFilters({
                     className='ml-auto cursor-pointer hover:scale-105'
                     onClick={onClose}
                 />
-                <Text as='p' className='text-gray-dark text-3xl font-bold text-center'>{nameModal}</Text>
-                <Text as='div' className='flex flex-col gap-6 mt-10'>
-                    <Text as='div'>
+                <Text as='p' className='text-gray-dark text-xl font-bold text-center'>{nameModal}</Text>
+                <Text as='div' className='flex flex-col w-[90%] gap-6 mt-10 mx-auto'>
+                    <Text as='div' className='w-full'>
                         <Text as='p'>Data Inicial</Text>
                         <Input
                             type='date'
-                            className='bg-white cursor-pointer w-[90%]'
+                            className='bg-white cursor-pointer px-3.5 md:w-full md:px-0'
                             value={filtersCourses.dataInicial}
                             onChange={e => setFiltersCourses({ ...filtersCourses, dataInicial: e.target.value })}
                         />
                     </Text>
-                    <Text as='div'>
+                    <Text as='div' className='w-full'>
                         <Text as='p'>Data Final</Text>
                         <Input
                             type='date'
-                            className='bg-white cursor-pointer w-[90%]'
+                            className='bg-white cursor-pointer px-3.5 md:w-full md:px-0'
                             value={filtersCourses.dataFinal}
                             onChange={e => setFiltersCourses({ ...filtersCourses, dataFinal: e.target.value })}
                         />
                     </Text>
-                    <Text as='div' className='mt-auto'>
+                    <Text as='div' className='mt-auto w-full'>
                         <Text
                             as='select'
-                            className='bg-white w-[90%] h-11 p-2 border border-black/50 rounded-md cursor-pointer'            
+                            className='bg-white py-3 w-full border border-black/50 rounded-md cursor-pointer'            
                             value={filtersCourses.loja}
                             onChange={e => setFiltersCourses({ ...filtersCourses, loja: e.target.value })}
                         >
@@ -78,10 +78,10 @@ export default function ModalFilters({
                             <Text as='option' value='Teresopolis'>Teresópolis</Text>
                         </Text>
                     </Text>
-                    <Text as='div' className='mt-auto'>
+                    <Text as='div' className='mt-auto w-full'>
                         <Text
                             as='select'
-                            className='bg-white w-[90%] h-11 p-2 border border-black/50 rounded-md cursor-pointer'
+                            className='bg-white py-3 w-full border border-black/50 rounded-md cursor-pointer'
                             value={filtersCourses.culinarista}
                             onChange={e => setFiltersCourses({ ...filtersCourses, culinarista: e.target.value })}
                         >
@@ -94,7 +94,7 @@ export default function ModalFilters({
                         </Text>
                     </Text>
                     <Button
-                        className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
+                        className='bg-orange-base hover:bg-orange-light text-white w-full mt-10'
                         onClick={clear}
                     >
                         Limpar

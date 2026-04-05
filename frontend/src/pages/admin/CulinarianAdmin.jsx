@@ -27,6 +27,7 @@ export default function CulinarianAdmin() {
             addCulinarian,
             removeCulinarian,
             editCulinarian,
+            industrias
         } = useContext(DadosContext);
     
     // ============== STATES ==============
@@ -297,13 +298,26 @@ export default function CulinarianAdmin() {
                                 />
                             </Text>
                             <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Industria</Text> 
-                                <Input   
-                                    placeholder='Industria'
-                                    className='w-full h-[40px]'
+                                <Text as='p'>Industria</Text>
+                                <Text 
+                                    as='select' 
+                                    className='w-full min-w-40 h-[40px] bg-white border-black/50 border-1 rounded-md'
                                     value={formCulinarian.industria}
                                     onChange={e => setFormCulinarian({ ...formCulinarian, industria: e.target.value})}
-                                />
+                                >
+                                    <Text as='option' value=''>
+                                        Selecione a Industria
+                                    </Text>
+                                    {industrias.map(i => (
+                                        <Text 
+                                            as='option'
+                                            key={i.id}
+                                            value={i.nome}
+                                        >
+                                            {i.nome}
+                                        </Text>
+                                    ))}
+                                </Text>
                             </Text>
                             <Text as='div' className='flex flex-col text-gray-dark'>
                                 <Text>Telefone</Text> 
@@ -600,11 +614,25 @@ export default function CulinarianAdmin() {
                             </Text>
                             <Text as='div'>
                                 <Text as='p'>Industria</Text>
-                                <Input
-                                    type='text'
+                                <Text 
+                                    as='select' 
+                                    className='w-full min-w-40 h-[40px] bg-white border-black/50 border-1 rounded-md'
                                     value={culinarianEditar.industria}
                                     onChange={e => setCulinarianEditar({ ...culinarianEditar, industria: e.target.value})}
-                                />
+                                >
+                                    <Text as='option' value=''>
+                                        Selecione a Industria
+                                    </Text>
+                                    {industrias.map(i => (
+                                        <Text 
+                                            as='option'
+                                            key={i.id}
+                                            value={i.nome}
+                                        >
+                                            {i.nome}
+                                        </Text>
+                                    ))}
+                                </Text>
                             </Text>
                             <Text as='div'>
                                 <Text as='p'>Telefone</Text>

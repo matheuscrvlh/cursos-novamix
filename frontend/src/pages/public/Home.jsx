@@ -91,6 +91,7 @@ export default function Home() {
     // ========= STATE MODAL ========= 
     const [step, setStep] = useState(null)
     const [showModalFilters, setShowModalFilters ] = useState(false)
+    const [showModalFiltersChildrens, setShowModalFiltersChildrens ] = useState(false)
 
     // ====== FUNCOES
     function handleSubmitCourse() {
@@ -308,8 +309,8 @@ export default function Home() {
                     cursosInfantisFiltrados={cursosInfantisFiltrados}
                     vagasPorCursoInfantil={vagasPorCursoInfantil}
                     openForm={openForm}
-                    showModalFilters={showModalFilters}
-                    setShowModalFilters={setShowModalFilters}
+                    showModalFilters={showModalFiltersChildrens}
+                    setShowModalFilters={setShowModalFiltersChildrens}
                 />
 
                 {/* ======== CULINARISTAS ======== */}
@@ -326,6 +327,8 @@ export default function Home() {
                 <LocationSections/>
 
                 {/* ================= MODAIS ================= */}
+
+                {/* ======== MODAIS INSCRICOES CURSOS ======== */}
                 {/* ======== MODAL FORM ======== */}
                 <ModalEnrollmentForm
                     isOpen={step === 'form'}
@@ -371,11 +374,11 @@ export default function Home() {
                 }
 
                 {/* ======== MODAL FILTERS CURSOS INFANTIS ======== */}
-                {showModalFilters && 
+                {showModalFiltersChildrens && 
                     <ModalFilters
-                        isOpen={showModalFilters}
+                        isOpen={showModalFiltersChildrens}
                         nameModal={'Filtros Cursos Infantis'}
-                        onClose={() => setShowModalFilters(!showModalFilters)}
+                        onClose={() => setShowModalFiltersChildrens(!showModalFiltersChildrens)}
                         filtersCourses={filtersChildrensCourses}
                         setFiltersCourses={setFiltersChildrensCourses}
                         culinaristas={culinaristas}

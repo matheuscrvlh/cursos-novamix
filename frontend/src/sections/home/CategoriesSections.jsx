@@ -49,7 +49,7 @@ export default function CategoriesSections() {
                         <div className='w-25 h-25 rounded-full bg-orange-base md:w-[180px] md:h-[180px]'>
                             <img src={industrias} alt="Industrias" className='rounded-full -translate-y-2 -translate-x-2'/>
                         </div>
-                        <p className='font-bold mr-2 text-sm md:text-base'>Industrias Parceiras</p>
+                        <p className='font-bold mr-2 text-sm md:text-base'>Industrias</p>
                     </div>
                 </Link>
             </Text>

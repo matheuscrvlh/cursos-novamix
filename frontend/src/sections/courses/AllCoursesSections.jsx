@@ -20,14 +20,14 @@ export default function AllCoursesSections({
     }
 
     return (
-        <Text as='section' className='w-[80vw] mx-auto pt-15'>
+        <Text as='section' className='w-[80vw] mx-auto pt-10 md:pt-15'>
         
             {/* ======== FILTERS ======== */}
             <Text
                 as='div'
                 className='
-                            flex justify-between items-baseline-last pb-5 w-[80%] mx-auto
-                            md:w-[80vw]
+                            flex justify-between items-baseline-last pb-5 mx-auto
+                            md:w-[80vw] md:w-[80%] 
                         '
             >
                 <Text as='div'>

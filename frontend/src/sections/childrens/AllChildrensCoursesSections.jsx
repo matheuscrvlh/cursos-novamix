@@ -20,14 +20,14 @@ export default function AllChildrensCoursesSections({
     }
 
     return (
-        <Text as='section' className='w-[80vw] mx-auto pt-15'>
+        <Text as='section' className='w-[80vw] mx-auto pt-10 md:pt-15'>
 
             {/* ======== FILTERS ======== */}
             <Text
                 as='div'
                 className='
-                            flex justify-between items-baseline-last pt-15 pb-5 w-[87%] mx-auto
-                            md:w-[98%]
+                            flex justify-between items-baseline-last pb-5 mx-auto
+                            md:w-[98%] md:w-[80%]
                         '
             >
                 <Text as='div'>
@@ -35,7 +35,7 @@ export default function AllChildrensCoursesSections({
                                 text-lg font-bold text-gray-dark
                                 md:text-3xl
                             '>
-                        NOSSOS CURSOS INFANTIS
+                        CURSOS INFANTIS
                     </Text>
                 </Text>
                 <Text
@@ -58,7 +58,7 @@ export default function AllChildrensCoursesSections({
 
             {/* ======== CURSOS ======== */}
             <Text as='div' className='
-                bg-gray flex justify-center w-full pb-20
+                bg-gray flex justify-center w-full
             '>
                 {cursosFiltrados.length === 0
                     ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>

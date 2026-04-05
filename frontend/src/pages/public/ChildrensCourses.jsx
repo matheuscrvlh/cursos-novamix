@@ -256,7 +256,7 @@ export default function ChildrensCourses() {
                 {showModalFilters && 
                     <ModalFilters
                         isOpen={showModalFilters}
-                        nameModal={'Filtros Cursos'}
+                        nameModal={'Filtros Cursos Infantis'}
                         onClose={() => setShowModalFilters(!showModalFilters)}
                         filtersCourses={filters}
                         setFiltersCourses={setFilters}

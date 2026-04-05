@@ -38,7 +38,7 @@ export default function LocationSections() {
                     Teresópolis
                 </Button>
             </Text>
-            <Text as='div' className='flex flex-col justify-between mt-5 md:flex-row'>
+            <Text as='div' className='flex flex-col justify-between items-center mt-5 md:flex-row md:mt-0'>
                 <Text as='div'>
                     <Text as='div' className='text-4xl text-gray-dark md:text-7xl'>
                         <Text as='p'>CONFIRA</Text>

@@ -64,7 +64,7 @@ export default function CoursesSections({
             <Text 
                 as='div' 
                 className='
-                    bg-gray flex justify-center w-full pb-10
+                    bg-gray flex justify-center w-full pb-7 md:pb-10
             '>
                 {cursosFiltrados.length === 0
                     ?  (<Text 

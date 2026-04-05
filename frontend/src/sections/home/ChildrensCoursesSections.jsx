@@ -62,7 +62,7 @@ export default function ChildrensCoursesSections({
 
             {/* ======== CURSOS ======== */}
             <Text as='div' className='
-                bg-gray flex justify-center w-full pb-10
+                bg-gray flex justify-center w-full pb-7 md:pb-10
             '>
                 {cursosInfantisFiltrados.length === 0
                     ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
