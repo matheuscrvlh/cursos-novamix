@@ -1,15 +1,12 @@
 // React
 import { useEffect } from "react"
 
-// Components
-import Text from "../Text"
-
 export default function Modal({
-    as = 'div',
+    as: Component = 'div',
     width,
     maxWidth,
     height,
-    className,
+    className = '',
     children,
     isOpen,
     onClose,
@@ -30,32 +27,38 @@ export default function Modal({
     if (!isOpen) return null
 
     return (
-        <Text
-            as='div'
-            className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
+        <div
+            className="flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4"
             onClick={onClose}
         >
-            <Text
-                as={as}
+            <Component
                 style={{
                     width,
                     height,
                     maxWidth: maxWidth || width
                 }}
-                className={`bg-white shadow-md rounded-md p-4 md:p-6 max-h-[90vh] overflow-y-auto ${className}`}
+                className={`
+                    bg-white shadow-md rounded-md p-4 md:p-6
+                    max-h-[90vh] overflow-y-auto
+                    relative
+                    ${className}
+                `}
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                <Text
-                    as='button'
-                    className='cursor-pointer text-xl md:text-2xl font-bold text-gray-dark hover:text-orange-base float-right mb-2'
+                <button
+                    className="
+                        absolute top-3 right-3
+                        cursor-pointer text-xl md:text-2xl font-bold
+                        text-gray-dark hover:text-orange-base
+                    "
                     onClick={onClose}
                 >
                     ✕
-                </Text>
-                <div className="clear-both" />
+                </button>
+
                 {children}
-            </Text>
-        </Text>
+            </Component>
+        </div>
     )
 }

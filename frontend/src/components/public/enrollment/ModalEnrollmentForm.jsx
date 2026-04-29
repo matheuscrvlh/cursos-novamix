@@ -1,8 +1,4 @@
-// React
 import { useEffect } from "react"
-
-// Components
-import Text from "../../Text"
 import Input from "../../Input"
 import Button from "../../Button"
 
@@ -28,30 +24,37 @@ export default function ModalEnrollmentForm({
 
     if (!isOpen) return null
 
+    const isDisabled =
+        !enrollment.nome ||
+        !enrollment.cpf ||
+        !enrollment.celular ||
+        !enrollment.formaPagamento
+
     return (
-        <Text
-            as='div'
+        <div
             className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
             onClick={onClose}
         >
-            <Text
-                as='div'
+            <div
                 className='bg-white shadow-md rounded-md p-4 md:p-6 w-[90%] max-w-[500px] h-auto max-h-[90vh] overflow-y-auto'
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                <Text
-                    as='button'
+                <button
                     className='cursor-pointer text-xl md:text-2xl font-bold text-gray-dark hover:text-orange-base float-right mb-2'
                     onClick={onClose}
+                    aria-label="Fechar modal"
                 >
                     ✕
-                </Text>
+                </button>
+
                 <div className="clear-both" />
-                <Text as='div' className='flex flex-col gap-3 h-full'>
-                    <Text as='p' className='font-semibold mb-3 text-center text-lg md:text-xl mt-auto'>
-                        Digite suas informações para cadastramos você!
-                    </Text>
+
+                <div className='flex flex-col gap-3 h-full'>
+                    <p className='font-semibold mb-3 text-center text-lg md:text-xl mt-auto'>
+                        Digite suas informações para cadastrarmos você!
+                    </p>
+
                     <Input
                         type='text'
                         width='100%'
@@ -60,6 +63,7 @@ export default function ModalEnrollmentForm({
                         value={enrollment.nome}
                         onChange={e => setEnrollment({ ...enrollment, nome: e.target.value })}
                     />
+
                     <Input
                         type='text'
                         width='100%'
@@ -68,6 +72,7 @@ export default function ModalEnrollmentForm({
                         value={enrollment.cpf}
                         onChange={e => setEnrollment({ ...enrollment, cpf: e.target.value })}
                     />
+
                     <Input
                         type='text'
                         width='100%'
@@ -76,23 +81,25 @@ export default function ModalEnrollmentForm({
                         value={enrollment.celular}
                         onChange={e => setEnrollment({ ...enrollment, celular: e.target.value })}
                     />
-                    <Text
-                        as='select'
+
+                    <select
                         className='w-full h-[40px] p-2 border border-gray-base rounded-md'
                         value={enrollment.formaPagamento}
                         onChange={e => setEnrollment({ ...enrollment, formaPagamento: e.target.value })}
                     >
-                        <Text as='option' value=''>Forma de Pagamento</Text>
-                        <Text as='option' value='link'>Link de Pagamento</Text>
-                    </Text>
+                        <option value=''>Forma de Pagamento</option>
+                        <option value='link'>Link de Pagamento</option>
+                    </select>
+
                     <Button
                         className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                         onClick={onClick}
+                        disabled={isDisabled}
                     >
                         Enviar
                     </Button>
-                </Text>
-            </Text>
-        </Text>
+                </div>
+            </div>
+        </div>
     )
 }

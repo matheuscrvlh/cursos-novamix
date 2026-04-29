@@ -1,4 +1,3 @@
-// react
 import { useContext, useState } from 'react';
 
 // HEAD
@@ -9,7 +8,6 @@ import { Trash, Edit } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
-import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
@@ -31,7 +29,6 @@ export default function ChildrensAdmin() {
         culinaristas
     } = useContext(DadosContext);
 
-    // ================= STATES =================
     const [form, setForm] = useState({
         nomeCurso: '',
         data: '',
@@ -48,7 +45,6 @@ export default function ChildrensAdmin() {
     const [step, setStep] = useState('close');
     const [previewImagem, setPreviewImagem] = useState(null);
 
-    // ================= CREATE =================
     function handleSubmit() {
         if (!form.nomeCurso || !form.data || !form.hora || !form.loja) {
             alert('Preencha os campos obrigatórios');
@@ -59,12 +55,7 @@ export default function ChildrensAdmin() {
 
         Object.entries(form).forEach(([key, value]) => {
             if (!value) return;
-
-            if (key === 'fotos') {
-                formData.append('fotos', value);
-            } else {
-                formData.append(key, value);
-            }
+            formData.append(key, value);
         });
 
         addCursoInfantil(formData);
@@ -82,7 +73,6 @@ export default function ChildrensAdmin() {
         });
     }
 
-    // ================= EDIT =================
     function handleEdit(id) {
         const curso = cursosInfantis.find(c => c.id === id);
         if (!curso) return;
@@ -97,7 +87,6 @@ export default function ChildrensAdmin() {
 
     function salvarEdicao() {
         const formData = new FormData();
-
         formData.append('id', cursoEditar.id);
 
         Object.entries(cursoEditar).forEach(([key, value]) => {
@@ -129,75 +118,78 @@ export default function ChildrensAdmin() {
     }
 
     return (
-        <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
+        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <Head title='Admin | Cursos Infantis'/>
             <SideBar />
 
-            <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
+            <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Cursos Infantis'} />
 
-                <Text as='section' className='flex flex-col gap-10 mt-10 w-[92dvw] lg:w-[78vw]'>
+                <section className='flex flex-col gap-10 mt-10 w-[92dvw] lg:w-[78vw]'>
 
                     {/* FORM */}
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                        <Text className='font-bold text-gray-text mb-4'>
+                        <p className='font-bold text-gray-text mb-4'>
                             CADASTRE UM CURSO INFANTIL
-                        </Text>
+                        </p>
 
-                        <Text className='flex flex-wrap gap-3 text-gray-dark'>
+                        <div className='flex flex-wrap gap-3 text-gray-dark'>
 
-                            <Input placeholder='Curso'
+                            <Input
+                                placeholder='Curso'
                                 value={form.nomeCurso}
                                 onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
                             />
 
-                            <Input type='date'
+                            <Input
+                                type='date'
                                 value={form.data}
                                 onChange={e => setForm({ ...form, data: e.target.value })}
                             />
 
-                            <Input type='time'
+                            <Input
+                                type='time'
                                 value={form.hora}
                                 onChange={e => setForm({ ...form, hora: e.target.value })}
                             />
 
-                            {/* LOJA */}
-                            <Text as='select'
+                            <select
                                 value={form.loja}
                                 onChange={e => setForm({ ...form, loja: e.target.value })}
                                 className='w-[150px] h-[40px] border border-gray-base rounded-md'
                             >
-                                <Text as='option' value=''>Selecione a loja</Text>
-                                <Text as='option' value='Prado'>Prado</Text>
-                                <Text as='option' value='Teresopolis'>Teresopolis</Text>
-                            </Text>
+                                <option value=''>Selecione a loja</option>
+                                <option value='Prado'>Prado</option>
+                                <option value='Teresopolis'>Teresópolis</option>
+                            </select>
 
-                            {/* CULINARISTA */}
-                            <Text as='select'
+                            <select
                                 value={form.culinarista}
                                 onChange={e => setForm({ ...form, culinarista: e.target.value })}
                                 className='w-[200px] h-[40px] border border-gray-base rounded-md'
                             >
-                                <Text as='option' value=''>Selecione a culinarista</Text>
-
+                                <option value=''>Selecione a culinarista</option>
                                 {culinaristas?.map(c => (
-                                    <Text key={c.id} as='option' value={c.nomeCulinarista}>
+                                    <option key={c.id} value={c.nomeCulinarista}>
                                         {c.nomeCulinarista}
-                                    </Text>
+                                    </option>
                                 ))}
-                            </Text>
+                            </select>
 
-                            <Input placeholder='Valor'
+                            <Input
+                                placeholder='Valor'
                                 value={form.valor}
                                 onChange={e => setForm({ ...form, valor: e.target.value })}
                             />
 
-                            <Input placeholder='Duração'
+                            <Input
+                                placeholder='Duração'
                                 value={form.duracao}
                                 onChange={e => setForm({ ...form, duracao: e.target.value })}
                             />
 
-                            <Input placeholder='Categoria'
+                            <Input
+                                placeholder='Categoria'
                                 value={form.categoria}
                                 onChange={e => setForm({ ...form, categoria: e.target.value })}
                             />
@@ -221,24 +213,24 @@ export default function ChildrensAdmin() {
                             >
                                 Adicionar
                             </Button>
-
-                        </Text>
+                        </div>
                     </CardDash>
 
                     {/* LISTAGEM */}
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                        <Text className='font-bold text-gray-text'>CURSOS INFANTIS</Text>
+                        <p className='font-bold text-gray-text'>CURSOS INFANTIS</p>
 
-                        <Text className='mt-4 max-h-[400px] overflow-y-auto'>
-                            {cursosInfantis.map((c, i) => (
-                                <Text key={i}
+                        <div className='mt-4 max-h-[400px] overflow-y-auto'>
+                            {cursosInfantis.map((c) => (
+                                <div
+                                    key={c.id}
                                     className='flex justify-between items-center p-2 border-b text-gray-text'
                                 >
-                                    <Text>
+                                    <span>
                                         {c.nomeCurso} - {formatarData(c.data)}
-                                    </Text>
+                                    </span>
 
-                                    <Text className='flex gap-2'>
+                                    <div className='flex gap-2'>
                                         <Button
                                             className='bg-red-base text-white p-2'
                                             onClick={() => removeCursoInfantil(c.id)}
@@ -252,10 +244,10 @@ export default function ChildrensAdmin() {
                                         >
                                             <Edit />
                                         </Button>
-                                    </Text>
-                                </Text>
+                                    </div>
+                                </div>
                             ))}
-                        </Text>
+                        </div>
                     </CardDash>
 
                     {/* MODAL */}
@@ -265,15 +257,15 @@ export default function ChildrensAdmin() {
                         width='90%'
                         maxWidth='600px'
                     >
-                        <Text className='font-bold text-xl mb-5 text-gray-text'>
+                        <p className='font-bold text-xl mb-5 text-gray-text'>
                             Editar Curso Infantil
-                        </Text>
+                        </p>
 
                         {previewImagem && (
                             <img src={previewImagem} className='w-[200px] mb-4' />
                         )}
 
-                        <Text className='flex flex-col gap-3'>
+                        <div className='flex flex-col gap-3'>
 
                             <Input
                                 value={cursoEditar.nomeCurso || ''}
@@ -286,58 +278,45 @@ export default function ChildrensAdmin() {
                                 onChange={e => setCursoEditar({ ...cursoEditar, data: e.target.value })}
                             />
 
-                            <Text
-                                as='select'
+                            <select
                                 className='w-full h-[40px] border border-gray-base rounded-md'
                                 value={cursoEditar.loja || ''}
-                                onChange={e => setCursoEditar({
-                                    ...cursoEditar,
-                                    loja: e.target.value
-                                })}
+                                onChange={e => setCursoEditar({ ...cursoEditar, loja: e.target.value })}
                             >
-                                <Text as='option' value=''>Selecione a loja</Text>
-                                <Text as='option' value='Prado'>Prado</Text>
-                                <Text as='option' value='Teresopolis'>Teresopolis</Text>
-                            </Text>
+                                <option value=''>Selecione a loja</option>
+                                <option value='Prado'>Prado</option>
+                                <option value='Teresopolis'>Teresópolis</option>
+                            </select>
 
-                            <Text
-                                as='select'
+                            <select
                                 className='w-full h-[40px] border border-gray-base rounded-md'
                                 value={cursoEditar.culinarista || ''}
-                                onChange={e => setCursoEditar({
-                                    ...cursoEditar,
-                                    culinarista: e.target.value
-                                })}
+                                onChange={e => setCursoEditar({ ...cursoEditar, culinarista: e.target.value })}
                             >
-                                <Text as='option' value=''>Selecione a culinarista</Text>
-
+                                <option value=''>Selecione a culinarista</option>
                                 {culinaristas?.map(c => (
-                                    <Text
-                                        key={c.id}
-                                        as='option'
-                                        value={c.nomeCulinarista}
-                                    >
+                                    <option key={c.id} value={c.nomeCulinarista}>
                                         {c.nomeCulinarista}
-                                    </Text>
+                                    </option>
                                 ))}
-                            </Text>
+                            </select>
 
-                              <Input
+                            <Input
                                 value={cursoEditar.valor || ''}
                                 onChange={e => setCursoEditar({ ...cursoEditar, valor: e.target.value })}
                             />
 
-                              <Input
+                            <Input
                                 value={cursoEditar.duracao || ''}
                                 onChange={e => setCursoEditar({ ...cursoEditar, duracao: e.target.value })}
                             />
 
-                              <Input
+                            <Input
                                 value={cursoEditar.categoria || ''}
                                 onChange={e => setCursoEditar({ ...cursoEditar, categoria: e.target.value })}
                             />
 
-                              <Input
+                            <Input
                                 type='time'
                                 value={cursoEditar.hora || ''}
                                 onChange={e => setCursoEditar({ ...cursoEditar, hora: e.target.value })}
@@ -350,11 +329,11 @@ export default function ChildrensAdmin() {
                                 Salvar
                             </Button>
 
-                        </Text>
+                        </div>
                     </Modal>
 
-                </Text>
-            </Text>
-        </Text>
+                </section>
+            </main>
+        </div>
     );
 }

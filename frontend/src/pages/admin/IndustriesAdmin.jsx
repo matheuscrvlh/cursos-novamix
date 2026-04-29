@@ -1,4 +1,3 @@
-// Head
 import { Head } from '../../components/Head'
 
 // Layouts
@@ -13,7 +12,6 @@ import { Trash, Edit } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
-import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
@@ -29,7 +27,6 @@ export default function IndustriesAdmin() {
         editIndustry
     } = useContext(DadosContext);
 
-    // ================= STATES =================
     const [formIndustria, setFormIndustria] = useState({
         razaoSocial: '',
         nome: '',
@@ -45,7 +42,6 @@ export default function IndustriesAdmin() {
     const [industriaEditar, setIndustriaEditar] = useState({});
     const [step, setStep] = useState('close');
 
-    // ================= CREATE =================
     function handleSubmitIndustria() {
         if (!formIndustria.nome || !formIndustria.razaoSocial) {
             alert('Nome e Razão Social são obrigatórios');
@@ -73,33 +69,32 @@ export default function IndustriesAdmin() {
         });
     }
 
-    // ================= EDIT =================
     function handleEditIndustria(id) {
         const industria = industrias.find(i => i.id === id);
         setIndustriaEditar(industria);
         setStep('edit');
     }
 
-async function salvarEdicao() {
-    const formData = new FormData();
+    async function salvarEdicao() {
+        const formData = new FormData();
 
-    formData.append('id', industriaEditar.id);
+        formData.append('id', industriaEditar.id);
 
-    Object.entries(industriaEditar).forEach(([key, value]) => {
-        if (value === undefined || value === null) return;
+        Object.entries(industriaEditar).forEach(([key, value]) => {
+            if (value === undefined || value === null) return;
 
-        if (key === 'foto') {
-            if (value instanceof File) {
-                formData.append('foto', value);
+            if (key === 'foto') {
+                if (value instanceof File) {
+                    formData.append('foto', value);
+                }
+            } else {
+                formData.append(key, value);
             }
-        } else {
-            formData.append(key, value);
-        }
-    });
+        });
 
-    await editIndustry(formData);
-    setStep('close');
-}
+        await editIndustry(formData);
+        setStep('close');
+    }
 
     function closeModal() {
         setIndustriaEditar({});
@@ -107,22 +102,22 @@ async function salvarEdicao() {
     }
 
     return (
-        <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
+        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <Head title='Admin | Industrias'/>
             <SideBar />
 
-            <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
+            <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Indústrias'} />
 
-                <Text as='section' className='flex flex-col gap-10 mt-10 w-[92dvw] lg:w-[78vw]'>
+                <section className='flex flex-col gap-10 mt-10 w-[92dvw] lg:w-[78vw]'>
 
                     {/* FORM */}
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                        <Text className='font-bold text-gray-text mb-4'>
+                        <p className='font-bold text-gray-text mb-4'>
                             CADASTRE UMA INDÚSTRIA
-                        </Text>
+                        </p>
 
-                        <Text className='flex flex-wrap gap-3 text-gray-dark'>
+                        <div className='flex flex-wrap gap-3 text-gray-dark'>
 
                             <Input placeholder='Razão Social'
                                 value={formIndustria.razaoSocial}
@@ -184,24 +179,24 @@ async function salvarEdicao() {
                                 Adicionar Indústria
                             </Button>
 
-                        </Text>
+                        </div>
                     </CardDash>
 
                     {/* LISTAGEM */}
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                        <Text className='font-bold text-gray-text'>INDÚSTRIAS</Text>
+                        <p className='font-bold text-gray-text'>INDÚSTRIAS</p>
 
-                        <Text as='div' className='mt-4 max-h-[400px] overflow-y-auto'>
+                        <div className='mt-4 max-h-[400px] overflow-y-auto'>
                             {industrias.map(i => (
-                                <Text 
+                                <div 
                                     key={i.id} 
                                     className='flex justify-between items-center p-2 border-b text-gray-text'
                                 >
-                                    <Text>
+                                    <p>
                                         {i.nome} - {i.razaoSocial}
-                                    </Text>
+                                    </p>
 
-                                    <Text className='flex gap-2'>
+                                    <div className='flex gap-2'>
                                         <Button
                                             className='bg-red-base text-white p-2 hover:bg-red-light'
                                             onClick={() => removeIndustry(i.id)}
@@ -215,10 +210,10 @@ async function salvarEdicao() {
                                         >
                                             <Edit />
                                         </Button>
-                                    </Text>
-                                </Text>
+                                    </div>
+                                </div>
                             ))}
-                        </Text>
+                        </div>
                     </CardDash>
 
                     {/* MODAL EDIT */}
@@ -228,11 +223,11 @@ async function salvarEdicao() {
                         width='90%'
                         maxWidth='600px'
                     >
-                        <Text className='font-bold text-xl mb-5 text-gray-text'>
+                        <p className='font-bold text-xl mb-5 text-gray-text'>
                             Editar Indústria
-                        </Text>
+                        </p>
 
-                        <Text className='flex flex-col gap-3 text-gray-dark'>
+                        <div className='flex flex-col gap-3 text-gray-dark'>
 
                             <Input
                                 placeholder='Nome'
@@ -302,11 +297,11 @@ async function salvarEdicao() {
                                 Salvar
                             </Button>
 
-                        </Text>
+                        </div>
                     </Modal>
 
-                </Text>
-            </Text>
-        </Text>
+                </section>
+            </main>
+        </div>
     );
 }
