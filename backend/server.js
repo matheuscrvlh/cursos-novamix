@@ -27,5 +27,5 @@ app.use('/api/cursos-infantis', cursosInfantisRoutes);
 app.use('/api/inscricoes-infantis', inscricoesInfantisRoutes);
 
 app.listen(3001, () => {
-  console.log('Backend torando na porta 3001');
+  console.log('Backend torando na porta 3001 --');
 });
