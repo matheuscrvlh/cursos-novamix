@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
+const db = require('../db')
 
 const uploadCursos = createUpload('cursos');
 
@@ -26,124 +27,102 @@ const safeRead = (filePath) => {
 const write = (p, d) => fs.writeFileSync(p, JSON.stringify(d, null, 2));
 
 router.get('/', (req, res) => {
-  res.json(safeRead(cursosPath));
+  db.all(`
+    SELECT c.*, 
+    GROUP_CONCAT(f.url) as fotos
+    FROM cursos c
+    LEFT JOIN fotos f ON f.cursoId = c.id
+    GROUP BY c.id
+  `, [], (err, rows) => {
+    if (err) return res.status(500).json(err);
+
+    const cursos = rows.map(c => ({
+      ...c,
+      fotos: c.fotos ? c.fotos.split(',') : []
+    }));
+
+    res.json(cursos);
+  });
 });
 
 router.post('/', uploadCursos.array('fotos', 5), (req, res) => {
-  const cursos = safeRead(cursosPath);
-  const assentos = safeRead(assentosPath);
-
   const cursoId = uuidv4();
-  const fotos = req.files
-    ? req.files.map(f => `/uploads/cursos/${f.filename}`)
-    : [];
 
-  const novoCurso = {
-    id: cursoId,
-    nomeCurso: req.body.nomeCurso,
-    culinarista: req.body.culinarista,
-    categoria: req.body.categoria,
-    duracao: req.body.duracao,
-    data: req.body.data,
-    hora: req.body.hora,
-    loja: req.body.loja,
-    valor: req.body.valor,
-    fotos
-  };
+  db.run(`
+    INSERT INTO cursos 
+    (id, nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [
+    cursoId,
+    req.body.nomeCurso,
+    req.body.culinarista,
+    req.body.categoria,
+    req.body.duracao,
+    req.body.data,
+    req.body.hora,
+    req.body.loja,
+    req.body.valor
+  ]);
 
-  cursos.push(novoCurso);
+  // fotos
+  if (req.files) {
+    req.files.forEach(file => {
+      db.run(
+        `INSERT INTO fotos (cursoId, url) VALUES (?, ?)`,
+        [cursoId, `/uploads/cursos/${file.filename}`]
+      );
+    });
+  }
 
-  // gerar 24 assentos
+  // assentos
   for (let i = 1; i <= 24; i++) {
-    assentos.push({
-      id: i,
-      cursoId,
-      status: 'livre'
-    });
-  }
-
-  write(cursosPath, cursos);
-  write(assentosPath, assentos);
-
-  res.status(201).json(novoCurso);
-});
-
-router.put('/:id', uploadCursos.array('fotos', 5), (req, res) => {
-  const cursos = safeRead(cursosPath);
-  const index = cursos.findIndex(c => c.id === req.params.id);
-
-  if (index === -1) {
-    return res.status(404).json({ message: 'Curso não encontrado' });
-  }
-
-  if (req.files && req.files.length > 0) {
-    cursos[index].fotos.forEach(foto => {
-      const fotoPath = path.join(__dirname, '..', foto);
-      if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
-    });
-
-    cursos[index].fotos = req.files.map(
-      f => `/uploads/cursos/${f.filename}`
+    db.run(
+      `INSERT INTO assentos (id, cursoId, status) VALUES (?, ?, ?)`,
+      [i, cursoId, 'livre']
     );
   }
 
-  cursos[index] = {
-    ...cursos[index],
-    nomeCurso: req.body.nomeCurso ?? cursos[index].nomeCurso,
-    culinarista: req.body.culinarista ?? cursos[index].culinarista,
-    categoria: req.body.categoria ?? cursos[index].categoria,
-    duracao: req.body.duracao ?? cursos[index].duracao,
-    valor: req.body.valor ? parseFloat(req.body.valor) : cursos[index].valor,
-    data: req.body.data ?? cursos[index].data,
-    hora: req.body.hora ?? cursos[index].hora,
-    loja: req.body.loja ?? cursos[index].loja,
-    modalidade: req.body.modalidade ?? cursos[index].modalidade
-  };
+  res.status(201).json({ id: cursoId });
+});
 
-  write(cursosPath, cursos);
-  res.json(cursos[index]);
+router.put('/:id', uploadCursos.array('fotos', 5), (req, res) => {
+  const id = req.params.id;
+
+  db.run(`
+    UPDATE cursos SET
+      nomeCurso = COALESCE(?, nomeCurso),
+      culinarista = COALESCE(?, culinarista),
+      categoria = COALESCE(?, categoria),
+      duracao = COALESCE(?, duracao),
+      data = COALESCE(?, data),
+      hora = COALESCE(?, hora),
+      loja = COALESCE(?, loja),
+      valor = COALESCE(?, valor)
+    WHERE id = ?
+  `, [
+    req.body.nomeCurso,
+    req.body.culinarista,
+    req.body.categoria,
+    req.body.duracao,
+    req.body.data,
+    req.body.hora,
+    req.body.loja,
+    req.body.valor,
+    id
+  ]);
+
+  res.json({ message: 'Atualizado' });
 });
 
 router.delete('/:id', (req, res) => {
-  const cursos = safeRead(cursosPath);
-  const assentos = safeRead(assentosPath);
-  const inscricoes = safeRead(inscricoesPath);
+  const id = req.params.id;
 
-  const cursoIndex = cursos.findIndex(c => c.id === req.params.id);
+  db.run(`DELETE FROM cursos WHERE id = ?`, [id]);
+  db.run(`DELETE FROM fotos WHERE cursoId = ?`, [id]);
+  db.run(`DELETE FROM assentos WHERE cursoId = ?`, [id]);
+  db.run(`DELETE FROM inscricoes WHERE cursoId = ?`, [id]);
 
-  if (cursoIndex === -1) {
-    return res.status(404).json({ message: 'Curso não encontrado' });
-  }
-
-  const curso = cursos[cursoIndex];
-
-  // apagar fotos do curso 
-  if (curso.fotos && curso.fotos.length > 0) {
-    curso.fotos.forEach(foto => {
-      const fotoPath = path.join(__dirname, '..', foto);
-      if (fs.existsSync(fotoPath)) {
-        fs.unlinkSync(fotoPath);
-      }
-    });
-  }
-
-  // romover curso
-  cursos.splice(cursoIndex, 1);
-
-  // remover inscrições
-  const inscricoesAtualizadas = inscricoes.filter(
-    i => i.cursoId !== req.params.id
-  );
-
-  // remove assentos
-  const assentosAtualizados = assentos.filter(
-    a => a.cursoId !== req.params.id
-  );
-
-  write(cursosPath, cursos);
-  write(assentosPath, assentosAtualizados);
-  write(inscricoesPath, inscricoesAtualizadas);
-
-  return res.status(204).send();
+  res.sendStatus(204);
 });
+
 module.exports = router;

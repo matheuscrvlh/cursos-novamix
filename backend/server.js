@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const db = require('./db');
 
 const cursosRoutes = require('./routes/cursos.routes');
 const assentosRoutes = require('./routes/assentos.routes');
