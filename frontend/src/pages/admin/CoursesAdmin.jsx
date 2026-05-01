@@ -57,11 +57,12 @@ export default function CoursesAdmin() {
         const formData = new FormData();
 
         Object.entries(form).forEach(([key, value]) => {
+            if (key === 'imagem') return; // ignora o campo imagem no loop
             if (value) formData.append(key, value);
         });
 
         if (form.imagem) {
-            formData.append('fotos', form.imagem);
+            formData.append('fotos', form.imagem); // só adiciona com o nome certo
         }
 
         addCourses(formData);
