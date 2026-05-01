@@ -1,4 +1,4 @@
-const URL = '/api'
+const URL = 'http://localhost:3001/api'
 
 // ============== POST
 export async function postCourse(formData) {
@@ -7,6 +7,8 @@ export async function postCourse(formData) {
             method: "POST",
             body: formData
         });
+
+        console.log()
 
         return res.json()
 

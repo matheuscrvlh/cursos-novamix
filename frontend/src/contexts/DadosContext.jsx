@@ -117,11 +117,9 @@ export function DadosProvider({ children }) {
     // ============  POST  ============
     async function addCourses(formData) {
         try {
-            const res = await postCourse(formData)
+            await postCourse(formData)
 
-            const novoCurso = await res;
-            setCursos(prev => [...prev, novoCurso]);
-
+            await updateCourses()
         } catch (error) {
             console.error('Erro ao adicionar curso:', error);
             alert('Erro ao adicionar curso');
