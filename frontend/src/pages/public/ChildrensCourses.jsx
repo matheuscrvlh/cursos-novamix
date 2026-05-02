@@ -11,6 +11,7 @@ import { postEnrollment, getSeats } from '../../api/enrollment.services';
 import { useThemeColor } from '../../hooks/useThemeColor';
 
 // COMPONENTS
+import Text from '../../components/Text'
 import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
@@ -35,16 +36,17 @@ export default function ChildrensCourses() {
         culinaristas,
     } = useContext(DadosContext);
 
-    // ========= STATES =========
+    // ========= STATES  =========
+    // ========= STATE CADASTRO CLIENTE  ========= 
     const [form, setForm] = useState({
         cursoId: '',
         nome: '',
         cpf: '',
         telefone: '',
-        formaPagamento: '',
         assento: ''
     });
 
+    // ========= STATE FILTERS ========= 
     const [filters, setFilters] = useState({
         dataInicial: '',
         dataFinal: '',
@@ -52,21 +54,26 @@ export default function ChildrensCourses() {
         culinarista: ''
     });
 
+    // ========= STATE CURSOS ========= 
     const [cursosAtuais, setCursosAtuais] = useState([]);
     const [cursosFiltrados, setCursosFiltrados] = useState([]);
 
+    // ========= STATE VAGAS ========= 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);
 
+    // ========= STATE ASSENTOS ========= 
     const [cursoSelecionado, setCursoSelecionado] = useState('');
     const [assentos, setAssentos] = useState([]);
 
+    // ========= STATE MODAL ========= 
     const [step, setStep] = useState(null)
     const [showModalFilters, setShowModalFilters ] = useState(false)
 
-    // ========= SUBMIT =========
+    // ========= FUNCOES  =========
+    // =========  FUNCOES CADASTRO CLIENTE ========= 
     function handleSubmit() {
-        if (!form.nome || !form.cpf || !form.telefone || !form.formaPagamento) {
+        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
             alert('Preencha todos os campos.')
             return;
         }
@@ -75,7 +82,7 @@ export default function ChildrensCourses() {
             cursoId: form.cursoId,
             nome: form.nome,
             cpf: form.cpf,
-            telefone: form.telefone,
+            celular: form.celular,
             formaPagamento: form.formaPagamento,
             assento: form.assento
         });
@@ -84,22 +91,25 @@ export default function ChildrensCourses() {
             cursoId: '',
             nome: '',
             cpf: '',
-            telefone: '',
+            celular: '',
             formaPagamento: '',
             assento: ''
         });
     }
 
-    // ========= ASSENTOS =========
     useEffect(() => {
-        if (!cursoSelecionado) return;
+        if (!cursoSelecionado) {
+            return
+        }
 
         getSeats(cursoSelecionado)
             .then(setAssentos)
             .catch(console.error)
     }, [cursoSelecionado])
 
-    // ========= VAGAS =========
+    // ====== FUNCOES
+
+    // buscar vagas livres e reservadas
     useEffect(() => {
         if (!cursosInfantis.length) return;
 
@@ -122,12 +132,12 @@ export default function ChildrensCourses() {
         loadVagas();
     }, [cursosInfantis, refreshVagas]);
 
-    // ========= CURSOS ATUAIS =========
+    // PEGAR CURSOS ATUAIS
     useEffect(() => {
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
 
-        const filtrados = cursosInfantis.filter(c => {
+        const cursosFiltrados = cursosInfantis.filter(c => {
             if (!c.data) return false;
 
             const dataCurso = new Date(c.data);
@@ -136,20 +146,20 @@ export default function ChildrensCourses() {
             return dataCurso >= hoje;
         });
 
-        setCursosAtuais(filtrados);
+        setCursosAtuais(cursosFiltrados);
     }, [cursosInfantis]);
 
-    // ========= FILTROS =========
+    // FILTRAR CURSOS
     useEffect(() => {
-        const filtrados = cursosAtuais
-            .filter(c => !filters.dataInicial || new Date(c.data) >= new Date(filters.dataInicial))
-            .filter(c => !filters.dataFinal || new Date(c.data) <= new Date(filters.dataFinal))
-            .filter(c => !filters.loja || c.loja === filters.loja)
-            .filter(c => !filters.culinarista || c.culinarista === filters.culinarista)
-
-        setCursosFiltrados(filtrados)
+            const filtrados = cursosAtuais
+                .filter(c =>  !filters.dataInicial || new Date(c.data) >= new Date(filters.dataInicial) )
+                .filter(c => !filters.dataFinal || new Date(c.data) <= new Date(filters.dataFinal) )
+                .filter(c => !filters.loja || c.loja === filters.loja )
+                .filter(c => !filters.culinarista || c.culinarista === filters.culinarista)
+            setCursosFiltrados(filtrados)
     }, [filters, cursosAtuais])
 
+    // LIMPAR FILTROS
     function clearFilters() {
         setFilters({
             dataInicial: '',
@@ -159,7 +169,7 @@ export default function ChildrensCourses() {
         })
     }
 
-    // ========= MODAIS =========
+    // =========  FUNCOES MODAL ========= 
     const openForm = (cursoId) => {
         setForm(prev => ({ ...prev, cursoId }))
         setStep('form')
@@ -167,7 +177,7 @@ export default function ChildrensCourses() {
     }
 
     const openAssento = () => {
-        if (!form.nome || !form.cpf || !form.telefone || !form.formaPagamento) {
+        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
             alert('Preencha todos os campos.')
             return;
         }
@@ -184,20 +194,15 @@ export default function ChildrensCourses() {
 
     const closeModal = () => {
         setStep(null)
-        setForm({
-            cursoId: '',
-            nome: '',
-            cpf: '',
-            telefone: '',
-            formaPagamento: '',
-            assento: ''
-        })
+        setForm({ cursoId: '', nome: '', cpf: '', telefone: '', formaPagamento: '', assento: '' })
         setCursoSelecionado('')
         setRefreshVagas(prev => prev + 1);
     }
     
+    // FUNDO PAGINA
     useThemeColor('#FF8D0A');
 
+    // ROLAR TELA AO TOPO
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth'})
     }, [])
@@ -205,9 +210,10 @@ export default function ChildrensCourses() {
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Loja Novamix | Cursos Infantis' />
+            <Text as='section' className='bg-gray mb-20'>
 
-            <section className='bg-gray mb-20'>
-
+                {/* ================= CONTEUDO ================= */}
+                {/* ======== CURSOS ======== */}
                 <AllChildrensCoursesSections
                     cursosFiltrados={cursosFiltrados}
                     vagasPorCurso={vagasPorCurso}
@@ -216,16 +222,17 @@ export default function ChildrensCourses() {
                     setShowModalFilters={setShowModalFilters}
                 />
 
-                {/* ===== MODAIS ===== */}
-
+                {/* ================= MODAIS ================= */}
+                {/* ======== MODAL FORM ======== */}
                 <ModalEnrollmentForm
                     isOpen={step === 'form'}
-                    onClick={openAssento}
-                    onClose={closeModal}
+                    onClick={() => openAssento()}
+                    onClose={() => closeModal()}
                     enrollment={form}
                     setEnrollment={setForm}
                 />
 
+                {/* ======== MODAL ASSENTOS */}
                 <ModalEnrollmentSeats
                     isOpen={step === 'assento'}
                     onClick={() => {
@@ -238,12 +245,14 @@ export default function ChildrensCourses() {
                     assentos={assentos}
                 />
 
+                {/* ======== MODAL SUCESS ======== */}
                 <ModalEnrollmentSucess
                     isOpen={step === 'confirmacao'}
-                    onClick={closeModal}
+                    onClick={() => closeModal()}
                     onClose={closeModal}
                 />
 
+                {/* ======== MODAL FILTERS ======== */}
                 {showModalFilters && 
                     <ModalFilters
                         isOpen={showModalFilters}
@@ -252,11 +261,11 @@ export default function ChildrensCourses() {
                         filtersCourses={filters}
                         setFiltersCourses={setFilters}
                         culinaristas={culinaristas}
-                        clear={clearFilters}
+                        clear={() => clearFilters()}
                     />
                 }
-
-            </section>
+            </Text>
         </PublicLayout>
     )
 }
+

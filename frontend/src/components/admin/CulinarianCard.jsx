@@ -1,3 +1,5 @@
+import Text from "../Text"
+
 export default function CulinarianCard({
     imagem,
     culinarista,
@@ -6,61 +8,70 @@ export default function CulinarianCard({
     instagram,
     lojas,
     cursos,
-    className = '',
+    className,
     onClick
+
 }) {
     return (
-        <div
+        <Text
+            as='div'
             className={`bg-white rounded-xl max-w-[300px] min-w-[250px] min-h-[380px] flex flex-col shadow-md
-            hover:shadow-lg transition-shadow
-            ${className}`}
+             hover:shadow-lg transition-shadow
+             ${className || ''}`}
         >
-            <div className='relative rounded-md h-[200px] overflow-hidden'>
-                <p className='absolute top-2 right-2 text-white bg-orange-base rounded-md p-2 text-sm md:text-base font-semibold z-10'>
-                    {culinarista}
-                </p>
-
+            <Text as='div' className='relative rounded-md h-[200px] overflow-hidden'>
+                <Text
+                    as='p'
+                    className='absolute top-2 text-white right-2 bg-orange-base rounded-md p-2 text-sm md:text-base font-semibold z-10'
+                >
+                    {`${culinarista}`}
+                </Text>
                 {imagem ? (
-                    <img
+                    <Text
+                        as='img'
                         src={imagem}
-                        alt={culinarista || 'Imagem do culinarista'}
+                        alt={culinarista}
                         className='rounded-t-md w-full h-full object-cover'
                     />
                 ) : (
-                    <div className='w-full h-full bg-gray-200 flex items-center justify-center text-gray-500'>
+                    <Text
+                        as='div'
+                        className='w-full h-full bg-gray-200 flex items-center justify-center text-gray-500'
+                    >
                         Sem imagem
-                    </div>
+                    </Text>
                 )}
-            </div>
+            </Text>
 
-            <h2 className='text-blue-base font-bold text-xl md:text-2xl p-4 line-clamp-2'>
+            <Text
+                as='h1'
+                className='text-blue-base font-bold text-xl md:text-2xl p-4 line-clamp-2'
+            >
                 {culinarista}
-            </h2>
+            </Text>
 
-            <div className='mt-auto p-4 pt-0'>
-                <p className='text-gray-dark text-sm md:text-base mb-1'>
-                    {industria}
-                </p>
+            <Text as='div' className='mt-auto p-4 pt-0'>
+                <Text as='p' className='text-gray-dark text-sm md:text-base mb-1'>
+                    {`${industria}`}
+                </Text>
+                <Text as='p' className='text-gray-dark text-sm md:text-base mb-1'>
+                    {`${lojas}`}
+                </Text>
+                <Text as='p' className='text-gray-dark text-sm md:text-base mb-1'>
+                    {`${cursos}`}
+                </Text>
 
-                <p className='text-gray-dark text-sm md:text-base mb-1'>
-                    {lojas}
-                </p>
-
-                <p className='text-gray-dark text-sm md:text-base mb-1'>
-                    {cursos}
-                </p>
-
-                <button
+                <Text
+                    as='button'
                     className='bg-orange-base rounded-sm p-2 md:p-3 w-full mt-3 text-white text-sm md:text-base font-semibold cursor-pointer hover:bg-orange-light hover:shadow-md transition-all'
-                    onClick={onClick}
+                    onClick={onClick ? onClick : null}
                 >
                     Ver detalhes
-                </button>
-
-                <p className='text-gray-dark text-center text-sm md:text-base mt-2'>
+                </Text>
+                <Text as='p' className='text-gray-dark text-center text-sm md:text-base mt-2'>
                     {`${telefone} - ${instagram}`}
-                </p>
-            </div>
-        </div>
+                </Text>
+            </Text>
+        </Text>
     )
 }

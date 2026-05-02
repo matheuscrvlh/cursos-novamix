@@ -1,4 +1,8 @@
+// React
 import { useEffect } from "react"
+
+// Components
+import Text from "../../Text"
 import Button from "../../Button"
 
 export default function ModalEnrollmentSeats({
@@ -16,6 +20,7 @@ export default function ModalEnrollmentSeats({
         } else {
             document.body.style.overflow = ''
         }
+
         return () => {
             document.body.style.overflow = ''
         }
@@ -24,76 +29,74 @@ export default function ModalEnrollmentSeats({
     if (!isOpen) return null
 
     return (
-        <div
+        <Text
+            as='div'
             className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
             onClick={onClose}
         >
-            <div
+            <Text
+                as='div'
                 className='bg-white shadow-md rounded-md p-4 md:p-6 w-[90%] max-w-[500px] h-auto max-h-[90vh] overflow-y-auto'
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                <button
+                <Text
+                    as='button'
                     className='cursor-pointer text-xl md:text-2xl font-bold text-gray-dark hover:text-orange-base float-right mb-2'
                     onClick={onClose}
-                    aria-label="Fechar modal"
                 >
                     ✕
-                </button>
-
+                </Text>
                 <div className="clear-both" />
-
-                <div className='flex flex-col gap-3 h-full'>
-                    <p className='font-semibold text-center text-lg md:text-xl mt-auto'>
+                <Text as='div' className='flex flex-col gap-3 h-full'>
+                    <Text as='p' className='font-semibold text-center text-lg md:text-xl mt-auto'>
                         Escolha seu assento para assistir ao curso
-                    </p>
-
-                    <div className='bg-gray-base rounded-sm p-4 md:p-6 text-center text-white font-semibold mb-6 md:mb-10'>
+                    </Text>
+                    <Text
+                        as='div'
+                        className='bg-gray-base rounded-sm p-4 md:p-6 text-center text-white font-semibold mb-6 md:mb-10'
+                    >
                         Balcão
-                    </div>
+                    </Text>
 
-                    {/* Grid de assentos */}
-                    <div className='grid grid-cols-6 gap-2'>
+                    {/* Grid de assentos responsivo */}
+                    <Text as='div' className='grid grid-cols-6 gap-2'>
                         {assentos.map(assento => {
-                            const isReservado = assento.status === 'reservado'
-                            const isSelecionado = enrollment.assento === assento.id
+                            const isReservado = assento.status === 'reservado';
+                            const isSelecionado = enrollment.assento === assento.id;
 
                             return (
-                                <button
+                                <Text
+                                    as='p'
                                     key={assento.id}
-                                    disabled={isReservado}
-                                    className={`p-2 rounded-full text-center font-semibold text-white text-sm
-                                        ${isReservado
-                                            ? 'bg-gray-base cursor-not-allowed'
-                                            : isSelecionado
-                                                ? 'bg-gray-dark'
-                                                : 'bg-orange-base hover:bg-orange-light'
-                                        }
-                                    `}
+                                    className={`p-2 rounded-full text-center font-semibold text-white text-sm ${isReservado
+                                        ? 'bg-gray-base cursor-not-allowed'
+                                        : isSelecionado
+                                            ? 'bg-gray-dark cursor-pointer'
+                                            : 'bg-orange-base cursor-pointer'
+                                        }`}
                                     onClick={() => {
-                                        if (isReservado) return
+                                        if (isReservado) return;
 
                                         setEnrollment(prev => ({
                                             ...prev,
                                             assento: assento.id
-                                        }))
+                                        }));
                                     }}
                                 >
                                     {assento.id}
-                                </button>
+                                </Text>
                             )
                         })}
-                    </div>
-
+                    </Text>
                     <Button
                         className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                         onClick={onClick}
-                        disabled={!enrollment.assento}
                     >
                         Enviar
                     </Button>
-                </div>
-            </div>
-        </div>
+                </Text>
+            </Text>
+        </Text>
     )
 }

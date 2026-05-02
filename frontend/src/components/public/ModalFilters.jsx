@@ -5,6 +5,7 @@ import { useEffect } from "react"
 import { X } from 'lucide-react'
 
 // COMPONENTS
+import Text from "../Text"
 import Input from "../Input"
 import Button from "../Button"
 
@@ -24,91 +25,82 @@ export default function ModalFilters({
         } else {
             document.body.style.overflow = 'auto'
         }
-
         return () => {
             document.body.style.overflow = 'auto'
         }
     }, [isOpen])
 
     return (
-        <div className={`
+        <Text as='div' className={`
             fixed flex justify-end bg-black/40 top-0 w-dvw h-dvh z-50
             transition-opacity duration-300
-            ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+            ${isOpen ? 'opacity-100' : 'opacity-0'}
         `}>
-            <div className={`
+            <Text as='div' className={`
                 bg-white w-[60dvw] h-full p-5
                 transform transition-transform duration-300 ease-in-out
                 md:w-[25vw]
                 ${isOpen ? 'translate-x-0' : 'translate-x-full'}
             `}>
-                
                 <X
                     className='ml-auto cursor-pointer hover:scale-105'
                     onClick={onClose}
                 />
-
-                <p className='text-gray-dark text-xl font-bold text-center'>
-                    {nameModal}
-                </p>
-
-                <div className='flex flex-col w-[90%] gap-6 mt-10 mx-auto'>
-                    
-                    <div className='w-full'>
-                        <p>Data Inicial</p>
+                <Text as='p' className='text-gray-dark text-xl font-bold text-center'>{nameModal}</Text>
+                <Text as='div' className='flex flex-col w-[90%] gap-6 mt-10 mx-auto'>
+                    <Text as='div' className='w-full'>
+                        <Text as='p'>Data Inicial</Text>
                         <Input
                             type='date'
                             className='bg-white cursor-pointer px-3.5 md:w-full md:px-0'
                             value={filtersCourses.dataInicial}
                             onChange={e => setFiltersCourses({ ...filtersCourses, dataInicial: e.target.value })}
                         />
-                    </div>
-
-                    <div className='w-full'>
-                        <p>Data Final</p>
+                    </Text>
+                    <Text as='div' className='w-full'>
+                        <Text as='p'>Data Final</Text>
                         <Input
                             type='date'
                             className='bg-white cursor-pointer px-3.5 md:w-full md:px-0'
                             value={filtersCourses.dataFinal}
                             onChange={e => setFiltersCourses({ ...filtersCourses, dataFinal: e.target.value })}
                         />
-                    </div>
-
-                    <div className='w-full'>
-                        <select
-                            className='bg-white py-3 w-full border border-black/50 rounded-md cursor-pointer'
+                    </Text>
+                    <Text as='div' className='mt-auto w-full'>
+                        <Text
+                            as='select'
+                            className='bg-white py-3 w-full border border-black/50 rounded-md cursor-pointer'            
                             value={filtersCourses.loja}
                             onChange={e => setFiltersCourses({ ...filtersCourses, loja: e.target.value })}
                         >
-                            <option value=''>Loja</option>
-                            <option value='Prado'>Prado</option>
-                            <option value='Teresopolis'>Teresópolis</option>
-                        </select>
-                    </div>
-
-                    <div className='w-full'>
-                        <select
+                            <Text as='option' value=''>Loja</Text>
+                            <Text as='option' value='Prado'>Prado</Text>
+                            <Text as='option' value='Teresopolis'>Teresópolis</Text>
+                        </Text>
+                    </Text>
+                    <Text as='div' className='mt-auto w-full'>
+                        <Text
+                            as='select'
                             className='bg-white py-3 w-full border border-black/50 rounded-md cursor-pointer'
                             value={filtersCourses.culinarista}
                             onChange={e => setFiltersCourses({ ...filtersCourses, culinarista: e.target.value })}
                         >
-                            <option value=''>Culinarista</option>
-                            {culinaristas.map(c => (
-                                <option key={c.id} value={c.nomeCulinarista}>
-                                    {c.nomeCulinarista}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
+                            <Text as='option' value=''>Culinarista</Text>
+                            {culinaristas.map(c => {
+                                return (
+                                    <Text key={c.id} as='option' value={c.nomeCulinarista}>{c.nomeCulinarista}</Text>
+                                )
+                            })}
+                        </Text>
+                    </Text>
                     <Button
                         className='bg-orange-base hover:bg-orange-light text-white w-full mt-10'
                         onClick={clear}
                     >
                         Limpar
                     </Button>
-                </div>
-            </div>
-        </div>
+                </Text>
+            </Text>
+        </Text>
     )
 }

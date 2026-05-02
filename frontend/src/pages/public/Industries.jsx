@@ -1,5 +1,8 @@
 // REACT
-import { useContext, useEffect } from "react"
+import { useContext, useEffect, useState } from "react"
+
+// COMPONENTS
+import Text from "../../components/Text"
 
 // LAYOUT
 import PublicLayout from "../../layouts/public/PublicLayout"
@@ -18,8 +21,12 @@ import { bannerHome } from '../../assets/images/banner'
 
 export default function Culinarians() {
 
-    const { industrias } = useContext(DadosContext)
+    // CONTEXT
+    const {
+        industrias
+    } = useContext(DadosContext)
 
+    // ROLAR TELA AO TOPO
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth'})
     }, [])
@@ -27,11 +34,12 @@ export default function Culinarians() {
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Loja Novamix | Cursos' />
+            <Text as='section' className='bg-gray mb-20'>
 
-            <section className='bg-gray mb-20'>
-                <AllIndustries industrias={industrias} />
-            </section>
+                {/* ================= CONTEUDO ================= */}
+                <AllIndustries industrias={industrias}/>
 
+            </Text>
         </PublicLayout>
     )
 }

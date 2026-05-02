@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 
 // Components
+import Text from '../../components/Text'
 import LinkSideBar from '../../components/admin/LinkSideBar'
 import ConfirmModal from '../../components/admin/ModalConfirm'
 
@@ -30,7 +31,7 @@ export default function SideBar() {
 
     return (
         <>
-            {/* menu hambúrguer */}
+            {/* menu hambuerguer*/}
             <button
                 onClick={toggleMenu}
                 className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-orange-base rounded-md shadow-lg hover:bg-orange-light transition-colors"
@@ -43,17 +44,18 @@ export default function SideBar() {
                 )}
             </button>
 
-            {/* overlay mobile */}
-            <div
+            {/* apenas para mobile */}
+            <Text as='div'
                 className={`
                     lg:hidden fixed inset-0 bg-black transition-opacity duration-300
                     ${isMenuOpen ? 'opacity-50 z-30 pointer-events-auto' : 'opacity-0 pointer-events-none'}
                 `}
                 onClick={closeMenu}
-            />
+            ></Text>
 
             {/* Sidebar */}
-            <aside
+            <Text 
+                as='aside' 
                 className={`
                     flex flex-col h-[100dvh] bg-white shadow-sm
                     fixed top-0 left-0 w-[280px]
@@ -63,20 +65,21 @@ export default function SideBar() {
                     lg:translate-x-0 lg:z-auto
                 `}
             >
-                <img
-                    src={logoNm}
-                    alt="Logo"
-                    className="w-[50%] ml-auto mr-auto mt-4"
+                <Text 
+                    as='img' 
+                    src={logoNm} 
+                    alt='Logo'
+                    className='w-[50%] ml-auto mr-auto mt-4' 
                 />
-
-                <nav className="flex flex-col w-[80%] mx-auto gap-3 mt-8">
+                
+                <Text as='nav' className='flex flex-col w-[80%] ml-auto mr-auto gap-3 mt-8'>
                     <LinkSideBar to='/dashboardAdmin' onClick={closeMenu}>
                         Dashboard
                     </LinkSideBar>
                     <LinkSideBar to='/cursosAdmin' onClick={closeMenu}>
                         Cursos
                     </LinkSideBar>
-                    <LinkSideBar to='/infantisAdmin' onClick={closeMenu}>
+                    <LinkSideBar to ='/infantisAdmin' onClick={closeMenu}>
                         Cursos Infantis
                     </LinkSideBar>
                     <LinkSideBar to='/inscricoesAdmin' onClick={closeMenu}>
@@ -88,22 +91,20 @@ export default function SideBar() {
                     <LinkSideBar to='/industriasAdmin' onClick={closeMenu}>
                         Industrias
                     </LinkSideBar>
-                </nav>
+                </Text>
 
-                <button
+                <Link
                     onClick={() => {
                         setOpenModal(true)
                         closeMenu()
                     }}
-                    className="
-                        bg-red-light shadow-sm w-[80%] rounded-md p-2 text-white
-                        font-semibold cursor-pointer hover:bg-red-base
-                        mx-auto mt-auto mb-[10%]
-                    "
+                    className='bg-red-light shadow-sm w-[80%] rounded-md p-2 text-white
+                        font-semibold cursor-pointer hover:bg-red-base ml-auto mr-auto mt-auto mb-[10%] text-center
+                    '
                 >
                     Sair
-                </button>
-            </aside>
+                </Link>
+            </Text>
 
             <ConfirmModal
                 isOpen={openModal}
@@ -112,6 +113,6 @@ export default function SideBar() {
                 onConfirm={handleLogout}
                 onCancel={() => setOpenModal(false)}
             />
-        </>
+        </>  
     )
 }

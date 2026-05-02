@@ -1,3 +1,4 @@
+// Head
 import { Head } from '../../components/Head'
 
 // Layouts
@@ -12,6 +13,7 @@ import { Trash, Edit } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
+import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
@@ -27,6 +29,7 @@ export default function IndustriesAdmin() {
         editIndustry
     } = useContext(DadosContext);
 
+    // ================= STATES =================
     const [formIndustria, setFormIndustria] = useState({
         razaoSocial: '',
         nome: '',
@@ -42,6 +45,7 @@ export default function IndustriesAdmin() {
     const [industriaEditar, setIndustriaEditar] = useState({});
     const [step, setStep] = useState('close');
 
+    // ================= CREATE =================
     function handleSubmitIndustria() {
         if (!formIndustria.nome || !formIndustria.razaoSocial) {
             alert('Nome e Razão Social são obrigatórios');
@@ -69,32 +73,33 @@ export default function IndustriesAdmin() {
         });
     }
 
+    // ================= EDIT =================
     function handleEditIndustria(id) {
         const industria = industrias.find(i => i.id === id);
         setIndustriaEditar(industria);
         setStep('edit');
     }
 
-    async function salvarEdicao() {
-        const formData = new FormData();
+async function salvarEdicao() {
+    const formData = new FormData();
 
-        formData.append('id', industriaEditar.id);
+    formData.append('id', industriaEditar.id);
 
-        Object.entries(industriaEditar).forEach(([key, value]) => {
-            if (value === undefined || value === null) return;
+    Object.entries(industriaEditar).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
 
-            if (key === 'foto') {
-                if (value instanceof File) {
-                    formData.append('foto', value);
-                }
-            } else {
-                formData.append(key, value);
+        if (key === 'foto') {
+            if (value instanceof File) {
+                formData.append('foto', value);
             }
-        });
+        } else {
+            formData.append(key, value);
+        }
+    });
 
-        await editIndustry(formData);
-        setStep('close');
-    }
+    await editIndustry(formData);
+    setStep('close');
+}
 
     function closeModal() {
         setIndustriaEditar({});
@@ -102,22 +107,22 @@ export default function IndustriesAdmin() {
     }
 
     return (
-        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
+        <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <Head title='Admin | Industrias'/>
             <SideBar />
 
-            <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
+            <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Indústrias'} />
 
-                <section className='flex flex-col gap-10 mt-10 w-[92dvw] lg:w-[78vw]'>
+                <Text as='section' className='flex flex-col gap-10 mt-10 w-[92dvw] lg:w-[78vw]'>
 
                     {/* FORM */}
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                        <p className='font-bold text-gray-text mb-4'>
+                        <Text className='font-bold text-gray-text mb-4'>
                             CADASTRE UMA INDÚSTRIA
-                        </p>
+                        </Text>
 
-                        <div className='flex flex-wrap gap-3 text-gray-dark'>
+                        <Text className='flex flex-wrap gap-3 text-gray-dark'>
 
                             <Input placeholder='Razão Social'
                                 value={formIndustria.razaoSocial}
@@ -179,24 +184,24 @@ export default function IndustriesAdmin() {
                                 Adicionar Indústria
                             </Button>
 
-                        </div>
+                        </Text>
                     </CardDash>
 
                     {/* LISTAGEM */}
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                        <p className='font-bold text-gray-text'>INDÚSTRIAS</p>
+                        <Text className='font-bold text-gray-text'>INDÚSTRIAS</Text>
 
-                        <div className='mt-4 max-h-[400px] overflow-y-auto'>
+                        <Text as='div' className='mt-4 max-h-[400px] overflow-y-auto'>
                             {industrias.map(i => (
-                                <div 
+                                <Text 
                                     key={i.id} 
                                     className='flex justify-between items-center p-2 border-b text-gray-text'
                                 >
-                                    <p>
+                                    <Text>
                                         {i.nome} - {i.razaoSocial}
-                                    </p>
+                                    </Text>
 
-                                    <div className='flex gap-2'>
+                                    <Text className='flex gap-2'>
                                         <Button
                                             className='bg-red-base text-white p-2 hover:bg-red-light'
                                             onClick={() => removeIndustry(i.id)}
@@ -210,10 +215,10 @@ export default function IndustriesAdmin() {
                                         >
                                             <Edit />
                                         </Button>
-                                    </div>
-                                </div>
+                                    </Text>
+                                </Text>
                             ))}
-                        </div>
+                        </Text>
                     </CardDash>
 
                     {/* MODAL EDIT */}
@@ -223,11 +228,11 @@ export default function IndustriesAdmin() {
                         width='90%'
                         maxWidth='600px'
                     >
-                        <p className='font-bold text-xl mb-5 text-gray-text'>
+                        <Text className='font-bold text-xl mb-5 text-gray-text'>
                             Editar Indústria
-                        </p>
+                        </Text>
 
-                        <div className='flex flex-col gap-3 text-gray-dark'>
+                        <Text className='flex flex-col gap-3 text-gray-dark'>
 
                             <Input
                                 placeholder='Nome'
@@ -297,11 +302,11 @@ export default function IndustriesAdmin() {
                                 Salvar
                             </Button>
 
-                        </div>
+                        </Text>
                     </Modal>
 
-                </section>
-            </main>
-        </div>
+                </Text>
+            </Text>
+        </Text>
     );
 }

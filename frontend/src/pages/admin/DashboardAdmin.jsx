@@ -9,6 +9,7 @@ import TopBar from '../../layouts/admin/TopBar'
 import { useContext, useState, useEffect } from 'react';
 
 // Components
+import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import CourseCard from '../../components/public/CourseCard'
 import CulinarianCard from '../../components/admin/CulinarianCard';
@@ -21,18 +22,30 @@ import { getCourses } from '../../api/courses.services';
 import { DadosContext } from '../../contexts/DadosContext';
 
 export default function DashboardAdmin() {
+    // ========= STATE VAGAS ========= 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);
-    const [inscricoes, setInscricoes] = useState({});
-    const [filtroCursos, setFiltroCursos] = useState({});
 
-    const { cursos, culinaristas } = useContext(DadosContext);
+    // ========= STATE INSCRICOES ========= 
+    const [inscricoes, setInscricoes] = useState([]);
 
+    // ========= STATE CURSOS HOJE ========= 
+    const [filtroCursos, setFiltroCursos] = useState([]);
+
+    // ========= DADOS CONTEXT
+    const {
+        cursos,
+        culinaristas,
+    } = useContext(DadosContext);
+
+    // ======= FUNCOES =========
+    // layout data
     function layoutData(data) {
         const [ano, mes, dia] = data.split('-');
         return `${dia}/${mes}/${ano}`;
     }
 
+    // BUSCA VAGAS LIVRES E RESERVADAS
     useEffect(() => {
         if (!cursos.length) return;
 
@@ -55,193 +68,252 @@ export default function DashboardAdmin() {
         loadVagas();
     }, [cursos, refreshVagas]);
 
+    // BUSCA DADOS DASHBOARD
     useEffect(() => {
         const hoje = new Date().toLocaleDateString('PT-BR');
 
         async function buscarDadosDashboard() {
             try {
+                // CONSULTA
                 const dataInscricoes = await getTotalEnrollment();
                 const dataCursos = await getCourses();
 
+                // CURSOS
                 const cursosHojeFiltrados = dataCursos.filter(c => layoutData(c.data) === hoje);
 
-                const contagemCursosHoje = cursosHojeFiltrados.length;
-                const idCursosHoje = cursosHojeFiltrados.map(c => c.id);
+                const contagemCursosHoje = cursosHojeFiltrados.length
+                const idCursosHoje = cursosHojeFiltrados.map(c => c.id)
 
-                const cursosConcluidos = dataCursos.filter(c => layoutData(c.data) < hoje).length;
+                const cursosConcluidos = dataCursos.filter(c => 
+                    layoutData(c.data) < hoje
+                ).length;
                 const cursosAtivos = dataCursos.filter(c => 
                     layoutData(c.data) > hoje || layoutData(c.data) === hoje
                 ).length;
+                // STATE CURSOS
+                setFiltroCursos({cursosHoje: contagemCursosHoje, cursosConcluidos: cursosConcluidos, cursosAtivos: cursosAtivos})
 
-                setFiltroCursos({
-                    cursosHoje: contagemCursosHoje,
-                    cursosConcluidos,
-                    cursosAtivos
-                });
-
+                // =============================================
+                // INSCRICOES
                 const inscricoesPagas = dataInscricoes.filter(i => i.status === 'pago').length;
                 const inscricoesVerificar = dataInscricoes.filter(i => i.status === 'verificar').length;
 
                 const inscricoesHojePagas = dataInscricoes.filter(i => 
-                    i.status === 'pago' && idCursosHoje.includes(i.cursoId)
+                    i.status === 'pago' &&
+                    idCursosHoje.includes(i.cursoId)
                 ).length;
-
+                
                 const inscricoesHojeVerificar = dataInscricoes.filter(i => 
-                    i.status === 'verificar' && idCursosHoje.includes(i.cursoId)
+                    i.status === 'verificar' &&
+                    idCursosHoje.includes(i.cursoId)
                 ).length;
-
-                setInscricoes({
-                    pagas: inscricoesPagas,
-                    verificar: inscricoesVerificar,
-                    hojePagas: inscricoesHojePagas,
-                    hojeVerificar: inscricoesHojeVerificar
-                });
+                // STATE INSCRICOES
+                setInscricoes({pagas: inscricoesPagas, verificar: inscricoesVerificar, hojePagas: inscricoesHojePagas, hojeVerificar: inscricoesHojeVerificar})
 
             } catch(err) {
-                console.log('Erro dashboard', err);
+                console.log('Nao foi possivel pegar as inscricoes', err);
             }
         }
-
-        buscarDadosDashboard();
-    }, []);
+        buscarDadosDashboard() 
+    }, [])
 
     return (
-        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
+        <Text as='div' className='flex w-full min-h-[100vdh] bg-gray overflow-x-hidden'>
             <Head title='Admin | Dashboard'/>
             <SideBar />
+           <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
+                <TopBar title={'Dashboard'} />
+                <Text as='div' className='w-full flex flex-col font-semibold gap-3 justify-center mt-50%'>
+                    <Text as='section' className='
+                        flex flex-col gap-10 mt-10 w-[92dvw]
+                        md:gap-20 md:w-[78vw]
+                    '>
+                        {/* ======== INFO CARDS ==========*/}
+                        <Text as='section' className='w-full'>
+                            <Text as='article' className='
+                                flex flex-col gap-7
+                                md:flex-row md:gap-7
+                            '>
+                                <Text as='div' className='
+                                    grid grid-cols-2 gap-7 w-full h-auto
+                                    md:grid-cols-2 md:w-[50%] md:h-[350px]
+                                '>
+                                    <CardDash>
+                                        <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
+                                            {!filtroCursos.cursosAtivos
+                                                ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                                : <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{filtroCursos.cursosAtivos}</Text>
+                                            }
+                                            <Text as='p' className='mb-auto text-gray-text'>Cursos Ativos</Text>
+                                        </Text>
+                                        
+                                    </CardDash>
+                                    <CardDash>
+                                        <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
+                                            {cursos.length > 0 
+                                                ? <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{cursos.length}</Text>
+                                                : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                            }
+                                            <Text as='p' className='mb-auto text-gray-text'>Cursos Totais</Text>
+                                        </Text>
+                                    </CardDash>
+                                    <CardDash>
+                                        <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
+                                            {filtroCursos.cursosHoje > 0
+                                                ? <Text as='p' className='font-semibold text-6xl mt-auto text-green-base'>{filtroCursos.cursosHoje}</Text>
+                                                : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                            }
+                                            <Text as='p' className='mb-auto text-gray-text'>Cursos Hoje</Text>
+                                        </Text>
+                                    </CardDash>
+                                    <CardDash>
+                                        <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
+                                            {!filtroCursos.cursosConcluidos 
+                                                ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                                : <Text as='p' className='font-semibold text-6xl mt-auto text-red-base'>{filtroCursos.cursosConcluidos}</Text>
+                                            }
+                                            <Text as='p' className='mb-auto text-gray-text'>Cursos Concluidos</Text>
+                                        </Text>
+                                    </CardDash>
+                                </Text>
+                                <Text as='div' className='
+                                    flex gap-7
+                                    md:w-[50%] md:h-[350px]
+                                '>
+                                    <CardDash className='w-[50%] flex flex-col justify-center items-center'>
+                                        <Text as='div' className='w-full flex flex-col text-center'>
+                                            <Text as='p' className='font-bold text-2xl text-gray-text mb-4'>TOTAIS</Text>
+                                            <Text as='p' className='font-semibold text-4xl text-green-base'>{!inscricoes.pagas ? '0' : inscricoes.pagas}</Text>
+                                            <Text as='p'>Inscricoes pagas</Text> 
+                                        </Text>
+                                        <Text as='div' className='w-full flex flex-col text-center mt-4'>
+                                            <Text as='p' className='font-semibold text-4xl text-red-base'>{!inscricoes.verificar ? '0' : inscricoes.verificar}</Text>
+                                            <Text as='p'>Inscricoes a verificar</Text>
+                                        </Text>
+                                    </CardDash>
+                                    <CardDash className='w-[50%] flex flex-col justify-center items-center'>
+                                        <Text as='div' className='w-full flex flex-col text-center mt-4'>
+                                            <Text as='p' className='font-bold text-2xl text-gray-text mb-4'>HOJE</Text>
+                                            <Text as='p' className='font-semibold text-4xl text-green-base'>{!inscricoes.hojePagas ? '0' : inscricoes.hojePagas}</Text>
+                                            <Text as='p'>Inscricoes pagas</Text> 
+                                        </Text>
+                                        <Text as='div' className='w-full flex flex-col text-center mt-4'>
+                                            <Text as='p' className='font-semibold text-4xl text-red-base'>{!inscricoes.hojeVerificar ? '0' : inscricoes.hojeVerificar}</Text>
+                                            <Text as='p'>Inscricoes a verificar</Text>
+                                        </Text>
+                                    </CardDash>
+                                </Text>
+                            </Text>
+                        </Text>
+                        {/* ======== CURSOS ==========*/}
+                        <Text as='section' className='flex flex-col gap-3'>
+                            <Text as='h2' className='font-bold text-gray-text text-center text-2xl'>CURSOS</Text>
+                            <Text as='article' className='flex flex-col gap-5'>
+                                <Text as='div'>
+                                    {cursos.length === 0 
+                                        ? <Text as='p'>Nenhum curso encontrado</Text>
+                                        : <Text
+                                                as='div'
+                                                className="
+                                                    w-[100dvw]
+                                                    max-h-[600px]
+                                                    h-full
+                                                    flex
+                                                    gap-2
+                                                    overflow-x-auto
+                                                    overflow-y-hidden
+                                                    whitespace-nowrap
+                                                    md:w-[81vw]
+                                                    p-4
+                                                "
+                                            >
+                                                {cursos.map(curso => {
+                                                    const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
-            <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
-                <TopBar title='Dashboard' />
+                                                    return (
+                                                        <CourseCard
+                                                            key={curso.id}
+                                                            id={curso.id}
+                                                            curso={curso.nomeCurso}
+                                                            data={layoutData(curso.data)}
+                                                            horario={curso.hora}
+                                                            loja={curso.loja}
+                                                            culinarista={curso.culinarista}
+                                                            duracao={curso.duracao}
+                                                            categoria={curso.categoria}
+                                                            vagasLivres={vagas.livres}
+                                                            vagasReservadas={vagas.reservadas}
+                                                            valor={curso.valor}
+                                                            className='min-w-[300px] scale-90'
+                                                            imagem={
+                                                                curso.fotos?.length
+                                                                    ? curso.fotos[0]
+                                                                    : null
+                                                            }
+                                                        />
+                                                    )
+                                                })}
+                                            </Text>
+                                        }
+                                </Text>
+                            </Text>
+                        </Text>
+                        {/* ======== CULINARISTAS ==========*/}
+                        <Text as='section' className='flex flex-col gap-3'>
+                            <Text as='h2' className='font-bold text-gray-text text-2xl text-center'>CULINARISTAS</Text>
+                            <Text as='article'>
+                                {culinaristas.length === 0 
+                                    ? <Text as='p'>Nenhuma culinarista encontrada</Text>
+                                    : <Text
+                                        as='div'
+                                        className="
+                                            w-[100dvw]
+                                            max-h-[600px]
+                                            h-full
+                                            flex
+                                            gap-2
+                                            overflow-x-auto
+                                            overflow-y-hidden
+                                            whitespace-nowrap
+                                            md:w-[81vw]
+                                            p-4
+                                        "
+                                    >
+                                        {culinaristas.map(culinarista => {
 
-                <div className='flex flex-col gap-10 mt-10 w-[92dvw] md:w-[78vw]'>
-
-                    {/* CARDS */}
-                    <section>
-                        <div className='flex flex-col gap-7 md:flex-row'>
-                            
-                            <div className='grid grid-cols-2 gap-7 w-full md:w-[50%]'>
-                                
-                                <CardDash>
-                                    <div className='flex flex-col text-center'>
-                                        <p className='text-6xl mt-auto'>
-                                            {filtroCursos.cursosAtivos || '0'}
-                                        </p>
-                                        <p>Cursos Ativos</p>
-                                    </div>
-                                </CardDash>
-
-                                <CardDash>
-                                    <div className='flex flex-col text-center'>
-                                        <p className='text-6xl mt-auto'>
-                                            {cursos.length || '0'}
-                                        </p>
-                                        <p>Cursos Totais</p>
-                                    </div>
-                                </CardDash>
-
-                                <CardDash>
-                                    <div className='flex flex-col text-center'>
-                                        <p className='text-6xl mt-auto text-green-base'>
-                                            {filtroCursos.cursosHoje || '0'}
-                                        </p>
-                                        <p>Cursos Hoje</p>
-                                    </div>
-                                </CardDash>
-
-                                <CardDash>
-                                    <div className='flex flex-col text-center'>
-                                        <p className='text-6xl mt-auto text-red-base'>
-                                            {filtroCursos.cursosConcluidos || '0'}
-                                        </p>
-                                        <p>Cursos Concluídos</p>
-                                    </div>
-                                </CardDash>
-
-                            </div>
-
-                            <div className='flex gap-7 md:w-[50%]'>
-
-                                <CardDash className='w-1/2 text-center'>
-                                    <p className='text-2xl font-bold'>Totais</p>
-                                    <p className='text-4xl text-green-base'>{inscricoes.pagas || 0}</p>
-                                    <p>Pagas</p>
-
-                                    <p className='text-4xl text-red-base mt-4'>{inscricoes.verificar || 0}</p>
-                                    <p>A verificar</p>
-                                </CardDash>
-
-                                <CardDash className='w-1/2 text-center'>
-                                    <p className='text-2xl font-bold'>Hoje</p>
-                                    <p className='text-4xl text-green-base'>{inscricoes.hojePagas || 0}</p>
-                                    <p>Pagas</p>
-
-                                    <p className='text-4xl text-red-base mt-4'>{inscricoes.hojeVerificar || 0}</p>
-                                    <p>A verificar</p>
-                                </CardDash>
-
-                            </div>
-
-                        </div>
-                    </section>
-
-                    {/* CURSOS */}
-                    <section>
-                        <h2 className='text-2xl font-bold text-center'>Cursos</h2>
-
-                        {cursos.length === 0 ? (
-                            <p>Nenhum curso</p>
-                        ) : (
-                            <div className='flex gap-2 overflow-x-auto p-4'>
-                                {cursos.map(curso => {
-                                    const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
-
-                                    return (
-                                        <CourseCard
-                                            key={curso.id}
-                                            id={curso.id}
-                                            curso={curso.nomeCurso}
-                                            data={layoutData(curso.data)}
-                                            horario={curso.hora}
-                                            loja={curso.loja}
-                                            culinarista={curso.culinarista}
-                                            duracao={curso.duracao}
-                                            categoria={curso.categoria}
-                                            vagasLivres={vagas.livres}
-                                            vagasReservadas={vagas.reservadas}
-                                            valor={curso.valor}
-                                        />
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </section>
-
-                    {/* CULINARISTAS */}
-                    <section>
-                        <h2 className='text-2xl font-bold text-center'>Culinaristas</h2>
-
-                        {culinaristas.length === 0 ? (
-                            <p>Nenhuma</p>
-                        ) : (
-                            <div className='flex gap-2 overflow-x-auto p-4'>
-                                {culinaristas.map(c => (
-                                    <CulinarianCard
-                                        key={c.id}
-                                        culinarista={c.nomeCulinarista}
-                                        industria={c.industria}
-                                        telefone={c.telefone}
-                                        instagram={c.instagram}
-                                        lojas={c.lojas}
-                                        cursos={c.cursos}
-                                        imagem={c.foto}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </section>
-
-                </div>
-            </main>
-        </div>
-    );
+                                            return (
+                                                <CulinarianCard
+                                                    key={culinarista.id}
+                                                    culinarista={culinarista.nomeCulinarista}
+                                                    industria={culinarista.industria}
+                                                    telefone={culinarista.telefone}
+                                                    instagram={culinarista.instagram}
+                                                    className='min-w-[300px] scale-90'
+                                                    lojas={
+                                                        culinarista.lojas.length === 0
+                                                            ? 'Nenhuma'
+                                                            : culinarista.lojas
+                                                    }
+                                                    cursos={
+                                                        culinarista.cursos.length === 0
+                                                            ? 'Nenhum'
+                                                            : culinarista.cursos
+                                                    }
+                                                    imagem={
+                                                        culinarista.foto === null
+                                                            ? null
+                                                            : culinarista.foto
+                                                    }
+                                                />
+                                            )
+                                        })}
+                                    </Text>
+                                }
+                            </Text>
+                        </Text>
+                    </Text>
+                </Text>
+            </Text>
+        </Text>
+    )
 }

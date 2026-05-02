@@ -1,4 +1,8 @@
+// React
 import { useEffect } from "react"
+
+// Components
+import Text from "../../Text"
 import Input from "../../Input"
 import Button from "../../Button"
 
@@ -16,49 +20,38 @@ export default function ModalEnrollmentForm({
         } else {
             document.body.style.overflow = ''
         }
-        
+
         return () => {
             document.body.style.overflow = ''
         }
     }, [isOpen])
 
-    useEffect(() => {
-        console.log(enrollment)
-    }, [enrollment])
-
     if (!isOpen) return null
 
-    const isDisabled =
-        !enrollment.nome ||
-        !enrollment.cpf ||
-        !enrollment.celular ||
-        !enrollment.formaPagamento
-
     return (
-        <div
+        <Text
+            as='div'
             className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
             onClick={onClose}
         >
-            <div
+            <Text
+                as='div'
                 className='bg-white shadow-md rounded-md p-4 md:p-6 w-[90%] max-w-[500px] h-auto max-h-[90vh] overflow-y-auto'
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                <button
+                <Text
+                    as='button'
                     className='cursor-pointer text-xl md:text-2xl font-bold text-gray-dark hover:text-orange-base float-right mb-2'
                     onClick={onClose}
-                    aria-label="Fechar modal"
                 >
                     ✕
-                </button>
-
+                </Text>
                 <div className="clear-both" />
-
-                <div className='flex flex-col gap-3 h-full'>
-                    <p className='font-semibold mb-3 text-center text-lg md:text-xl mt-auto'>
-                        Digite suas informações para cadastrarmos você!
-                    </p>
-
+                <Text as='div' className='flex flex-col gap-3 h-full'>
+                    <Text as='p' className='font-semibold mb-3 text-center text-lg md:text-xl mt-auto'>
+                        Digite suas informações para cadastramos você!
+                    </Text>
                     <Input
                         type='text'
                         width='100%'
@@ -67,7 +60,6 @@ export default function ModalEnrollmentForm({
                         value={enrollment.nome}
                         onChange={e => setEnrollment({ ...enrollment, nome: e.target.value })}
                     />
-
                     <Input
                         type='text'
                         width='100%'
@@ -76,34 +68,31 @@ export default function ModalEnrollmentForm({
                         value={enrollment.cpf}
                         onChange={e => setEnrollment({ ...enrollment, cpf: e.target.value })}
                     />
-
                     <Input
                         type='text'
                         width='100%'
                         height='40px'
-                        placeholder='Celular'
+                        placeholder='Telefone'
                         value={enrollment.celular}
                         onChange={e => setEnrollment({ ...enrollment, celular: e.target.value })}
                     />
-
-                    <select
+                    <Text
+                        as='select'
                         className='w-full h-[40px] p-2 border border-gray-base rounded-md'
                         value={enrollment.formaPagamento}
                         onChange={e => setEnrollment({ ...enrollment, formaPagamento: e.target.value })}
                     >
-                        <option value=''>Forma de Pagamento</option>
-                        <option value='link'>Link de Pagamento</option>
-                    </select>
-
+                        <Text as='option' value=''>Forma de Pagamento</Text>
+                        <Text as='option' value='link'>Link de Pagamento</Text>
+                    </Text>
                     <Button
                         className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
                         onClick={onClick}
-                        disabled={isDisabled}
                     >
                         Enviar
                     </Button>
-                </div>
-            </div>
-        </div>
+                </Text>
+            </Text>
+        </Text>
     )
 }

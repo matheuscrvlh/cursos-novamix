@@ -1,12 +1,15 @@
 // React
 import { useEffect } from "react"
 
+// Components
+import Text from "../Text"
+
 export default function Modal({
-    as: Component = 'div',
+    as = 'div',
     width,
     maxWidth,
     height,
-    className = '',
+    className,
     children,
     isOpen,
     onClose,
@@ -27,38 +30,32 @@ export default function Modal({
     if (!isOpen) return null
 
     return (
-        <div
-            className="flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4"
+        <Text
+            as='div'
+            className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
             onClick={onClose}
         >
-            <Component
+            <Text
+                as={as}
                 style={{
                     width,
                     height,
                     maxWidth: maxWidth || width
                 }}
-                className={`
-                    bg-white shadow-md rounded-md p-4 md:p-6
-                    max-h-[90vh] overflow-y-auto
-                    relative
-                    ${className}
-                `}
+                className={`bg-white shadow-md rounded-md p-4 md:p-6 max-h-[90vh] overflow-y-auto ${className}`}
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                <button
-                    className="
-                        absolute top-3 right-3
-                        cursor-pointer text-xl md:text-2xl font-bold
-                        text-gray-dark hover:text-orange-base
-                    "
+                <Text
+                    as='button'
+                    className='cursor-pointer text-xl md:text-2xl font-bold text-gray-dark hover:text-orange-base float-right mb-2'
                     onClick={onClose}
                 >
                     ✕
-                </button>
-
+                </Text>
+                <div className="clear-both" />
                 {children}
-            </Component>
-        </div>
+            </Text>
+        </Text>
     )
 }

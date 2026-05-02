@@ -61,7 +61,7 @@ export function DadosProvider({ children }) {
                 console.error('Erro ao buscar cursos', err)
             })
             .finally(() => {
-                setLoadingCourses(false)
+                setLoadingCulinarian(false)
             });
 
         getCulinarians()
@@ -117,9 +117,11 @@ export function DadosProvider({ children }) {
     // ============  POST  ============
     async function addCourses(formData) {
         try {
-            await postCourse(formData)
+            const res = await postCourse(formData)
 
-            await updateCourses()
+            const novoCurso = await res;
+            setCursos(prev => [...prev, novoCurso]);
+
         } catch (error) {
             console.error('Erro ao adicionar curso:', error);
             alert('Erro ao adicionar curso');

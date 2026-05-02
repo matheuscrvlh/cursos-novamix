@@ -1,3 +1,5 @@
+import Text from "./Text"
+
 export default function Input({
         type = 'text',
         placeholder = '',
@@ -7,7 +9,8 @@ export default function Input({
         ...props
     }) {
     return (
-        <input 
+        <Text 
+            as='input'
             type={type}
             value={value}
             onChange={onChange}
