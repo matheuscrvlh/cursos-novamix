@@ -1,147 +1,143 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-const uploadIndustria = require('../config/uploadIndustria');
+const createUpload = require('../config/createUpload');
+const db = require('../db');
 
+const uploadIndustria = createUpload('industrias');
 const router = express.Router();
 
-const industriasPath = path.join(__dirname, '../data/industrias.json');
-
-const safeRead = (filePath) => {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify([]));
-  }
-    const content = fs.readFileSync(filePath, 'utf8');
-  if (!content.trim()) return [];
-    return JSON.parse(content);
-};
-
-const safeWrite = (filePath, data) => {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-};
-
+// GET todas as indústrias
 router.get('/', (req, res) => {
-  res.json(safeRead(industriasPath));
+  db.all(`SELECT * FROM industrias`, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
 });
 
+// GET indústria por id
 router.get('/:id', (req, res) => {
-    const industrias = safeRead(industriasPath);
-    const industria = industrias.find(i => i.id === req.params.id);
-    if (!industria) {
-        return res.status(404).json({ message: 'Indústria não encontrada' });
-    }
-    res.json(industria);
+  db.get(`SELECT * FROM industrias WHERE id = ?`, [req.params.id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ message: 'Indústria não encontrada' });
+    res.json(row);
+  });
 });
 
+// POST nova indústria
 router.post('/', uploadIndustria.single('foto'), (req, res) => {
-    try {
-      const industrias = safeRead(industriasPath);
-      const { razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site } = req.body;
-      const novaIndustria = {
-        id: uuidv4(),
-        razaoSocial,
-        nome,
-        cnpj: cnpj || '',
-        telefone: telefone || '',
-        email: email || '',
-        endereco: endereco || '',
-        instagram: instagram || '',
-        site: site || '',
-        foto: req.file ? `/uploads/industrias/${req.file.filename}` : null,
-        dataCadastro: new Date().toISOString()
-      };
+  const { razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site } = req.body;
+  const id = uuidv4();
+  const foto = req.file ? `/uploads/industrias/${req.file.filename}` : null;
+  const dataCadastro = new Date().toISOString();
 
-      industrias.push(novaIndustria);
-
-      safeWrite(industriasPath, industrias);
-
-      res.status(201).json(novaIndustria);
-
-    } catch (err) {
-      console.log(err)
+  db.run(`
+    INSERT INTO industrias
+      (id, razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site, foto, dataCadastro)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [
+    id,
+    razaoSocial,
+    nome,
+    cnpj       || '',
+    telefone   || '',
+    email      || '',
+    endereco   || '',
+    instagram  || '',
+    site       || '',
+    foto,
+    dataCadastro
+  ], function(err) {
+    if (err) {
+      console.error('Erro ao inserir indústria:', err);
+      return res.status(500).json({ error: err.message });
     }
+
+    res.status(201).json({ id, razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site, foto, dataCadastro });
+  });
 });
 
+// PUT atualizar indústria
 router.put('/:id', uploadIndustria.single('foto'), (req, res) => {
-  try {
+  const { id } = req.params;
 
-    const industrias = safeRead(industriasPath);
+  db.get(`SELECT * FROM industrias WHERE id = ?`, [id], (err, industria) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!industria) return res.status(404).json({ message: 'Indústria não encontrada' });
 
-    const index = industrias.findIndex(i => i.id === req.params.id);
-
-    if (index === -1) {
-      return res.status(404).json({
-        message: 'Indústria não encontrada'
-      });
+    // apagar foto antiga se uma nova for enviada
+    if (req.file && industria.foto) {
+      const oldPath = path.join(__dirname, '..', industria.foto);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
     }
 
-    if (req.file && industrias[index].foto) {
-      const oldPath = path.join(__dirname, '..', industrias[index].foto);
+    const novaFoto = req.file
+      ? `/uploads/industrias/${req.file.filename}`
+      : industria.foto;
 
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
+    db.run(`
+      UPDATE industrias SET
+        razaoSocial = COALESCE(?, razaoSocial),
+        nome        = COALESCE(?, nome),
+        cnpj        = COALESCE(?, cnpj),
+        telefone    = COALESCE(?, telefone),
+        email       = COALESCE(?, email),
+        endereco    = COALESCE(?, endereco),
+        instagram   = COALESCE(?, instagram),
+        site        = COALESCE(?, site),
+        foto        = ?
+      WHERE id = ?
+    `, [
+      req.body.razaoSocial ?? null,
+      req.body.nome        ?? null,
+      req.body.cnpj        ?? null,
+      req.body.telefone    ?? null,
+      req.body.email       ?? null,
+      req.body.endereco    ?? null,
+      req.body.instagram   ?? null,
+      req.body.site        ?? null,
+      novaFoto,
+      id
+    ], function(err) {
+      if (err) {
+        console.error('Erro ao atualizar indústria:', err);
+        return res.status(500).json({ message: 'Erro ao atualizar indústria' });
       }
-    }
 
-    industrias[index] = {
-      ...industrias[index],
-      razaoSocial: req.body.razaoSocial ?? industrias[index].razaoSocial,
-      nome: req.body.nome ?? industrias[index].nome,
-      cnpj: req.body.cnpj ?? industrias[index].cnpj,
-      telefone: req.body.telefone ?? industrias[index].telefone,
-      email: req.body.email ?? industrias[index].email,
-      endereco: req.body.endereco ?? industrias[index].endereco,
-      instagram: req.body.instagram ?? industrias[index].instagram,
-      site: req.body.site ?? industrias[index].site,
-      foto: req.file
-        ? `/uploads/industrias/${req.file.filename}`
-        : industrias[index].foto
-    };
-
-    safeWrite(industriasPath, industrias);
-
-    res.json(industrias[index]);
-
-  } catch (err) {
-    console.error('ERRO AO ATUALIZAR INDÚSTRIA:', err);
-    res.status(500).json({ message: 'Erro ao atualizar indústria' });
-  }
+      res.json({ message: 'Atualizado' });
+    });
+  });
 });
 
+// DELETE indústria
 router.delete('/:id', (req, res) => {
-  try {
+  const { id } = req.params;
 
-    const industrias = safeRead(industriasPath);
-
-    const index = industrias.findIndex(i => i.id === req.params.id);
-
-    if (index === -1) {
-      return res.status(404).json({
-        message: 'Indústria não encontrada'
-      });
-    }
-
-    const industria = industrias[index];
+  db.get(`SELECT * FROM industrias WHERE id = ?`, [id], (err, industria) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!industria) return res.status(404).json({ message: 'Indústria não encontrada' });
 
     if (industria.foto) {
       const imgPath = path.join(__dirname, '..', industria.foto);
-
-      if (fs.existsSync(imgPath)) {
-        fs.unlinkSync(imgPath);
-      }
+      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
     }
 
-    industrias.splice(index, 1);
+    db.run(`DELETE FROM industrias WHERE id = ?`, [id], function(err) {
+      if (err) {
+        console.error('Erro ao deletar indústria:', err);
+        return res.status(500).json({ message: 'Erro ao excluir indústria' });
+      }
 
-    safeWrite(industriasPath, industrias);
+      res.sendStatus(204);
+    });
+  });
+});
 
-    res.status(204).send();
-
-  } catch (err) {
-    console.error('ERRO AO EXCLUIR INDÚSTRIA:', err);
-    res.status(500).json({ message: 'Erro ao excluir indústria' });
-  }
+// Handler de erro do Multer
+router.use((err, req, res, next) => {
+  if (err) return res.status(400).json({ error: err.message });
+  next();
 });
 
 module.exports = router;

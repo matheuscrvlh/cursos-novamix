@@ -1,27 +1,36 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const db = require('../db');
 
 const router = express.Router();
-const assentosPath = path.join(__dirname, '../data/assentos.json');
 
-const read = () => JSON.parse(fs.readFileSync(assentosPath));
-
+// GET assentos por curso
 router.get('/:cursoId', (req, res) => {
-  const assentos = read().filter(a => a.cursoId === req.params.cursoId);
-  res.json(assentos);
+  db.all(
+    `SELECT * FROM assentos WHERE cursoId = ?`,
+    [req.params.cursoId],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json(rows);
+    }
+  );
 });
 
+// PUT atualizar assentos de um curso
 router.put('/:cursoId', (req, res) => {
   const { cursoId } = req.params;
-  const updatedAssentos = req.body;
+  const updatedAssentos = req.body; // array de assentos
 
-  let assentos = read();
-  assentos = assentos.filter(a => a.cursoId !== cursoId).concat(updatedAssentos);
-  fs.writeFileSync(assentosPath, JSON.stringify(assentos, null, 2));
+  db.serialize(() => {
+    updatedAssentos.forEach(assento => {
+      db.run(
+        `UPDATE assentos SET status = ? WHERE id = ? AND cursoId = ?`,
+        [assento.status, assento.id, cursoId],
+        err => { if (err) console.error('Erro ao atualizar assento:', err); }
+      );
+    });
 
-  res.json({ message: 'Assentos atualizados com sucesso!' });
+    res.json({ message: 'Assentos atualizados com sucesso!' });
+  });
 });
 
 module.exports = router;
-

@@ -42,12 +42,16 @@ export default function Home() {
         industrias,
     } = useContext(DadosContext);
 
+    useEffect(() => {
+        console.log(cursosFiltrados)
+    }, [])
+
     // ========= STATE ENROLLMENT ========= 
     const [enrollment, setEnrollment] = useState({
         cursoId: '',
         nome: '',
         cpf: '',
-        telefone: '',
+        celular: '',
         formaPagamento: '',
         assento: ''
     });
@@ -92,7 +96,7 @@ export default function Home() {
 
     // ========= SUBMIT =========
     function handleSubmitCourse() {
-        if (!enrollment.nome || !enrollment.cpf || !enrollment.telefone || !enrollment.formaPagamento) {
+        if (!enrollment.nome || !enrollment.cpf || !enrollment.celular || !enrollment.formaPagamento) {
             alert('Preencha todos os campos.');
             return;
         }
@@ -236,10 +240,11 @@ export default function Home() {
     };
 
     const openAssento = () => {
-        if (!enrollment.nome || !enrollment.cpf || !enrollment.telefone || !enrollment.formaPagamento) {
+        if (!enrollment.nome || !enrollment.cpf || !enrollment.celular || !enrollment.formaPagamento) {
             alert('Preencha todos os campos.');
             return;
         }
+        console.log('clicado')
         setStep('assento');
     };
 
@@ -257,7 +262,7 @@ export default function Home() {
             cursoId: '',
             nome: '',
             cpf: '',
-            telefone: '',
+            celular: '',
             formaPagamento: '',
             assento: ''
         });

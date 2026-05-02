@@ -1,193 +1,228 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-const uploadCursosInfantis = require('../config/uploadCursosInfantis');
+const createUpload = require('../config/createUpload');
+const db = require('../db');
 
+const uploadCursosInfantis = createUpload('cursosInfantis');
 const router = express.Router();
 
-const cursosPath = path.join(__dirname, '../data/cursosInfantis.json');
-const assentosPath = path.join(__dirname, '../data/assentos.json');
-
-const safeRead = (filePath) => {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify([]));
-  }
-
-  const content = fs.readFileSync(filePath, 'utf8');
-  return content.trim() ? JSON.parse(content) : [];
-};
-
-const write = (p, d) => {
-  fs.writeFileSync(p, JSON.stringify(d, null, 2));
-};
-
-
+// GET todos os cursos infantis
 router.get('/', (req, res) => {
-  res.json(safeRead(cursosPath));
+  db.all(`
+    SELECT ci.*,
+    GROUP_CONCAT(f.url) as fotos
+    FROM cursosInfantis ci
+    LEFT JOIN fotos f ON f.cursoId = ci.id
+    GROUP BY ci.id
+  `, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    const cursos = rows.map(c => ({
+      ...c,
+      fotos: c.fotos ? c.fotos.split(',') : []
+    }));
+
+    res.json(cursos);
+  });
 });
 
-
+// GET curso infantil por id
 router.get('/:id', (req, res) => {
-  const cursos = safeRead(cursosPath);
-  const curso = cursos.find(c => c.id === req.params.id);
+  db.get(`
+    SELECT ci.*,
+    GROUP_CONCAT(f.url) as fotos
+    FROM cursosInfantis ci
+    LEFT JOIN fotos f ON f.cursoId = ci.id
+    WHERE ci.id = ?
+    GROUP BY ci.id
+  `, [req.params.id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ message: 'Curso infantil não encontrado' });
 
-  if (!curso) {
-    return res.status(404).json({ message: 'Curso infantil não encontrado' });
-  }
-
-  res.json(curso);
+    res.json({
+      ...row,
+      fotos: row.fotos ? row.fotos.split(',') : []
+    });
+  });
 });
 
-
+// POST novo curso infantil
 router.post('/', uploadCursosInfantis.array('fotos', 5), (req, res) => {
-  try {
-    const cursos = safeRead(cursosPath);
-    const assentos = safeRead(assentosPath);
+  const cursoId = uuidv4();
+  const valor = parseFloat(req.body.valor);
 
-    console.log(req.body)
-
-    const cursoId = uuidv4();
-
-    const fotos = req.files
-      ? req.files.map(f => `/uploads/cursosInfantis/${f.filename}`)
-      : [];
-
-    const valor = parseFloat(req.body.valor);
-
-    const novoCurso = {
-      id: cursoId,
-      nomeCurso: req.body.nomeCurso,
-      tipo: req.body.tipo,
-      culinarista: req.body.culinarista,
-      categoria: req.body.categoria,
-      duracao: req.body.duracao,
-      data: req.body.data,
-      hora: req.body.hora,
-      loja: req.body.loja,
-      valor,
-      fotos
-    };
-
-    cursos.push(novoCurso);
-
-    
-    for (let i = 1; i <= 20; i++) {
-      assentos.push({
-        id: i,
-        cursoId,
-        status: 'livre'
-      });
+  db.run(`
+    INSERT INTO cursosInfantis
+      (id, nomeCurso, tipo, culinarista, categoria, duracao, data, hora, loja, valor)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [
+    cursoId,
+    req.body.nomeCurso,
+    req.body.tipo,
+    req.body.culinarista,
+    req.body.categoria,
+    req.body.duracao,
+    req.body.data,
+    req.body.hora,
+    req.body.loja,
+    valor
+  ], function(err) {
+    if (err) {
+      console.error('Erro ao inserir curso infantil:', err);
+      return res.status(500).json({ message: 'Erro ao criar curso infantil' });
     }
 
-    write(cursosPath, cursos);
-    write(assentosPath, assentos);
-
-    res.status(201).json(novoCurso);
-
-  } catch (err) {
-    console.error('ERRO AO CRIAR CURSO INFANTIL:', err);
-    res.status(500).json({ message: 'Erro ao criar curso infantil' });
-  }
-});
-
-router.put('/:id', uploadCursosInfantis.array('fotos', 5), (req, res) => {
-  try {
-    const cursos = safeRead(cursosPath);
-    const index = cursos.findIndex(c => c.id === req.params.id);
-
-    if (index === -1) {
-      return res.status(404).json({
-        message: 'Curso infantil não encontrado'
-      });
-    }
-
-    // apagar fotos antigas
+    // fotos
     if (req.files && req.files.length > 0) {
-      cursos[index].fotos.forEach(foto => {
-        const fotoPath = path.join(__dirname, '..', foto);
+      const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
-        if (fs.existsSync(fotoPath)) {
-          fs.unlinkSync(fotoPath);
+      req.files.forEach(file => {
+        if (!permitidos.includes(file.mimetype)) {
+          console.warn(`Arquivo ignorado (tipo não permitido): ${file.originalname}`);
+          return;
         }
-      });
 
-      cursos[index].fotos = req.files.map(
-        f => `/uploads/cursosInfantis/${f.filename}`
+        db.run(
+          `INSERT INTO fotos (cursoId, url) VALUES (?, ?)`,
+          [cursoId, `/uploads/cursosInfantis/${file.filename}`],
+          err => { if (err) console.error('Erro ao inserir foto:', err); }
+        );
+      });
+    }
+
+    // assentos — cursos infantis têm 20 (vs 24 dos adultos)
+    for (let i = 1; i <= 20; i++) {
+      db.run(
+        `INSERT INTO assentos (id, cursoId, status) VALUES (?, ?, ?)`,
+        [i, cursoId, 'livre'],
+        err => { if (err) console.error('Erro ao inserir assento:', err); }
       );
     }
 
-    cursos[index] = {
-      ...cursos[index],
-      nomeCurso: req.body.nomeCurso ?? cursos[index].nomeCurso,
-      nomeResponsavel: req.body.nomeResponsavel ?? cursos[index].nomeResponsavel,
-      nomeAluno: req.body.nomeAluno ?? cursos[index].nomeAluno,
-      tipo: req.body.tipo ?? cursos[index].tipo,
-      culinarista: req.body.culinarista ?? cursos[index].culinarista,
-      categoria: req.body.categoria ?? cursos[index].categoria,
-      duracao: req.body.duracao ?? cursos[index].duracao,
-      data: req.body.data ?? cursos[index].data,
-      hora: req.body.hora ?? cursos[index].hora,
-      loja: req.body.loja ?? cursos[index].loja,
-      modalidade: req.body.modalidade ?? cursos[index].modalidade,
-      valor: req.body.valor
-        ? parseFloat(req.body.valor)
-        : cursos[index].valor
-    };
-
-    write(cursosPath, cursos);
-
-    res.json(cursos[index]);
-
-  } catch (err) {
-    console.error('ERRO AO ATUALIZAR CURSO INFANTIL:', err);
-    res.status(500).json({ message: 'Erro ao atualizar curso infantil' });
-  }
+    res.status(201).json({ id: cursoId });
+  });
 });
 
-router.delete('/:id', (req, res) => {
-  try {
-    const cursos = safeRead(cursosPath);
-    const assentos = safeRead(assentosPath);
+// PUT atualizar curso infantil
+router.put('/:id', uploadCursosInfantis.array('fotos', 5), (req, res) => {
+  const { id } = req.params;
 
-    const cursoIndex = cursos.findIndex(c => c.id === req.params.id);
+  // se vieram novas fotos, apaga as antigas do disco e do banco
+  if (req.files && req.files.length > 0) {
+    db.all(`SELECT url FROM fotos WHERE cursoId = ?`, [id], (err, fotos) => {
+      if (!err) {
+        fotos.forEach(({ url }) => {
+          const fotoPath = path.join(__dirname, '..', url);
+          if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+        });
+      }
 
-    if (cursoIndex === -1) {
-      return res.status(404).json({
-        message: 'Curso infantil não encontrado'
+      db.run(`DELETE FROM fotos WHERE cursoId = ?`, [id], err => {
+        if (err) console.error('Erro ao deletar fotos antigas:', err);
       });
-    }
 
-    const curso = cursos[cursoIndex];
+      const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
-    // apagar fotos
-    if (curso.fotos && curso.fotos.length > 0) {
-      curso.fotos.forEach(foto => {
-        const fotoPath = path.join(__dirname, '..', foto);
-
-        if (fs.existsSync(fotoPath)) {
-          fs.unlinkSync(fotoPath);
+      req.files.forEach(file => {
+        if (!permitidos.includes(file.mimetype)) {
+          console.warn(`Arquivo ignorado (tipo não permitido): ${file.originalname}`);
+          return;
         }
+
+        db.run(
+          `INSERT INTO fotos (cursoId, url) VALUES (?, ?)`,
+          [id, `/uploads/cursosInfantis/${file.filename}`],
+          err => { if (err) console.error('Erro ao inserir foto:', err); }
+        );
       });
+    });
+  }
+
+  db.run(`
+    UPDATE cursosInfantis SET
+      nomeCurso       = COALESCE(?, nomeCurso),
+      nomeResponsavel = COALESCE(?, nomeResponsavel),
+      nomeAluno       = COALESCE(?, nomeAluno),
+      tipo            = COALESCE(?, tipo),
+      culinarista     = COALESCE(?, culinarista),
+      categoria       = COALESCE(?, categoria),
+      duracao         = COALESCE(?, duracao),
+      data            = COALESCE(?, data),
+      hora            = COALESCE(?, hora),
+      loja            = COALESCE(?, loja),
+      modalidade      = COALESCE(?, modalidade),
+      valor           = COALESCE(?, valor)
+    WHERE id = ?
+  `, [
+    req.body.nomeCurso       ?? null,
+    req.body.nomeResponsavel ?? null,
+    req.body.nomeAluno       ?? null,
+    req.body.tipo            ?? null,
+    req.body.culinarista     ?? null,
+    req.body.categoria       ?? null,
+    req.body.duracao         ?? null,
+    req.body.data            ?? null,
+    req.body.hora            ?? null,
+    req.body.loja            ?? null,
+    req.body.modalidade      ?? null,
+    req.body.valor ? parseFloat(req.body.valor) : null,
+    id
+  ], function(err) {
+    if (err) {
+      console.error('Erro ao atualizar curso infantil:', err);
+      return res.status(500).json({ message: 'Erro ao atualizar curso infantil' });
     }
 
-    // remover curso
-    cursos.splice(cursoIndex, 1);
+    res.json({ message: 'Atualizado' });
+  });
+});
 
-    // remover assentos
-    const assentosAtualizados = assentos.filter(
-      a => a.cursoId !== req.params.id
-    );
+// DELETE curso infantil e tudo relacionado
+router.delete('/:id', (req, res) => {
+  const { id } = req.params;
 
-    write(cursosPath, cursos);
-    write(assentosPath, assentosAtualizados);
+  db.get(`SELECT * FROM cursosInfantis WHERE id = ?`, [id], (err, curso) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!curso) return res.status(404).json({ message: 'Curso infantil não encontrado' });
 
-    res.status(204).send();
+    // apagar fotos do disco
+    db.all(`SELECT url FROM fotos WHERE cursoId = ?`, [id], (err, fotos) => {
+      if (!err) {
+        fotos.forEach(({ url }) => {
+          const fotoPath = path.join(__dirname, '..', url);
+          if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+        });
+      }
 
-  } catch (err) {
-    console.error('ERRO AO EXCLUIR CURSO INFANTIL:', err);
-    res.status(500).json({ message: 'Erro ao excluir curso infantil' });
-  }
+      db.serialize(() => {
+        db.run(`DELETE FROM inscricoes WHERE cursoId = ?`, [id],
+          err => { if (err) console.error('Erro ao deletar inscrições:', err); }
+        );
+        db.run(`DELETE FROM assentos WHERE cursoId = ?`, [id],
+          err => { if (err) console.error('Erro ao deletar assentos:', err); }
+        );
+        db.run(`DELETE FROM fotos WHERE cursoId = ?`, [id],
+          err => { if (err) console.error('Erro ao deletar fotos:', err); }
+        );
+        db.run(`DELETE FROM cursosInfantis WHERE id = ?`, [id], function(err) {
+          if (err) {
+            console.error('Erro ao deletar curso infantil:', err);
+            return res.status(500).json({ message: 'Erro ao excluir curso infantil' });
+          }
+
+          res.sendStatus(204);
+        });
+      });
+    });
+  });
+});
+
+// Handler de erro do Multer
+router.use((err, req, res, next) => {
+  if (err) return res.status(400).json({ error: err.message });
+  next();
 });
 
 module.exports = router;

@@ -16,7 +16,6 @@ export default function ModalEnrollmentSeats({
         } else {
             document.body.style.overflow = ''
         }
-
         return () => {
             document.body.style.overflow = ''
         }

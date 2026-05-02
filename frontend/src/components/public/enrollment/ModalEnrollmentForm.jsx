@@ -16,11 +16,15 @@ export default function ModalEnrollmentForm({
         } else {
             document.body.style.overflow = ''
         }
-
+        
         return () => {
             document.body.style.overflow = ''
         }
     }, [isOpen])
+
+    useEffect(() => {
+        console.log(enrollment)
+    }, [enrollment])
 
     if (!isOpen) return null
 
@@ -77,7 +81,7 @@ export default function ModalEnrollmentForm({
                         type='text'
                         width='100%'
                         height='40px'
-                        placeholder='Telefone'
+                        placeholder='Celular'
                         value={enrollment.celular}
                         onChange={e => setEnrollment({ ...enrollment, celular: e.target.value })}
                     />

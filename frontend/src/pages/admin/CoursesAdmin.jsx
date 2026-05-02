@@ -1,30 +1,23 @@
-// react
 import { useContext, useState } from 'react';
 
-// HEAD
 import { Head } from '../../components/Head'
-
-// LUCIDE ICONS
 import { Trash, Edit } from 'lucide-react';
 
-// Components
 import Input from '../../components/Input'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
 
-// Layouts
 import SideBar from '../../layouts/admin/SideBar'
 import TopBar from '../../layouts/admin/TopBar'
 
-// DB
 import { DadosContext } from '../../contexts/DadosContext';
 
 export default function CoursesAdmin() {
 
     const { 
         cursos,
-        loading, 
+        loadingCourses, 
         addCourses, 
         removeCourse,
         editCourse,
@@ -40,7 +33,6 @@ export default function CoursesAdmin() {
         valor: '',
         duracao: '',
         categoria: '',
-        ativo: 'true',
         imagem: null
     });
 
@@ -57,12 +49,12 @@ export default function CoursesAdmin() {
         const formData = new FormData();
 
         Object.entries(form).forEach(([key, value]) => {
-            if (key === 'imagem') return; // ignora o campo imagem no loop
+            if (key === 'imagem') return;
             if (value) formData.append(key, value);
         });
 
         if (form.imagem) {
-            formData.append('fotos', form.imagem); // só adiciona com o nome certo
+            formData.append('fotos', form.imagem);
         }
 
         addCourses(formData);
@@ -76,7 +68,6 @@ export default function CoursesAdmin() {
             valor: '',
             duracao: '',
             categoria: '',
-            ativo: 'true',
             imagem: null
         });
     }
@@ -93,12 +84,18 @@ export default function CoursesAdmin() {
     function editarCourse() {
         const formData = new FormData();
 
-        Object.entries(cursoEditar).forEach(([key, value]) => {
-            if (value) formData.append(key, value);
-        });
+        formData.append('id',          cursoEditar.id);
+        formData.append('nomeCurso',   cursoEditar.nomeCurso   || '');
+        formData.append('data',        cursoEditar.data        || '');
+        formData.append('hora',        cursoEditar.hora        || '');
+        formData.append('loja',        cursoEditar.loja        || '');
+        formData.append('culinarista', cursoEditar.culinarista || '');
+        formData.append('valor',       cursoEditar.valor       || '');
+        formData.append('duracao',     cursoEditar.duracao     || '');
+        formData.append('categoria',   cursoEditar.categoria   || '');
 
-        if (cursoEditar.fotos) {
-            formData.append('fotos', cursoEditar.fotos);
+        if (cursoEditar._novaFoto) {
+            formData.append('fotos', cursoEditar._novaFoto);
         }
 
         editCourse(formData);
@@ -127,7 +124,7 @@ export default function CoursesAdmin() {
 
                 <section className='flex flex-col gap-10 mt-10 w-[92dvw] lg:w-[78vw]'>
 
-                    {/* FORM */}
+                    {/* FORM CADASTRO */}
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
                         <p className='font-bold mb-4'>CADASTRE UM CURSO</p>
 
@@ -136,17 +133,14 @@ export default function CoursesAdmin() {
                                 value={form.nomeCurso}
                                 onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
                             />
-
                             <Input type='date'
                                 value={form.data}
                                 onChange={e => setForm({ ...form, data: e.target.value })}
                             />
-
                             <Input type='time'
                                 value={form.hora}
                                 onChange={e => setForm({ ...form, hora: e.target.value })}
                             />
-
                             <select
                                 value={form.loja}
                                 onChange={e => setForm({ ...form, loja: e.target.value })}
@@ -156,7 +150,6 @@ export default function CoursesAdmin() {
                                 <option value='Prado'>Prado</option>
                                 <option value='Teresopolis'>Teresopolis</option>
                             </select>
-
                             <select
                                 value={form.culinarista}
                                 onChange={e => setForm({ ...form, culinarista: e.target.value })}
@@ -169,22 +162,18 @@ export default function CoursesAdmin() {
                                     </option>
                                 ))}
                             </select>
-
                             <Input placeholder='Valor'
                                 value={form.valor}
                                 onChange={e => setForm({ ...form, valor: e.target.value })}
                             />
-
                             <Input placeholder='Duração'
                                 value={form.duracao}
                                 onChange={e => setForm({ ...form, duracao: e.target.value })}
                             />
-
                             <Input placeholder='Categoria'
                                 value={form.categoria}
                                 onChange={e => setForm({ ...form, categoria: e.target.value })}
                             />
-
                             <Input type='file'
                                 onChange={e => {
                                     const file = e.target.files[0];
@@ -192,7 +181,6 @@ export default function CoursesAdmin() {
                                     setForm({ ...form, imagem: file });
                                 }}
                             />
-
                             <Button onClick={handleSubmit} className='w-full bg-orange-base text-white'>
                                 Adicionar
                             </Button>
@@ -203,7 +191,7 @@ export default function CoursesAdmin() {
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
                         <p className='font-bold mb-4'>CURSOS</p>
 
-                        {loading ? (
+                        {loadingCourses ? (
                             <p>Carregando...</p>
                         ) : (
                             cursos.map(curso => (
@@ -212,12 +200,10 @@ export default function CoursesAdmin() {
                                         <p>{curso.nomeCurso}</p>
                                         <small>{formatDate(curso.data)} - {curso.hora}</small>
                                     </div>
-
                                     <div className='flex gap-2'>
                                         <Button onClick={() => removeCourse(curso.id)}>
                                             <Trash />
                                         </Button>
-
                                         <Button onClick={() => handleEditCourse(curso.id)}>
                                             <Edit />
                                         </Button>
@@ -227,36 +213,79 @@ export default function CoursesAdmin() {
                         )}
                     </CardDash>
 
-                    {/* MODAL */}
+                    {/* MODAL EDITAR */}
                     <Modal isOpen={step === 'edit'} onClose={closeModal}>
                         <h2 className='font-bold text-xl mb-4'>Editar Curso</h2>
 
                         {previewImagemCurso && (
-                            <img src={previewImagemCurso} className='w-40 mb-4'/>
+                            <img src={`http://localhost:3001${previewImagemCurso}`} className='w-40 mb-4 rounded'/>
                         )}
 
-                        <Input
-                            value={cursoEditar.nomeCurso || ''}
-                            onChange={e => setCursoEditar({
-                                ...cursoEditar,
-                                nomeCurso: e.target.value
-                            })}
-                        />
-
-                        <Input
-                            type='file'
-                            onChange={e => {
-                                const file = e.target.files[0];
-                                if (!file) return;
-
-                                setCursoEditar({ ...cursoEditar, fotos: file });
-                                setPreviewImagemCurso(URL.createObjectURL(file));
-                            }}
-                        />
-
-                        <Button onClick={editarCourse} className='mt-4 w-full bg-orange-base text-white'>
-                            Salvar
-                        </Button>
+                        <div className='flex flex-col gap-3'>
+                            <Input
+                                placeholder='Nome do curso'
+                                value={cursoEditar.nomeCurso || ''}
+                                onChange={e => setCursoEditar({ ...cursoEditar, nomeCurso: e.target.value })}
+                            />
+                            <Input
+                                type='date'
+                                value={cursoEditar.data || ''}
+                                onChange={e => setCursoEditar({ ...cursoEditar, data: e.target.value })}
+                            />
+                            <Input
+                                type='time'
+                                value={cursoEditar.hora || ''}
+                                onChange={e => setCursoEditar({ ...cursoEditar, hora: e.target.value })}
+                            />
+                            <select
+                                value={cursoEditar.loja || ''}
+                                onChange={e => setCursoEditar({ ...cursoEditar, loja: e.target.value })}
+                                className='h-[40px] border rounded-md px-2'
+                            >
+                                <option value=''>Loja</option>
+                                <option value='Prado'>Prado</option>
+                                <option value='Teresopolis'>Teresopolis</option>
+                            </select>
+                            <select
+                                value={cursoEditar.culinarista || ''}
+                                onChange={e => setCursoEditar({ ...cursoEditar, culinarista: e.target.value })}
+                                className='h-[40px] border rounded-md px-2'
+                            >
+                                <option value=''>Culinarista</option>
+                                {culinaristas.map(c => (
+                                    <option key={c.id} value={c.nomeCulinarista}>
+                                        {c.nomeCulinarista}
+                                    </option>
+                                ))}
+                            </select>
+                            <Input
+                                placeholder='Valor'
+                                value={cursoEditar.valor || ''}
+                                onChange={e => setCursoEditar({ ...cursoEditar, valor: e.target.value })}
+                            />
+                            <Input
+                                placeholder='Duração'
+                                value={cursoEditar.duracao || ''}
+                                onChange={e => setCursoEditar({ ...cursoEditar, duracao: e.target.value })}
+                            />
+                            <Input
+                                placeholder='Categoria'
+                                value={cursoEditar.categoria || ''}
+                                onChange={e => setCursoEditar({ ...cursoEditar, categoria: e.target.value })}
+                            />
+                            <Input
+                                type='file'
+                                onChange={e => {
+                                    const file = e.target.files[0];
+                                    if (!file) return;
+                                    setCursoEditar({ ...cursoEditar, _novaFoto: file });
+                                    setPreviewImagemCurso(URL.createObjectURL(file));
+                                }}
+                            />
+                            <Button onClick={editarCourse} className='mt-2 w-full bg-orange-base text-white'>
+                                Salvar
+                            </Button>
+                        </div>
                     </Modal>
 
                 </section>

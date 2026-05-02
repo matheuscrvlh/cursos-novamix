@@ -61,7 +61,7 @@ export function DadosProvider({ children }) {
                 console.error('Erro ao buscar cursos', err)
             })
             .finally(() => {
-                setLoadingCulinarian(false)
+                setLoadingCourses(false)
             });
 
         getCulinarians()

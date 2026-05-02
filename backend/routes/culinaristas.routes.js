@@ -1,130 +1,143 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-const upload = require('../config/uploadCulinaristas');
 const createUpload = require('../config/createUpload');
-
-
-const router = express.Router();
-
-const culinaristasPath = path.join(__dirname, '../data/culinaristas.json');
-
-const safeRead = () => {
-  if (!fs.existsSync(culinaristasPath)) {
-    fs.writeFileSync(culinaristasPath, JSON.stringify([]));
-  }
-
-  const content = fs.readFileSync(culinaristasPath, 'utf8');
-  return content.trim() ? JSON.parse(content) : [];
-};
-
-const safeWrite = (data) => {
-  fs.writeFileSync(culinaristasPath, JSON.stringify(data, null, 2));
-};
+const db = require('../db');
 
 const uploadCulinaristas = createUpload('culinaristas');
+const router = express.Router();
 
+// GET todos os culinaristas
 router.get('/', (req, res) => {
-  res.json(safeRead());
+  db.all(`SELECT * FROM culinaristas`, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    const culinaristas = rows.map(c => ({
+      ...c,
+      lojas: c.lojas ? JSON.parse(c.lojas) : [],
+      cursos: c.cursos ? JSON.parse(c.cursos) : []
+    }));
+
+    res.json(culinaristas);
+  });
 });
 
+// POST novo culinarista
 router.post('/', uploadCulinaristas.single('foto'), (req, res) => {
-  try {
-    const { nomeCulinarista, cpf, lojas, cursos, instagram, industria, telefone } = req.body;
+  const { nomeCulinarista, cpf, lojas, cursos, instagram, industria, telefone } = req.body;
 
-    if (!nomeCulinarista || !cpf) {
-      return res.status(400).json({ message: 'Nome e CPF são obrigatórios' });
+  if (!nomeCulinarista || !cpf) {
+    return res.status(400).json({ message: 'Nome e CPF são obrigatórios' });
+  }
+
+  const id = uuidv4();
+  const foto = req.file ? `/uploads/culinaristas/${req.file.filename}` : null;
+  const dataCadastro = new Date().toISOString();
+
+  db.run(`
+    INSERT INTO culinaristas
+      (id, nomeCulinarista, cpf, industria, telefone, instagram, lojas, cursos, foto, dataCadastro)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [
+    id,
+    nomeCulinarista,
+    cpf,
+    industria,
+    telefone,
+    instagram,
+    lojas ? lojas : JSON.stringify([]),
+    cursos ? cursos : JSON.stringify([]),
+    foto,
+    dataCadastro
+  ], function(err) {
+    if (err) {
+      console.error('Erro ao inserir culinarista:', err);
+      return res.status(500).json({ message: 'Erro ao criar culinarista' });
     }
 
-    const culinaristas = safeRead();
-
-    const novoCulinarista = {
-      id: uuidv4(),
-      nomeCulinarista,
-      cpf,
-      industria,
-      telefone,
-      instagram, 
-      lojas: lojas ? JSON.parse(lojas) : [],
-      cursos: cursos ? JSON.parse(cursos) : [],
-      foto: req.file ? `/uploads/culinaristas/${req.file.filename}` : null,
-      dataCadastro: new Date().toISOString()
-    };
-
-    culinaristas.push(novoCulinarista);
-    safeWrite(culinaristas);
-
-    res.status(201).json(novoCulinarista);
-  } catch (err) {
-    console.error('ERRO AO CRIAR CULINARISTA:', err);
-    res.status(500).json({ message: 'Erro ao criar culinarista' });
-  }
+    res.status(201).json({ id, nomeCulinarista, cpf, industria, telefone, instagram, foto, dataCadastro });
+  });
 });
 
+// PUT atualizar culinarista
 router.put('/:id', uploadCulinaristas.single('foto'), (req, res) => {
-  const culinaristas = safeRead();
-  const index = culinaristas.findIndex(c => c.id === req.params.id);
+  const { id } = req.params;
 
-  if (index === -1) {
-    return res.status(404).json({ message: 'Culinarista não encontrado' });
-  }
+  db.get(`SELECT * FROM culinaristas WHERE id = ?`, [id], (err, culinarista) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!culinarista) return res.status(404).json({ message: 'Culinarista não encontrado' });
 
-  // apagar a foto antiga se uma nova for enviada 
-  if (req.file && culinaristas[index].foto) {
-    const fotoPath = path.join(__dirname, '..', culinaristas[index].foto);
-    if (fs.existsSync(fotoPath)) {
-      fs.unlinkSync(fotoPath);
+    // apagar foto antiga se uma nova for enviada
+    if (req.file && culinarista.foto) {
+      const fotoPath = path.join(__dirname, '..', culinarista.foto);
+      if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
     }
-  }
 
-  culinaristas[index] = {
-    ...culinaristas[index],
-    nomeCulinarista:
-      req.body.nomeCulinarista ?? culinaristas[index].nomeCulinarista,
-    cpf: 
-      req.body.cpf ?? culinaristas[index].cpf,
-    instagram: 
-      req.body.instagram ?? culinaristas[index].instagram,
-    telefone: 
-      req.body.telefone ?? culinaristas[index].telefone,
-    industria: 
-      req.body.industria ?? culinaristas[index].industria,
-    lojas: req.body.lojas
-      ? JSON.parse(req.body.lojas)
-      : culinaristas[index].lojas,
-    cursos: req.body.cursos
-      ? JSON.parse(req.body.cursos)
-      : culinaristas[index].cursos,
-    foto: req.file
-      ? `uploads/culinaristas/${req.file.filename}` 
-      : culinaristas[index].foto
-  };
+    const novaFoto = req.file
+      ? `/uploads/culinaristas/${req.file.filename}`
+      : culinarista.foto;
 
-  safeWrite(culinaristas);
-  res.json(culinaristas[index]);
+    db.run(`
+      UPDATE culinaristas SET
+        nomeCulinarista = COALESCE(?, nomeCulinarista),
+        cpf             = COALESCE(?, cpf),
+        instagram       = COALESCE(?, instagram),
+        telefone        = COALESCE(?, telefone),
+        industria       = COALESCE(?, industria),
+        lojas           = COALESCE(?, lojas),
+        cursos          = COALESCE(?, cursos),
+        foto            = ?
+      WHERE id = ?
+    `, [
+      req.body.nomeCulinarista ?? null,
+      req.body.cpf ?? null,
+      req.body.instagram ?? null,
+      req.body.telefone ?? null,
+      req.body.industria ?? null,
+      req.body.lojas ?? null,
+      req.body.cursos ?? null,
+      novaFoto,
+      id
+    ], function(err) {
+      if (err) {
+        console.error('Erro ao atualizar culinarista:', err);
+        return res.status(500).json({ error: err.message });
+      }
+
+      res.json({ message: 'Atualizado' });
+    });
+  });
 });
 
-
+// DELETE culinarista
 router.delete('/:id', (req, res) => {
-  const culinaristas = safeRead();
-  const index = culinaristas.findIndex(c => c.id === req.params.id);
+  const { id } = req.params;
 
-  if (index === -1) {
-    return res.status(404).json({ message: 'Culinarista não encontrado' });
-  }
+  db.get(`SELECT * FROM culinaristas WHERE id = ?`, [id], (err, culinarista) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!culinarista) return res.status(404).json({ message: 'Culinarista não encontrado' });
 
-  const culinarista = culinaristas[index];
+    if (culinarista.foto) {
+      const fotoPath = path.join(__dirname, '..', culinarista.foto);
+      if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
+    }
 
-  if (culinarista.foto) {
-    const fotoPath = path.join(__dirname, '..', culinarista.foto);
-    if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
-  }
+    db.run(`DELETE FROM culinaristas WHERE id = ?`, [id], function(err) {
+      if (err) {
+        console.error('Erro ao deletar culinarista:', err);
+        return res.status(500).json({ error: err.message });
+      }
 
-  culinaristas.splice(index, 1);
-  safeWrite(culinaristas);
+      res.sendStatus(204);
+    });
+  });
+});
 
-  res.status(204).send();
+// Handler de erro do Multer
+router.use((err, req, res, next) => {
+  if (err) return res.status(400).json({ error: err.message });
+  next();
 });
 
 module.exports = router;
