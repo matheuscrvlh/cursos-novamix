@@ -7,6 +7,7 @@ import { Menu } from "lucide-react";
 
 export default function AllCoursesSections({
     cursosFiltrados,
+    loadingCourses,
     vagasPorCurso,
     openForm,
     showModalFilters,
@@ -57,7 +58,9 @@ export default function AllCoursesSections({
             </Text>
 
             {/* ======== CURSOS ======== */}
-            {cursosFiltrados.length === 0
+            {loadingCourses 
+            ? 'Carregando...'
+            : cursosFiltrados.length === 0
                 ?  (<Text 
                         as='div' 
                         className='

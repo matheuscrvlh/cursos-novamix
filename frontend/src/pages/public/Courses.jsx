@@ -36,6 +36,7 @@ export default function Courses() {
 
     const {
         cursos,
+        loadingCourses,
         culinaristas,
     } = useContext(DadosContext);
 
@@ -219,6 +220,7 @@ export default function Courses() {
                 {/* ======== CURSOS ======== */}
                 <AllCoursesSections
                     cursosFiltrados={cursosFiltrados}
+                    loadingCourses={loadingCourses}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
                     showModalFilters={showModalFilters}
