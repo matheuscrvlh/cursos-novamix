@@ -21,7 +21,7 @@ import TopBar from '../../layouts/admin/TopBar'
 // Context
 import { DadosContext } from '../../contexts/DadosContext';
 
-export default function ChildrensAdmin() {
+export default function ChildrenAdmin() {
 
     const { 
         cursosInfantis = [],
