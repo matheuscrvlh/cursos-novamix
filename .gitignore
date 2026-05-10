@@ -44,3 +44,12 @@ frontend/.vite/
 # SISTEMA OPERACIONAL
 .DS_Store
 Thumbs.db
+
+############################
+frontend/dist
+
+############################
+backend/data
+backend/uploads
+
+
