@@ -14,7 +14,7 @@ import CoursesAdmin from './pages/admin/CoursesAdmin'
 import RegistrationsAdmin from './pages/admin/RegistrationsAdmin'
 import CulinarianAdmin from './pages/admin/CulinarianAdmin'
 import IndustriesAdmin from './pages/admin/IndustriesAdmin'
-import ChildrenAdmin from './pages/admin/ChildrenAdmin'
+import ChildrensAdmin from './pages/admin/ChildrensAdmin'
 
 export default function App() {
   return (
