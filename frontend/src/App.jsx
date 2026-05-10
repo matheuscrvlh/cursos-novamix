@@ -31,7 +31,7 @@ export default function App() {
         <Route path='/inscricoesAdmin' element={<RegistrationsAdmin />} />
         <Route path='/culinaristasAdmin' element={<CulinarianAdmin />} />
         <Route path='/industriasAdmin' element={<IndustriesAdmin />} />
-        <Route path='/infantisAdmin' element={<ChildrenAdmin />} />
+        <Route path='/infantisAdmin' element={<ChildrensAdmin />} />
     </Routes>
   )
 }
