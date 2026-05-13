@@ -94,29 +94,43 @@ export default function Home() {
     const [showModalFiltersChildrens, setShowModalFiltersChildrens ] = useState(false)
 
     // ====== FUNCOES
-    function handleSubmitCourse() {
+    async function handleSubmitCourse() {
         if (!enrollment.nome || !enrollment.cpf || !enrollment.celular || !enrollment.formaPagamento) {
             alert('Preencha todos os campos.')
             return;
         }
 
-        postEnrollment({
-            cursoId: enrollment.cursoId,
-            nome: enrollment.nome,
-            cpf: enrollment.cpf,
-            celular: enrollment.celular,
-            formaPagamento: enrollment.formaPagamento,
-            assento: enrollment.assento
-        });
+        try {
+            await postEnrollment({
+                cursoId: enrollment.cursoId,
+                nome: enrollment.nome,
+                cpf: enrollment.cpf,
+                celular: enrollment.celular,
+                formaPagamento: enrollment.formaPagamento,
+                assento: enrollment.assento
+            });
 
-    ({
-            cursoId: '',
-            nome: '',
-            cpf: '',
-            celular: '',
-            formaPagamento: '', 
-            assento: ''
-        });
+            // So dispara se o backend confirmou (tag manager google)
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                event: 'form_submit_success',
+                form_name: 'cadastro_curso'
+            });
+
+            setEnrollment({
+                cursoId: '',
+                nome: '',
+                cpf: '',
+                celular: '',
+                formaPagamento: '', 
+                assento: ''
+            });
+
+        } catch (err) {
+            console.error(err);
+            alert('Erro ao realizar cadastro. Tente novamente.')
+        }
+        
     }
 
     useEffect(() => {
