@@ -101,7 +101,7 @@ export default function Home() {
         }
 
         try {
-            await postEnrollment({
+            const res = await postEnrollment({
                 cursoId: enrollment.cursoId,
                 nome: enrollment.nome,
                 cpf: enrollment.cpf,
@@ -111,11 +111,13 @@ export default function Home() {
             });
 
             // So dispara se o backend confirmou (tag manager google)
-            window.dataLayer = window.dataLayer || [];
-            window.dataLayer.push({
-                event: 'form_submit_success',
-                form_name: 'cadastro_curso'
-            });
+            if (res && res.id) {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({
+                    event: 'form_submit_success',
+                    form_name: 'cadastro_curso'
+                });
+            }
 
             setEnrollment({
                 cursoId: '',
@@ -333,9 +335,11 @@ export default function Home() {
                 />
 
                 {/* ======== INDUSTRIAS ======== */}
-                <IndustriesSections
-                    industrias={industrias}
-                />
+                {industrias &&
+                    <IndustriesSections
+                        industrias={industrias}
+                    />
+                }
 
                 {/* ======== LOCALIZAÇÃO ======== */}
                 <LocationSections/>
