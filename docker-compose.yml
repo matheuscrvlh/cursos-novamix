@@ -7,13 +7,13 @@ services:
     container_name: cursos-backend
     restart: unless-stopped
     ports:
-      - "3003:3000"
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
     volumes:
-      # Persiste o banco SQLite fora do container
       - sqlite_data:/app/data
+      - uploads_data:/app/uploads
     networks:
       - app-network
 
@@ -32,6 +32,7 @@ services:
 
 volumes:
   sqlite_data:
+  uploads_data:
 
 networks:
   app-network:

@@ -293,6 +293,7 @@ export function DadosProvider({ children }) {
                 culinaristas,
                 industrias,
                 cursosInfantis,
+                
                 loadingCourses,
                 loadingCulinarian,
                 loadingIndustries,

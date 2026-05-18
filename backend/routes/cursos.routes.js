@@ -6,6 +6,7 @@ const db = require('../db');
 
 const uploadCursos = createUpload('cursos');
 const router = express.Router();
+const fs = require('fs');
 
 // GET todos os cursos
 router.get('/', (req, res) => {
@@ -139,30 +140,46 @@ router.put('/:id', uploadCursos.array('fotos', 5), (req, res) => {
 router.delete('/:id', (req, res) => {
   const id = req.params.id;
 
-  db.serialize(() => {
-    db.run(`DELETE FROM inscricoes WHERE cursoId = ?`, [id], err => {
-      if (err) console.error('Erro ao deletar inscrições:', err);
-    });
-    db.run(`DELETE FROM assentos WHERE cursoId = ?`, [id], err => {
-      if (err) console.error('Erro ao deletar assentos:', err);
-    });
-    db.run(`DELETE FROM fotos WHERE cursoId = ?`, [id], err => {
-      if (err) console.error('Erro ao deletar fotos:', err);
-    });
-    db.run(`DELETE FROM cursos WHERE id = ?`, [id], function(err) {
+  // busca fotos
+  db.all(
+    `SELECT url FROM fotos WHERE cursoId = ?`,
+    [id],
+    (err, fotos) => {
       if (err) {
-        console.error('Erro ao deletar curso:', err);
         return res.status(500).json({ error: err.message });
       }
-      res.sendStatus(204);
-    });
-  });
-});
 
-// Handler de erro do Multer
-router.use((err, req, res, next) => {
-  if (err) return res.status(400).json({ error: err.message });
-  next();
+      // remove arquivos físicos
+      fotos.forEach(foto => {
+        const filePath = path.join(__dirname, '..', foto.url);
+
+        fs.unlink(filePath, err => {
+          if (err) {
+            console.error('Erro ao deletar arquivo:', filePath, err.message);
+          }
+        });
+      });
+
+      // remove do banco
+      db.serialize(() => {
+        db.run(`DELETE FROM inscricoes WHERE cursoId = ?`, [id]);
+        db.run(`DELETE FROM assentos WHERE cursoId = ?`, [id]);
+        db.run(`DELETE FROM fotos WHERE cursoId = ?`, [id]);
+
+        db.run(
+          `DELETE FROM cursos WHERE id = ?`,
+          [id],
+          function(err) {
+            if (err) {
+              return res.status(500).json({ error: err.message });
+            }
+
+            res.sendStatus(204);
+          }
+        );
+      });
+    }
+  );
 });
 
 module.exports = router;

@@ -42,6 +42,10 @@ export default function Home() {
         cursosInfantis,
         culinaristas,
         industrias,
+        loadingCourses,
+        loadingCulinarian,
+        loadingIndustries,
+        loadingChildren
     } = useContext(DadosContext);
 
     // ========= STATES  =========
@@ -150,23 +154,29 @@ export default function Home() {
     useEffect(() => {
         if (!cursos.length) return;
 
-        async function loadVagas() {
-            const resultado = {};
+        try {
+            async function loadVagas() {
+                const resultado = {};
 
-            await Promise.all(
-                cursos.map(async (curso) => {
-                    const assentos = await getSeats(curso.id);
-                    resultado[curso.id] = {
-                        livres: assentos.filter(v => v.status === 'livre').length,
-                        reservadas: assentos.filter(v => v.status === 'reservado').length
-                    };
-                })
-            );
+                await Promise.all(
+                    cursos.map(async (curso) => {
+                        const assentos = await getSeats(curso.id);
+                        resultado[curso.id] = {
+                            livres: assentos.filter(v => v.status === 'livre').length,
+                            reservadas: assentos.filter(v => v.status === 'reservado').length
+                        };
+                    })
+                );
 
-            setVagasPorCurso(resultado);
+                setVagasPorCurso(resultado);
+            }
+
+            loadVagas();
+        } catch (err) {
+            console.log(err)
         }
 
-        loadVagas();
+        
     }, [cursos, refreshVagas]);
 
     // PEGAR CURSOS ATUAIS
@@ -311,6 +321,7 @@ export default function Home() {
                 {/* ======== CURSOS ======== */}
                 <CoursesSections
                     cursosFiltrados={cursosFiltrados}
+                    loadingCourses={loadingCourses}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
                     showModalFilters={showModalFilters}
@@ -323,6 +334,7 @@ export default function Home() {
                 {/* ======== CURSOS INFANTIS ======== */}
                 <ChildrensCoursesSections
                     cursosInfantisFiltrados={cursosInfantisFiltrados}
+                    loadingChildren={loadingChildren}
                     vagasPorCursoInfantil={vagasPorCursoInfantil}
                     openForm={openForm}
                     showModalFilters={showModalFiltersChildrens}
@@ -332,12 +344,14 @@ export default function Home() {
                 {/* ======== CULINARISTAS ======== */}
                 <CulinariansSections 
                     culinaristas={culinaristas}
+                    loadingCulinarian={loadingCulinarian}
                 />
 
                 {/* ======== INDUSTRIAS ======== */}
                 {industrias &&
                     <IndustriesSections
                         industrias={industrias}
+                        loadingIndustries={loadingIndustries}
                     />
                 }
 
