@@ -11,6 +11,8 @@ import { Menu } from "lucide-react";
 
 export default function ChildrensCoursesSections({
     cursosInfantisFiltrados,
+    loadingChildren,
+    loadingVagasPorCursoInfantis,
     vagasPorCursoInfantil,
     openForm,
     showModalFilters,
@@ -64,7 +66,17 @@ export default function ChildrensCoursesSections({
             <Text as='div' className='
                 bg-gray flex justify-center w-full pb-7 md:pb-10
             '>
-                {cursosInfantisFiltrados.length === 0
+                {loadingChildren 
+                    ? (
+                        <Text 
+                            as='div' 
+                            className='
+                                flex flex-col items-center justify-center w-full text-center mt-25 mb-25
+                        '>
+                            <Text as='p' className='text-xl font-semibold'>Carregando...</Text>
+                        </Text>
+                        )
+                    : cursosInfantisFiltrados.length === 0
                     ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
                         <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
                         <Text as='p'>Favor tente com outros filtros.</Text>
@@ -94,6 +106,7 @@ export default function ChildrensCoursesSections({
                                         culinarista={curso.culinarista}
                                         duracao={curso.duracao}
                                         categoria={curso.categoria}
+                                        loadingVagasPorCurso={loadingVagasPorCursoInfantis}
                                         vagasLivres={vagas.livres}
                                         vagasReservadas={vagas.reservadas}
                                         valor={curso.valor}

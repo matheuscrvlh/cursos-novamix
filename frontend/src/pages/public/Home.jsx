@@ -82,9 +82,11 @@ export default function Home() {
     const [cursosInfantisFiltrados, setCursosInfantisFiltrados] = useState([]);
 
     // ========= STATE VAGAS ========= 
+    const [loadingVagasPorCurso, setLoadingVagasPorCurso] = useState(true);
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);
 
+    const [loadingVagasPorCursoInfantis, setLoadingVagasPorCursoInfantis] = useState(true);
     const [vagasPorCursoInfantil, setVagasPorCursoInfantil] = useState({});
     const [refreshVagasInfantis, setRefreshVagasInfantis] = useState(0);
 
@@ -154,13 +156,16 @@ export default function Home() {
     useEffect(() => {
         if (!cursos.length) return;
 
-        try {
-            async function loadVagas() {
+        async function loadVagas() {
+            setLoadingVagasPorCurso(true);
+
+            try {
                 const resultado = {};
 
                 await Promise.all(
                     cursos.map(async (curso) => {
                         const assentos = await getSeats(curso.id);
+
                         resultado[curso.id] = {
                             livres: assentos.filter(v => v.status === 'livre').length,
                             reservadas: assentos.filter(v => v.status === 'reservado').length
@@ -169,14 +174,17 @@ export default function Home() {
                 );
 
                 setVagasPorCurso(resultado);
-            }
 
-            loadVagas();
-        } catch (err) {
-            console.log(err)
+            } catch (err) {
+                console.log(err);
+
+            } finally {
+                setLoadingVagasPorCurso(false);
+            }
         }
 
-        
+        loadVagas();
+
     }, [cursos, refreshVagas]);
 
     // PEGAR CURSOS ATUAIS
@@ -222,19 +230,29 @@ export default function Home() {
         if (!cursosInfantis.length) return;
 
         async function loadVagas() {
-            const resultado = {};
+            setLoadingVagasPorCursoInfantis(true)
 
-            await Promise.all(
-                cursosInfantis.map(async (curso) => {
-                    const assentos = await getSeats(curso.id);
-                    resultado[curso.id] = {
-                        livres: assentos.filter(v => v.status === 'livre').length,
-                        reservadas: assentos.filter(v => v.status === 'reservado').length
-                    };
-                })
-            );
+            try {
+                const resultado = {};
 
-            setVagasPorCursoInfantil(resultado);
+                await Promise.all(
+                    cursosInfantis.map(async (curso) => {
+                        const assentos = await getSeats(curso.id);
+                        resultado[curso.id] = {
+                            livres: assentos.filter(v => v.status === 'livre').length,
+                            reservadas: assentos.filter(v => v.status === 'reservado').length
+                        };
+                    })
+                );
+                
+                setVagasPorCursoInfantil(resultado);
+
+            } catch (err) {
+                console.log(err);
+
+            } finally {
+                setLoadingVagasPorCursoInfantis(false)
+            }
         }
 
         loadVagas();
@@ -322,6 +340,7 @@ export default function Home() {
                 <CoursesSections
                     cursosFiltrados={cursosFiltrados}
                     loadingCourses={loadingCourses}
+                    loadingVagasPorCurso={loadingVagasPorCurso}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
                     showModalFilters={showModalFilters}
@@ -335,6 +354,7 @@ export default function Home() {
                 <ChildrensCoursesSections
                     cursosInfantisFiltrados={cursosInfantisFiltrados}
                     loadingChildren={loadingChildren}
+                    loadingVagasPorCursoInfantis={loadingVagasPorCursoInfantis}
                     vagasPorCursoInfantil={vagasPorCursoInfantil}
                     openForm={openForm}
                     showModalFilters={showModalFiltersChildrens}
@@ -348,8 +368,9 @@ export default function Home() {
                 />
 
                 {/* ======== INDUSTRIAS ======== */}
-                {industrias &&
-                    <IndustriesSections
+                {industrias.length === 0 
+                    ? ''
+                    :<IndustriesSections
                         industrias={industrias}
                         loadingIndustries={loadingIndustries}
                     />

@@ -10,6 +10,7 @@ export default function CourseCard({
   duracao,
   categoria,
   valor,
+  loadingVagasPorCurso,
   vagasLivres,
   vagasReservadas,
   className,
@@ -106,8 +107,8 @@ export default function CourseCard({
           Garantir minha vaga
         </Text>
 
-        <Text as="p" className="text-gray-dark text-center text-sm md:text-base mt-2">
-          {`Vagas: ${vagasLivres}/24`}
+        <Text as="div" className="text-gray-dark text-center text-sm md:text-base mt-2">
+          {loadingVagasPorCurso ? (<div>Carregando vagas...</div>) : (<div>Vagas: {vagasLivres}/24</div>)}
         </Text>
       </Text>
     </Text>

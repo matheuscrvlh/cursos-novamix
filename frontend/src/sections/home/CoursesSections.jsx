@@ -12,6 +12,7 @@ import { Menu } from "lucide-react";
 export default function CoursesSections({
     cursosFiltrados,
     loadingCourses,
+    loadingVagasPorCurso,
     vagasPorCurso,
     openForm,
     showModalFilters,
@@ -68,13 +69,15 @@ export default function CoursesSections({
                     bg-gray flex justify-center w-full pb-7 md:pb-10
             '>
                 {loadingCourses 
-                    ? <Text 
+                    ? (
+                        <Text 
                             as='div' 
                             className='
                                 flex flex-col items-center justify-center w-full text-center mt-25 mb-25
                         '>
                             <Text as='p' className='text-xl font-semibold'>Carregando...</Text>
-                        </Text> 
+                        </Text>
+                        )
                     : cursosFiltrados.length === 0
                     ?  (<Text 
                             as='div' 
@@ -109,6 +112,7 @@ export default function CoursesSections({
                                         culinarista={curso.culinarista}
                                         duracao={curso.duracao}
                                         categoria={curso.categoria}
+                                        loadingVagasPorCurso={loadingVagasPorCurso}
                                         vagasLivres={vagas.livres}
                                         vagasReservadas={vagas.reservadas}
                                         valor={curso.valor}

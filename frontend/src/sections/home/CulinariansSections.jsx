@@ -9,7 +9,10 @@ import Text from "../../components/Text"
 import Button from '../../components/Button'
 import CulinarianCard from '../../components/public/CulinarianCard'
 
-export default function CulinariansSections({ culinaristas }) {
+export default function CulinariansSections({ 
+    culinaristas,
+    loadingCulinarian
+}) {
 
     return (
         <Text as='section' className='w-full mt-20 mb-20'>
@@ -28,7 +31,17 @@ export default function CulinariansSections({ culinaristas }) {
                     CULINARISTAS PARCEIROS
                 </Text>
                 <Text as='div' className='flex overflow-x-auto gap-10 w-screen px-10 pb-5 h-full mt-5 md:w-full md:grid md:grid-cols-4 md:overflow-x-hidden md:px-1'>
-                    {culinaristas.slice(0,4).map(c => (
+                    {loadingCulinarian 
+                        ? (
+                            <Text 
+                                as='div' 
+                                className='
+                                    flex flex-col items-center justify-center w-full text-center mt-25 mb-25
+                            '>
+                                <Text as='p' className='text-xl font-semibold'>Carregando...</Text>
+                            </Text>
+                            )
+                        : culinaristas.slice(0,4).map(c => (
                         <CulinarianCard
                             id={c.id}
                             foto={c.foto}
