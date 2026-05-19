@@ -108,7 +108,7 @@ export default function ChildrensCoursesSections({
                                         categoria={curso.categoria}
                                         loadingVagasPorCurso={loadingVagasPorCursoInfantis}
                                         vagasLivres={vagas.livres}
-                                        vagasReservadas={vagas.reservadas}
+                                        vagasReservadas={20}
                                         valor={curso.valor}
                                         onClick={() => openForm(curso.id)}
                                         className='

@@ -108,7 +108,7 @@ export default function CourseCard({
         </Text>
 
         <Text as="div" className="text-gray-dark text-center text-sm md:text-base mt-2">
-          {loadingVagasPorCurso ? (<div>Carregando vagas...</div>) : (<div>Vagas: {vagasLivres}/24</div>)}
+          {loadingVagasPorCurso ? (<div>Carregando vagas...</div>) : (<div>Vagas: {vagasLivres}/{vagasReservadas}</div>)}
         </Text>
       </Text>
     </Text>
