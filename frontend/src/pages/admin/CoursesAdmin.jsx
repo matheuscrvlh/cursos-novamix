@@ -363,10 +363,10 @@ export default function CoursesAdmin() {
                             {loading ? (
                                 <Text as='p'>Carregando cursos...</Text>
                             ) : (
-                                cursos.map(curso => (
+                                cursos.map((curso, i) => (
                                 <Text 
                                     as='div'
-                                    key={curso.id}
+                                    key={i}
                                 >
                                     {/* MOBILE */}
                                     <Text 

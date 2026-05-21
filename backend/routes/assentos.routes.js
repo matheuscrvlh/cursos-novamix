@@ -6,7 +6,7 @@ const router = express.Router();
 // GET assentos por curso
 router.get('/:cursoId', (req, res) => {
   db.all(
-    `SELECT * FROM assentos WHERE cursoId = ?`,
+    `SELECT * FROM assentos WHERE cursoId = ? ORDER BY id ASC`,
     [req.params.cursoId],
     (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });

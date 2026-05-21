@@ -31,6 +31,7 @@ router.get('/', (req, res) => {
 // POST novo curso
 router.post('/', uploadCursos.array('fotos', 5), (req, res) => {
   const cursoId = uuidv4();
+  const { nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor } = req.body
 
   db.run(`
     INSERT INTO cursos 
@@ -38,14 +39,14 @@ router.post('/', uploadCursos.array('fotos', 5), (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     cursoId,
-    req.body.nomeCurso,
-    req.body.culinarista,
-    req.body.categoria,
-    req.body.duracao,
-    req.body.data,
-    req.body.hora,
-    req.body.loja,
-    req.body.valor
+    nomeCurso,
+    culinarista,
+    categoria,
+    duracao,
+    data,
+    hora,
+    loja,
+    valor
   ], function(err) {
     if (err) {
       console.error('Erro ao inserir curso:', err);
@@ -79,7 +80,7 @@ router.post('/', uploadCursos.array('fotos', 5), (req, res) => {
       );
     }
 
-    res.status(201).json({ id: cursoId });
+    res.status(201).json({ cursoId, nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor  });
   });
 });
 

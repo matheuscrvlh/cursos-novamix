@@ -149,6 +149,7 @@ export default function Home() {
         getSeats(cursoSelecionado)
             .then(setAssentos)
             .catch(console.error)
+        
     }, [cursoSelecionado])
 
     // ========= FUNCOES CURSOS =========
@@ -195,8 +196,9 @@ export default function Home() {
         const cursosFiltrados = cursos.filter(c => {
             if (!c.data) return false;
 
-            const dataCurso = new Date(c.data);
-            dataCurso.setHours(0, 0, 0, 0);
+            const [ano, mes, dia] = c.data.split('-');
+
+            const dataCurso = new Date(ano, mes - 1, dia);
 
             return dataCurso >= hoje;
         });
@@ -266,8 +268,9 @@ export default function Home() {
         const cursosFiltrados = cursosInfantis.filter(c => {
             if (!c.data) return false;
 
-            const dataCurso = new Date(c.data);
-            dataCurso.setHours(0, 0, 0, 0);
+            const [ano, mes, dia] = c.data.split('-');
+
+            const dataCurso = new Date(ano, mes - 1, dia)
 
             return dataCurso >= hoje;
         });

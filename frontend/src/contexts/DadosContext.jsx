@@ -89,7 +89,6 @@ export function DadosProvider({ children }) {
         getIndustries()
             .then(data => {
                 setIndustrias(data)
-                console.log(data)
             })
             .catch(err => {
                 console.error('Erro ao buscar Industrias', err)

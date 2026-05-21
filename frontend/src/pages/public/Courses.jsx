@@ -144,8 +144,8 @@ export default function Courses() {
         const cursosFiltrados = cursos.filter(c => {
             if (!c.data) return false;
 
-            const dataCurso = new Date(c.data);
-            dataCurso.setHours(0, 0, 0, 0);
+            const [ano, mes, dia] = c.data.split('-');
+            const dataCurso = new Date(ano, mes - 1, dia)
 
             return dataCurso >= hoje;
         });

@@ -56,7 +56,7 @@ router.post('/', uploadCulinaristas.single('foto'), (req, res) => {
       return res.status(500).json({ message: 'Erro ao criar culinarista' });
     }
 
-    res.status(201).json({ id, nomeCulinarista, cpf, industria, telefone, instagram, foto, dataCadastro });
+    res.status(201).json({ id, nomeCulinarista, cpf, industria, telefone, lojas, instagram, foto, dataCadastro });
   });
 });
 
