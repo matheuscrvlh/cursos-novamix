@@ -12,6 +12,7 @@ import { useThemeColor } from '../../hooks/useThemeColor';
 
 // COMPONENTS
 import Text from '../../components/Text'
+import ModalBranch from '../../components/public/ModalBranch';
 import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
@@ -329,6 +330,12 @@ export default function Home() {
         setRefreshVagas(prev => prev + 1);
         setRefreshVagasInfantis(prev => prev + 1);
     }
+
+    // ========= ONLOAD ========= 
+    // Carregar filtro de loja inicial
+    useEffect(() => {
+        setStep('filterBranch')
+    }, [])
     
     // FUNDO PAGINA
     useThemeColor('#FF8D0A');
@@ -383,6 +390,15 @@ export default function Home() {
                 <LocationSections/>
 
                 {/* ================= MODAIS ================= */}
+                {/* ======== MODAL SELECIONAR FILIAL ONLOAD ======== */}
+                <ModalBranch 
+                    isOpen={step === 'filterBranch'}
+                    onClose={() => closeModal()}
+                    filtersCourses={filtersCourses}
+                    setFiltersCourses={setFiltersCourses}
+                    filtersChildrensCourses={filtersChildrensCourses}
+                    setFiltersChildrensCourses={setFiltersChildrensCourses}
+                />
 
                 {/* ======== MODAIS INSCRICOES CURSOS ======== */}
                 {/* ======== MODAL FORM ======== */}

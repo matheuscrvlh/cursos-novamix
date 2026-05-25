@@ -28,6 +28,7 @@ export default function DashboardAdmin() {
 
     // ========= STATE INSCRICOES ========= 
     const [inscricoes, setInscricoes] = useState([]);
+    const [loadingInscricoes, setLoadingInscricoes] = useState(true)
 
     // ========= STATE CURSOS HOJE ========= 
     const [filtroCursos, setFiltroCursos] = useState([]);
@@ -36,6 +37,10 @@ export default function DashboardAdmin() {
     const {
         cursos,
         culinaristas,
+        loadingCourses,
+        loadingCulinarian,
+        loadingIndustries,
+        loadingChildren
     } = useContext(DadosContext);
 
     // ======= FUNCOES =========
@@ -73,6 +78,8 @@ export default function DashboardAdmin() {
         const hoje = new Date().toLocaleDateString('PT-BR');
 
         async function buscarDadosDashboard() {
+            setLoadingInscricoes(true);
+
             try {
                 // CONSULTA
                 const dataInscricoes = await getTotalEnrollment();
@@ -112,6 +119,8 @@ export default function DashboardAdmin() {
 
             } catch(err) {
                 console.log('Nao foi possivel pegar as inscricoes', err);
+            } finally {
+                setLoadingInscricoes(false)
             }
         }
         buscarDadosDashboard() 
@@ -140,9 +149,11 @@ export default function DashboardAdmin() {
                                 '>
                                     <CardDash>
                                         <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {!filtroCursos.cursosAtivos
-                                                ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
-                                                : <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{filtroCursos.cursosAtivos}</Text>
+                                            {loadingCourses 
+                                                ?  <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Carregando...</Text>
+                                                :  !filtroCursos.cursosAtivos
+                                                    ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                                    : <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{filtroCursos.cursosAtivos}</Text>
                                             }
                                             <Text as='p' className='mb-auto text-gray-text'>Cursos Ativos</Text>
                                         </Text>
@@ -150,27 +161,33 @@ export default function DashboardAdmin() {
                                     </CardDash>
                                     <CardDash>
                                         <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {cursos.length > 0 
-                                                ? <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{cursos.length}</Text>
-                                                : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                            {loadingCourses 
+                                                ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Carregando...</Text>
+                                                :  cursos.length > 0 
+                                                    ? <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{cursos.length}</Text>
+                                                    : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
                                             }
                                             <Text as='p' className='mb-auto text-gray-text'>Cursos Totais</Text>
                                         </Text>
                                     </CardDash>
                                     <CardDash>
                                         <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {filtroCursos.cursosHoje > 0
-                                                ? <Text as='p' className='font-semibold text-6xl mt-auto text-green-base'>{filtroCursos.cursosHoje}</Text>
-                                                : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                            {loadingCourses 
+                                                ?  <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Carregando...</Text>
+                                                :  filtroCursos.cursosHoje > 0
+                                                    ? <Text as='p' className='font-semibold text-6xl mt-auto text-green-base'>{filtroCursos.cursosHoje}</Text>
+                                                    : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
                                             }
                                             <Text as='p' className='mb-auto text-gray-text'>Cursos Hoje</Text>
                                         </Text>
                                     </CardDash>
                                     <CardDash>
                                         <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {!filtroCursos.cursosConcluidos 
-                                                ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
-                                                : <Text as='p' className='font-semibold text-6xl mt-auto text-red-base'>{filtroCursos.cursosConcluidos}</Text>
+                                            {loadingCourses 
+                                                ?  <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Carregando...</Text>
+                                                :   !filtroCursos.cursosConcluidos 
+                                                    ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
+                                                    : <Text as='p' className='font-semibold text-6xl mt-auto text-red-base'>{filtroCursos.cursosConcluidos}</Text>
                                             }
                                             <Text as='p' className='mb-auto text-gray-text'>Cursos Concluidos</Text>
                                         </Text>
@@ -182,23 +199,41 @@ export default function DashboardAdmin() {
                                 '>
                                     <CardDash className='w-[50%] flex flex-col justify-center items-center'>
                                         <Text as='div' className='w-full flex flex-col text-center'>
-                                            <Text as='p' className='font-bold text-2xl text-gray-text mb-4'>TOTAIS</Text>
-                                            <Text as='p' className='font-semibold text-4xl text-green-base'>{!inscricoes.pagas ? '0' : inscricoes.pagas}</Text>
+                                                {loadingInscricoes 
+                                                    ? 'Carregando...'
+                                                    : !inscricoes.pagas 
+                                                        ? <Text as='p' className='font-semibold text-4xl text-green-base'>0</Text>
+                                                        : <Text as='p' className='font-semibold text-4xl text-green-base'>{inscricoes.pagas}</Text>
+                                                }
                                             <Text as='p'>Inscricoes pagas</Text> 
                                         </Text>
                                         <Text as='div' className='w-full flex flex-col text-center mt-4'>
-                                            <Text as='p' className='font-semibold text-4xl text-red-base'>{!inscricoes.verificar ? '0' : inscricoes.verificar}</Text>
+                                                {loadingInscricoes
+                                                    ? 'Carregando...'
+                                                    : !inscricoes.verificar 
+                                                        ? <Text as='p' className='font-semibold text-4xl text-red-base'>0</Text>
+                                                        : <Text as='p' className='font-semibold text-4xl text-red-base'>{inscricoes.verificar}</Text>
+                                                }
                                             <Text as='p'>Inscricoes a verificar</Text>
                                         </Text>
                                     </CardDash>
                                     <CardDash className='w-[50%] flex flex-col justify-center items-center'>
                                         <Text as='div' className='w-full flex flex-col text-center mt-4'>
-                                            <Text as='p' className='font-bold text-2xl text-gray-text mb-4'>HOJE</Text>
-                                            <Text as='p' className='font-semibold text-4xl text-green-base'>{!inscricoes.hojePagas ? '0' : inscricoes.hojePagas}</Text>
+                                                {loadingInscricoes 
+                                                    ? 'Carregando...'
+                                                    : !inscricoes.hojePagas 
+                                                        ? <Text as='p' className='font-semibold text-4xl text-green-base'>0</Text>
+                                                        : <Text as='p' className='font-semibold text-4xl text-green-base'>{inscricoes.hojePagas}</Text>
+                                                }
                                             <Text as='p'>Inscricoes pagas</Text> 
                                         </Text>
                                         <Text as='div' className='w-full flex flex-col text-center mt-4'>
-                                            <Text as='p' className='font-semibold text-4xl text-red-base'>{!inscricoes.hojeVerificar ? '0' : inscricoes.hojeVerificar}</Text>
+                                                {loadingInscricoes 
+                                                    ? 'Carregando...'
+                                                    : !inscricoes.hojeVerificar 
+                                                        ? <Text as='p' className='font-semibold text-4xl text-red-base'>0</Text>
+                                                        : <Text as='p' className='font-semibold text-4xl text-red-base'>{inscricoes.hojeVerificar}</Text>
+                                                }
                                             <Text as='p'>Inscricoes a verificar</Text>
                                         </Text>
                                     </CardDash>
