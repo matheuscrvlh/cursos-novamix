@@ -2,7 +2,6 @@
 import { useContext, useEffect, useState } from "react"
 
 // COMPONENTS
-import Text from "../../components/Text"
 
 // LAYOUT
 import PublicLayout from "../../layouts/public/PublicLayout"
@@ -34,12 +33,12 @@ export default function Culinarians() {
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Loja Novamix | Cursos' />
-            <Text as='section' className='bg-gray mb-20'>
+            <section className='bg-gray mb-20'>
 
                 {/* ================= CONTEUDO ================= */}
                 <AllCulinariansSections culinaristas={culinaristas}/>
 
-            </Text>
+            </section>
         </PublicLayout>
     )
 }

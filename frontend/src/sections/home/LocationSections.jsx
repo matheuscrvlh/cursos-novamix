@@ -2,7 +2,6 @@
 import { useState } from 'react'
 
 // COMPONENTS
-import Text from "../../components/Text"
 import Button from '../../components/Button'
 
 export default function LocationSections() {
@@ -15,8 +14,8 @@ export default function LocationSections() {
     }) 
 
     return (
-        <Text as='section' className='w-[80vw] mx-auto mt-20 md:mt-30'>
-            <Text as='div' className='flex justify-end gap-5'>
+        <section className='w-[80vw] mx-auto mt-20 md:mt-30'>
+            <div className='flex justify-end gap-5'>
                 <Button 
                     className={`text-white ${location.adress.includes('Duas Pedras') ? 'bg-gray-base' : 'bg-orange-base'}`}
                     onClick={() => setLocation(prev => ({
@@ -37,31 +36,29 @@ export default function LocationSections() {
                 >
                     Teresópolis
                 </Button>
-            </Text>
-            <Text as='div' className='flex flex-col justify-between items-center mt-5 md:flex-row md:mt-0'>
-                <Text as='div'>
-                    <Text as='div' className='text-4xl text-gray-dark md:text-7xl'>
-                        <Text as='p'>CONFIRA</Text>
-                        <Text as='p' className='text-orange-base font-bold'>NOSSA</Text>
-                        <Text as='p'>LOCALIZAÇÃO</Text>
-                    </Text>
-                    <Text as='div' className='flex flex-col gap-5 mt-5 text-gray-dark md:mt-10'>
-                        <Text as='div'>
-                            <Text as='p' className='text-md font-bold md:text-xl'>Endereço</Text>
-                            <Text as='p' className='text-sm md:text-base'>{location.adress}</Text>
-                        </Text>
-                        <Text as='div'>
-                            <Text as='p' className='text-md font-bold md:text-xl'>Horário de Atendimento</Text>
-                            <Text as='p' className='text-sm md:text-base'>{location.time}</Text>
-                        </Text>
-                    </Text>
-                </Text>
-                <Text
-                    as='iframe' 
-                    src={location.iframe}
+            </div>
+            <div className='flex flex-col justify-between items-center mt-5 md:flex-row md:mt-0'>
+                <div>
+                    <div className='text-4xl text-gray-dark md:text-7xl'>
+                        <p>CONFIRA</p>
+                        <p className='text-orange-base font-bold'>NOSSA</p>
+                        <p>LOCALIZAÇÃO</p>
+                    </div>
+                    <div className='flex flex-col gap-5 mt-5 text-gray-dark md:mt-10'>
+                        <div>
+                            <p className='text-md font-bold md:text-xl'>Endereço</p>
+                            <p className='text-sm md:text-base'>{location.adress}</p>
+                        </div>
+                        <div>
+                            <p className='text-md font-bold md:text-xl'>Horário de Atendimento</p>
+                            <p className='text-sm md:text-base'>{location.time}</p>
+                        </div>
+                    </div>
+                </div>
+                <iframe src={location.iframe}
                     className='w-full mt-10 h-80 md:h-100 md:w-[60%] '
                 />
-            </Text>
-        </Text>
+            </div>
+        </section>
     )
 }

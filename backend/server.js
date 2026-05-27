@@ -18,7 +18,6 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-
 app.use('/api/cursos', cursosRoutes);
 app.use('/api/assentos', assentosRoutes);
 app.use('/api/inscricoes', inscricoesRoutes);

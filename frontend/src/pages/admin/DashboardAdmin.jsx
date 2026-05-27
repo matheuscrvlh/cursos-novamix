@@ -8,8 +8,10 @@ import TopBar from '../../layouts/admin/TopBar'
 // React
 import { useContext, useState, useEffect } from 'react';
 
+// Icons
+import { BookOpen, CalendarCheck, CheckCircle2, ArchiveX, CreditCard, AlertCircle } from 'lucide-react';
+
 // Components
-import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import CourseCard from '../../components/public/CourseCard'
 import CulinarianCard from '../../components/admin/CulinarianCard';
@@ -127,228 +129,212 @@ export default function DashboardAdmin() {
     }, [])
 
     return (
-        <Text as='div' className='flex w-full min-h-[100vdh] bg-gray overflow-x-hidden'>
+        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <Head title='Admin | Dashboard'/>
             <SideBar />
-           <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
+            <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Dashboard'} />
-                <Text as='div' className='w-full flex flex-col font-semibold gap-3 justify-center mt-50%'>
-                    <Text as='section' className='
-                        flex flex-col gap-10 mt-10 w-[92dvw]
-                        md:gap-20 md:w-[78vw]
-                    '>
-                        {/* ======== INFO CARDS ==========*/}
-                        <Text as='section' className='w-full'>
-                            <Text as='article' className='
-                                flex flex-col gap-7
-                                md:flex-row md:gap-7
-                            '>
-                                <Text as='div' className='
-                                    grid grid-cols-2 gap-7 w-full h-auto
-                                    md:grid-cols-2 md:w-[50%] md:h-[350px]
-                                '>
-                                    <CardDash>
-                                        <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {loadingCourses 
-                                                ?  <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Carregando...</Text>
-                                                :  !filtroCursos.cursosAtivos
-                                                    ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
-                                                    : <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{filtroCursos.cursosAtivos}</Text>
-                                            }
-                                            <Text as='p' className='mb-auto text-gray-text'>Cursos Ativos</Text>
-                                        </Text>
-                                        
-                                    </CardDash>
-                                    <CardDash>
-                                        <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {loadingCourses 
-                                                ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Carregando...</Text>
-                                                :  cursos.length > 0 
-                                                    ? <Text as='p' className='font-semibold text-6xl mt-auto text-gray-text'>{cursos.length}</Text>
-                                                    : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
-                                            }
-                                            <Text as='p' className='mb-auto text-gray-text'>Cursos Totais</Text>
-                                        </Text>
-                                    </CardDash>
-                                    <CardDash>
-                                        <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {loadingCourses 
-                                                ?  <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Carregando...</Text>
-                                                :  filtroCursos.cursosHoje > 0
-                                                    ? <Text as='p' className='font-semibold text-6xl mt-auto text-green-base'>{filtroCursos.cursosHoje}</Text>
-                                                    : <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
-                                            }
-                                            <Text as='p' className='mb-auto text-gray-text'>Cursos Hoje</Text>
-                                        </Text>
-                                    </CardDash>
-                                    <CardDash>
-                                        <Text as='div' className='w-full h-full flex flex-col text-center gap-1'>
-                                            {loadingCourses 
-                                                ?  <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Carregando...</Text>
-                                                :   !filtroCursos.cursosConcluidos 
-                                                    ? <Text as='p' className='font-semibold text-xl mt-auto text-gray-text'>Nenhum</Text>
-                                                    : <Text as='p' className='font-semibold text-6xl mt-auto text-red-base'>{filtroCursos.cursosConcluidos}</Text>
-                                            }
-                                            <Text as='p' className='mb-auto text-gray-text'>Cursos Concluidos</Text>
-                                        </Text>
-                                    </CardDash>
-                                </Text>
-                                <Text as='div' className='
-                                    flex gap-7
-                                    md:w-[50%] md:h-[350px]
-                                '>
-                                    <CardDash className='w-[50%] flex flex-col justify-center items-center'>
-                                        <Text as='div' className='w-full flex flex-col text-center'>
-                                                {loadingInscricoes 
-                                                    ? 'Carregando...'
-                                                    : !inscricoes.pagas 
-                                                        ? <Text as='p' className='font-semibold text-4xl text-green-base'>0</Text>
-                                                        : <Text as='p' className='font-semibold text-4xl text-green-base'>{inscricoes.pagas}</Text>
-                                                }
-                                            <Text as='p'>Inscricoes pagas</Text> 
-                                        </Text>
-                                        <Text as='div' className='w-full flex flex-col text-center mt-4'>
-                                                {loadingInscricoes
-                                                    ? 'Carregando...'
-                                                    : !inscricoes.verificar 
-                                                        ? <Text as='p' className='font-semibold text-4xl text-red-base'>0</Text>
-                                                        : <Text as='p' className='font-semibold text-4xl text-red-base'>{inscricoes.verificar}</Text>
-                                                }
-                                            <Text as='p'>Inscricoes a verificar</Text>
-                                        </Text>
-                                    </CardDash>
-                                    <CardDash className='w-[50%] flex flex-col justify-center items-center'>
-                                        <Text as='div' className='w-full flex flex-col text-center mt-4'>
-                                                {loadingInscricoes 
-                                                    ? 'Carregando...'
-                                                    : !inscricoes.hojePagas 
-                                                        ? <Text as='p' className='font-semibold text-4xl text-green-base'>0</Text>
-                                                        : <Text as='p' className='font-semibold text-4xl text-green-base'>{inscricoes.hojePagas}</Text>
-                                                }
-                                            <Text as='p'>Inscricoes pagas</Text> 
-                                        </Text>
-                                        <Text as='div' className='w-full flex flex-col text-center mt-4'>
-                                                {loadingInscricoes 
-                                                    ? 'Carregando...'
-                                                    : !inscricoes.hojeVerificar 
-                                                        ? <Text as='p' className='font-semibold text-4xl text-red-base'>0</Text>
-                                                        : <Text as='p' className='font-semibold text-4xl text-red-base'>{inscricoes.hojeVerificar}</Text>
-                                                }
-                                            <Text as='p'>Inscricoes a verificar</Text>
-                                        </Text>
-                                    </CardDash>
-                                </Text>
-                            </Text>
-                        </Text>
-                        {/* ======== CURSOS ==========*/}
-                        <Text as='section' className='flex flex-col gap-3'>
-                            <Text as='h2' className='font-bold text-gray-text text-center text-2xl'>CURSOS</Text>
-                            <Text as='article' className='flex flex-col gap-5'>
-                                <Text as='div'>
-                                    {cursos.length === 0 
-                                        ? <Text as='p'>Nenhum curso encontrado</Text>
-                                        : <Text
-                                                as='div'
-                                                className="
-                                                    w-[100dvw]
-                                                    max-h-[600px]
-                                                    h-full
-                                                    flex
-                                                    gap-2
-                                                    overflow-x-auto
-                                                    overflow-y-hidden
-                                                    whitespace-nowrap
-                                                    md:w-[81vw]
-                                                    p-4
-                                                "
-                                            >
-                                                {cursos.map(curso => {
-                                                    const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
 
-                                                    return (
-                                                        <CourseCard
-                                                            key={curso.id}
-                                                            id={curso.id}
-                                                            curso={curso.nomeCurso}
-                                                            data={layoutData(curso.data)}
-                                                            horario={curso.hora}
-                                                            loja={curso.loja}
-                                                            culinarista={curso.culinarista}
-                                                            duracao={curso.duracao}
-                                                            categoria={curso.categoria}
-                                                            vagasLivres={vagas.livres}
-                                                            vagasReservadas={vagas.reservadas}
-                                                            valor={curso.valor}
-                                                            className='min-w-[300px] scale-90'
-                                                            imagem={
-                                                                curso.fotos?.length
-                                                                    ? curso.fotos[0]
-                                                                    : null
-                                                            }
-                                                        />
-                                                    )
-                                                })}
-                                            </Text>
-                                        }
-                                </Text>
-                            </Text>
-                        </Text>
-                        {/* ======== CULINARISTAS ==========*/}
-                        <Text as='section' className='flex flex-col gap-3'>
-                            <Text as='h2' className='font-bold text-gray-text text-2xl text-center'>CULINARISTAS</Text>
-                            <Text as='article'>
-                                {culinaristas.length === 0 
-                                    ? <Text as='p'>Nenhuma culinarista encontrada</Text>
-                                    : <Text
-                                        as='div'
-                                        className="
-                                            w-[100dvw]
-                                            max-h-[600px]
-                                            h-full
-                                            flex
-                                            gap-2
-                                            overflow-x-auto
-                                            overflow-y-hidden
-                                            whitespace-nowrap
-                                            md:w-[81vw]
-                                            p-4
-                                        "
-                                    >
-                                        {culinaristas.map(culinarista => {
+                <section className='flex flex-col gap-10 mt-10 w-[92dvw] md:w-[78vw]'>
 
-                                            return (
-                                                <CulinarianCard
-                                                    key={culinarista.id}
-                                                    culinarista={culinarista.nomeCulinarista}
-                                                    industria={culinarista.industria}
-                                                    telefone={culinarista.telefone}
-                                                    instagram={culinarista.instagram}
-                                                    className='min-w-[300px] scale-90'
-                                                    lojas={
-                                                        culinarista.lojas.length === 0
-                                                            ? 'Nenhuma'
-                                                            : culinarista.lojas
-                                                    }
-                                                    cursos={
-                                                        culinarista.cursos.length === 0
-                                                            ? 'Nenhum'
-                                                            : culinarista.cursos
-                                                    }
-                                                    imagem={
-                                                        culinarista.foto === null
-                                                            ? null
-                                                            : culinarista.foto
-                                                    }
-                                                />
-                                            )
-                                        })}
-                                    </Text>
+                    {/* ======== CURSOS STATS ========== */}
+                    <div className='flex flex-col gap-3'>
+                        <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Cursos</p>
+                        <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
+
+                            <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                                <div className='flex items-center justify-between'>
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Ativos</p>
+                                    <div className='w-8 h-8 rounded-full bg-orange-base/10 flex items-center justify-center'>
+                                        <BookOpen size={15} className='text-orange-base' />
+                                    </div>
+                                </div>
+                                {loadingCourses
+                                    ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                                    : <p className='text-4xl font-bold text-gray-text'>{filtroCursos.cursosAtivos || 0}</p>
                                 }
-                            </Text>
-                        </Text>
-                    </Text>
-                </Text>
-            </Text>
-        </Text>
+                            </div>
+
+                            <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                                <div className='flex items-center justify-between'>
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Totais</p>
+                                    <div className='w-8 h-8 rounded-full bg-gray-base/10 flex items-center justify-center'>
+                                        <BookOpen size={15} className='text-gray-base' />
+                                    </div>
+                                </div>
+                                {loadingCourses
+                                    ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                                    : <p className='text-4xl font-bold text-gray-text'>{cursos.length}</p>
+                                }
+                            </div>
+
+                            <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                                <div className='flex items-center justify-between'>
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Hoje</p>
+                                    <div className='w-8 h-8 rounded-full bg-green-base/10 flex items-center justify-center'>
+                                        <CalendarCheck size={15} className='text-green-base' />
+                                    </div>
+                                </div>
+                                {loadingCourses
+                                    ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                                    : <p className='text-4xl font-bold text-green-base'>{filtroCursos.cursosHoje || 0}</p>
+                                }
+                            </div>
+
+                            <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                                <div className='flex items-center justify-between'>
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Concluídos</p>
+                                    <div className='w-8 h-8 rounded-full bg-red-base/10 flex items-center justify-center'>
+                                        <CheckCircle2 size={15} className='text-red-base' />
+                                    </div>
+                                </div>
+                                {loadingCourses
+                                    ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                                    : <p className='text-4xl font-bold text-red-base'>{filtroCursos.cursosConcluidos || 0}</p>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {/* ======== INSCRICOES STATS ========== */}
+                    <div className='flex flex-col gap-3 -mt-4'>
+                        <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Inscrições</p>
+                        <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
+
+                            <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                                <div className='flex items-center justify-between'>
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Pagas</p>
+                                    <div className='w-8 h-8 rounded-full bg-green-base/10 flex items-center justify-center'>
+                                        <CreditCard size={15} className='text-green-base' />
+                                    </div>
+                                </div>
+                                {loadingInscricoes
+                                    ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                                    : <p className='text-4xl font-bold text-green-base'>{inscricoes.pagas || 0}</p>
+                                }
+                            </div>
+
+                            <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                                <div className='flex items-center justify-between'>
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>A Verificar</p>
+                                    <div className='w-8 h-8 rounded-full bg-red-base/10 flex items-center justify-center'>
+                                        <AlertCircle size={15} className='text-red-base' />
+                                    </div>
+                                </div>
+                                {loadingInscricoes
+                                    ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                                    : <p className='text-4xl font-bold text-red-base'>{inscricoes.verificar || 0}</p>
+                                }
+                            </div>
+
+                            <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                                <div className='flex items-center justify-between'>
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Pagas Hoje</p>
+                                    <div className='w-8 h-8 rounded-full bg-green-base/10 flex items-center justify-center'>
+                                        <CreditCard size={15} className='text-green-base' />
+                                    </div>
+                                </div>
+                                {loadingInscricoes
+                                    ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                                    : <p className='text-4xl font-bold text-green-base'>{inscricoes.hojePagas || 0}</p>
+                                }
+                            </div>
+
+                            <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                                <div className='flex items-center justify-between'>
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Verificar Hoje</p>
+                                    <div className='w-8 h-8 rounded-full bg-red-base/10 flex items-center justify-center'>
+                                        <AlertCircle size={15} className='text-red-base' />
+                                    </div>
+                                </div>
+                                {loadingInscricoes
+                                    ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                                    : <p className='text-4xl font-bold text-red-base'>{inscricoes.hojeVerificar || 0}</p>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {/* ======== CURSOS ========== */}
+                    <section className='flex flex-col gap-4'>
+                        <div className='flex items-center gap-3'>
+                            <h2 className='font-bold text-gray-text text-lg shrink-0'>CURSOS</h2>
+                            <div className='flex-1 h-px bg-gray-base/20'/>
+                        </div>
+                        {cursos.length === 0
+                            ? <p className='text-gray-text/60 text-sm'>Nenhum curso encontrado</p>
+                            : <div className='flex gap-4 overflow-x-auto pb-3 -mx-4 px-4'>
+                                {cursos.map(curso => {
+                                    const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
+                                    return (
+                                        <CourseCard
+                                            key={curso.id}
+                                            id={curso.id}
+                                            curso={curso.nomeCurso}
+                                            data={layoutData(curso.data)}
+                                            horario={curso.hora}
+                                            loja={curso.loja}
+                                            culinarista={curso.culinarista}
+                                            duracao={curso.duracao}
+                                            categoria={curso.categoria}
+                                            vagasLivres={vagas.livres}
+                                            vagasReservadas={vagas.reservadas}
+                                            valor={curso.valor}
+                                            className='min-w-75 shrink-0'
+                                            imagem={
+                                                curso.fotos?.length
+                                                    ? curso.fotos[0]
+                                                    : null
+                                            }
+                                        />
+                                    )
+                                })}
+                            </div>
+                        }
+                    </section>
+
+                    {/* ======== CULINARISTAS ========== */}
+                    <section className='flex flex-col gap-4'>
+                        <div className='flex items-center gap-3'>
+                            <h2 className='font-bold text-gray-text text-lg shrink-0'>CULINARISTAS</h2>
+                            <div className='flex-1 h-px bg-gray-base/20'/>
+                        </div>
+                        {culinaristas.length === 0
+                            ? <p className='text-gray-text/60 text-sm'>Nenhuma culinarista encontrada</p>
+                            : <div className='flex gap-4 overflow-x-auto pb-3 -mx-4 px-4'>
+                                {culinaristas.map(culinarista => (
+                                    <CulinarianCard
+                                        key={culinarista.id}
+                                        culinarista={culinarista.nomeCulinarista}
+                                        industria={culinarista.industria}
+                                        telefone={culinarista.telefone}
+                                        instagram={culinarista.instagram}
+                                        className='min-w-75 shrink-0'
+                                        lojas={
+                                            culinarista.lojas.length === 0
+                                                ? 'Nenhuma'
+                                                : culinarista.lojas
+                                        }
+                                        cursos={
+                                            culinarista.cursos.length === 0
+                                                ? 'Nenhum'
+                                                : culinarista.cursos
+                                        }
+                                        imagem={
+                                            culinarista.foto === null
+                                                ? null
+                                                : culinarista.foto
+                                        }
+                                    />
+                                ))}
+                            </div>
+                        }
+                    </section>
+
+                </section>
+            </main>
+        </div>
     )
 }

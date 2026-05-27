@@ -9,7 +9,6 @@ import { Trash, Edit } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
-import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
@@ -129,133 +128,199 @@ export default function ChildrensAdmin() {
     }
 
     return (
-        <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
+        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <Head title='Admin | Cursos Infantis'/>
             <SideBar />
 
-            <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
+            <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Cursos Infantis'} />
 
-                <Text as='section' className='flex flex-col gap-10 mt-10 w-[92dvw] lg:w-[78vw]'>
+                <section className='flex flex-col gap-10 mt-10 w-[92dvw] lg:w-[78vw]'>
 
                     {/* FORM */}
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                        <Text className='font-bold text-gray-text mb-4'>
-                            CADASTRE UM CURSO INFANTIL
-                        </Text>
+                        <p className='font-bold text-gray-text mb-6'>CADASTRE UM CURSO INFANTIL</p>
 
-                        <Text className='flex flex-wrap gap-3 text-gray-dark'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
 
-                            <Input placeholder='Curso'
-                                value={form.nomeCurso}
-                                onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
-                            />
+                            <div className='flex flex-col gap-1.5 md:col-span-2 lg:col-span-3'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Curso</label>
+                                <Input placeholder='Nome do curso'
+                                    value={form.nomeCurso}
+                                    onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
+                                />
+                            </div>
 
-                            <Input type='date'
-                                value={form.data}
-                                onChange={e => setForm({ ...form, data: e.target.value })}
-                            />
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Data</label>
+                                <Input type='date'
+                                    value={form.data}
+                                    onChange={e => setForm({ ...form, data: e.target.value })}
+                                />
+                            </div>
 
-                            <Input type='time'
-                                value={form.hora}
-                                onChange={e => setForm({ ...form, hora: e.target.value })}
-                            />
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Horário</label>
+                                <Input type='time'
+                                    value={form.hora}
+                                    onChange={e => setForm({ ...form, hora: e.target.value })}
+                                />
+                            </div>
 
-                            {/* LOJA */}
-                            <Text as='select'
-                                value={form.loja}
-                                onChange={e => setForm({ ...form, loja: e.target.value })}
-                                className='w-[150px] h-[40px] border border-gray-base rounded-md'
-                            >
-                                <Text as='option' value=''>Selecione a loja</Text>
-                                <Text as='option' value='Prado'>Prado</Text>
-                                <Text as='option' value='Teresopolis'>Teresopolis</Text>
-                            </Text>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Loja</label>
+                                <select value={form.loja}
+                                    onChange={e => setForm({ ...form, loja: e.target.value })}
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
+                                >
+                                    <option value=''>Selecione a loja</option>
+                                    <option value='Prado'>Prado</option>
+                                    <option value='Teresopolis'>Teresopolis</option>
+                                </select>
+                            </div>
 
-                            {/* CULINARISTA */}
-                            <Text as='select'
-                                value={form.culinarista}
-                                onChange={e => setForm({ ...form, culinarista: e.target.value })}
-                                className='w-[200px] h-[40px] border border-gray-base rounded-md'
-                            >
-                                <Text as='option' value=''>Selecione a culinarista</Text>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
+                                <select value={form.culinarista}
+                                    onChange={e => setForm({ ...form, culinarista: e.target.value })}
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
+                                >
+                                    <option value=''>Selecione a culinarista</option>
+                                    {culinaristas?.map(c => (
+                                        <option key={c.id} value={c.nomeCulinarista}>
+                                            {c.nomeCulinarista}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                                {culinaristas?.map(c => (
-                                    <Text key={c.id} as='option' value={c.nomeCulinarista}>
-                                        {c.nomeCulinarista}
-                                    </Text>
-                                ))}
-                            </Text>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Valor</label>
+                                <Input placeholder='Valor'
+                                    value={form.valor}
+                                    onChange={e => setForm({ ...form, valor: e.target.value })}
+                                />
+                            </div>
 
-                            <Input placeholder='Valor'
-                                value={form.valor}
-                                onChange={e => setForm({ ...form, valor: e.target.value })}
-                            />
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Duração</label>
+                                <Input placeholder='Duração'
+                                    value={form.duracao}
+                                    onChange={e => setForm({ ...form, duracao: e.target.value })}
+                                />
+                            </div>
 
-                            <Input placeholder='Duração'
-                                value={form.duracao}
-                                onChange={e => setForm({ ...form, duracao: e.target.value })}
-                            />
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Categoria</label>
+                                <Input placeholder='Categoria'
+                                    value={form.categoria}
+                                    onChange={e => setForm({ ...form, categoria: e.target.value })}
+                                />
+                            </div>
 
-                            <Input placeholder='Categoria'
-                                value={form.categoria}
-                                onChange={e => setForm({ ...form, categoria: e.target.value })}
-                            />
+                            <div className='flex flex-col gap-1.5 md:col-span-2 lg:col-span-3'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Imagem</label>
+                                <Input
+                                    type='file'
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
+                                        setForm(prev => ({ ...prev, fotos: file }));
+                                    }}
+                                />
+                            </div>
 
-                            <Input
-                                type='file'
-                                onChange={(e) => {
-                                    const file = e.target.files[0];
-                                    if (!file) return;
+                            <div className='md:col-span-2 lg:col-span-3 mt-2'>
+                                <Button
+                                    onClick={handleSubmit}
+                                    className='bg-orange-base text-white w-full hover:bg-orange-light'
+                                >
+                                    Adicionar Curso Infantil
+                                </Button>
+                            </div>
 
-                                    setForm(prev => ({
-                                        ...prev,
-                                        fotos: file
-                                    }));
-                                }}
-                            />
-
-                            <Button
-                                onClick={handleSubmit}
-                                className='bg-orange-base text-white w-full hover:bg-orange-light'
-                            >
-                                Adicionar
-                            </Button>
-
-                        </Text>
+                        </div>
                     </CardDash>
 
                     {/* LISTAGEM */}
                     <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                        <Text className='font-bold text-gray-text'>CURSOS INFANTIS</Text>
+                        <p className='font-bold text-gray-text mb-4'>CURSOS INFANTIS</p>
 
-                        <Text className='mt-4 max-h-[400px] overflow-y-auto'>
-                            {cursosInfantis.map((c, i) => (
-                                <Text key={i}
-                                    className='flex justify-between items-center p-2 border-b text-gray-text'
-                                >
-                                    <Text>
-                                        {c.nomeCurso} - {formatarData(c.data)}
-                                    </Text>
+                        <div className='max-h-100 overflow-y-auto'>
 
-                                    <Text className='flex gap-2'>
-                                        <Button
-                                            className='bg-red-base text-white p-2'
-                                            onClick={() => removeCursoInfantil(c.id)}
-                                        >
-                                            <Trash />
-                                        </Button>
+                            {/* HEADER DESKTOP */}
+                            <div className='hidden md:grid grid-cols-[2fr_1fr_0.7fr_0.6fr_0.7fr_auto] gap-2
+                                            text-xs font-semibold text-gray-text uppercase tracking-wider
+                                            bg-gray px-3 py-2 rounded-md mb-1 sticky top-0 z-10'>
+                                <p>Descrição</p>
+                                <p>Culinarista</p>
+                                <p>Data</p>
+                                <p>Horário</p>
+                                <p>Loja</p>
+                                <p>Ações</p>
+                            </div>
 
-                                        <Button
-                                            className='bg-orange-base text-white p-2'
-                                            onClick={() => handleEdit(c.id)}
-                                        >
-                                            <Edit />
-                                        </Button>
-                                    </Text>
-                                </Text>
-                            ))}
-                        </Text>
+                            {cursosInfantis.length === 0 ? (
+                                <p className='text-gray-text text-center py-8'>Nenhum curso infantil cadastrado</p>
+                            ) : (
+                                cursosInfantis.map((c, i) => (
+                                    <div key={i}>
+                                        {/* MOBILE */}
+                                        <div className='md:hidden p-3 text-gray-text'>
+                                            <p className='font-semibold'>{c.nomeCurso}</p>
+                                            <p className='text-sm text-gray-text/70'>{c.culinarista} · {formatarData(c.data)} · {c.hora}</p>
+                                            {c.loja === 'Prado'
+                                                ? <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-orange-base/10 text-orange-base'>{c.loja}</span>
+                                                : <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-blue-base/20 text-blue-base'>{c.loja}</span>
+                                            }
+                                            <div className='flex gap-2 mt-2'>
+                                                <Button
+                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
+                                                    onClick={() => removeCursoInfantil(c.id)}
+                                                >
+                                                    <Trash size={16} />
+                                                </Button>
+                                                <Button
+                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
+                                                    onClick={() => handleEdit(c.id)}
+                                                >
+                                                    <Edit size={16} />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* DESKTOP */}
+                                        <div className='hidden md:grid grid-cols-[2fr_1fr_0.7fr_0.6fr_0.7fr_auto] gap-2
+                                                        px-3 py-3 items-center text-gray-text text-sm
+                                                        hover:bg-gray/60 transition-colors rounded-md'>
+                                            <p className='font-medium truncate pr-2'>{c.nomeCurso}</p>
+                                            <p className='truncate'>{c.culinarista}</p>
+                                            <p>{formatarData(c.data)}</p>
+                                            <p>{c.hora}</p>
+                                            {c.loja === 'Prado'
+                                                ? <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-orange-base/10 text-orange-base'>{c.loja}</span>
+                                                : <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-blue-base/20 text-blue-base'>{c.loja}</span>
+                                            }
+                                            <div className='flex gap-2'>
+                                                <Button
+                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
+                                                    onClick={() => removeCursoInfantil(c.id)}
+                                                >
+                                                    <Trash size={16} />
+                                                </Button>
+                                                <Button
+                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
+                                                    onClick={() => handleEdit(c.id)}
+                                                >
+                                                    <Edit size={16} />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <hr className='border-gray-base/20'/>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </CardDash>
 
                     {/* MODAL */}
@@ -263,98 +328,120 @@ export default function ChildrensAdmin() {
                         isOpen={step === 'edit'}
                         onClose={closeModal}
                         width='90%'
-                        maxWidth='600px'
+                        maxWidth='700px'
                     >
-                        <Text className='font-bold text-xl mb-5 text-gray-text'>
-                            Editar Curso Infantil
-                        </Text>
+                        {/* HEADER */}
+                        <div className='mb-6'>
+                            <h2 className='text-xl font-bold text-gray-text'>Editar Curso Infantil</h2>
+                            <hr className='border-gray-base/30 w-full mt-3'/>
+                        </div>
 
-                        {previewImagem && (
-                            <img src={previewImagem} className='w-[200px] mb-4' />
-                        )}
+                        {/* FOTO */}
+                        <div className='flex items-start gap-5 mb-6 p-4 bg-gray rounded-lg'>
+                            {previewImagem
+                                ? <img src={previewImagem} className='w-28 h-28 shrink-0 object-cover rounded-lg'/>
+                                : <div className='w-28 h-28 shrink-0 rounded-lg bg-gray-base/20 flex items-center justify-center text-gray-text text-xs text-center'>
+                                    Sem foto
+                                  </div>
+                            }
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Alterar Foto</label>
+                                <Input
+                                    type='file'
+                                    accept='image/*'
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (!file) return;
+                                        setCursoEditar(prev => ({ ...prev, fotos: file }));
+                                        setPreviewImagem(URL.createObjectURL(file));
+                                    }}
+                                />
+                            </div>
+                        </div>
 
-                        <Text className='flex flex-col gap-3'>
+                        {/* CAMPOS */}
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+                            <div className='flex flex-col gap-1.5 md:col-span-2'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Nome do Curso</label>
+                                <Input
+                                    value={cursoEditar.nomeCurso || ''}
+                                    onChange={e => setCursoEditar({ ...cursoEditar, nomeCurso: e.target.value })}
+                                />
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Data</label>
+                                <Input
+                                    type='date'
+                                    value={cursoEditar.data || ''}
+                                    onChange={e => setCursoEditar({ ...cursoEditar, data: e.target.value })}
+                                />
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Horário</label>
+                                <Input
+                                    type='time'
+                                    value={cursoEditar.hora || ''}
+                                    onChange={e => setCursoEditar({ ...cursoEditar, hora: e.target.value })}
+                                />
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Loja</label>
+                                <select
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
+                                    value={cursoEditar.loja || ''}
+                                    onChange={e => setCursoEditar({ ...cursoEditar, loja: e.target.value })}
+                                >
+                                    <option value=''>Selecione a loja</option>
+                                    <option value='Prado'>Prado</option>
+                                    <option value='Teresopolis'>Teresopolis</option>
+                                </select>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
+                                <select
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
+                                    value={cursoEditar.culinarista || ''}
+                                    onChange={e => setCursoEditar({ ...cursoEditar, culinarista: e.target.value })}
+                                >
+                                    <option value=''>Selecione a culinarista</option>
+                                    {culinaristas?.map(c => (
+                                        <option key={c.id} value={c.nomeCulinarista}>{c.nomeCulinarista}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Valor</label>
+                                <Input
+                                    value={cursoEditar.valor || ''}
+                                    onChange={e => setCursoEditar({ ...cursoEditar, valor: e.target.value })}
+                                />
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Duração</label>
+                                <Input
+                                    value={cursoEditar.duracao || ''}
+                                    onChange={e => setCursoEditar({ ...cursoEditar, duracao: e.target.value })}
+                                />
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Categoria</label>
+                                <Input
+                                    value={cursoEditar.categoria || ''}
+                                    onChange={e => setCursoEditar({ ...cursoEditar, categoria: e.target.value })}
+                                />
+                            </div>
+                        </div>
 
-                            <Input
-                                value={cursoEditar.nomeCurso || ''}
-                                onChange={e => setCursoEditar({ ...cursoEditar, nomeCurso: e.target.value })}
-                            />
-
-                            <Input
-                                type='date'
-                                value={cursoEditar.data || ''}
-                                onChange={e => setCursoEditar({ ...cursoEditar, data: e.target.value })}
-                            />
-
-                            <Text
-                                as='select'
-                                className='w-full h-[40px] border border-gray-base rounded-md'
-                                value={cursoEditar.loja || ''}
-                                onChange={e => setCursoEditar({
-                                    ...cursoEditar,
-                                    loja: e.target.value
-                                })}
-                            >
-                                <Text as='option' value=''>Selecione a loja</Text>
-                                <Text as='option' value='Prado'>Prado</Text>
-                                <Text as='option' value='Teresopolis'>Teresopolis</Text>
-                            </Text>
-
-                            <Text
-                                as='select'
-                                className='w-full h-[40px] border border-gray-base rounded-md'
-                                value={cursoEditar.culinarista || ''}
-                                onChange={e => setCursoEditar({
-                                    ...cursoEditar,
-                                    culinarista: e.target.value
-                                })}
-                            >
-                                <Text as='option' value=''>Selecione a culinarista</Text>
-
-                                {culinaristas?.map(c => (
-                                    <Text
-                                        key={c.id}
-                                        as='option'
-                                        value={c.nomeCulinarista}
-                                    >
-                                        {c.nomeCulinarista}
-                                    </Text>
-                                ))}
-                            </Text>
-
-                              <Input
-                                value={cursoEditar.valor || ''}
-                                onChange={e => setCursoEditar({ ...cursoEditar, valor: e.target.value })}
-                            />
-
-                              <Input
-                                value={cursoEditar.duracao || ''}
-                                onChange={e => setCursoEditar({ ...cursoEditar, duracao: e.target.value })}
-                            />
-
-                              <Input
-                                value={cursoEditar.categoria || ''}
-                                onChange={e => setCursoEditar({ ...cursoEditar, categoria: e.target.value })}
-                            />
-
-                              <Input
-                                type='time'
-                                value={cursoEditar.hora || ''}
-                                onChange={e => setCursoEditar({ ...cursoEditar, hora: e.target.value })}
-                            />
-
-                            <Button
-                                onClick={salvarEdicao}
-                                className='bg-orange-base text-white w-full mt-4'
-                            >
-                                Salvar
-                            </Button>
-
-                        </Text>
+                        <Button
+                            onClick={salvarEdicao}
+                            className='bg-orange-base text-white w-full hover:bg-orange-light'
+                        >
+                            Salvar Edições
+                        </Button>
                     </Modal>
 
-                </Text>
-            </Text>
-        </Text>
+                </section>
+            </main>
+        </div>
     );
 }

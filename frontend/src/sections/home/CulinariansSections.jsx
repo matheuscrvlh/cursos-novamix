@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom'
 import { bannerCulinarista } from "../../assets/images/banner"
 
 // COMPONENTS
-import Text from "../../components/Text"
 import Button from '../../components/Button'
 import CulinarianCard from '../../components/public/CulinarianCard'
 
@@ -15,31 +14,29 @@ export default function CulinariansSections({
 }) {
 
     return (
-        <Text as='section' className='w-full mt-20 mb-20'>
+        <section className='w-full mt-20 mb-20'>
 
             {/* ========== BANNER =========== */}
-            <Text as='div' className=' md:w-[99dvw]'>
-                <Text as='img' src={bannerCulinarista} className='min-h-25 object-cover w-full'></Text>
-            </Text>
+            <div className=' md:w-[99dvw]'>
+                <img src={bannerCulinarista} className='min-h-25 object-cover w-full'></img>
+            </div>
 
             {/* ========== CULINARISTAS =========== */}
-            <Text as='div' className='mt-10 md:mt-20 md:w-[80vw] md:mx-auto'>
-                <Text as='p' className='
+            <div className='mt-10 md:mt-20 md:w-[80vw] md:mx-auto'>
+                <p className='
                     text-lg pl-10 font-bold text-gray-dark
                     md:text-3xl md:pl-0 md:px-2
                 '>
                     CULINARISTAS PARCEIROS
-                </Text>
-                <Text as='div' className='flex overflow-x-auto gap-10 w-screen px-10 pb-5 h-full mt-5 md:w-full md:grid md:grid-cols-4 md:overflow-x-hidden md:px-1'>
+                </p>
+                <div className='flex overflow-x-auto gap-10 w-screen px-10 pb-5 h-full mt-5 md:w-full md:grid md:grid-cols-4 md:overflow-x-hidden md:px-1'>
                     {loadingCulinarian 
                         ? (
-                            <Text 
-                                as='div' 
-                                className='
+                            <div className='
                                     flex flex-col items-center justify-center w-full text-center mt-25 mb-25
                             '>
-                                <Text as='p' className='text-xl font-semibold'>Carregando...</Text>
-                            </Text>
+                                <p className='text-xl font-semibold'>Carregando...</p>
+                            </div>
                             )
                         : culinaristas.slice(0,4).map(c => (
                         <CulinarianCard
@@ -49,11 +46,11 @@ export default function CulinariansSections({
                             lojas={c.lojas}
                         />
                     ))}
-                </Text>
-            </Text>
+                </div>
+            </div>
 
             {/* ========== BUTTON =========== */}
-            <Text as='div' className='
+            <div className='
                 flex w-full justify-center mt-5 md:mt-10
             '>  
                 <Link to={'/culinaristas'}>
@@ -64,8 +61,8 @@ export default function CulinariansSections({
                         Ver mais
                     </Button>
                 </Link>
-            </Text>
+            </div>
 
-        </Text>
+        </section>
     )
 }

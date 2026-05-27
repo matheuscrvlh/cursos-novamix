@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom'
 import { Head } from '../../components/Head'
 
 // Components
-import Text from '../../components/Text'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
 
@@ -45,27 +44,21 @@ export default function Login() {
     useThemeColor('#FF8D0A');
 
     return (
-        <Text as='main' className='w-full min-h-screen flex relative overflow-hidden'>
+        <main className='w-full min-h-screen flex relative overflow-hidden'>
             <Head title='Loja Novamix | Login'/>
             {/* Imagem de fundo */}
-            <Text 
-                as='img' 
-                src={bannerLogin} 
+            <img src={bannerLogin} 
                 alt='Banner Loja' 
                 className='absolute inset-0 w-full h-full object-cover'
             />
             {/* Card de Login */}
-            <Text 
-                as='div' 
-                className='bg-white w-[90%] max-w-[380px] mx-auto my-auto flex flex-col gap-3 p-6 
+            <div className='bg-white w-[90%] max-w-[380px] mx-auto my-auto flex flex-col gap-3 p-6 
                            justify-center rounded-xl shadow-2xl relative z-10
                            md:w-[420px] md:max-w-[420px] md:absolute md:right-[8%] 
                            md:top-1/2 md:-translate-y-1/2 md:mx-0
                            lg:right-[10%]'
             >
-                <Text 
-                    as='img' 
-                    src={logoNm} 
+                <img src={logoNm} 
                     alt='Logo' 
                     className='w-[45%] max-w-[140px] mx-auto mb-3'
                 />
@@ -95,15 +88,13 @@ export default function Login() {
                     Login
                 </Button>
                 
-                <Text
-                    as='p'
-                    className='text-center cursor-pointer text-gray-dark hover:text-red-base 
+                <p className='text-center cursor-pointer text-gray-dark hover:text-red-base 
                                transition-colors mt-2 text-sm'
                     onClick={Sair}
                 >
                     Sair
-                </Text>
-            </Text>
-        </Text>
+                </p>
+            </div>
+        </main>
     )
 }

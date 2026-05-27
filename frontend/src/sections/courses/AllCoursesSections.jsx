@@ -1,5 +1,4 @@
 // COMPONENTS
-import Text from "../../components/Text"
 import CourseCard from "../../components/public/CourseCard";
 
 // ICONS
@@ -21,58 +20,50 @@ export default function AllCoursesSections({
     }
 
     return (
-        <Text as='section' className='w-[80vw] mx-auto pt-10 md:pt-15'>
+        <section className='w-[80vw] mx-auto pt-10 md:pt-15'>
         
             {/* ======== FILTERS ======== */}
-            <Text
-                as='div'
-                className='
+            <div className='
                             flex justify-between items-baseline-last pb-5 mx-auto
                             md:w-[80vw] md:w-[80%] 
                         '
             >
-                <Text as='div'>
-                    <Text as='p' className='
+                <div>
+                    <p className='
                                 text-lg font-bold text-gray-dark
                                 md:text-3xl
                             '>
                         NOSSOS CURSOS
-                    </Text>
-                </Text>
-                <Text
-                    as='div'
-                    onClick={() => setShowModalFilters(!showModalFilters)}
+                    </p>
+                </div>
+                <div onClick={() => setShowModalFilters(!showModalFilters)}
                     className='
                                 flex gap-2 items-center text-white bg-orange-base px-3 py-2 rounded-xl cursor-pointer font-bold
                                 hover:bg-orange-light transition
                                 md:px-7 md:py-2
                             '
                 >
-                    <Text as='p'>Filtros</Text>
+                    <p>Filtros</p>
                     <Menu
                         className='
                                 w-6 h-6 
                         '
                     />
-                </Text>
-            </Text>
+                </div>
+            </div>
 
             {/* ======== CURSOS ======== */}
             {loadingCourses 
             ? 'Carregando...'
             : cursosFiltrados.length === 0
-                ?  (<Text 
-                        as='div' 
-                        className='
+                ?  (<div className='
                             flex flex-col items-center justify-center w-full text-center mt-25
                     '>
-                        <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
-                        <Text as='p'>Favor tente com outros filtros.</Text>
-                    </Text>
+                        <p className='text-xl font-semibold'>Nenhum curso encontrado.</p>
+                        <p>Favor tente com outros filtros.</p>
+                    </div>
                 ) : (
-                    <Text
-                        as='div'
-                        className='
+                    <div className='
                                 bg-gray grid grid-cols-1 gap-10 justify-items-center
                                 sm:grid-cols-2
                                 lg:grid-cols-3
@@ -104,8 +95,8 @@ export default function AllCoursesSections({
                                 />
                             );
                         })}
-                    </Text>
+                    </div>
                 )}
-        </Text>
+        </section>
     )
 }

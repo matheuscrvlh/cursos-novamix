@@ -8,7 +8,6 @@ import { Head } from '../../components/Head'
 import { Trash, Edit, Users, Plus, X } from 'lucide-react';
 
 // Components
-import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
@@ -220,189 +219,162 @@ export default function RegistrationsAdmin() {
     }
 
     return (
-        <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
+        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <Head title='Admin | Inscrições'/>
             <SideBar />
-            <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
+            <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Inscrições'} />
-                <Text as='section' className='
+                <section className='
                     flex flex-col gap-10 mt-10 w-[92dvw]
                     md:gap-20 lg:w-[78vw]
                 '>
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                        <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>INSCRIÇÕES</Text>
-                        <Text as='div' className='
-                                grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] font-bold text-gray-text
-                                hidden md:grid
-                            '
-                        >
-                            <Text as='p'>CURSO</Text>
-                            <Text as='p'>DATA CURSO</Text>
-                            <Text as='p'>NOME</Text>
-                            <Text as='p'>ASSENTO</Text>
-                            <Text as='p'>STATUS</Text>
-                            <Text as='p'>PAGAMENTO</Text>
-                            <Text as='p'>FUNÇÕES</Text>
-                        </Text>
-                        <Text as='hr' className='border-gray-base/30 w-full mt-4'/>
-                        <Text as='div' className='max-h-[400px] overflow-y-auto'>
-                            { 
-                                inscricoesTotais.map(i => (
-                                    <Text 
-                                        as='div'
-                                        key={i.id}
-                                    >
-                                        {/* MOBILE */}
-                                        <Text 
-                                            as='div' 
-                                            className='
-                                                p-3 text-gray-text
-                                                md:hidden
-                                            ' 
-                                        >
-                                            <Text as='p'>a fazer</Text>
-                                            <Text as='p'>a fazer</Text>
-                                            <Text as='p'>Nome: {i.nome}</Text>
-                                            <Text as='p'>Assento: {i.assento}</Text>
-                                            <Text as='p'>Status: {i.status}</Text>
-                                            <Text as='p'>Pagamento: {i.formaPagamento}</Text>
-                                            <Text as='div' className='flex gap-3 h-full mt-3'>
-                                                <Button 
-                                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-base/80 hover:shadow-md text-white'
-                                                    // onClick={}
-                                                >
-                                                    <Edit />
-                                                </Button>
-                                                <Button 
-                                                    className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-base/80 hover:shadow-md text-white'
-                                                    onClick={() => deletarInscricao(i.id)}
-                                                >
-                                                    <Trash />
-                                                </Button>
-                                            </Text>
-                                        </Text>
-                                        
-                                        {/* DESKTOP */}
-                                        <Text 
-                                            as='div' 
-                                            className='
-                                                grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] text-gray-text  p-2 items-center
-                                                md:grid hidden
-                                            ' 
-                                        >
-                                            <Text as='p'>{cursos.find(c => c.id === i.cursoId)?.nomeCurso}</Text>
-                                            <Text as='p'>
-                                                {cursos.find(c => c.id === i.cursoId)?.data 
-                                                    ? layoutDataInput(cursos.find(c => c.id === i.cursoId).data) 
-                                                    : '-'
-                                                }
-                                            </Text>
-                                            <Text as='p'>{i.nome}</Text>
-                                            <Text as='p'>{i.assento}</Text>
-                                            <Text 
-                                                as='p' 
-                                                className={`p-2 w-20 text-white font-semibold rounded-md text-center ${i.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
+                        <p className='font-bold text-xl mb-4 text-gray-text'>INSCRIÇÕES</p>
+
+                        <div className='max-h-100 overflow-y-auto'>
+
+                            {/* HEADER DESKTOP */}
+                            <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-2
+                                            text-xs font-semibold text-gray-text uppercase tracking-wider
+                                            bg-gray px-3 py-2 rounded-md mb-1 sticky top-0 z-10'>
+                                <p>CURSO</p>
+                                <p>DATA CURSO</p>
+                                <p>NOME</p>
+                                <p>ASSENTO</p>
+                                <p>STATUS</p>
+                                <p>PAGAMENTO</p>
+                                <p>FUNÇÕES</p>
+                            </div>
+
+                            {inscricoesTotais.map(i => (
+                                <div key={i.id}>
+                                    {/* MOBILE */}
+                                    <div className='p-3 text-gray-text md:hidden'>
+                                        <p className='font-semibold'>{cursos.find(c => c.id === i.cursoId)?.nomeCurso}</p>
+                                        <p className='text-sm text-gray-text/70'>Nome: {i.nome} · Assento: {i.assento}</p>
+                                        <p className='text-sm text-gray-text/70'>Pagamento: {i.formaPagamento}</p>
+                                        <span className={`text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full text-white ${i.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
+                                            {i.status}
+                                        </span>
+                                        <div className='flex gap-2 mt-2'>
+                                            <Button
+                                                className='bg-orange-base p-2 hover:bg-orange-light text-white'
+                                                onClick={() => handleEditInscricoesTotais(i.id)}
                                             >
-                                                {i.status}
-                                            </Text>
-                                            <Text as='p'>{i.formaPagamento}</Text>
-                                            <Text as='div' className='flex gap-3 justify-center h-full'>
-                                                <Button 
-                                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-base/80 hover:shadow-md text-white'
-                                                    onClick={() => handleEditInscricoesTotais(i.id)}
-                                                >
-                                                    <Edit />
-                                                </Button>
-                                                <Button 
-                                                    className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-base/80 hover:shadow-md text-white'
-                                                    onClick={() => deletarInscricao(i.id)}
-                                                >
-                                                    <Trash />
-                                                </Button>
-                                            </Text>
-                                        </Text>
-                                        <Text as='hr' className='border-gray-base/30 w-full'/>
-                                    </Text>
-                                ))
-                            }
-                        </Text>
+                                                <Edit size={16} />
+                                            </Button>
+                                            <Button
+                                                className='bg-red-base p-2 hover:bg-red-light text-white'
+                                                onClick={() => deletarInscricao(i.id)}
+                                            >
+                                                <Trash size={16} />
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {/* DESKTOP */}
+                                    <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-2
+                                                    px-3 py-3 items-center text-gray-text text-sm
+                                                    hover:bg-gray/60 transition-colors rounded-md'>
+                                        <p className='truncate font-medium'>{cursos.find(c => c.id === i.cursoId)?.nomeCurso}</p>
+                                        <p>
+                                            {cursos.find(c => c.id === i.cursoId)?.data
+                                                ? layoutDataInput(cursos.find(c => c.id === i.cursoId).data)
+                                                : '-'
+                                            }
+                                        </p>
+                                        <p className='truncate'>{i.nome}</p>
+                                        <p>{i.assento}</p>
+                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${i.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
+                                            {i.status}
+                                        </span>
+                                        <p>{i.formaPagamento}</p>
+                                        <div className='flex gap-2'>
+                                            <Button
+                                                className='bg-orange-base p-2 hover:bg-orange-light text-white'
+                                                onClick={() => handleEditInscricoesTotais(i.id)}
+                                            >
+                                                <Edit size={16} />
+                                            </Button>
+                                            <Button
+                                                className='bg-red-base p-2 hover:bg-red-light text-white'
+                                                onClick={() => deletarInscricao(i.id)}
+                                            >
+                                                <Trash size={16} />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <hr className='border-gray-base/20'/>
+                                </div>
+                            ))}
+                        </div>
                     </CardDash>
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                        <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>INSCRIÇÕES POR CURSOS</Text>
-                        <Text as='div' className='
-                                grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] font-bold text-gray-text
-                                hidden md:grid
-                            '
-                        >
-                            <Text as='p'>DESCRIÇÃO</Text>
-                            <Text as='p'>CULINARISTA</Text>
-                            <Text as='p'>DATA</Text>
-                            <Text as='p'>HORARIO</Text>
-                            <Text as='p'>LOJA</Text>
-                            <Text as='p'>FUNÇÕES</Text>
-                        </Text>
-                        <Text as='hr' className='border-gray-base/30 w-full mt-4'/>
-                        <Text as='div' className='max-h-[400px] overflow-y-auto'>
+                        <p className='font-bold text-xl mb-4 text-gray-text'>INSCRIÇÕES POR CURSOS</p>
 
-                        </Text>
-                        <Text as='div' className='max-h-[400px] overflow-y-auto'>
+                        <div className='max-h-100 overflow-y-auto'>
+
+                            {/* HEADER DESKTOP */}
+                            <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-2
+                                            text-xs font-semibold text-gray-text uppercase tracking-wider
+                                            bg-gray px-3 py-2 rounded-md mb-1 sticky top-0 z-10'>
+                                <p>DESCRIÇÃO</p>
+                                <p>CULINARISTA</p>
+                                <p>DATA</p>
+                                <p>HORARIO</p>
+                                <p>LOJA</p>
+                                <p>FUNÇÕES</p>
+                            </div>
+
                             {loading ? (
-                                <Text as='p'>Carregando cursos...</Text>
+                                <p className='text-gray-text text-center py-8'>Carregando cursos...</p>
                             ) : (
                                 cursos.map(curso => (
-                                <Text 
-                                    as='div'
-                                    key={curso.id}
-                                >
-                                    {/* MOBILE */}
-                                    <Text 
-                                        as='div' 
-                                        className='
-                                            p-3 text-gray-text
-                                            md:hidden
-                                        ' 
-                                    >
-                                        <Text as='p'>Descrição: {curso.nomeCurso}</Text>
-                                        <Text as='p'>Culinarista: {curso.culinarista}</Text>
-                                        <Text as='p'>{layoutDataInput(curso.data)}</Text>
-                                        <Text as='p'>{curso.hora}</Text>
-                                        <Text as='p'>{curso.loja}</Text>
-                                        <Text as='div' className='flex gap-3 h-full mt-3'>
-                                            <Button 
-                                                className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
-                                                onClick={() => handleInscricoesCurso(curso.id)}
-                                            >
-                                                <Users />
-                                            </Button>
-                                        </Text>
-                                    </Text>
-                                    
-                                    {/* DESKTOP */}
-                                    <Text 
-                                        as='div' 
-                                        className='
-                                            grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] text-gray-text  p-2 items-center
-                                            md:grid hidden
-                                        ' 
-                                    >
-                                        <Text as='p'>{curso.nomeCurso}</Text>
-                                        <Text as='p'>{curso.culinarista}</Text>
-                                        <Text as='p'>{layoutDataInput(curso.data)}</Text>
-                                        <Text as='p'>{curso.hora}</Text>
-                                        <Text as='p'>{curso.loja}</Text>
-                                        <Text as='div' className='flex gap-3 justify-center h-full'>
-                                            <Button 
-                                                className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
-                                                onClick={() => handleInscricoesCurso(curso.id)}
-                                            >
-                                                <Users />
-                                            </Button>
-                                        </Text>
-                                    </Text>
-                                    <Text as='hr' className='border-gray-base/30 w-full'/>
-                                </Text>
-                            )))}
-                        </Text>
+                                    <div key={curso.id}>
+                                        {/* MOBILE */}
+                                        <div className='p-3 text-gray-text md:hidden'>
+                                            <p className='font-semibold'>{curso.nomeCurso}</p>
+                                            <p className='text-sm text-gray-text/70'>{curso.culinarista} · {layoutDataInput(curso.data)} · {curso.hora}</p>
+                                            {curso.loja === 'Prado'
+                                                ? <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-orange-base/10 text-orange-base'>{curso.loja}</span>
+                                                : <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-blue-base/20 text-blue-base'>{curso.loja}</span>
+                                            }
+                                            <div className='flex gap-2 mt-2'>
+                                                <Button
+                                                    className='bg-gray-base p-2 hover:bg-gray-dark text-white'
+                                                    onClick={() => handleInscricoesCurso(curso.id)}
+                                                >
+                                                    <Users size={16} />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* DESKTOP */}
+                                        <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-2
+                                                        px-3 py-3 items-center text-gray-text text-sm
+                                                        hover:bg-gray/60 transition-colors rounded-md'>
+                                            <p className='font-medium truncate'>{curso.nomeCurso}</p>
+                                            <p className='truncate'>{curso.culinarista}</p>
+                                            <p>{layoutDataInput(curso.data)}</p>
+                                            <p>{curso.hora}</p>
+                                            {curso.loja === 'Prado'
+                                                ? <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-orange-base/10 text-orange-base'>{curso.loja}</span>
+                                                : <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-blue-base/20 text-blue-base'>{curso.loja}</span>
+                                            }
+                                            <div className='flex gap-2'>
+                                                <Button
+                                                    className='bg-gray-base p-2 hover:bg-gray-dark text-white'
+                                                    onClick={() => handleInscricoesCurso(curso.id)}
+                                                >
+                                                    <Users size={16} />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <hr className='border-gray-base/20'/>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </CardDash>
                     <Modal
                         width='90%'
@@ -412,46 +384,35 @@ export default function RegistrationsAdmin() {
                         onClose={() => closeModal()}
                     >   
                         {/* MOBILE */}
-                        <Text as='p' className='md:hidden text-xl font-bold mb-4 text-gray-text'>INSCRIÇÕES</Text>
-                        <Text as='hr' className='md:hidden border-gray-base/30 w-full mt-3'/>
-                        <Text 
-                            as='div'
-                            className='flex md:hidden flex-col gap-3 h-[90dvh] max-h-[70%] overflow-y-auto'
+                        <p className='md:hidden text-xl font-bold mb-4 text-gray-text'>INSCRIÇÕES</p>
+                        <hr className='md:hidden border-gray-base/30 w-full mt-3'/>
+                        <div className='flex md:hidden flex-col gap-3 h-[90dvh] max-h-[70%] overflow-y-auto'
                         >
                             {inscricoes.length === 0 
-                                ? <Text 
-                                    className='mr-auto ml-auto p-10'
+                                ? <span className='mr-auto ml-auto p-10'
                                     key={1}
                                 >
                                     Nenhuma inscrição encontrada
-                                </Text> 
+                                </span> 
                                 : inscricoes.map(inscricao => {
                                     return (
-                                        <Text 
-                                            as='div'
-                                            key={inscricao.id}
+                                        <div key={inscricao.id}
                                         >
-                                            <Text
-                                                as='div'
-                                                className=' text-gray-text items-center p-3'
+                                            <div className=' text-gray-text items-center p-3'
                                             >
-                                                <Text as='p'>Assento: {inscricao.assento}</Text>
-                                                <Text as='p'>Nome: {inscricao.nome}</Text>
-                                                <Text as='p'>CPF: {inscricao.cpf}</Text>
-                                                <Text as='p'>Telefone: {inscricao.celular}</Text>
-                                                <Text as='p'>Pagamento: {inscricao.formaPagamento}</Text>
-                                                <Text as='p'>Data: {layoutDataSistem(inscricao.dataInscricao)}</Text>
-                                                <Text 
-                                                    as='div'
-                                                >
-                                                    <Text 
-                                                        as='p' 
-                                                        className={`p-2 w-20 mt-3 text-white font-semibold rounded-md text-center ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
+                                                <p>Assento: {inscricao.assento}</p>
+                                                <p>Nome: {inscricao.nome}</p>
+                                                <p>CPF: {inscricao.cpf}</p>
+                                                <p>Telefone: {inscricao.celular}</p>
+                                                <p>Pagamento: {inscricao.formaPagamento}</p>
+                                                <p>Data: {layoutDataSistem(inscricao.dataInscricao)}</p>
+                                                <div >
+                                                    <p className={`p-2 w-20 mt-3 text-white font-semibold rounded-md text-center ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
                                                     >
                                                         {inscricao.status}
-                                                    </Text>
-                                                </Text>
-                                                <Text as='div' className='flex gap-3 mt-3'>
+                                                    </p>
+                                                </div>
+                                                <div className='flex gap-3 mt-3'>
                                                     <Button
                                                         className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
                                                         onClick={() => handleEditInscricao(inscricao.id)}
@@ -464,89 +425,70 @@ export default function RegistrationsAdmin() {
                                                     >
                                                         <Trash />
                                                     </Button>
-                                                </Text>
-                                            </Text>
-                                            <Text as='hr' className='border-gray-base/30 w-full'/>
-                                        </Text>
+                                                </div>
+                                            </div>
+                                            <hr className='border-gray-base/30 w-full'/>
+                                        </div>
                                     )
                             })}
-                        </Text>
+                        </div>
 
                         {/* DESKTOP */}
-                        <Text 
-                            as='div'
-                            className='hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] font-bold text-gray-text'
-                        >
-                            <Text as='p'>ASSENTO</Text>
-                            <Text as='p'>NOME</Text>
-                            <Text as='p'>CPF</Text>
-                            <Text as='p'>CELULAR</Text>
-                            <Text as='p'>PAGAMENTO</Text>
-                            <Text as='p'>STATUS</Text>
-                            <Text as='p'>INSCRICAO</Text>
-                            <Text as='p'>FUNÇÕES</Text>
-                        </Text>
-                        <Text as='hr' className='border-gray-base/30 w-full mt-3'/>
-                        <Text 
-                            as='div'
-                            className='hidden md:flex flex-col gap-3 h-[400px] max-h-[70%] overflow-y-auto'
-                        >
-                            {inscricoes.length === 0 
-                                ? <Text 
-                                    className='mr-auto ml-auto p-10'
-                                    key={1}
-                                >
-                                    Nenhuma inscrição encontrada
-                                </Text> 
-                                : inscricoes.map(inscricao => {
-                                    return (
-                                        <Text 
-                                            as='div'
-                                            key={inscricao.id}
-                                        >
-                                            <Text
-                                                as='div'
-                                                className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] text-gray-text items-center p-2'
-                                            >
-                                                <Text as='p'>{inscricao.assento}</Text>
-                                                <Text as='p'>{inscricao.nome}</Text>
-                                                <Text as='p'>{inscricao.cpf}</Text>
-                                                <Text as='p'>{inscricao.celular}</Text>
-                                                <Text as='p'>{inscricao.formaPagamento}</Text>
-                                                <Text 
-                                                    as='div'
+                        <div className='hidden md:block max-h-100 overflow-y-auto'>
+
+                            {/* HEADER */}
+                            <div className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2
+                                            text-xs font-semibold text-gray-text uppercase tracking-wider
+                                            bg-gray px-3 py-2 rounded-md mb-1 sticky top-0 z-10'>
+                                <p>ASSENTO</p>
+                                <p>NOME</p>
+                                <p>CPF</p>
+                                <p>CELULAR</p>
+                                <p>PAGAMENTO</p>
+                                <p>STATUS</p>
+                                <p>INSCRICAO</p>
+                                <p>FUNÇÕES</p>
+                            </div>
+
+                            {inscricoes.length === 0
+                                ? <p className='text-gray-text text-center py-8'>Nenhuma inscrição encontrada</p>
+                                : inscricoes.map(inscricao => (
+                                    <div key={inscricao.id}>
+                                        <div className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2
+                                                        px-3 py-3 items-center text-gray-text text-sm
+                                                        hover:bg-gray/60 transition-colors rounded-md'>
+                                            <p>{inscricao.assento}</p>
+                                            <p className='truncate'>{inscricao.nome}</p>
+                                            <p>{inscricao.cpf}</p>
+                                            <p>{inscricao.celular}</p>
+                                            <p>{inscricao.formaPagamento}</p>
+                                            <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
+                                                {inscricao.status}
+                                            </span>
+                                            <p>{layoutDataSistem(inscricao.dataInscricao)}</p>
+                                            <div className='flex gap-2'>
+                                                <Button
+                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
+                                                    onClick={() => handleEditInscricao(inscricao.id)}
                                                 >
-                                                    <Text 
-                                                        as='p' 
-                                                        className={`p-2 w-20 text-white font-semibold rounded-md text-center ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
-                                                    >
-                                                        {inscricao.status}
-                                                    </Text>
-                                                </Text>
-                                                <Text as='p'>{layoutDataSistem(inscricao.dataInscricao)}</Text>
-                                                <Text as='div' className='flex gap-3'>
-                                                    <Button
-                                                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                                        onClick={() => handleEditInscricao(inscricao.id)}
-                                                    >
-                                                        <Edit />
-                                                    </Button>
-                                                    <Button
-                                                        className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
-                                                        onClick={() => deletarInscricao(inscricao.id)}
-                                                    >
-                                                        <Trash />
-                                                    </Button>
-                                                </Text>
-                                            </Text>
-                                            <Text as='hr' className='border-gray-base/30 w-full'/>
-                                        </Text>
-                                    )
-                            })}
-                        </Text>
+                                                    <Edit size={16} />
+                                                </Button>
+                                                <Button
+                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
+                                                    onClick={() => deletarInscricao(inscricao.id)}
+                                                >
+                                                    <Trash size={16} />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <hr className='border-gray-base/20'/>
+                                    </div>
+                                ))
+                            }
+                        </div>
                     </Modal>
-                </Text>
-            </Text>
-        </Text>
+                </section>
+            </main>
+        </div>
     )
 }

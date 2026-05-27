@@ -1,5 +1,3 @@
-import Text from '../Text';
-
 export default function CourseCard({
   curso,
   data,
@@ -17,76 +15,62 @@ export default function CourseCard({
   onClick
 }) {
   return (
-    <Text
-      as="div"
-      className={`bg-white w-75 max-w-150 rounded-xl min-h-[380px] max-h-[550px] flex flex-col shadow-md
+    <div className={`bg-white w-75 max-w-150 rounded-xl min-h-[380px] max-h-[550px] flex flex-col shadow-md
         md:min-w-[300px]
         hover:shadow-lg transition-shadow
         ${className || ''}
       `}
     >
       {/* IMAGEM */}
-      <Text
-        as="div"
-        className="relative rounded-t-xl h-[200px] overflow-hidden"
+      <div className="relative rounded-t-xl h-[200px] overflow-hidden"
       >
-        <Text
-          as="p"
-          className="
+        <p className="
             absolute top-2 right-2 bg-orange-base text-white rounded-md px-2 py-1 mx-auto text-sm font-semibold z-10
             md:text-base 
           "
         >
           R$ {valor}
-        </Text>
+        </p>
 
         {imagem ? (
-          <Text
-            as="img"
-            src={imagem}
+          <img src={imagem}
             alt={curso}
             className="w-full h-full object-cover"
           />
         ) : (
-          <Text
-            as="div"
-            className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500"
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500"
           >
             Sem imagem
-          </Text>
+          </div>
         )}
-      </Text>
+      </div>
 
       {/* TÍTULO */}
-      <Text
-        as="h1"
-        className="text-gray-dark font-bold text-xl md:text-2xl p-4 line-clamp-2"
+      <h1 className="text-gray-dark font-bold text-xl md:text-2xl p-4 line-clamp-2"
       >
         {curso}
-      </Text>
+      </h1>
 
       {/* CONTEÚDO */}
-      <Text as="div" className="mt-auto p-4 pt-0">
-        <Text as="p" className="text-gray-dark text-sm md:text-base mb-1">
+      <div className="mt-auto p-4 pt-0">
+        <p className="text-gray-dark text-sm md:text-base mb-1">
           {`${data} - ${horario}h`}
-        </Text>
+        </p>
 
-        <Text as="p" className="text-gray-dark text-sm md:text-base mb-1">
+        <p className="text-gray-dark text-sm md:text-base mb-1">
           {`Duração: ${duracao}`}
-        </Text>
+        </p>
 
-        <Text as="p" className="text-gray-dark text-sm md:text-base mb-1">
+        <p className="text-gray-dark text-sm md:text-base mb-1">
           {`Loja: ${loja}`}
-        </Text>
+        </p>
 
-        <Text as="p" className="text-gray-dark text-sm md:text-base mb-3">
+        <p className="text-gray-dark text-sm md:text-base mb-3">
           {`Culinarista: ${culinarista}`}
-        </Text>
+        </p>
 
         {/* BOTÃO */}
-        <Text
-          as="button"
-          className="
+        <button className="
             bg-orange-base
             rounded-sm
             p-2
@@ -105,12 +89,12 @@ export default function CourseCard({
           onClick={onClick || undefined}
         >
           Garantir minha vaga
-        </Text>
+        </button>
 
-        <Text as="div" className="text-gray-dark text-center text-sm md:text-base mt-2">
+        <div className="text-gray-dark text-center text-sm md:text-base mt-2">
           {loadingVagasPorCurso ? (<div>Carregando vagas...</div>) : (<div>Vagas: {vagasLivres}/{vagasReservadas}</div>)}
-        </Text>
-      </Text>
-    </Text>
+        </div>
+      </div>
+    </div>
   );
 }

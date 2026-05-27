@@ -1,44 +1,39 @@
 // COMPONENTS
-import Text from "../../components/Text"
 import IndustryCard from "../../components/public/IndustryCard"
 
 export default function AllIndustries({
     industrias
 }) {
     return (
-        <Text as='section' className='w-[80vw] mx-auto pt-15'>
+        <section className='w-[80vw] mx-auto pt-15'>
 
             {/* ======== FILTERS ======== */}
-            <Text
-                as='div'
-                className='
+            <div className='
                             flex justify-between items-baseline-last pt-15 pb-5 w-[87%] mx-auto
                             md:w-[98%]
                         '
             >
-                <Text as='div'>
-                    <Text as='p' className='
+                <div>
+                    <p className='
                                 text-lg font-bold text-gray-dark
                                 md:text-3xl
                             '>
                         NOSSOS PARCEIROS
-                    </Text>
-                </Text>
-            </Text>
+                    </p>
+                </div>
+            </div>
 
             {/* ======== CURSOS ======== */}
-            <Text as='div' className='
+            <div className='
                 bg-gray flex justify-center w-full pb-20
             '>
                 {industrias.length === 0
-                    ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
-                        <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
-                        <Text as='p'>Favor tente com outros filtros.</Text>
-                    </Text>
+                    ? (<div className='flex flex-col items-center justify-center w-full text-center mt-20'>
+                        <p className='text-xl font-semibold'>Nenhum curso encontrado.</p>
+                        <p>Favor tente com outros filtros.</p>
+                    </div>
                     ) : (
-                        <Text
-                            as='div'
-                            className='
+                        <div className='
                             max-w-350 w-full justify-items-center bg-gray grid grid-cols-1 gap-8
                             sm:grid-cols-2
                             lg:grid-cols-3
@@ -60,9 +55,9 @@ export default function AllIndustries({
                                     />
                                 );
                             })}
-                        </Text>
+                        </div>
                     )}
-            </Text> 
-        </Text>
+            </div> 
+        </section>
     )
 }

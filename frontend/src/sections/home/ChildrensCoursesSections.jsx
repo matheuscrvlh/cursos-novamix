@@ -2,7 +2,6 @@
 import { Link } from 'react-router-dom'
 
 // COMPONENTS
-import Text from "../../components/Text"
 import Button from "../../components/Button";
 import CourseCard from "../../components/public/CourseCard";
 
@@ -26,65 +25,57 @@ export default function ChildrensCoursesSections({
     }
 
     return (
-        <Text as='section' className='md:w-[80vw] md:mx-auto'>
+        <section className='md:w-[80vw] md:mx-auto'>
         
             {/* ======== FILTERS ======== */}
-            <Text
-                as='div'
-                className='
+            <div className='
                             flex justify-between items-baseline-last pb-5 w-[80%] mx-auto
                             md:w-[80vw]
                         '
             >
-                <Text as='div'>
-                    <Text as='p' className='
+                <div>
+                    <p className='
                                 text-lg font-bold text-gray-dark
                                 md:text-3xl md:px-1
                             '>
                         CURSOS INFANTIS
-                    </Text>
-                </Text>
-                <Text
-                    as='div'
-                    onClick={() => setShowModalFilters(!showModalFilters)}
+                    </p>
+                </div>
+                <div onClick={() => setShowModalFilters(!showModalFilters)}
                     className='
                                 flex gap-2 items-center text-white bg-orange-base px-3 py-2 rounded-xl cursor-pointer font-bold
                                 hover:bg-orange-light transition
                                 md:px-7 md:py-2
                             '
                 >
-                    <Text as='p'>Filtros</Text>
+                    <p>Filtros</p>
                     <Menu
                         className='
                                 w-6 h-6 
                         '
                     />
-                </Text>
-            </Text>
+                </div>
+            </div>
 
             {/* ======== CURSOS ======== */}
-            <Text as='div' className='
+            <div className='
                 bg-gray flex justify-center w-full pb-7 md:pb-10
             '>
                 {loadingChildren 
                     ? (
-                        <Text 
-                            as='div' 
-                            className='
+                        <div className='
                                 flex flex-col items-center justify-center w-full text-center mt-25 mb-25
                         '>
-                            <Text as='p' className='text-xl font-semibold'>Carregando...</Text>
-                        </Text>
+                            <p className='text-xl font-semibold'>Carregando...</p>
+                        </div>
                         )
                     : cursosInfantisFiltrados.length === 0
-                    ? (<Text as='div' className='flex flex-col items-center justify-center w-full text-center mt-20'>
-                        <Text as='p' className='text-xl font-semibold'>Nenhum curso encontrado.</Text>
-                        <Text as='p'>Favor tente com outros filtros.</Text>
-                    </Text>
+                    ? (<div className='flex flex-col items-center justify-center w-full text-center mt-20'>
+                        <p className='text-xl font-semibold'>Nenhum curso encontrado.</p>
+                        <p>Favor tente com outros filtros.</p>
+                    </div>
                     ) : (
-                        <Text
-                            as='div'
-                            className='
+                        <div className='
                                 bg-gray flex overflow-x-auto gap-10 justify-items-center
                                 px-10 pb-3
                                 sm:grid-cols-2 sm:overflow-x-hidden sm:px-2 sm:pb-4
@@ -118,12 +109,12 @@ export default function ChildrensCoursesSections({
                                     />
                                 );
                             })}
-                        </Text>
+                        </div>
                     )}
-            </Text>
+            </div>
 
             {/* ======== BUTTON ======== */}
-            <Text as='div' className='
+            <div className='
                 flex w-full justify-center
             '>  
                 <Link to={'/cursosInfantis'}>
@@ -134,8 +125,8 @@ export default function ChildrensCoursesSections({
                         Ver todos
                     </Button>
                 </Link>
-            </Text>
+            </div>
             
-        </Text>
+        </section>
     )
 }

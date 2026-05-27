@@ -5,7 +5,6 @@ import { useEffect } from "react"
 import { X } from 'lucide-react'
 
 // COMPONENTS
-import Text from "../Text"
 import Input from "../Input"
 import Button from "../Button"
 
@@ -31,76 +30,92 @@ export default function ModalFilters({
     }, [isOpen])
 
     return (
-        <Text as='div' className={`
-            fixed flex justify-end bg-black/40 top-0 w-dvw h-dvh z-50
+        <div className={`
+            fixed flex justify-end bg-black/50 top-0 w-dvw h-dvh z-50
             transition-opacity duration-300
             ${isOpen ? 'opacity-100' : 'opacity-0'}
         `}>
-            <Text as='div' className={`
-                bg-white w-[60dvw] h-full p-5
+            <div className={`
+                bg-white w-[80dvw] h-full flex flex-col shadow-2xl
                 transform transition-transform duration-300 ease-in-out
-                md:w-[25vw]
+                md:w-[320px]
                 ${isOpen ? 'translate-x-0' : 'translate-x-full'}
             `}>
-                <X
-                    className='ml-auto cursor-pointer hover:scale-105'
-                    onClick={onClose}
-                />
-                <Text as='p' className='text-gray-dark text-xl font-bold text-center'>{nameModal}</Text>
-                <Text as='div' className='flex flex-col w-[90%] gap-6 mt-10 mx-auto'>
-                    <Text as='div' className='w-full'>
-                        <Text as='p'>Data Inicial</Text>
+
+                {/* HEADER */}
+                <div className='flex items-center justify-between px-6 py-5 border-b border-gray-base/30'>
+                    <p className='text-gray-dark text-lg font-bold'>{nameModal}</p>
+                    <button
+                        onClick={onClose}
+                        className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-base/20 transition-colors cursor-pointer'
+                    >
+                        <X size={18} className='text-gray-dark' />
+                    </button>
+                </div>
+
+                {/* BODY */}
+                <div className='flex flex-col flex-1 gap-5 px-6 py-7 overflow-y-auto'>
+
+                    <div className='flex flex-col gap-1.5'>
+                        <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Data Inicial</label>
                         <Input
                             type='date'
-                            className='bg-white cursor-pointer px-3.5 md:w-full md:px-0'
+                            className='w-full cursor-pointer'
                             value={filtersCourses.dataInicial}
                             onChange={e => setFiltersCourses({ ...filtersCourses, dataInicial: e.target.value })}
                         />
-                    </Text>
-                    <Text as='div' className='w-full'>
-                        <Text as='p'>Data Final</Text>
+                    </div>
+
+                    <div className='flex flex-col gap-1.5'>
+                        <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Data Final</label>
                         <Input
                             type='date'
-                            className='bg-white cursor-pointer px-3.5 md:w-full md:px-0'
+                            className='w-full cursor-pointer'
                             value={filtersCourses.dataFinal}
                             onChange={e => setFiltersCourses({ ...filtersCourses, dataFinal: e.target.value })}
                         />
-                    </Text>
-                    <Text as='div' className='mt-auto w-full'>
-                        <Text
-                            as='select'
-                            className='bg-white py-3 w-full border border-black/50 rounded-md cursor-pointer'            
+                    </div>
+
+                    <div className='flex flex-col gap-1.5'>
+                        <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Loja</label>
+                        <select
+                            className='p-2 w-full border border-gray-base rounded-md text-gray-text bg-white cursor-pointer'
                             value={filtersCourses.loja}
                             onChange={e => setFiltersCourses({ ...filtersCourses, loja: e.target.value })}
                         >
-                            <Text as='option' value=''>Loja</Text>
-                            <Text as='option' value='Prado'>Prado</Text>
-                            <Text as='option' value='Teresopolis'>Teresópolis</Text>
-                        </Text>
-                    </Text>
-                    <Text as='div' className='mt-auto w-full'>
-                        <Text
-                            as='select'
-                            className='bg-white py-3 w-full border border-black/50 rounded-md cursor-pointer'
+                            <option value=''>Todas as lojas</option>
+                            <option value='Prado'>Prado</option>
+                            <option value='Teresopolis'>Teresópolis</option>
+                        </select>
+                    </div>
+
+                    <div className='flex flex-col gap-1.5'>
+                        <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
+                        <select
+                            className='p-2 w-full border border-gray-base rounded-md text-gray-text bg-white cursor-pointer'
                             value={filtersCourses.culinarista}
                             onChange={e => setFiltersCourses({ ...filtersCourses, culinarista: e.target.value })}
                         >
-                            <Text as='option' value=''>Culinarista</Text>
-                            {culinaristas.map(c => {
-                                return (
-                                    <Text key={c.id} as='option' value={c.nomeCulinarista}>{c.nomeCulinarista}</Text>
-                                )
-                            })}
-                        </Text>
-                    </Text>
+                            <option value=''>Todas as culinaristas</option>
+                            {culinaristas.map(c => (
+                                <option key={c.id} value={c.nomeCulinarista}>{c.nomeCulinarista}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                </div>
+
+                {/* FOOTER */}
+                <div className='px-6 py-5 border-t border-gray-base/30'>
                     <Button
-                        className='bg-orange-base hover:bg-orange-light text-white w-full mt-10'
+                        className='bg-orange-base hover:bg-orange-light text-white w-full'
                         onClick={clear}
                     >
-                        Limpar
+                        Limpar filtros
                     </Button>
-                </Text>
-            </Text>
-        </Text>
+                </div>
+
+            </div>
+        </div>
     )
 }

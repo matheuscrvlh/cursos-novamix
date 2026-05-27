@@ -13,7 +13,6 @@ import { Trash, Edit, Users, Plus, X } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
-import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
@@ -267,281 +266,254 @@ export default function CulinarianAdmin() {
     // ============== FUNCOES ==============
 
     return (
-        <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
+        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <Head title='Admin | Culinaristas'/>
             <SideBar />
-            <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
+            <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Culinaristas'} />
-                <Text as='section' className='
+                <section className='
                     flex flex-col gap-10 mt-10 w-[92dvw]
                     md:gap-20 lg:w-[78vw]
                 '>
-                    <CardDash as='div' className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                        <Text as='p' className='font-bold text-gray-text mb-4'>CADASTRE UMA CULINARISTA</Text>
-                        <Text as='div' className='flex flex-wrap gap-3'>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Nome</Text> 
+                    <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
+                        <p className='font-bold text-gray-text mb-6'>CADASTRE UMA CULINARISTA</p>
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Nome</label>
                                 <Input
                                     placeholder='Nome'
-                                    className='w-full h-[40px]'
                                     value={formCulinarian.nomeCulinarista}
                                     onChange={e => setFormCulinarian({ ...formCulinarian, nomeCulinarista: e.target.value})}
                                 />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Cpf</Text> 
-                                <Input  
-                                    placeholder='Cpf'
-                                    className='w-full h-[40px]'
+                            </div>
+
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>CPF</label>
+                                <Input
+                                    placeholder='CPF'
                                     value={formCulinarian.cpf}
                                     onChange={e => setFormCulinarian({ ...formCulinarian, cpf: e.target.value})}
                                 />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text as='p'>Industria</Text>
-                                <Text 
-                                    as='select' 
-                                    className='w-full min-w-40 h-[40px] bg-white border-black/50 border-1 rounded-md'
+                            </div>
+
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Indústria</label>
+                                <select
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
                                     value={formCulinarian.industria}
                                     onChange={e => setFormCulinarian({ ...formCulinarian, industria: e.target.value})}
                                 >
-                                    <Text as='option' value=''>
-                                        Selecione a Industria
-                                    </Text>
+                                    <option value=''>Selecione a Indústria</option>
                                     {industrias.map(i => (
-                                        <Text 
-                                            as='option'
-                                            key={i.id}
-                                            value={i.nome}
-                                        >
-                                            {i.nome}
-                                        </Text>
+                                        <option key={i.id} value={i.nome}>{i.nome}</option>
                                     ))}
-                                </Text>
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Telefone</Text> 
-                                <Input   
+                                </select>
+                            </div>
+
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Telefone</label>
+                                <Input
                                     placeholder='Telefone'
-                                    className='w-full h-[40px]'
                                     value={formCulinarian.telefone}
                                     onChange={e => setFormCulinarian({ ...formCulinarian, telefone: e.target.value})}
                                 />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Instagram</Text> 
-                                <Input 
+                            </div>
+
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Instagram</label>
+                                <Input
                                     placeholder='Instagram'
-                                    className='w-full h-[40px]'
                                     value={formCulinarian.instagram}
                                     onChange={e => setFormCulinarian({ ...formCulinarian, instagram: e.target.value})}
                                 />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Imagem</Text>
+                            </div>
+
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Imagem</label>
                                 <Input
-                                    className='w-full h-[40px] mr-7'
                                     type='file'
                                     accept='image/png, image/jpeg'
                                     onChange={(e) => {
                                         const file = e.target.files[0]
                                         if(!file) return
-        
-                                        setFormCulinarian((prev) => ({
-                                            ...prev,
-                                            foto: file,
-                                        }))
+                                        setFormCulinarian((prev) => ({ ...prev, foto: file }))
                                     }}
                                 />
-                            </Text>    
-                            <Text as='div' className='flex gap-3'>
-                                <Input 
-                                    type='checkbox'
-                                    className='w-6 cursor-pointer'
-                                    id='prado'
-                                    name='Prado'
-                                    value='Prado'
-                                    onChange={() => handleToggleLoja('Prado')}
-                                />
-                                <Text as='label' className='mt-2 mr-9'>Prado</Text>
-                                <Input 
-                                    type='checkbox'
-                                    className='w-6 cursor-pointer'
-                                    id='teresopolis'
-                                    name='teresopolis'
-                                    value='Teresopolis'
-                                    onChange={() => handleToggleLoja('Teresopolis')}
-                                />
-                                <Text as='label' className='mt-2'>Teresopolis</Text>
-                            </Text>
-                            <Text as='hr' className='border-gray-base/30 w-full mt-4 pb-2'/>
-                            <Text as='div' className='flex flex-col'>
-                                <Text>Cursos que executa</Text>
-                                <Text as='div' className='flex gap-3 text-gray-dark'>
+                            </div>
+
+                            <div className='flex flex-col gap-1.5 md:col-span-2 lg:col-span-3'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Lojas</label>
+                                <div className='flex gap-6 items-center'>
+                                    <label className='flex items-center gap-2 cursor-pointer text-gray-text'>
+                                        <Input
+                                            type='checkbox'
+                                            className='w-4 cursor-pointer'
+                                            id='prado'
+                                            name='Prado'
+                                            value='Prado'
+                                            onChange={() => handleToggleLoja('Prado')}
+                                        />
+                                        Prado
+                                    </label>
+                                    <label className='flex items-center gap-2 cursor-pointer text-gray-text'>
+                                        <Input
+                                            type='checkbox'
+                                            className='w-4 cursor-pointer'
+                                            id='teresopolis'
+                                            name='teresopolis'
+                                            value='Teresopolis'
+                                            onChange={() => handleToggleLoja('Teresopolis')}
+                                        />
+                                        Teresopolis
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className='md:col-span-2 lg:col-span-3'>
+                                <hr className='border-gray-base/30'/>
+                            </div>
+
+                            <div className='flex flex-col gap-1.5 md:col-span-2 lg:col-span-3'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Cursos que executa</label>
+                                <div className='flex gap-3'>
                                     <Input
-                                        placeholder='Curso'
-                                        className='w-full h-[40px]'
+                                        placeholder='Nome do curso'
                                         value={formCulinarian.cursoAtual}
                                         onChange={e => setFormCulinarian({ ...formCulinarian, cursoAtual: e.target.value })}
                                     />
                                     <Button
-                                        width='auto'
-                                        className='bg-orange-base text-white hover:bg-orange-light'
+                                        className='bg-orange-base text-white hover:bg-orange-light shrink-0'
                                         onClick={() => {
                                             if(!formCulinarian.cursoAtual) {
                                                 alert('Preencha o campo.')
                                                 return
                                             }
-                                            setFormCulinarian({ 
+                                            setFormCulinarian({
                                                 ...formCulinarian,
-                                                cursos: [
-                                                    ...formCulinarian.cursos,
-                                                    formCulinarian.cursoAtual
-                                                ],
+                                                cursos: [...formCulinarian.cursos, formCulinarian.cursoAtual],
                                                 cursoAtual: ''
-                                            })}
-                                        }
+                                            })
+                                        }}
                                     >
                                         <Plus />
                                     </Button>
-                                </Text>
-                            </Text>
-                            <Text as='div' className='flex flex-wrap gap-3 w-full'>
-                                {formCulinarian.cursos.map((curso, index) => (
-                                    <Text 
-                                        as='div'
-                                        key={index}
-                                        className="relative flex items-center"
-                                    >
-                                        <Text 
-                                            as='p' 
-                                            className="bg-orange-base px-4 py-2 text-white rounded-md"
-                                        >
-                                            {curso}
-                                        </Text>
-                                        <Text 
-                                            className="
-                                                absolute -top-2 -right-2
-                                                flex items-center justify-center
-                                                w-5 h-5 text-xs
-                                                bg-black text-white
-                                                rounded-full cursor-pointer font-bold
-                                                "
-                                            onClick={() => {
-                                                setFormCulinarian({
+                                </div>
+                            </div>
+
+                            {formCulinarian.cursos.length > 0 && (
+                                <div className='flex flex-wrap gap-2 md:col-span-2 lg:col-span-3'>
+                                    {formCulinarian.cursos.map((curso, index) => (
+                                        <div key={index} className='relative flex items-center'>
+                                            <p className='bg-orange-base px-3 py-1.5 text-white rounded-md text-sm'>{curso}</p>
+                                            <span
+                                                className='absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs bg-black text-white rounded-full cursor-pointer font-bold'
+                                                onClick={() => setFormCulinarian({
                                                     ...formCulinarian,
-                                                    cursos: formCulinarian.cursos.filter(
-                                                        (_, i) => i !== index
-                                                    )
-                                                    
-                                                })
-                                            }}
-                                        >
-                                            <X />
-                                        </Text>
-                                    </Text>
-                                ))}
-                            </Text>
-                            <Button 
-                                onClick={handleSubmitCulinarian}
-                                className='bg-orange-base text-white w-full hover:bg-orange-light'
-                            >
-                                Adicionar Culinarista
-                            </Button>
-                        </Text>
+                                                    cursos: formCulinarian.cursos.filter((_, i) => i !== index)
+                                                })}
+                                            >
+                                                <X size={10} />
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className='md:col-span-2 lg:col-span-3 mt-2'>
+                                <Button
+                                    onClick={handleSubmitCulinarian}
+                                    className='bg-orange-base text-white w-full hover:bg-orange-light'
+                                >
+                                    Adicionar Culinarista
+                                </Button>
+                            </div>
+
+                        </div>
                     </CardDash>
                     <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                        <Text as='div' className='text-gray-text'>
-                            <Text as='p' className='font-bold'>CULINARISTAS</Text>
-                            <Text as='div' className='
-                                grid-cols-[1fr_1fr_0.8fr_0.7fr_0.8fr] text-gray-text mt-3 font-bold
-                                hidden md:grid
-                                '
-                            >
-                                <Text as='p'>NOME</Text>
-                                <Text as='p'>INDUSTRIA</Text>
-                                <Text as='p'>LOJAS</Text>
-                                <Text as='p'>CADASTRO</Text>
-                                <Text as='p'>FUNÇOES</Text>
-                            </Text>
-                            <Text as='hr' className='border-gray-base/30 w-full mt-4 pb-2'/>
-                            <Text as='div' className='max-h-[400px] overflow-y-auto'>
-                                {culinaristas.map(c => (
-                                    <Text 
-                                        as='div'
-                                        key={c.id}
-                                    >
+                        <p className='font-bold text-gray-text mb-4'>CULINARISTAS</p>
+
+                        <div className='max-h-100 overflow-y-auto'>
+
+                            {/* HEADER DESKTOP */}
+                            <div className='hidden md:grid grid-cols-[1fr_1fr_0.8fr_0.7fr_0.8fr] gap-2
+                                            text-xs font-semibold text-gray-text uppercase tracking-wider
+                                            bg-gray px-3 py-2 rounded-md mb-1 sticky top-0 z-10'>
+                                <p>NOME</p>
+                                <p>INDUSTRIA</p>
+                                <p>LOJAS</p>
+                                <p>CADASTRO</p>
+                                <p>FUNÇOES</p>
+                            </div>
+
+                            {culinaristas.length === 0 ? (
+                                <p className='text-gray-text text-center py-8'>Nenhuma culinarista cadastrada</p>
+                            ) : (
+                                culinaristas.map(c => (
+                                    <div key={c.id}>
                                         {/* MOBILE */}
-                                        <Text 
-                                            as='div' 
-                                            className='
-                                                p-3 text-gray-text
-                                                md:hidden
-                                            '
-                                        >
-                                            <Text as='p'>Culinarista: {c.nomeCulinarista}</Text>
-                                            <Text as='p'>Industria: {c.industria}</Text>
-                                            <Text as='p'>Loja: {c.lojas.length > 1 ? 'Prado e Teresopolis' : c.lojas}</Text>
-                                            <Text as='p'>Cadastro: {layoutDataSistem(c.dataCadastro)}</Text>
-                                            <Text as='div' className='flex gap-3 mt-3'>
-                                                <Button 
-                                                    className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
+                                        <div className='p-3 text-gray-text md:hidden'>
+                                            <p className='font-semibold'>{c.nomeCulinarista}</p>
+                                            <p className='text-sm text-gray-text/70'>{c.industria}</p>
+                                            <p className='text-sm text-gray-text/70'>Loja: {c.lojas.length > 1 ? 'Prado e Teresopolis' : c.lojas}</p>
+                                            <p className='text-sm text-gray-text/70'>Cadastro: {layoutDataSistem(c.dataCadastro)}</p>
+                                            <div className='flex gap-2 mt-2'>
+                                                <Button
+                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
                                                     onClick={() => removeCulinarian(c.id)}
                                                 >
-                                                    <Trash />
+                                                    <Trash size={16} />
                                                 </Button>
-                                                <Button 
-                                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                                <Button
+                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
                                                     onClick={() => handleEditCulinarian(c.id)}
                                                 >
-                                                    <Edit />
+                                                    <Edit size={16} />
                                                 </Button>
-                                                <Button 
-                                                    className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
+                                                <Button
+                                                    className='bg-gray-base p-2 hover:bg-gray-dark text-white'
                                                     onClick={() => handleViewCulinarian(c.id)}
                                                 >
-                                                    <Users />
+                                                    <Users size={16} />
                                                 </Button>
-                                            </Text>
-                                        </Text>
-        
+                                            </div>
+                                        </div>
+
                                         {/* DESKTOP */}
-                                        <Text 
-                                            as='div' 
-                                            className='grid-cols-[1fr_1fr_0.8fr_0.7fr_0.8fr] text-gray-text p-2 items-center
-                                                hidden md:grid
-                                            '
-                                        >
-                                            <Text as='p'>{c.nomeCulinarista}</Text>
-                                            <Text as='p'>{c.industria}</Text>
-                                            <Text as='p'>{c.lojas.length > 1 ? 'Prado e Teresopolis' : c.lojas}</Text>
-                                            <Text as='p'>{layoutDataSistem(c.dataCadastro)}</Text>
-                                            <Text as='div' className='flex gap-3'>
-                                                <Button 
-                                                    className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
+                                        <div className='hidden md:grid grid-cols-[1fr_1fr_0.8fr_0.7fr_0.8fr] gap-2
+                                                        px-3 py-3 items-center text-gray-text text-sm
+                                                        hover:bg-gray/60 transition-colors rounded-md'>
+                                            <p className='font-medium truncate'>{c.nomeCulinarista}</p>
+                                            <p className='truncate'>{c.industria}</p>
+                                            <p>{c.lojas.length > 1 ? 'Prado e Teresopolis' : c.lojas}</p>
+                                            <p>{layoutDataSistem(c.dataCadastro)}</p>
+                                            <div className='flex gap-2'>
+                                                <Button
+                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
                                                     onClick={() => removeCulinarian(c.id)}
                                                 >
-                                                    <Trash />
+                                                    <Trash size={16} />
                                                 </Button>
-                                                <Button 
-                                                    className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
+                                                <Button
+                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
                                                     onClick={() => handleEditCulinarian(c.id)}
                                                 >
-                                                    <Edit />
+                                                    <Edit size={16} />
                                                 </Button>
-                                                <Button 
-                                                    className='bg-gray-base p-2 rounded-md cursor-pointer hover:bg-gray-dark hover:shadow-md text-white'
+                                                <Button
+                                                    className='bg-gray-base p-2 hover:bg-gray-dark text-white'
                                                     onClick={() => handleViewCulinarian(c.id)}
                                                 >
-                                                    <Users />
+                                                    <Users size={16} />
                                                 </Button>
-                                            </Text>
-                                        </Text>
-                                        <Text as='hr' className='border-gray-base/30 w-full'/>
-                                    </Text>
-                                ))}
-                            </Text>
-                        </Text>
+                                            </div>
+                                        </div>
+                                        <hr className='border-gray-base/20'/>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </CardDash>
 
                     {/* ====== MODALS ===== */}
@@ -552,109 +524,100 @@ export default function CulinarianAdmin() {
                         isOpen={step === 'editCulinarian'}
                         onClose={() => closeModal()}
                     >
-                        <Text as='p' className='font-semibold text-xl mb-5 text-gray-text'>Editar Culinarista</Text>
-                        <Text
-                            as='div'
-                            className='flex flex-wrap gap-4 text-gray-text'
-                        >
-                            <Text as='div' className='flex gap-10'>
-                                {culinarianEditar.foto === null 
-                                    ?   <Text as='p'
-                                            className='w-[40%] min-h-[50%] p-8 bg-gray'
-                                        >
-                                            Nenhuma Foto Cadastrada
-                                        </Text>
-                                    :   <Text
-                                            as='img' 
-                                            src={previewImagemCulinarista ?? culinarianEditar.foto}
-                                            className='w-[30%]'
-                                        />
-                                }
-                                <Text as='div'>
-                                    <Text as='p'>Alterar Foto</Text>
-                                    <Input
-                                        type='file'
-                                        accept='image/png, image/jpeg'
-                                        onChange={(e) => {
-                                            const file = e.target.files[0]
-                                            if (!file) return
+                        {/* HEADER */}
+                        <div className='mb-6'>
+                            <h2 className='text-xl font-bold text-gray-text'>Editar Culinarista</h2>
+                            <hr className='border-gray-base/30 w-full mt-3'/>
+                        </div>
 
-                                            if(!file.type.startsWith('image/')) {
-                                                alert('Selecione uma imagem válida');
-                                                return
-                                            }
+                        {/* FOTO */}
+                        <div className='flex items-start gap-5 mb-6 p-4 bg-gray rounded-lg'>
+                            {culinarianEditar.foto === null
+                                ? <div className='w-28 h-28 shrink-0 rounded-lg bg-gray-base/20 flex items-center justify-center text-gray-text text-xs text-center'>
+                                    Sem foto
+                                  </div>
+                                : <img
+                                    src={previewImagemCulinarista ?? culinarianEditar.foto}
+                                    className='w-28 h-28 shrink-0 object-cover rounded-lg'
+                                  />
+                            }
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Alterar Foto</label>
+                                <Input
+                                    type='file'
+                                    accept='image/png, image/jpeg'
+                                    onChange={(e) => {
+                                        const file = e.target.files[0]
+                                        if (!file) return
 
-                                            setCulinarianEditar((prev) => ({
-                                                ...prev,
-                                                foto: file,
-                                            }))
+                                        if(!file.type.startsWith('image/')) {
+                                            alert('Selecione uma imagem válida');
+                                            return
+                                        }
 
-                                            const previewURL = URL.createObjectURL(file)
-                                            setPreviewImagemCulinarista(previewURL)
-                                        }}
-                                    />
-                                </Text>
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Nome</Text>
+                                        setCulinarianEditar((prev) => ({
+                                            ...prev,
+                                            foto: file,
+                                        }))
+
+                                        const previewURL = URL.createObjectURL(file)
+                                        setPreviewImagemCulinarista(previewURL)
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* CAMPOS */}
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Nome</label>
                                 <Input
                                     type='text'
                                     value={culinarianEditar.nomeCulinarista}
                                     onChange={e => setCulinarianEditar({ ...culinarianEditar, nomeCulinarista: e.target.value})}
                                 />
-                            </Text>
-                            <Text 
-                                as='div'>
-                                <Text as='p'>Cpf</Text>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>CPF</label>
                                 <Input
                                     type='text'
                                     value={culinarianEditar.cpf}
                                     onChange={e => setCulinarianEditar({ ...culinarianEditar, cpf: e.target.value})}
                                 />
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Industria</Text>
-                                <Text 
-                                    as='select' 
-                                    className='w-full min-w-40 h-[40px] bg-white border-black/50 border-1 rounded-md'
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Indústria</label>
+                                <select
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
                                     value={culinarianEditar.industria}
                                     onChange={e => setCulinarianEditar({ ...culinarianEditar, industria: e.target.value})}
                                 >
-                                    <Text as='option' value=''>
-                                        Selecione a Industria
-                                    </Text>
+                                    <option value=''>Selecione a Indústria</option>
                                     {industrias.map(i => (
-                                        <Text 
-                                            as='option'
-                                            key={i.id}
-                                            value={i.nome}
-                                        >
-                                            {i.nome}
-                                        </Text>
+                                        <option key={i.id} value={i.nome}>{i.nome}</option>
                                     ))}
-                                </Text>
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Telefone</Text>
+                                </select>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Telefone</label>
                                 <Input
                                     type='text'
                                     value={culinarianEditar.telefone}
                                     onChange={e => setCulinarianEditar({ ...culinarianEditar, telefone: e.target.value})}
                                 />
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Instagram</Text>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Instagram</label>
                                 <Input
                                     type='text'
                                     value={culinarianEditar.instagram}
                                     onChange={e => setCulinarianEditar({ ...culinarianEditar, instagram: e.target.value})}
                                 />
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Lojas</Text>
-                                <Text 
-                                    as='select'
-                                    className='w-[200px] h-[40px] border border-gray-base rounded-md'
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Lojas</label>
+                                <select
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
                                     value={culinarianEditar.lojas?.join(',') || ''}
                                     onChange={e => setCulinarianEditar({
                                         ...culinarianEditar,
@@ -663,86 +626,63 @@ export default function CulinarianAdmin() {
                                         : [e.target.value]
                                     })}
                                 >
-                                    <Text as='option' value=''>Selecione a loja</Text>
-                                    <Text as='option' value='Prado'>Prado</Text>
-                                    <Text as='option' value='Teresopolis'>Teresopolis</Text>
-                                    <Text as='option' value='Prado,Teresopolis'>Prado e Teresopolis</Text>
-                                </Text>
-                            </Text>
-                            <Text as='hr' className='border-gray-base/30 w-full'/>
-                            <Text as='div' className='flex flex-col'>
-                                <Text as='p'>Cursos que executa</Text>
-                                <Text 
-                                    as='div'
-                                    className='flex gap-3 text-gray-dark'
+                                    <option value=''>Selecione a loja</option>
+                                    <option value='Prado'>Prado</option>
+                                    <option value='Teresopolis'>Teresopolis</option>
+                                    <option value='Prado,Teresopolis'>Prado e Teresopolis</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* CURSOS */}
+                        <div className='mb-6'>
+                            <hr className='border-gray-base/30 w-full mb-4'/>
+                            <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Cursos que executa</label>
+                            <div className='flex gap-3 mt-2'>
+                                <Input
+                                    value={cursoAtual}
+                                    onChange={e => setCursoAtual(e.target.value)}
+                                    placeholder='Nome do curso'
+                                />
+                                <Button
+                                    className='bg-orange-base hover:bg-orange-light text-white shrink-0'
+                                    onClick={() => {
+                                        setCulinarianEditar(prev => ({
+                                            ...prev,
+                                            cursos: [...prev.cursos, cursoAtual]
+                                        }))
+                                        setCursoAtual('')
+                                    }}
                                 >
-                                    <Input
-                                        width='250px'
-                                        height='40px'
-                                        value={cursoAtual}
-                                        onChange={e => setCursoAtual(e.target.value)}
-                                    />
-                                    <Button
-                                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                        onClick={() => {
-                                            setCulinarianEditar(prev => ({
-                                                ...prev,
-                                                cursos: [
-                                                    ...prev.cursos,
-                                                    cursoAtual
-                                                ]
-                                            }))
-                                            setCursoAtual('')
-                                        }}
-                                    >
-                                        <Plus />
-                                    </Button>
-                                </Text>
-                            </Text>
-                            <Text as='div' className='w-full'>
-                                <Text as='div' className='flex gap-3'>
-                                    {culinarianEditar.cursos.map((curso, index) => (
-                                            <Text 
-                                                as='div'
-                                                key={index}
-                                                className="relative flex items-center"
-                                            >
-                                                <Text 
-                                                    as='p'
-                                                    className="bg-orange-base px-4 py-2 text-white rounded-md"
-                                                >
-                                                    {curso} 
-                                                </Text>
-                                                <Button
-                                                    className="
-                                                        absolute -top-2 -right-2
-                                                        flex items-center justify-center
-                                                        w-5 h-5 text-xs
-                                                        bg-black text-white
-                                                        rounded-full cursor-pointer font-bold
-                                                    "
-                                                    onClick={() => setCulinarianEditar({
-                                                        ...culinarianEditar,
-                                                        cursos: culinarianEditar.cursos.filter((_, i) => 
-                                                            i !== index 
-                                                        )
-                                                    })}
-                                                >
-                                                    <Text>X</Text>
-                                                </Button>
-                                            </Text>
-                                        ))
-                                    }   
-                                </Text>
-                            </Text>
-                            <Button
-                                className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white w-full'
-                                onClick={() => editarCulinarian()}
-                            >
-                                Salvar Edições
-                            </Button>
-                        </Text>
+                                    <Plus />
+                                </Button>
+                            </div>
+                            <div className='flex flex-wrap gap-2 mt-3'>
+                                {culinarianEditar.cursos.map((curso, index) => (
+                                    <div key={index} className='relative flex items-center'>
+                                        <p className='bg-orange-base px-3 py-1.5 text-white rounded-md text-sm'>{curso}</p>
+                                        <Button
+                                            className='absolute -top-2 -right-2 w-5 h-5 text-xs bg-black text-white rounded-full p-0 flex items-center justify-center'
+                                            onClick={() => setCulinarianEditar({
+                                                ...culinarianEditar,
+                                                cursos: culinarianEditar.cursos.filter((_, i) => i !== index)
+                                            })}
+                                        >
+                                            <span>X</span>
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <Button
+                            className='w-full bg-orange-base hover:bg-orange-light text-white'
+                            onClick={() => editarCulinarian()}
+                        >
+                            Salvar Edições
+                        </Button>
                     </Modal>
+
                     <Modal
                         width='90%'
                         maxWidth='800px'
@@ -750,36 +690,47 @@ export default function CulinarianAdmin() {
                         isOpen={step === 'viewCulinarian'}
                         onClose={() => closeModal()}
                     >
-                        <Text as='p' className='font-semibold text-xl mb-5 text-gray-text'>Perfil da Culinarista</Text>
-                        <Text
-                            as='div'
-                            className='flex flex-wrap gap-4 text-gray-text'
-                        >
-                            {culinarianEditar.foto === null 
-                                ?   <Text as='p'
-                                        className='w-[40%] h-[20%] p-8 bg-gray'
-                                    >
-                                        Nenhuma Foto Cadastrada
-                                    </Text>
-                                :   <Text
-                                        as='img' 
-                                        src={culinarianEditar.foto}
-                                        className='w-[30%]'
-                                    />
+                        {/* HEADER */}
+                        <div className='mb-6'>
+                            <h2 className='text-xl font-bold text-gray-text'>Perfil da Culinarista</h2>
+                            <hr className='border-gray-base/30 w-full mt-3'/>
+                        </div>
+
+                        <div className='flex items-start gap-6'>
+                            {culinarianEditar.foto === null
+                                ? <div className='w-24 h-24 shrink-0 rounded-full bg-gray-base/20 flex items-center justify-center text-gray-text text-xs text-center'>
+                                    Sem foto
+                                  </div>
+                                : <img
+                                    src={culinarianEditar.foto}
+                                    className='w-24 h-24 shrink-0 object-cover rounded-full'
+                                  />
                             }
-                            <Text>Nome: {culinarianEditar.nomeCulinarista}</Text>
-                            <Text>Cpf: {culinarianEditar.cpf}</Text>
-                            <Text>Industria: {culinarianEditar.industria}</Text>
-                            <Text>Telefone: {culinarianEditar.telefone}</Text>
-                            <Text>Instagram: {culinarianEditar.instagram}</Text>
-                            <Text>Lojas: {culinarianEditar.lojas}</Text>
-                            <Text>Cursos: {culinarianEditar.cursos}</Text>
-                            <Text>Data Cadastro: {culinarianEditar.dataCadastro}</Text>
-                        </Text>
+                            <div className='flex flex-col gap-2 text-gray-text'>
+                                <p><span className='font-semibold'>Nome:</span> {culinarianEditar.nomeCulinarista}</p>
+                                <p><span className='font-semibold'>CPF:</span> {culinarianEditar.cpf}</p>
+                                <p><span className='font-semibold'>Indústria:</span> {culinarianEditar.industria}</p>
+                                <p><span className='font-semibold'>Telefone:</span> {culinarianEditar.telefone}</p>
+                                <p><span className='font-semibold'>Instagram:</span> {culinarianEditar.instagram}</p>
+                                <p><span className='font-semibold'>Lojas:</span> {culinarianEditar.lojas?.join(', ')}</p>
+                            </div>
+                        </div>
+
+                        {culinarianEditar.cursos?.length > 0 && (
+                            <div className='mt-6'>
+                                <hr className='border-gray-base/30 mb-4'/>
+                                <p className='text-xs font-semibold text-gray-text uppercase tracking-wider mb-3'>Cursos que executa</p>
+                                <div className='flex flex-wrap gap-2'>
+                                    {culinarianEditar.cursos.map((curso, i) => (
+                                        <p key={i} className='bg-orange-base px-3 py-1.5 text-white rounded-md text-sm'>{curso}</p>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </Modal>
                     {/* ====== MODALS ===== */}
-                </Text>
-            </Text>
-        </Text>
+                </section>
+            </main>
+        </div>
     )
 }

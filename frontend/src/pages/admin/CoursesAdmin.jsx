@@ -9,7 +9,6 @@ import { Trash, Edit } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
-import Text from '../../components/Text'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
@@ -210,225 +209,205 @@ export default function CoursesAdmin() {
     // ============== FUNCOES ==============
 
     return (
-        <Text as='div' className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
+        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
             <Head title='Admin | Cursos'/>
             <SideBar />
-             <Text as='main' className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
+             <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
                 <TopBar title={'Cursos'} />
-                <Text as='section' className='
+                <section className='
                     flex flex-col gap-10 mt-10 w-[92dvw]
                     md:gap-20 lg:w-[78vw]
                 '>
-                    <CardDash className='
-                            bg-white h-[200px] w-full h-full rounded-md p-10 shadow-sm
-                        '
-                    >
-                        <Text as='p' className='font-bold text-gray-text'>CADASTRE UM CURSO</Text>
-                        <Text as='div' className='flex flex-wrap w-full gap-[20px] mt-[30px]'>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Curso</Text>
-                                <Input 
+                    {/* ======== FORM CADASTRO ======== */}
+                    <CardDash className='bg-white w-full rounded-md p-8 shadow-sm'>
+                        <p className='font-bold text-gray-text mb-1'>CADASTRE UM CURSO</p>
+                        <hr className='border-gray-base/30 w-full mb-6'/>
+
+                        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                            <div className='flex flex-col gap-1.5 lg:col-span-2'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Curso</label>
+                                <Input
                                     type='text'
-                                    placeholder='Curso'
-                                    className='w-full h-[40px]'
+                                    placeholder='Nome do curso'
                                     value={form.nomeCurso}
                                     onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
-                            />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Data</Text>
-                                <Input 
-                                    type='date' 
-                                    className='w-full h-[40px]'
-                                    value={form.data}
-                                    onChange={e => setForm({ ...form, data: e.target.value })}
                                 />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Horario</Text>
-                                <Input 
-                                    type='time' 
-                                    className='w-full h-[40px]'
-                                    value={form.hora}
-                                    onChange={e => setForm({ ...form, hora: e.target.value })}
-                                />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Loja</Text>
-                                <Text 
-                                    as='select' 
-                                    value={form.loja}
-                                    onChange={e => setForm({ ...form, loja: e.target.value})}
-                                    className='w-[150px] h-[40px] border border-gray-base rounded-md'
-                                >
-                                    <Text as='option' value=''>Selecione a loja</Text>
-                                    <Text as='option' value='Prado'>Prado</Text>
-                                    <Text as='option' value='Teresopolis'>Teresopolis</Text>
-                                </Text>
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Culinarista</Text>  
-                                <Text
-                                    as='select'
-                                    value={form.culinarista}
-                                    onChange={e => setForm({ ...form, culinarista: e.target.value })}
-                                    className='w-[200px] h-[40px] border border-gray-base rounded-md'
-                                >
-                                    <Text as='option' value=''>Selecione a culinarista</Text>
-                                    {culinaristas === null
-                                    ? 'Nenhuma encontrada' 
-                                    : culinaristas.map(culinarista =>
-                                        <Text key={culinarista.id}
-                                            as='option' 
-                                            value={culinarista.nomeCulinarista}
-                                        >
-                                            {culinarista.nomeCulinarista}
-                                        </Text>
-                                    )}
-                                </Text>
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Valor</Text>
-                                <Input 
-                                    type='text' 
-                                    placeholder='Valor'
-                                    className='w-full h-[40px]'
-                                    value={form.valor}
-                                    onChange={e => setForm({ ...form, valor: e.target.value})}
-                                />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Duração</Text>  
-                                <Input 
-                                    type='text'
-                                    placeholder='Duração'
-                                    className='w-full h-[40px]'
-                                    value={form.duracao}
-                                    onChange={e => setForm({ ...form, duracao: e.target.value })}
-                                />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Categoria</Text>    
-                                <Input 
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Categoria</label>
+                                <Input
                                     type='text'
                                     placeholder='Categoria'
-                                    className='w-full h-[40px]'
                                     value={form.categoria}
                                     onChange={e => setForm({ ...form, categoria: e.target.value })}
                                 />
-                            </Text>
-                            <Text as='div' className='flex flex-col text-gray-dark'>
-                                <Text>Imagem</Text>  
-                                <Input 
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Data</label>
+                                <Input
+                                    type='date'
+                                    value={form.data}
+                                    onChange={e => setForm({ ...form, data: e.target.value })}
+                                />
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Horário</label>
+                                <Input
+                                    type='time'
+                                    value={form.hora}
+                                    onChange={e => setForm({ ...form, hora: e.target.value })}
+                                />
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Duração</label>
+                                <Input
+                                    type='text'
+                                    placeholder='Ex: 2h'
+                                    value={form.duracao}
+                                    onChange={e => setForm({ ...form, duracao: e.target.value })}
+                                />
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Loja</label>
+                                <select
+                                    value={form.loja}
+                                    onChange={e => setForm({ ...form, loja: e.target.value })}
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
+                                >
+                                    <option value=''>Selecione a loja</option>
+                                    <option value='Prado'>Prado</option>
+                                    <option value='Teresopolis'>Teresopolis</option>
+                                </select>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
+                                <select
+                                    value={form.culinarista}
+                                    onChange={e => setForm({ ...form, culinarista: e.target.value })}
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
+                                >
+                                    <option value=''>Selecione a culinarista</option>
+                                    {culinaristas === null
+                                    ? 'Nenhuma encontrada'
+                                    : culinaristas.map(culinarista =>
+                                        <option key={culinarista.id} value={culinarista.nomeCulinarista}>
+                                            {culinarista.nomeCulinarista}
+                                        </option>
+                                    )}
+                                </select>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Valor</label>
+                                <Input
+                                    type='text'
+                                    placeholder='R$ 0,00'
+                                    value={form.valor}
+                                    onChange={e => setForm({ ...form, valor: e.target.value })}
+                                />
+                            </div>
+                            <div className='flex flex-col gap-1.5 md:col-span-2 lg:col-span-3'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Imagem</label>
+                                <Input
                                     type='file'
                                     accept='image/png, image/jpeg'
-                                    className='w-full h-[40px]'
                                     onChange={(e) => {
                                         const file = e.target.files[0];
                                         if (!file) return;
-
-                                        setForm((prev) => ({
-                                            ...prev,
-                                            imagem: file,
-                                        }));
+                                        setForm((prev) => ({ ...prev, imagem: file }));
                                     }}
-                                >
-                                </Input>
-                            </Text>
-                            <Button 
-                                width='100%'
-                                className='bg-orange-base hover:bg-orange-light text-white'
-                                onClick={handleSubmit}
-                            >
-                                Adicionar
-                            </Button>
-                        </Text>
-                    </CardDash>
-                    <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                        <Text as='p' className='font-bold text-xl mb-3 text-gray-text'>CURSOS</Text>
-                        <Text as='div' className='
-                                grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] font-bold text-gray-text
-                                hidden md:grid
-                            '
+                                />
+                            </div>
+                        </div>
+
+                        <Button
+                            className='bg-orange-base hover:bg-orange-light text-white w-full mt-6'
+                            onClick={handleSubmit}
                         >
-                            <Text as='p'>DESCRIÇÃO</Text>
-                            <Text as='p'>CULINARISTA</Text>
-                            <Text as='p'>DATA</Text>
-                            <Text as='p'>HORARIO</Text>
-                            <Text as='p'>LOJA</Text>
-                            <Text as='p'>FUNÇÕES</Text>
-                        </Text>
-                        <Text as='hr' className='border-gray-base/30 w-full mt-4'/>
-                        <Text as='div' className='max-h-[400px] overflow-y-auto'>
+                            Adicionar Curso
+                        </Button>
+                    </CardDash>
+
+                    {/* ======== LISTA DE CURSOS ======== */}
+                    <CardDash className='bg-white w-full rounded-md p-8 shadow-sm'>
+                        <p className='font-bold text-xl mb-1 text-gray-text'>CURSOS</p>
+                        <hr className='border-gray-base/30 w-full mb-4'/>
+
+                        <div className='max-h-112.5 overflow-y-auto'>
+
+                        {/* HEADER DESKTOP */}
+                        <div className='hidden md:grid grid-cols-[2fr_1fr_0.7fr_0.6fr_0.7fr_auto] gap-2
+                                        text-xs font-semibold text-gray-text uppercase tracking-wider
+                                        bg-gray px-3 py-2 rounded-md mb-1 sticky top-0 z-10'>
+                            <p>Descrição</p>
+                            <p>Culinarista</p>
+                            <p>Data</p>
+                            <p>Horário</p>
+                            <p>Loja</p>
+                            <p>Ações</p>
+                        </div>
                             {loading ? (
-                                <Text as='p'>Carregando cursos...</Text>
+                                <p className='text-gray-text text-center py-8'>Carregando cursos...</p>
+                            ) : cursos.length === 0 ? (
+                                <p className='text-gray-text text-center py-8'>Nenhum curso cadastrado</p>
                             ) : (
                                 cursos.map((curso, i) => (
-                                <Text 
-                                    as='div'
-                                    key={i}
-                                >
-                                    {/* MOBILE */}
-                                    <Text 
-                                        as='div' 
-                                        className='
-                                            p-3 text-gray-text
-                                            md:hidden
-                                        ' 
-                                    >
-                                        <Text as='p'>Descrição: {curso.nomeCurso}</Text>
-                                        <Text as='p'>Culinarista: {curso.culinarista}</Text>
-                                        <Text as='p'>{layoutDataInput(curso.data)}</Text>
-                                        <Text as='p'>{curso.hora}</Text>
-                                        <Text as='p'>{curso.loja}</Text>
-                                        <Text as='div' className='flex gap-3 h-full mt-3'>
-                                            <Button 
-                                                className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
-                                                onClick={() => removeCourse(curso.id)}
-                                            >
-                                                <Trash />
-                                            </Button>
-                                            <Button 
-                                                className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                                onClick={() => handleEditCourse(curso.id)}
-                                            >
-                                                <Edit />
-                                            </Button>
-                                        </Text>
-                                    </Text>
-                                    
-                                    {/* DESKTOP */}
-                                    <Text 
-                                        as='div' 
-                                        className='
-                                            grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] text-gray-text  p-2 items-center
-                                            md:grid hidden
-                                        ' 
-                                    >
-                                        <Text as='p'>{curso.nomeCurso}</Text>
-                                        <Text as='p'>{curso.culinarista}</Text>
-                                        <Text as='p'>{layoutDataInput(curso.data)}</Text>
-                                        <Text as='p'>{curso.hora}</Text>
-                                        <Text as='p'>{curso.loja}</Text>
-                                        <Text as='div' className='flex gap-3 justify-center h-full'>
-                                            <Button 
-                                                className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
-                                                onClick={() => removeCourse(curso.id)}
-                                            >
-                                                <Trash />
-                                            </Button>
-                                            <Button 
-                                                className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                                onClick={() => handleEditCourse(curso.id)}
-                                            >
-                                                <Edit />
-                                            </Button>
-                                        </Text>
-                                    </Text>
-                                    <Text as='hr' className='border-gray-base/30 w-full'/>
-                                </Text>
-                            )))}
-                        </Text>
+                                    <div key={i}>
+                                        {/* MOBILE */}
+                                        <div className='md:hidden p-3 text-gray-text'>
+                                            <p className='font-semibold'>{curso.nomeCurso}</p>
+                                            <p className='text-sm text-gray-text/70'>{curso.culinarista} · {layoutDataInput(curso.data)} · {curso.hora}</p>
+                                            {curso.loja === 'Prado'
+                                                ? <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-orange-base/10 text-orange-base'>{curso.loja}</span>
+                                                : <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-blue-base/20 text-blue-base'>{curso.loja}</span>
+                                            }
+                                            <div className='flex gap-2 mt-2'>
+                                                <Button
+                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
+                                                    onClick={() => removeCourse(curso.id)}
+                                                >
+                                                    <Trash size={16} />
+                                                </Button>
+                                                <Button
+                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
+                                                    onClick={() => handleEditCourse(curso.id)}
+                                                >
+                                                    <Edit size={16} />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* DESKTOP */}
+                                        <div className='hidden md:grid grid-cols-[2fr_1fr_0.7fr_0.6fr_0.7fr_auto] gap-2
+                                                        px-3 py-3 items-center text-gray-text text-sm
+                                                        hover:bg-gray/60 transition-colors rounded-md'>
+                                            <p className='font-medium truncate pr-2'>{curso.nomeCurso}</p>
+                                            <p className='truncate'>{curso.culinarista}</p>
+                                            <p>{layoutDataInput(curso.data)}</p>
+                                            <p>{curso.hora}</p>
+                                            {curso.loja === 'Prado'
+                                                ? <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-orange-base/10 text-orange-base'>{curso.loja}</span>
+                                                : <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-blue-base/20 text-blue-base'>{curso.loja}</span>
+                                            }
+                                            <div className='flex gap-2'>
+                                                <Button
+                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
+                                                    onClick={() => removeCourse(curso.id)}
+                                                >
+                                                    <Trash size={16} />
+                                                </Button>
+                                                <Button
+                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
+                                                    onClick={() => handleEditCourse(curso.id)}
+                                                >
+                                                    <Edit size={16} />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <hr className='border-gray-base/20'/>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </CardDash>
                     <Modal
                         width='90%'
@@ -436,26 +415,26 @@ export default function CoursesAdmin() {
                         height='auto'
                         isOpen={step === 'editCourse'}
                         onClose={() => closeModal()}
-                    >   
-                        <Text as='div' className='text-xl font-bold mb-4 text-gray-text'>
-                            <Text>Editar Curso</Text>
-                            <Text as='hr' className='border-gray-base/30 w-full mt-3'/>
-                        </Text>
-                        <Text as='div' className='flex gap-10'>
-                            {cursoEditar.fotos === null 
-                                ?   <Text as='p'
-                                        className='w-[40%] min-h-[50%] p-8 bg-gray'
-                                    >
-                                        Nenhuma Foto Cadastrada
-                                    </Text>
-                                :   <Text
-                                        as='img' 
-                                        src={previewImagemCurso || cursoEditar.fotos}
-                                        className='w-[30%]'
-                                    />
+                    >
+                        {/* HEADER */}
+                        <div className='mb-6'>
+                            <h2 className='text-xl font-bold text-gray-text'>Editar Curso</h2>
+                            <hr className='border-gray-base/30 w-full mt-3'/>
+                        </div>
+
+                        {/* FOTO */}
+                        <div className='flex items-start gap-5 mb-6 p-4 bg-gray rounded-lg'>
+                            {!previewImagemCurso && cursoEditar.fotos === null
+                                ? <div className='w-28 h-28 shrink-0 rounded-lg bg-gray-base/20 flex items-center justify-center text-gray-text text-xs text-center'>
+                                    Sem foto
+                                  </div>
+                                : <img
+                                    src={previewImagemCurso || cursoEditar.fotos}
+                                    className='w-28 h-28 shrink-0 object-cover rounded-lg'
+                                  />
                             }
-                            <Text as='div'>
-                                <Text as='p'>Alterar Foto</Text>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Alterar Foto</label>
                                 <Input
                                     type='file'
                                     accept='image/png, image/jpeg'
@@ -477,96 +456,93 @@ export default function CoursesAdmin() {
                                         setPreviewImagemCurso(previewURL)
                                     }}
                                 />
-                            </Text>
-                        </Text>
-                        <Text className='flex flex-wrap gap-3'>
-                            <Text as='div'>
-                                <Text as='p'>Descrição</Text>
+                            </div>
+                        </div>
+
+                        {/* CAMPOS */}
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Descrição</label>
                                 <Input
                                     value={cursoEditar.nomeCurso}
                                     onChange={e => setCursoEditar({ ...cursoEditar, nomeCurso: e.target.value })}
                                 />
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Data</Text>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Data</label>
                                 <Input
                                     type='date'
                                     value={cursoEditar.data}
                                     onChange={e => setCursoEditar({ ...cursoEditar, data: e.target.value })}
                                 />
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Horario</Text>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Horário</label>
                                 <Input
                                     type='time'
                                     value={cursoEditar.hora}
                                     onChange={e => setCursoEditar({ ...cursoEditar, hora: e.target.value })}
                                 />
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Loja</Text>
-                                <Text
-                                    as='select'
-                                    className='w-[200px] h-[40px] border border-gray-base rounded-md'
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Loja</label>
+                                <select
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
                                     value={cursoEditar.loja}
                                     onChange={e => setCursoEditar({ ...cursoEditar, loja: e.target.value })}
                                 >
-                                    <Text as='option' value='Prado'>Prado</Text>
-                                    <Text as='option' value='Teresopolis'>Teresopolis</Text>
-                                </Text>
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Culinarista</Text>
-                                <Text
-                                    as='select'
-                                    className='w-[200px] h-[40px] border border-gray-base rounded-md'
+                                    <option value='Prado'>Prado</option>
+                                    <option value='Teresopolis'>Teresopolis</option>
+                                </select>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
+                                <select
+                                    className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
                                     value={cursoEditar.culinarista}
                                     onChange={e => setCursoEditar({ ...cursoEditar, culinarista: e.target.value })}
                                 >
                                     {culinaristas === null
-                                    ? 'Nenhuma encontrada' 
+                                    ? <option>Nenhuma encontrada</option>
                                     : culinaristas.map(culinarista =>
-                                        <Text 
-                                            as='option' 
-                                            key={culinarista.id}
-                                            value={culinarista.nomeCulinarista}
-                                        >
+                                        <option key={culinarista.id} value={culinarista.nomeCulinarista}>
                                             {culinarista.nomeCulinarista}
-                                        </Text>
+                                        </option>
                                     )}
-                                </Text>
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Valor</Text>
+                                </select>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Valor</label>
                                 <Input
                                     value={cursoEditar.valor}
                                     onChange={e => setCursoEditar({ ...cursoEditar, valor: e.target.value })}
                                 />
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Duração</Text>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Duração</label>
                                 <Input
                                     value={cursoEditar.duracao}
                                     onChange={e => setCursoEditar({ ...cursoEditar, duracao: e.target.value })}
                                 />
-                            </Text>
-                            <Text as='div'>
-                                <Text as='p'>Categoria</Text>
+                            </div>
+                            <div className='flex flex-col gap-1.5'>
+                                <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Categoria</label>
                                 <Input
                                     value={cursoEditar.categoria}
                                     onChange={e => setCursoEditar({ ...cursoEditar, categoria: e.target.value })}
                                 />
-                            </Text>
-                        </Text>
+                            </div>
+                        </div>
+
                         <Button
-                            className='w-full bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white mt-5'
+                            className='w-full bg-orange-base hover:bg-orange-light text-white'
                             onClick={() => editarCourse()}
                         >
                             Salvar Edições
                         </Button>
                     </Modal>
-                </Text>
-            </Text>
-        </Text>
+                </section>
+            </main>
+        </div>
     )
 }

@@ -1,9 +1,8 @@
 // React
 import { useEffect } from "react"
 
-// Components
-import Text from "../Text"
-import Button from "../Button"
+// Icons
+import { MapPin, X } from "lucide-react"
 
 export default function ModalBranch({
     isOpen,
@@ -28,57 +27,79 @@ export default function ModalBranch({
 
     if (!isOpen) return null
 
+    function selectLoja(loja) {
+        setFiltersCourses({ ...filtersCourses, loja })
+        setFiltersChildrensCourses({ ...filtersChildrensCourses, loja })
+        onClose()
+    }
+
     return (
-        <Text
-            as='div'
-            className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
+        <div
+            className='fixed inset-0 w-full h-full bg-black/60 z-50 flex items-center justify-center p-4'
             onClick={onClose}
         >
-            <Text
-                as='div'
-                className='bg-white shadow-md rounded-md p-4 md:p-6 w-[90%] max-w-[500px] h-auto max-h-[90vh] overflow-y-auto'
-                onClick={(e) => e.stopPropagation()}
+            <div
+                className='bg-white rounded-2xl shadow-2xl w-[90%] max-w-lg overflow-hidden'
+                onClick={e => e.stopPropagation()}
                 {...props}
             >
-                <Text
-                    as='button'
-                    className='cursor-pointer text-xl md:text-2xl font-bold text-gray-dark hover:text-orange-base float-right mb-2'
-                    onClick={onClose}
-                >
-                    ✕
-                </Text>
-                <div className="clear-both" />
-                <Text
-                    as='div'
-                    className='flex flex-col w-full h-full font-semibold p-2 gap-3 text-center'
-                >
-                    <Text as='p' className='text-lg md:text-xl mb-5'>Seleciona a loja que deseja ver os cursos</Text>
-                    <Text as='div' className='flex justify-center gap-8'>
-                        <Button
-                            className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
-                            onClick={() => {
-                                setFiltersCourses({...filtersCourses, loja: 'Prado'})
-                                setFiltersChildrensCourses({ ...filtersChildrensCourses, loja: 'Prado'})
-                                onClose()
-                                }
-                            }
-                        >
-                            Prado - Friburgo
-                        </Button>
-                        <Button
-                            className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
-                            onClick={() => {
-                                setFiltersCourses({ ...filtersCourses, loja: 'Teresopolis'})
-                                setFiltersChildrensCourses({ ...filtersChildrensCourses, loja: 'Teresopolis'})
-                                onClose()
-                                }
-                            }
-                        >
-                            Várzea - Teresópolis
-                        </Button>
-                    </Text>
-                </Text>
-            </Text>
-        </Text>
+                {/* HEADER */}
+                <div className='flex items-center justify-between px-6 py-5 border-b border-gray-base/20'>
+                    <div>
+                        <p className='text-lg font-bold text-gray-text'>Selecione a loja</p>
+                        <p className='text-sm text-gray-text/60 mt-0.5'>Escolha a unidade para ver os cursos disponíveis</p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-base/10 transition-colors cursor-pointer'
+                    >
+                        <X size={18} className='text-gray-text' />
+                    </button>
+                </div>
+
+                {/* CARDS */}
+                <div className='flex flex-col sm:flex-row gap-4 p-6'>
+
+                    {/* PRADO */}
+                    <button
+                        onClick={() => selectLoja('Prado')}
+                        className='
+                            flex-1 flex flex-col items-center gap-3 p-6
+                            border-2 border-gray-base/20 rounded-xl
+                            hover:border-orange-base hover:bg-orange-base/5
+                            transition-all duration-200 cursor-pointer group
+                        '
+                    >
+                        <div className='w-12 h-12 rounded-full bg-orange-base/10 flex items-center justify-center group-hover:bg-orange-base/20 transition-colors'>
+                            <MapPin size={22} className='text-orange-base' />
+                        </div>
+                        <div className='text-center'>
+                            <p className='font-bold text-gray-text text-base'>Prado</p>
+                            <p className='text-sm text-gray-text/60 mt-0.5'>Nova Friburgo</p>
+                        </div>
+                    </button>
+
+                    {/* TERESÓPOLIS */}
+                    <button
+                        onClick={() => selectLoja('Teresopolis')}
+                        className='
+                            flex-1 flex flex-col items-center gap-3 p-6
+                            border-2 border-gray-base/20 rounded-xl
+                            hover:border-blue-base hover:bg-blue-base/5
+                            transition-all duration-200 cursor-pointer group
+                        '
+                    >
+                        <div className='w-12 h-12 rounded-full bg-blue-base/10 flex items-center justify-center group-hover:bg-blue-base/20 transition-colors'>
+                            <MapPin size={22} className='text-blue-base' />
+                        </div>
+                        <div className='text-center'>
+                            <p className='font-bold text-gray-text text-base'>Várzea</p>
+                            <p className='text-sm text-gray-text/60 mt-0.5'>Teresópolis</p>
+                        </div>
+                    </button>
+
+                </div>
+            </div>
+        </div>
     )
 }

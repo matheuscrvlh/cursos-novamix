@@ -14,7 +14,6 @@ import { postEnrollment, getSeats } from '../../api/enrollment.services';
 import { useThemeColor } from '../../hooks/useThemeColor';
 
 // COMPONENTS
-import Text from '../../components/Text'
 import ModalBranch from '../../components/public/ModalBranch';
 import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
@@ -221,7 +220,7 @@ export default function Courses() {
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Loja Novamix | Cursos' />
-            <Text as='section' className='bg-gray mb-20'>
+            <section className='bg-gray mb-20'>
 
                 {/* ================= CONTEUDO ================= */}
                 {/* ======== CURSOS ======== */}
@@ -287,7 +286,7 @@ export default function Courses() {
                         clear={() => clearFilters()}
                     />
                 }
-            </Text>
+            </section>
         </PublicLayout>
     )
 }

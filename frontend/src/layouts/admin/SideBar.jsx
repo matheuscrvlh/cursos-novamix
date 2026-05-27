@@ -5,7 +5,6 @@ import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 
 // Components
-import Text from '../../components/Text'
 import LinkSideBar from '../../components/admin/LinkSideBar'
 import ConfirmModal from '../../components/admin/ModalConfirm'
 
@@ -45,18 +44,15 @@ export default function SideBar() {
             </button>
 
             {/* apenas para mobile */}
-            <Text as='div'
-                className={`
+            <div className={`
                     lg:hidden fixed inset-0 bg-black transition-opacity duration-300
                     ${isMenuOpen ? 'opacity-50 z-30 pointer-events-auto' : 'opacity-0 pointer-events-none'}
                 `}
                 onClick={closeMenu}
-            ></Text>
+            ></div>
 
             {/* Sidebar */}
-            <Text 
-                as='aside' 
-                className={`
+            <aside className={`
                     flex flex-col h-[100dvh] bg-white shadow-sm
                     fixed top-0 left-0 w-[280px]
                     transition-transform duration-300 ease-in-out
@@ -65,14 +61,12 @@ export default function SideBar() {
                     lg:translate-x-0 lg:z-auto
                 `}
             >
-                <Text 
-                    as='img' 
-                    src={logoNm} 
+                <img src={logoNm} 
                     alt='Logo'
                     className='w-[50%] ml-auto mr-auto mt-4' 
                 />
                 
-                <Text as='nav' className='flex flex-col w-[80%] ml-auto mr-auto gap-3 mt-8'>
+                <nav className='flex flex-col w-[80%] ml-auto mr-auto gap-3 mt-8'>
                     <LinkSideBar to='/dashboardAdmin' onClick={closeMenu}>
                         Dashboard
                     </LinkSideBar>
@@ -91,7 +85,7 @@ export default function SideBar() {
                     <LinkSideBar to='/industriasAdmin' onClick={closeMenu}>
                         Industrias
                     </LinkSideBar>
-                </Text>
+                </nav>
 
                 <Link
                     onClick={() => {
@@ -104,7 +98,7 @@ export default function SideBar() {
                 >
                     Sair
                 </Link>
-            </Text>
+            </aside>
 
             <ConfirmModal
                 isOpen={openModal}

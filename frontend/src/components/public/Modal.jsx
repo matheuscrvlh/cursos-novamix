@@ -2,7 +2,6 @@
 import { useEffect } from "react"
 
 // Components
-import Text from "../Text"
 
 export default function Modal({
     as = 'div',
@@ -30,13 +29,10 @@ export default function Modal({
     if (!isOpen) return null
 
     return (
-        <Text
-            as='div'
-            className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
+        <div className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
             onClick={onClose}
         >
-            <Text
-                as={as}
+            <span as={as}
                 style={{
                     width,
                     height,
@@ -46,16 +42,14 @@ export default function Modal({
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                <Text
-                    as='button'
-                    className='cursor-pointer text-xl md:text-2xl font-bold text-gray-dark hover:text-orange-base float-right mb-2'
+                <button className='cursor-pointer text-xl md:text-2xl font-bold text-gray-dark hover:text-orange-base float-right mb-2'
                     onClick={onClose}
                 >
                     ✕
-                </Text>
+                </button>
                 <div className="clear-both" />
                 {children}
-            </Text>
-        </Text>
+            </span>
+        </div>
     )
 }
