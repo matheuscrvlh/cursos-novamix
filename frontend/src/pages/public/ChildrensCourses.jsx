@@ -137,14 +137,14 @@ export default function ChildrensCourses() {
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
 
-        const cursosFiltrados = cursosInfantis.filter(c => {
-            if (!c.data) return false;
-
-            const [ano, mes, dia] = c.data.split('-');
-            const dataCurso = new Date(ano, mes - 1, dia);
-
-            return dataCurso >= hoje;
-        });
+        const cursosFiltrados = cursosInfantis
+            .filter(c => {
+                if (!c.data) return false;
+                const [ano, mes, dia] = c.data.split('-');
+                const dataCurso = new Date(ano, mes - 1, dia);
+                return dataCurso >= hoje;
+            })
+            .sort((a, b) => new Date(a.data) - new Date(b.data));
 
         setCursosAtuais(cursosFiltrados);
     }, [cursosInfantis]);

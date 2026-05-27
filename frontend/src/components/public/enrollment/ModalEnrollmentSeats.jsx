@@ -1,6 +1,9 @@
 // React
 import { useEffect } from "react"
 
+// Icons
+import { X } from "lucide-react"
+
 // Components
 import Button from "../../Button"
 
@@ -19,71 +22,106 @@ export default function ModalEnrollmentSeats({
         } else {
             document.body.style.overflow = ''
         }
-
-        return () => {
-            document.body.style.overflow = ''
-        }
+        return () => { document.body.style.overflow = '' }
     }, [isOpen])
 
     if (!isOpen) return null
 
     return (
-        <div className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
+        <div
+            className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
             onClick={onClose}
         >
-            <div className='bg-white shadow-md rounded-md p-4 md:p-6 w-[90%] max-w-[500px] h-auto max-h-[90vh] overflow-y-auto'
+            <div
+                className='bg-white shadow-xl rounded-xl w-[90%] max-w-115 max-h-[90vh] overflow-y-auto'
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                <button className='cursor-pointer text-xl md:text-2xl font-bold text-gray-dark hover:text-orange-base float-right mb-2'
-                    onClick={onClose}
-                >
-                    ✕
-                </button>
-                <div className="clear-both" />
-                <div className='flex flex-col gap-3 h-full'>
-                    <p className='font-semibold text-center text-lg md:text-xl mt-auto'>
-                        Escolha seu assento para assistir ao curso
-                    </p>
-                    <div className='bg-gray-base rounded-sm p-4 md:p-6 text-center text-white font-semibold mb-6 md:mb-10'
+                {/* HEADER */}
+                <div className='flex items-center justify-between p-5 pb-4 border-b border-gray-base/20'>
+                    <div>
+                        <h2 className='font-bold text-gray-dark text-lg'>Escolha seu assento</h2>
+                        <p className='text-xs text-gray-text/60 mt-0.5'>Toque no assento para selecioná-lo</p>
+                    </div>
+                    <button
+                        className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray text-gray-text/60 hover:text-gray-dark transition cursor-pointer'
+                        onClick={onClose}
                     >
+                        <X size={18} />
+                    </button>
+                </div>
+
+                <div className='p-5 flex flex-col gap-5'>
+
+                    {/* Balcão */}
+                    <div className='bg-gray-dark rounded-lg py-3 text-center text-sm font-bold text-white uppercase tracking-widest'>
                         Balcão
                     </div>
 
-                    {/* Grid de assentos responsivo */}
-                    <div className='grid grid-cols-6 gap-2'>
+                    {/* Grid de assentos */}
+                    <div className='grid grid-cols-6 gap-3'>
                         {assentos.map(assento => {
                             const isReservado = assento.status === 'reservado';
                             const isSelecionado = enrollment.assento === assento.id;
 
                             return (
-                                <p key={assento.id}
-                                    className={`p-2 rounded-full text-center font-semibold text-white text-sm ${isReservado
-                                        ? 'bg-gray-base cursor-not-allowed'
-                                        : isSelecionado
-                                            ? 'bg-gray-dark cursor-pointer'
-                                            : 'bg-orange-base cursor-pointer'
-                                        }`}
+                                <button
+                                    key={assento.id}
+                                    disabled={isReservado}
                                     onClick={() => {
                                         if (isReservado) return;
-
-                                        setEnrollment(prev => ({
-                                            ...prev,
-                                            assento: assento.id
-                                        }));
+                                        setEnrollment(prev => ({ ...prev, assento: assento.id }));
                                     }}
+                                    className={`flex flex-col items-center transition-transform ${
+                                        isReservado ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105'
+                                    }`}
                                 >
-                                    {assento.id}
-                                </p>
-                            )
+                                    {/* Encosto */}
+                                    <div className={`w-3/5 h-3 rounded-t-md transition-colors ${
+                                        isReservado
+                                            ? 'bg-gray-base/25'
+                                            : isSelecionado
+                                                ? 'bg-gray-dark'
+                                                : 'bg-orange-base'
+                                    }`} />
+                                    {/* Assento */}
+                                    <div className={`w-full h-8 rounded-b-lg flex items-center justify-center font-bold text-xs transition-colors ${
+                                        isReservado
+                                            ? 'bg-gray-base/20 text-gray-base/40'
+                                            : isSelecionado
+                                                ? 'bg-gray-dark text-white shadow-md'
+                                                : 'bg-orange-base text-white hover:bg-orange-light'
+                                    }`}>
+                                        {assento.id}
+                                    </div>
+                                </button>
+                            );
                         })}
                     </div>
+
+                    {/* Legenda */}
+                    <div className='flex justify-center gap-5'>
+                        <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
+                            <span className='w-3 h-3 rounded-sm bg-orange-base' />
+                            Disponível
+                        </div>
+                        <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
+                            <span className='w-3 h-3 rounded-sm bg-gray-dark' />
+                            Selecionado
+                        </div>
+                        <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
+                            <span className='w-3 h-3 rounded-sm bg-gray-base/20' />
+                            Ocupado
+                        </div>
+                    </div>
+
                     <Button
-                        className='bg-orange-base hover:bg-orange-light text-white mt-5 mb-5'
+                        className='bg-orange-base hover:bg-orange-light text-white font-semibold'
                         onClick={onClick}
                     >
-                        Enviar
+                        Confirmar assento
                     </Button>
+
                 </div>
             </div>
         </div>

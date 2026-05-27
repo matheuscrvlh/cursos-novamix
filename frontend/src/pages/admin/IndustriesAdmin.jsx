@@ -9,13 +9,14 @@ import TopBar from '../../layouts/admin/TopBar'
 import { useContext, useState } from 'react';
 
 // Icons
-import { Trash, Edit } from 'lucide-react';
+import { Trash, Edit, Inbox } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
+import Tooltip from '../../components/admin/Tooltip';
 
 // Context
 import { DadosContext } from '../../contexts/DadosContext';
@@ -227,7 +228,10 @@ async function salvarEdicao() {
                             </div>
 
                             {industrias.length === 0 ? (
-                                <p className='text-gray-text text-center py-8'>Nenhuma indústria cadastrada</p>
+                                <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
+                                    <Inbox size={36} />
+                                    <p className='text-sm'>Nenhuma indústria cadastrada</p>
+                                </div>
                             ) : (
                                 industrias.map(i => (
                                     <div key={i.id}>
@@ -238,18 +242,16 @@ async function salvarEdicao() {
                                             {i.cnpj && <p className='text-sm text-gray-text/70'>CNPJ: {i.cnpj}</p>}
                                             {i.telefone && <p className='text-sm text-gray-text/70'>Tel: {i.telefone}</p>}
                                             <div className='flex gap-2 mt-2'>
-                                                <Button
-                                                    className='bg-red-base text-white p-2 hover:bg-red-light'
-                                                    onClick={() => removeIndustry(i.id)}
-                                                >
-                                                    <Trash size={16} />
-                                                </Button>
-                                                <Button
-                                                    className='bg-orange-base text-white p-2 hover:bg-orange-light'
-                                                    onClick={() => handleEditIndustria(i.id)}
-                                                >
-                                                    <Edit size={16} />
-                                                </Button>
+                                                <Tooltip label='Excluir'>
+                                                    <Button className='bg-red-base text-white p-2 hover:bg-red-light' onClick={() => removeIndustry(i.id)}>
+                                                        <Trash size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Editar'>
+                                                    <Button className='bg-orange-base text-white p-2 hover:bg-orange-light' onClick={() => handleEditIndustria(i.id)}>
+                                                        <Edit size={16} />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         </div>
 
@@ -262,18 +264,16 @@ async function salvarEdicao() {
                                             <p>{i.cnpj || '-'}</p>
                                             <p>{i.telefone || '-'}</p>
                                             <div className='flex gap-2'>
-                                                <Button
-                                                    className='bg-red-base text-white p-2 hover:bg-red-light'
-                                                    onClick={() => removeIndustry(i.id)}
-                                                >
-                                                    <Trash size={16} />
-                                                </Button>
-                                                <Button
-                                                    className='bg-orange-base text-white p-2 hover:bg-orange-light'
-                                                    onClick={() => handleEditIndustria(i.id)}
-                                                >
-                                                    <Edit size={16} />
-                                                </Button>
+                                                <Tooltip label='Excluir'>
+                                                    <Button className='bg-red-base text-white p-2 hover:bg-red-light' onClick={() => removeIndustry(i.id)}>
+                                                        <Trash size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Editar'>
+                                                    <Button className='bg-orange-base text-white p-2 hover:bg-orange-light' onClick={() => handleEditIndustria(i.id)}>
+                                                        <Edit size={16} />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         </div>
                                         <hr className='border-gray-base/20'/>

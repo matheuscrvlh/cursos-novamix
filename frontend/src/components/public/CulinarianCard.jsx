@@ -1,21 +1,54 @@
-// COMPONENTS
+import { User } from 'lucide-react';
 
 export default function CulinarianCard({
     id,
     foto,
     nomeCulinarista,
     lojas,
-    ...props
 }) {
+    const duasLojas = Array.isArray(lojas) ? lojas.length === 2 : false;
+    const lojaUnica = Array.isArray(lojas) ? lojas[0] : lojas;
+
     return (
-        <div key={id} className={`${props}h-full rounded-xl shadow-md hover:shadow-lg transition`}>
-            <div className='min-w-73 w-full h-80 rounded-t-xl'>
-                <img src={foto} className='w-full h-full object-cover rounded-t-xl'/>
+        <div className='rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden'>
+
+            {/* IMAGEM com overlay */}
+            <div className='relative h-72 w-full overflow-hidden'>
+                {foto ? (
+                    <img
+                        src={foto}
+                        alt={nomeCulinarista}
+                        className='w-full h-full object-cover'
+                    />
+                ) : (
+                    <div className='w-full h-full bg-gray-base/10 flex items-center justify-center'>
+                        <User size={48} className='text-gray-base/30' />
+                    </div>
+                )}
+
+                {/* Gradient */}
+                <div className='absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent' />
+
+                {/* Nome + loja sobre a imagem */}
+                <div className='absolute bottom-0 left-0 right-0 p-4'>
+                    <p className='text-white font-bold text-lg leading-tight mb-1.5'>{nomeCulinarista}</p>
+
+                    {duasLojas ? (
+                        <span className='text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm'>
+                            Prado e Teresópolis
+                        </span>
+                    ) : lojaUnica === 'Prado' ? (
+                        <span className='text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-base text-white'>
+                            Prado
+                        </span>
+                    ) : (
+                        <span className='text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-base text-white'>
+                            {lojaUnica}
+                        </span>
+                    )}
+                </div>
             </div>
-            <div className='flex justify-between bg-white w-full rounded-b-xl p-4 items-center'> 
-                <p className='font-semibold text-sm text-gray-dark md:text-lg'>{nomeCulinarista}</p>
-                <p className='bg-gray-base text-white text-sm rounded-2xl px-3 py-2 md:px-6'>{lojas.length === 2 ? 'Prado e Teresópolis' : lojas}</p>
-            </div>
+
         </div>
-    )
+    );
 }

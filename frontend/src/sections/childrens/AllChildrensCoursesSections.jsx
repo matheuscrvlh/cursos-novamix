@@ -84,7 +84,7 @@ export default function AllChildrensCoursesSections({
                                         duracao={curso.duracao}
                                         categoria={curso.categoria}
                                         vagasLivres={vagas.livres}
-                                        vagasReservadas={vagas.reservadas}
+                                        vagasReservadas={24}
                                         valor={curso.valor}
                                         onClick={() => openForm(curso.id)}
                                         className='w-[80vw] min-w-[300px] 

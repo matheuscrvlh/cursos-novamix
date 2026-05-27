@@ -5,13 +5,14 @@ import { useContext, useState } from 'react';
 import { Head } from '../../components/Head'
 
 // LUCIDE ICONS
-import { Trash, Edit } from 'lucide-react';
+import { Trash, Edit, Inbox } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
+import Tooltip from '../../components/admin/Tooltip';
 
 // Layouts
 import SideBar from '../../layouts/admin/SideBar'
@@ -67,6 +68,12 @@ export default function CoursesAdmin() {
 
     // ======= STATE PREVIEW IMAGEM
     const [ previewImagemCurso, setPreviewImagemCurso ] = useState(null)
+
+    // ======= STATE FILTRO STATUS
+    const [ filtroStatus, setFiltroStatus ] = useState('todos')
+
+    // ======= STATE FILTRO LOJA
+    const [ filtroLoja, setFiltroLoja ] = useState('todas')
     // ============== STATES ==============
 
     // ============== POST ==============
@@ -180,6 +187,16 @@ export default function CoursesAdmin() {
         const [ano, mes, dia] = data.split('-');
         return `${dia}/${mes}/${ano}`;
     }
+
+    // filtros
+    const hoje = new Date().toISOString().split('T')[0];
+    const cursosFiltrados = cursos.filter(c => {
+        const passaStatus = filtroStatus === 'ativos' ? c.data >= hoje
+                          : filtroStatus === 'concluidos' ? c.data < hoje
+                          : true;
+        const passaLoja = filtroLoja === 'todas' || c.loja === filtroLoja;
+        return passaStatus && passaLoja;
+    });
 
     function closeModal() {
         if(step === 'editCourse') {
@@ -329,7 +346,53 @@ export default function CoursesAdmin() {
 
                     {/* ======== LISTA DE CURSOS ======== */}
                     <CardDash className='bg-white w-full rounded-md p-8 shadow-sm'>
-                        <p className='font-bold text-xl mb-1 text-gray-text'>CURSOS</p>
+                        <div className='flex flex-col gap-3 mb-4'>
+                            <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
+                                <p className='font-bold text-xl text-gray-text'>CURSOS</p>
+                                <div className='flex flex-wrap gap-2'>
+                                    {[
+                                        { label: 'Todos', value: 'todos' },
+                                        { label: 'Ativos', value: 'ativos' },
+                                        { label: 'Concluídos', value: 'concluidos' },
+                                    ].map(f => (
+                                        <button
+                                            key={f.value}
+                                            onClick={() => setFiltroStatus(f.value)}
+                                            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                                filtroStatus === f.value
+                                                    ? 'bg-orange-base text-white'
+                                                    : 'bg-gray text-gray-text hover:bg-gray-base/20'
+                                            }`}
+                                        >
+                                            {f.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className='flex flex-wrap gap-2'>
+                                {[
+                                    { label: 'Todas as lojas', value: 'todas' },
+                                    { label: 'Prado', value: 'Prado' },
+                                    { label: 'Teresópolis', value: 'Teresopolis' },
+                                ].map(f => (
+                                    <button
+                                        key={f.value}
+                                        onClick={() => setFiltroLoja(f.value)}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                            filtroLoja === f.value
+                                                ? f.value === 'Prado'
+                                                    ? 'bg-orange-base text-white'
+                                                    : f.value === 'Teresopolis'
+                                                        ? 'bg-blue-base text-white'
+                                                        : 'bg-gray-text text-white'
+                                                : 'bg-gray text-gray-text hover:bg-gray-base/20'
+                                        }`}
+                                    >
+                                        {f.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                         <hr className='border-gray-base/30 w-full mb-4'/>
 
                         <div className='max-h-112.5 overflow-y-auto'>
@@ -346,33 +409,40 @@ export default function CoursesAdmin() {
                             <p>Ações</p>
                         </div>
                             {loading ? (
-                                <p className='text-gray-text text-center py-8'>Carregando cursos...</p>
-                            ) : cursos.length === 0 ? (
-                                <p className='text-gray-text text-center py-8'>Nenhum curso cadastrado</p>
+                                <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
+                                    <Inbox size={36} />
+                                    <p className='text-sm'>Carregando cursos...</p>
+                                </div>
+                            ) : cursosFiltrados.length === 0 ? (
+                                <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
+                                    <Inbox size={36} />
+                                    <p className='text-sm'>Nenhum curso encontrado</p>
+                                </div>
                             ) : (
-                                cursos.map((curso, i) => (
+                                cursosFiltrados.map((curso, i) => (
                                     <div key={i}>
                                         {/* MOBILE */}
                                         <div className='md:hidden p-3 text-gray-text'>
-                                            <p className='font-semibold'>{curso.nomeCurso}</p>
-                                            <p className='text-sm text-gray-text/70'>{curso.culinarista} · {layoutDataInput(curso.data)} · {curso.hora}</p>
+                                            <div className='flex items-center gap-2'>
+                                                <span className={`w-2 h-2 rounded-full shrink-0 ${curso.data >= hoje ? 'bg-green-base' : 'bg-gray-base/40'}`} />
+                                                <p className='font-semibold'>{curso.nomeCurso}</p>
+                                            </div>
+                                            <p className='text-sm text-gray-text/70 mt-0.5'>{curso.culinarista} · {layoutDataInput(curso.data)} · {curso.hora}</p>
                                             {curso.loja === 'Prado'
                                                 ? <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-orange-base/10 text-orange-base'>{curso.loja}</span>
                                                 : <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-blue-base/20 text-blue-base'>{curso.loja}</span>
                                             }
                                             <div className='flex gap-2 mt-2'>
-                                                <Button
-                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
-                                                    onClick={() => removeCourse(curso.id)}
-                                                >
-                                                    <Trash size={16} />
-                                                </Button>
-                                                <Button
-                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
-                                                    onClick={() => handleEditCourse(curso.id)}
-                                                >
-                                                    <Edit size={16} />
-                                                </Button>
+                                                <Tooltip label='Excluir'>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCourse(curso.id)}>
+                                                        <Trash size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Editar'>
+                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditCourse(curso.id)}>
+                                                        <Edit size={16} />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         </div>
 
@@ -382,25 +452,26 @@ export default function CoursesAdmin() {
                                                         hover:bg-gray/60 transition-colors rounded-md'>
                                             <p className='font-medium truncate pr-2'>{curso.nomeCurso}</p>
                                             <p className='truncate'>{curso.culinarista}</p>
-                                            <p>{layoutDataInput(curso.data)}</p>
+                                            <div className='flex items-center gap-1.5'>
+                                                <span className={`w-2 h-2 rounded-full shrink-0 ${curso.data >= hoje ? 'bg-green-base' : 'bg-gray-base/40'}`} />
+                                                <p>{layoutDataInput(curso.data)}</p>
+                                            </div>
                                             <p>{curso.hora}</p>
                                             {curso.loja === 'Prado'
                                                 ? <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-orange-base/10 text-orange-base'>{curso.loja}</span>
                                                 : <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-blue-base/20 text-blue-base'>{curso.loja}</span>
                                             }
                                             <div className='flex gap-2'>
-                                                <Button
-                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
-                                                    onClick={() => removeCourse(curso.id)}
-                                                >
-                                                    <Trash size={16} />
-                                                </Button>
-                                                <Button
-                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
-                                                    onClick={() => handleEditCourse(curso.id)}
-                                                >
-                                                    <Edit size={16} />
-                                                </Button>
+                                                <Tooltip label='Excluir'>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCourse(curso.id)}>
+                                                        <Trash size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Editar'>
+                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditCourse(curso.id)}>
+                                                        <Edit size={16} />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         </div>
                                         <hr className='border-gray-base/20'/>

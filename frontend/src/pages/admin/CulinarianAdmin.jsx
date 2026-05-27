@@ -9,13 +9,14 @@ import TopBar from '../../layouts/admin/TopBar'
 import { useContext, useState } from 'react';
 
 // LUCIDE ICONS
-import { Trash, Edit, Users, Plus, X } from 'lucide-react';
+import { Trash, Edit, Users, Plus, X, Inbox } from 'lucide-react';
 
 // Components
 import Input from '../../components/Input'
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
+import Tooltip from '../../components/admin/Tooltip';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -448,35 +449,41 @@ export default function CulinarianAdmin() {
                             </div>
 
                             {culinaristas.length === 0 ? (
-                                <p className='text-gray-text text-center py-8'>Nenhuma culinarista cadastrada</p>
+                                <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
+                                    <Inbox size={36} />
+                                    <p className='text-sm'>Nenhuma culinarista cadastrada</p>
+                                </div>
                             ) : (
                                 culinaristas.map(c => (
                                     <div key={c.id}>
                                         {/* MOBILE */}
                                         <div className='p-3 text-gray-text md:hidden'>
-                                            <p className='font-semibold'>{c.nomeCulinarista}</p>
-                                            <p className='text-sm text-gray-text/70'>{c.industria}</p>
+                                            <div className='flex items-center gap-2'>
+                                                {c.foto
+                                                    ? <img src={c.foto} className='w-8 h-8 rounded-full object-cover shrink-0' />
+                                                    : <div className='w-8 h-8 rounded-full bg-gray-base/20 shrink-0' />
+                                                }
+                                                <p className='font-semibold'>{c.nomeCulinarista}</p>
+                                            </div>
+                                            <p className='text-sm text-gray-text/70 mt-0.5'>{c.industria}</p>
                                             <p className='text-sm text-gray-text/70'>Loja: {c.lojas.length > 1 ? 'Prado e Teresopolis' : c.lojas}</p>
                                             <p className='text-sm text-gray-text/70'>Cadastro: {layoutDataSistem(c.dataCadastro)}</p>
                                             <div className='flex gap-2 mt-2'>
-                                                <Button
-                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
-                                                    onClick={() => removeCulinarian(c.id)}
-                                                >
-                                                    <Trash size={16} />
-                                                </Button>
-                                                <Button
-                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
-                                                    onClick={() => handleEditCulinarian(c.id)}
-                                                >
-                                                    <Edit size={16} />
-                                                </Button>
-                                                <Button
-                                                    className='bg-gray-base p-2 hover:bg-gray-dark text-white'
-                                                    onClick={() => handleViewCulinarian(c.id)}
-                                                >
-                                                    <Users size={16} />
-                                                </Button>
+                                                <Tooltip label='Excluir'>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCulinarian(c.id)}>
+                                                        <Trash size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Editar'>
+                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditCulinarian(c.id)}>
+                                                        <Edit size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Visualizar'>
+                                                    <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => handleViewCulinarian(c.id)}>
+                                                        <Users size={16} />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         </div>
 
@@ -484,29 +491,32 @@ export default function CulinarianAdmin() {
                                         <div className='hidden md:grid grid-cols-[1fr_1fr_0.8fr_0.7fr_0.8fr] gap-2
                                                         px-3 py-3 items-center text-gray-text text-sm
                                                         hover:bg-gray/60 transition-colors rounded-md'>
-                                            <p className='font-medium truncate'>{c.nomeCulinarista}</p>
+                                            <div className='flex items-center gap-2 min-w-0'>
+                                                {c.foto
+                                                    ? <img src={c.foto} className='w-7 h-7 rounded-full object-cover shrink-0' />
+                                                    : <div className='w-7 h-7 rounded-full bg-gray-base/20 shrink-0' />
+                                                }
+                                                <p className='font-medium truncate'>{c.nomeCulinarista}</p>
+                                            </div>
                                             <p className='truncate'>{c.industria}</p>
                                             <p>{c.lojas.length > 1 ? 'Prado e Teresopolis' : c.lojas}</p>
                                             <p>{layoutDataSistem(c.dataCadastro)}</p>
                                             <div className='flex gap-2'>
-                                                <Button
-                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
-                                                    onClick={() => removeCulinarian(c.id)}
-                                                >
-                                                    <Trash size={16} />
-                                                </Button>
-                                                <Button
-                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
-                                                    onClick={() => handleEditCulinarian(c.id)}
-                                                >
-                                                    <Edit size={16} />
-                                                </Button>
-                                                <Button
-                                                    className='bg-gray-base p-2 hover:bg-gray-dark text-white'
-                                                    onClick={() => handleViewCulinarian(c.id)}
-                                                >
-                                                    <Users size={16} />
-                                                </Button>
+                                                <Tooltip label='Excluir'>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCulinarian(c.id)}>
+                                                        <Trash size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Editar'>
+                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditCulinarian(c.id)}>
+                                                        <Edit size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Visualizar'>
+                                                    <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => handleViewCulinarian(c.id)}>
+                                                        <Users size={16} />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         </div>
                                         <hr className='border-gray-base/20'/>

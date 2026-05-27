@@ -1,3 +1,5 @@
+import { Calendar, Clock, User, MapPin } from 'lucide-react';
+
 export default function CourseCard({
   curso,
   data,
@@ -15,85 +17,71 @@ export default function CourseCard({
   onClick
 }) {
   return (
-    <div className={`bg-white w-75 max-w-150 rounded-xl min-h-[380px] max-h-[550px] flex flex-col shadow-md
-        md:min-w-[300px]
-        hover:shadow-lg transition-shadow
-        ${className || ''}
-      `}
-    >
-      {/* IMAGEM */}
-      <div className="relative rounded-t-xl h-[200px] overflow-hidden"
-      >
-        <p className="
-            absolute top-2 right-2 bg-orange-base text-white rounded-md px-2 py-1 mx-auto text-sm font-semibold z-10
-            md:text-base 
-          "
-        >
-          R$ {valor}
-        </p>
+    <div className={`bg-white rounded-xl flex flex-col shadow-md hover:shadow-lg transition-shadow md:min-w-75 ${className || ''}`}>
 
+      {/* IMAGEM */}
+      <div className="relative rounded-t-xl h-48 overflow-hidden">
         {imagem ? (
-          <img src={imagem}
-            alt={curso}
-            className="w-full h-full object-cover"
-          />
+          <img src={imagem} alt={curso} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500"
-          >
-            Sem imagem
+          <div className="w-full h-full bg-gray-base/10 flex items-center justify-center">
+            <User size={40} className="text-gray-base/30" />
           </div>
         )}
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
+
+        {/* Valor badge — base esquerda */}
+        <span className="absolute bottom-3 left-3 bg-orange-base text-white text-sm font-bold px-3 py-1 rounded-full shadow">
+          R$ {valor}
+        </span>
+
+        {/* Loja badge — topo direito */}
+        {loja === 'Prado'
+          ? <span className="absolute top-3 right-3 bg-orange-base text-white text-xs font-semibold px-2.5 py-1 rounded-full">Prado</span>
+          : <span className="absolute top-3 right-3 bg-blue-base text-white text-xs font-semibold px-2.5 py-1 rounded-full">{loja}</span>
+        }
       </div>
 
       {/* TÍTULO */}
-      <h1 className="text-gray-dark font-bold text-xl md:text-2xl p-4 line-clamp-2"
-      >
+      <h2 className="text-gray-dark font-bold text-lg px-4 pt-4 pb-2 line-clamp-2 leading-snug">
         {curso}
-      </h1>
+      </h2>
 
-      {/* CONTEÚDO */}
-      <div className="mt-auto p-4 pt-0">
-        <p className="text-gray-dark text-sm md:text-base mb-1">
-          {`${data} - ${horario}h`}
-        </p>
+      {/* INFOS */}
+      <div className="px-4 pb-4 flex flex-col gap-2 mt-auto">
 
-        <p className="text-gray-dark text-sm md:text-base mb-1">
-          {`Duração: ${duracao}`}
-        </p>
+        <div className="flex items-center gap-2 text-sm text-gray-text/70">
+          <Calendar size={14} className="shrink-0 text-orange-base" />
+          <span>{data} às {horario}h</span>
+        </div>
 
-        <p className="text-gray-dark text-sm md:text-base mb-1">
-          {`Loja: ${loja}`}
-        </p>
+        <div className="flex items-center gap-2 text-sm text-gray-text/70">
+          <Clock size={14} className="shrink-0 text-orange-base" />
+          <span>{duracao}</span>
+        </div>
 
-        <p className="text-gray-dark text-sm md:text-base mb-3">
-          {`Culinarista: ${culinarista}`}
-        </p>
+        <div className="flex items-center gap-2 text-sm text-gray-text/70">
+          <User size={14} className="shrink-0 text-orange-base" />
+          <span className="truncate">{culinarista}</span>
+        </div>
+
+        {/* Vagas */}
+        <div className="text-xs text-gray-text/50 mt-1">
+          {loadingVagasPorCurso
+            ? <span>Carregando vagas...</span>
+            : <span>Vagas: <span className="font-semibold text-gray-dark">{vagasLivres}/{vagasReservadas}</span></span>
+          }
+        </div>
 
         {/* BOTÃO */}
-        <button className="
-            bg-orange-base
-            rounded-sm
-            p-2
-            md:p-3
-            w-full
-            mt-3
-            text-white
-            text-sm
-            md:text-base
-            font-semibold
-            cursor-pointer
-            hover:bg-orange-light
-            hover:shadow-md
-            transition-all
-          "
+        <button
+          className="mt-2 bg-orange-base text-white font-semibold text-sm py-2.5 rounded-lg w-full hover:bg-orange-light hover:shadow-md transition-all cursor-pointer"
           onClick={onClick || undefined}
         >
           Garantir minha vaga
         </button>
-
-        <div className="text-gray-dark text-center text-sm md:text-base mt-2">
-          {loadingVagasPorCurso ? (<div>Carregando vagas...</div>) : (<div>Vagas: {vagasLivres}/{vagasReservadas}</div>)}
-        </div>
       </div>
     </div>
   );

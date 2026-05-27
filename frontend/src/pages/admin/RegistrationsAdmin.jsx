@@ -5,7 +5,7 @@ import { useContext, useState, useEffect } from 'react';
 import { Head } from '../../components/Head'
 
 // LUCIDE ICONS
-import { Trash, Edit, Users, Plus, X } from 'lucide-react';
+import { Trash, Edit, Users, Plus, X, Inbox } from 'lucide-react';
 
 // Components
 import CardDash from '../../components/admin/CardDash'
@@ -21,6 +21,7 @@ import { getSeats, getEnrollment, getTotalEnrollment, putEnrollment, deleteEnrol
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
+import Tooltip from '../../components/admin/Tooltip';
 
 export default function RegistrationsAdmin() {
     // ============== STATES ==============
@@ -39,10 +40,55 @@ export default function RegistrationsAdmin() {
     // ============== STATES ==============
 
     // DADOS CONTEXT
-    const { 
+    const {
             cursos,
-            loading, 
+            cursosInfantis = [],
+            loading,
+            loadingChildren,
         } = useContext(DadosContext);
+
+    // ======= STATE FILTROS - tabela INSCRIÇÕES (topo)
+    const [ filtroTipoInsc, setFiltroTipoInsc ] = useState('todos');
+    const [ filtroStatusInsc, setFiltroStatusInsc ] = useState('ativos');
+    const [ filtroLojaInsc, setFiltroLojaInsc ] = useState('todas');
+
+    // ======= STATE FILTROS - tabela INSCRIÇÕES POR CURSOS (baixo)
+    const [ filtroTipo, setFiltroTipo ] = useState('todos');
+    const [ filtroStatus, setFiltroStatus ] = useState('ativos');
+    const [ filtroLoja, setFiltroLoja ] = useState('todas');
+
+    const hoje = new Date().toISOString().split('T')[0];
+
+    // combina os dois tipos com tag para exibição
+    const todosCursos = [
+        ...cursos.map(c => ({ ...c, tipo: 'normal' })),
+        ...cursosInfantis.map(c => ({ ...c, tipo: 'infantil' })),
+    ];
+
+    // filtra as inscrições totais pelos filtros da tabela de cima
+    const inscricoesFiltradas = inscricoesTotais.filter(i => {
+        const curso = todosCursos.find(c => c.id === i.cursoId);
+        if (!curso) return true;
+        const passaTipo = filtroTipoInsc === 'normais' ? curso.tipo === 'normal'
+                        : filtroTipoInsc === 'infantis' ? curso.tipo === 'infantil'
+                        : true;
+        const passaStatus = filtroStatusInsc === 'ativos' ? curso.data >= hoje
+                          : filtroStatusInsc === 'concluidos' ? curso.data < hoje
+                          : true;
+        const passaLoja = filtroLojaInsc === 'todas' || curso.loja === filtroLojaInsc;
+        return passaTipo && passaStatus && passaLoja;
+    });
+
+    const cursosExibidos = todosCursos.filter(c => {
+        const passaTipo = filtroTipo === 'normais' ? c.tipo === 'normal'
+                        : filtroTipo === 'infantis' ? c.tipo === 'infantil'
+                        : true;
+        const passaStatus = filtroStatus === 'ativos' ? c.data >= hoje
+                          : filtroStatus === 'concluidos' ? c.data < hoje
+                          : true;
+        const passaLoja = filtroLoja === 'todas' || c.loja === filtroLoja;
+        return passaTipo && passaStatus && passaLoja;
+    });
 
     // ============== DELETE ==============
     async function deletarInscricao(inscricaoId) {
@@ -228,8 +274,90 @@ export default function RegistrationsAdmin() {
                     flex flex-col gap-10 mt-10 w-[92dvw]
                     md:gap-20 lg:w-[78vw]
                 '>
-                    <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                        <p className='font-bold text-xl mb-4 text-gray-text'>INSCRIÇÕES</p>
+                    <CardDash className='bg-white h-full w-full rounded-md p-4 md:p-10 shadow-sm'>
+                        <div className='flex flex-col gap-3 mb-4'>
+                            <p className='font-bold text-xl text-gray-text'>INSCRIÇÕES</p>
+                            <div className='flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-2'>
+
+                                {/* Tipo */}
+                                <div className='flex items-center gap-2'>
+                                    <span className='text-xs font-medium text-gray-text/50 uppercase tracking-wider w-12 shrink-0 md:hidden'>Tipo</span>
+                                    <div className='flex flex-wrap gap-1.5'>
+                                        {[
+                                            { label: 'Todos', value: 'todos' },
+                                            { label: 'Cursos', value: 'normais' },
+                                            { label: 'Infantis', value: 'infantis' },
+                                        ].map(f => (
+                                            <button
+                                                key={f.value}
+                                                onClick={() => setFiltroTipoInsc(f.value)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                                    filtroTipoInsc === f.value
+                                                        ? 'bg-orange-base text-white'
+                                                        : 'bg-gray text-gray-text hover:bg-gray-base/20'
+                                                }`}
+                                            >
+                                                {f.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <span className='hidden md:block w-px h-5 bg-gray-base/30' />
+
+                                {/* Status */}
+                                <div className='flex items-center gap-2'>
+                                    <span className='text-xs font-medium text-gray-text/50 uppercase tracking-wider w-12 shrink-0 md:hidden'>Status</span>
+                                    <div className='flex flex-wrap gap-1.5'>
+                                        {[
+                                            { label: 'Todos', value: 'todos' },
+                                            { label: 'Ativos', value: 'ativos' },
+                                            { label: 'Concluídos', value: 'concluidos' },
+                                        ].map(f => (
+                                            <button
+                                                key={f.value}
+                                                onClick={() => setFiltroStatusInsc(f.value)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                                    filtroStatusInsc === f.value
+                                                        ? 'bg-green-base text-white'
+                                                        : 'bg-gray text-gray-text hover:bg-gray-base/20'
+                                                }`}
+                                            >
+                                                {f.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <span className='hidden md:block w-px h-5 bg-gray-base/30' />
+
+                                {/* Loja */}
+                                <div className='flex items-center gap-2'>
+                                    <span className='text-xs font-medium text-gray-text/50 uppercase tracking-wider w-12 shrink-0 md:hidden'>Loja</span>
+                                    <div className='flex flex-wrap gap-1.5'>
+                                        {[
+                                            { label: 'Todas', value: 'todas' },
+                                            { label: 'Prado', value: 'Prado' },
+                                            { label: 'Teresópolis', value: 'Teresópolis' },
+                                        ].map(f => (
+                                            <button
+                                                key={f.value}
+                                                onClick={() => setFiltroLojaInsc(f.value)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                                    filtroLojaInsc === f.value
+                                                        ? 'bg-blue-base text-white'
+                                                        : 'bg-gray text-gray-text hover:bg-gray-base/20'
+                                                }`}
+                                            >
+                                                {f.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <hr className='border-gray-base/30 w-full mb-4'/>
 
                         <div className='max-h-100 overflow-y-auto'>
 
@@ -246,29 +374,45 @@ export default function RegistrationsAdmin() {
                                 <p>FUNÇÕES</p>
                             </div>
 
-                            {inscricoesTotais.map(i => (
+                            {loadingInscricoesTotais ? (
+                                <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Carregando...</p></div>
+                            ) : inscricoesFiltradas.length === 0 ? (
+                                <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Nenhuma inscrição encontrada</p></div>
+                            ) : inscricoesFiltradas.map(i => {
+                                const curso = todosCursos.find(c => c.id === i.cursoId);
+                                return (
                                 <div key={i.id}>
                                     {/* MOBILE */}
                                     <div className='p-3 text-gray-text md:hidden'>
-                                        <p className='font-semibold'>{cursos.find(c => c.id === i.cursoId)?.nomeCurso}</p>
-                                        <p className='text-sm text-gray-text/70'>Nome: {i.nome} · Assento: {i.assento}</p>
-                                        <p className='text-sm text-gray-text/70'>Pagamento: {i.formaPagamento}</p>
-                                        <span className={`text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full text-white ${i.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
-                                            {i.status}
-                                        </span>
-                                        <div className='flex gap-2 mt-2'>
-                                            <Button
-                                                className='bg-orange-base p-2 hover:bg-orange-light text-white'
-                                                onClick={() => handleEditInscricoesTotais(i.id)}
-                                            >
-                                                <Edit size={16} />
-                                            </Button>
-                                            <Button
-                                                className='bg-red-base p-2 hover:bg-red-light text-white'
-                                                onClick={() => deletarInscricao(i.id)}
-                                            >
-                                                <Trash size={16} />
-                                            </Button>
+                                        <div className='flex items-start justify-between gap-2 mb-1'>
+                                            <p className='font-semibold text-sm leading-tight flex-1'>{curso?.nomeCurso}</p>
+                                            {curso?.tipo === 'infantil'
+                                                ? <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-green-base/15 text-green-base'>Infantil</span>
+                                                : <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-gray-base/15 text-gray-base'>Curso</span>
+                                            }
+                                        </div>
+                                        <p className='font-medium text-sm text-gray-text'>{i.nome}</p>
+                                        <div className='flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-text/60 mt-1'>
+                                            <span>Assento: {i.assento}</span>
+                                            <span>{i.formaPagamento}</span>
+                                            {curso?.data && <span>{layoutDataInput(curso.data)}</span>}
+                                        </div>
+                                        <div className='flex items-center justify-between mt-2'>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full text-white ${i.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
+                                                {i.status}
+                                            </span>
+                                            <div className='flex gap-2'>
+                                                <Tooltip label='Editar status'>
+                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditInscricoesTotais(i.id)}>
+                                                        <Edit size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Excluir'>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => deletarInscricao(i.id)}>
+                                                        <Trash size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -276,13 +420,14 @@ export default function RegistrationsAdmin() {
                                     <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-2
                                                     px-3 py-3 items-center text-gray-text text-sm
                                                     hover:bg-gray/60 transition-colors rounded-md'>
-                                        <p className='truncate font-medium'>{cursos.find(c => c.id === i.cursoId)?.nomeCurso}</p>
-                                        <p>
-                                            {cursos.find(c => c.id === i.cursoId)?.data
-                                                ? layoutDataInput(cursos.find(c => c.id === i.cursoId).data)
-                                                : '-'
+                                        <div className='flex items-center gap-2 min-w-0'>
+                                            <p className='truncate font-medium'>{curso?.nomeCurso}</p>
+                                            {curso?.tipo === 'infantil'
+                                                ? <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-green-base/15 text-green-base'>Infantil</span>
+                                                : <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-gray-base/15 text-gray-base'>Curso</span>
                                             }
-                                        </p>
+                                        </div>
+                                        <p>{curso?.data ? layoutDataInput(curso.data) : '-'}</p>
                                         <p className='truncate'>{i.nome}</p>
                                         <p>{i.assento}</p>
                                         <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${i.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
@@ -290,84 +435,180 @@ export default function RegistrationsAdmin() {
                                         </span>
                                         <p>{i.formaPagamento}</p>
                                         <div className='flex gap-2'>
-                                            <Button
-                                                className='bg-orange-base p-2 hover:bg-orange-light text-white'
-                                                onClick={() => handleEditInscricoesTotais(i.id)}
-                                            >
-                                                <Edit size={16} />
-                                            </Button>
-                                            <Button
-                                                className='bg-red-base p-2 hover:bg-red-light text-white'
-                                                onClick={() => deletarInscricao(i.id)}
-                                            >
-                                                <Trash size={16} />
-                                            </Button>
+                                            <Tooltip label='Editar status'>
+                                                <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditInscricoesTotais(i.id)}>
+                                                    <Edit size={16} />
+                                                </Button>
+                                            </Tooltip>
+                                            <Tooltip label='Excluir'>
+                                                <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => deletarInscricao(i.id)}>
+                                                    <Trash size={16} />
+                                                </Button>
+                                            </Tooltip>
                                         </div>
                                     </div>
                                     <hr className='border-gray-base/20'/>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </CardDash>
-                    <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                        <p className='font-bold text-xl mb-4 text-gray-text'>INSCRIÇÕES POR CURSOS</p>
+                    <CardDash className='bg-white h-full w-full rounded-md p-4 md:p-10 shadow-sm'>
+                        <div className='flex flex-col gap-3 mb-4'>
+                            <p className='font-bold text-xl text-gray-text'>INSCRIÇÕES POR CURSOS</p>
+                            <div className='flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-2'>
+
+                                {/* Tipo */}
+                                <div className='flex items-center gap-2'>
+                                    <span className='text-xs font-medium text-gray-text/50 uppercase tracking-wider w-12 shrink-0 md:hidden'>Tipo</span>
+                                    <div className='flex flex-wrap gap-1.5'>
+                                        {[
+                                            { label: 'Todos', value: 'todos' },
+                                            { label: 'Cursos', value: 'normais' },
+                                            { label: 'Infantis', value: 'infantis' },
+                                        ].map(f => (
+                                            <button
+                                                key={f.value}
+                                                onClick={() => setFiltroTipo(f.value)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                                    filtroTipo === f.value
+                                                        ? 'bg-orange-base text-white'
+                                                        : 'bg-gray text-gray-text hover:bg-gray-base/20'
+                                                }`}
+                                            >
+                                                {f.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <span className='hidden md:block w-px h-5 bg-gray-base/30' />
+
+                                {/* Status */}
+                                <div className='flex items-center gap-2'>
+                                    <span className='text-xs font-medium text-gray-text/50 uppercase tracking-wider w-12 shrink-0 md:hidden'>Status</span>
+                                    <div className='flex flex-wrap gap-1.5'>
+                                        {[
+                                            { label: 'Todos', value: 'todos' },
+                                            { label: 'Ativos', value: 'ativos' },
+                                            { label: 'Concluídos', value: 'concluidos' },
+                                        ].map(f => (
+                                            <button
+                                                key={f.value}
+                                                onClick={() => setFiltroStatus(f.value)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                                    filtroStatus === f.value
+                                                        ? 'bg-green-base text-white'
+                                                        : 'bg-gray text-gray-text hover:bg-gray-base/20'
+                                                }`}
+                                            >
+                                                {f.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <span className='hidden md:block w-px h-5 bg-gray-base/30' />
+
+                                {/* Loja */}
+                                <div className='flex items-center gap-2'>
+                                    <span className='text-xs font-medium text-gray-text/50 uppercase tracking-wider w-12 shrink-0 md:hidden'>Loja</span>
+                                    <div className='flex flex-wrap gap-1.5'>
+                                        {[
+                                            { label: 'Todas', value: 'todas' },
+                                            { label: 'Prado', value: 'Prado' },
+                                            { label: 'Teresópolis', value: 'Teresópolis' },
+                                        ].map(f => (
+                                            <button
+                                                key={f.value}
+                                                onClick={() => setFiltroLoja(f.value)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                                    filtroLoja === f.value
+                                                        ? 'bg-blue-base text-white'
+                                                        : 'bg-gray text-gray-text hover:bg-gray-base/20'
+                                                }`}
+                                            >
+                                                {f.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <hr className='border-gray-base/30 w-full mb-4'/>
 
                         <div className='max-h-100 overflow-y-auto'>
 
                             {/* HEADER DESKTOP */}
-                            <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-2
+                            <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.6fr_0.5fr_0.5fr] gap-2
                                             text-xs font-semibold text-gray-text uppercase tracking-wider
                                             bg-gray px-3 py-2 rounded-md mb-1 sticky top-0 z-10'>
                                 <p>DESCRIÇÃO</p>
                                 <p>CULINARISTA</p>
                                 <p>DATA</p>
                                 <p>HORARIO</p>
+                                <p>TIPO</p>
                                 <p>LOJA</p>
                                 <p>FUNÇÕES</p>
                             </div>
 
-                            {loading ? (
-                                <p className='text-gray-text text-center py-8'>Carregando cursos...</p>
+                            {loading || loadingChildren ? (
+                                <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Carregando...</p></div>
+                            ) : cursosExibidos.length === 0 ? (
+                                <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Nenhum curso encontrado</p></div>
                             ) : (
-                                cursos.map(curso => (
-                                    <div key={curso.id}>
+                                cursosExibidos.map(curso => (
+                                    <div key={`${curso.tipo}-${curso.id}`}>
                                         {/* MOBILE */}
                                         <div className='p-3 text-gray-text md:hidden'>
-                                            <p className='font-semibold'>{curso.nomeCurso}</p>
-                                            <p className='text-sm text-gray-text/70'>{curso.culinarista} · {layoutDataInput(curso.data)} · {curso.hora}</p>
-                                            {curso.loja === 'Prado'
-                                                ? <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-orange-base/10 text-orange-base'>{curso.loja}</span>
-                                                : <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-blue-base/20 text-blue-base'>{curso.loja}</span>
-                                            }
-                                            <div className='flex gap-2 mt-2'>
-                                                <Button
-                                                    className='bg-gray-base p-2 hover:bg-gray-dark text-white'
-                                                    onClick={() => handleInscricoesCurso(curso.id)}
-                                                >
-                                                    <Users size={16} />
-                                                </Button>
+                                            <div className='flex items-start justify-between gap-2 mb-1'>
+                                                <p className='font-semibold text-sm leading-tight flex-1'>{curso.nomeCurso}</p>
+                                                {curso.tipo === 'infantil'
+                                                    ? <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-green-base/15 text-green-base'>Infantil</span>
+                                                    : <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-gray-base/15 text-gray-base'>Curso</span>
+                                                }
+                                            </div>
+                                            <p className='text-xs text-gray-text/60 mb-1'>{curso.culinarista}</p>
+                                            <div className='flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-text/60'>
+                                                <span>{layoutDataInput(curso.data)}</span>
+                                                <span>{curso.hora}</span>
+                                            </div>
+                                            <div className='flex items-center justify-between mt-2'>
+                                                {curso.loja === 'Prado'
+                                                    ? <span className='text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-base/10 text-orange-base'>{curso.loja}</span>
+                                                    : <span className='text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-base/20 text-blue-base'>{curso.loja}</span>
+                                                }
+                                                <Tooltip label='Ver inscrições'>
+                                                    <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => handleInscricoesCurso(curso.id)}>
+                                                        <Users size={16} />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         </div>
 
                                         {/* DESKTOP */}
-                                        <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-2
+                                        <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.6fr_0.5fr_0.5fr] gap-2
                                                         px-3 py-3 items-center text-gray-text text-sm
                                                         hover:bg-gray/60 transition-colors rounded-md'>
                                             <p className='font-medium truncate'>{curso.nomeCurso}</p>
                                             <p className='truncate'>{curso.culinarista}</p>
                                             <p>{layoutDataInput(curso.data)}</p>
                                             <p>{curso.hora}</p>
+                                            {curso.tipo === 'infantil'
+                                                ? <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-green-base/15 text-green-base'>Infantil</span>
+                                                : <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-gray-base/15 text-gray-base'>Curso</span>
+                                            }
                                             {curso.loja === 'Prado'
                                                 ? <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-orange-base/10 text-orange-base'>{curso.loja}</span>
                                                 : <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-blue-base/20 text-blue-base'>{curso.loja}</span>
                                             }
                                             <div className='flex gap-2'>
-                                                <Button
-                                                    className='bg-gray-base p-2 hover:bg-gray-dark text-white'
-                                                    onClick={() => handleInscricoesCurso(curso.id)}
-                                                >
-                                                    <Users size={16} />
-                                                </Button>
+                                                <Tooltip label='Ver inscrições'>
+                                                    <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => handleInscricoesCurso(curso.id)}>
+                                                        <Users size={16} />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         </div>
                                         <hr className='border-gray-base/20'/>
@@ -384,53 +625,46 @@ export default function RegistrationsAdmin() {
                         onClose={() => closeModal()}
                     >   
                         {/* MOBILE */}
-                        <p className='md:hidden text-xl font-bold mb-4 text-gray-text'>INSCRIÇÕES</p>
-                        <hr className='md:hidden border-gray-base/30 w-full mt-3'/>
-                        <div className='flex md:hidden flex-col gap-3 h-[90dvh] max-h-[70%] overflow-y-auto'
-                        >
-                            {inscricoes.length === 0 
-                                ? <span className='mr-auto ml-auto p-10'
-                                    key={1}
-                                >
-                                    Nenhuma inscrição encontrada
-                                </span> 
-                                : inscricoes.map(inscricao => {
-                                    return (
-                                        <div key={inscricao.id}
-                                        >
-                                            <div className=' text-gray-text items-center p-3'
-                                            >
-                                                <p>Assento: {inscricao.assento}</p>
-                                                <p>Nome: {inscricao.nome}</p>
-                                                <p>CPF: {inscricao.cpf}</p>
-                                                <p>Telefone: {inscricao.celular}</p>
-                                                <p>Pagamento: {inscricao.formaPagamento}</p>
-                                                <p>Data: {layoutDataSistem(inscricao.dataInscricao)}</p>
-                                                <div >
-                                                    <p className={`p-2 w-20 mt-3 text-white font-semibold rounded-md text-center ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}
-                                                    >
-                                                        {inscricao.status}
-                                                    </p>
-                                                </div>
-                                                <div className='flex gap-3 mt-3'>
-                                                    <Button
-                                                        className='bg-orange-base p-2 rounded-md cursor-pointer hover:bg-orange-light hover:shadow-md text-white'
-                                                        onClick={() => handleEditInscricao(inscricao.id)}
-                                                    >
-                                                        <Edit />
-                                                    </Button>
-                                                    <Button
-                                                        className='bg-red-base p-2 rounded-md cursor-pointer hover:bg-red-light hover:shadow-md text-white'
-                                                        onClick={() => deletarInscricao(inscricao.id)}
-                                                    >
-                                                        <Trash />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                            <hr className='border-gray-base/30 w-full'/>
+                        <p className='md:hidden text-xl font-bold mb-2 text-gray-text'>INSCRIÇÕES</p>
+                        <hr className='md:hidden border-gray-base/30 w-full mb-3'/>
+                        <div className='flex md:hidden flex-col gap-2 max-h-[65dvh] overflow-y-auto'>
+                            {inscricoes.length === 0
+                                ? <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Nenhuma inscrição encontrada</p></div>
+                                : inscricoes.map(inscricao => (
+                                    <div key={inscricao.id} className='bg-gray rounded-lg p-3'>
+                                        {/* Nome + status */}
+                                        <div className='flex items-start justify-between gap-2 mb-2'>
+                                            <p className='font-semibold text-gray-text text-sm'>{inscricao.nome}</p>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 text-white ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
+                                                {inscricao.status}
+                                            </span>
                                         </div>
-                                    )
-                            })}
+                                        {/* Infos em grid */}
+                                        <div className='grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-text/70 mb-3'>
+                                            <span><span className='font-medium text-gray-text'>Assento </span>{inscricao.assento}</span>
+                                            <span><span className='font-medium text-gray-text'>CPF </span>{inscricao.cpf}</span>
+                                            <span><span className='font-medium text-gray-text'>Celular </span>{inscricao.celular}</span>
+                                            <span><span className='font-medium text-gray-text'>Pagamento </span>{inscricao.formaPagamento}</span>
+                                            <span className='col-span-2'><span className='font-medium text-gray-text'>Inscrição </span>{layoutDataSistem(inscricao.dataInscricao)}</span>
+                                        </div>
+                                        {/* Ações */}
+                                        <div className='flex gap-2'>
+                                            <Button
+                                                className='flex-1 bg-orange-base py-2 hover:bg-orange-light text-white text-xs font-semibold flex items-center justify-center gap-1 rounded-md'
+                                                onClick={() => handleEditInscricao(inscricao.id)}
+                                            >
+                                                <Edit size={14} /> Alterar status
+                                            </Button>
+                                            <Button
+                                                className='bg-red-base p-2 hover:bg-red-light text-white rounded-md'
+                                                onClick={() => deletarInscricao(inscricao.id)}
+                                            >
+                                                <Trash size={16} />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))
+                            }
                         </div>
 
                         {/* DESKTOP */}
@@ -451,7 +685,7 @@ export default function RegistrationsAdmin() {
                             </div>
 
                             {inscricoes.length === 0
-                                ? <p className='text-gray-text text-center py-8'>Nenhuma inscrição encontrada</p>
+                                ? <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Nenhuma inscrição encontrada</p></div>
                                 : inscricoes.map(inscricao => (
                                     <div key={inscricao.id}>
                                         <div className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2
@@ -467,18 +701,16 @@ export default function RegistrationsAdmin() {
                                             </span>
                                             <p>{layoutDataSistem(inscricao.dataInscricao)}</p>
                                             <div className='flex gap-2'>
-                                                <Button
-                                                    className='bg-orange-base p-2 hover:bg-orange-light text-white'
-                                                    onClick={() => handleEditInscricao(inscricao.id)}
-                                                >
-                                                    <Edit size={16} />
-                                                </Button>
-                                                <Button
-                                                    className='bg-red-base p-2 hover:bg-red-light text-white'
-                                                    onClick={() => deletarInscricao(inscricao.id)}
-                                                >
-                                                    <Trash size={16} />
-                                                </Button>
+                                                <Tooltip label='Editar status'>
+                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditInscricao(inscricao.id)}>
+                                                        <Edit size={16} />
+                                                    </Button>
+                                                </Tooltip>
+                                                <Tooltip label='Excluir'>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => deletarInscricao(inscricao.id)}>
+                                                        <Trash size={16} />
+                                                    </Button>
+                                                </Tooltip>
                                             </div>
                                         </div>
                                         <hr className='border-gray-base/20'/>
