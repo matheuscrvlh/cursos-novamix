@@ -48,15 +48,15 @@ export default function CulinariansSections({
                                 transition: 'opacity 0.7s',
                                 pointerEvents: visible ? 'auto' : 'none',
                             }
-                            const media = (
-                                <picture style={{ display: 'block', width: '100%', height: '100%' }}>
-                                    <source media='(min-width: 768px)' srcSet={b.imagem} />
-                                    <img src={b.imagem_mobile ?? b.imagem} className='w-full h-full object-cover' alt='' />
-                                </picture>
+                            const imgs = (
+                                <>
+                                    <img src={b.imagem} className='absolute inset-0 w-full h-full object-cover hidden md:block' alt='' />
+                                    <img src={b.imagem_mobile ?? b.imagem} className='absolute inset-0 w-full h-full object-cover md:hidden' alt='' />
+                                </>
                             )
                             return b.link
-                                ? <a key={b.id} href={b.link} target='_blank' rel='noopener noreferrer' style={wrapStyle}>{media}</a>
-                                : <div key={b.id} style={wrapStyle}>{media}</div>
+                                ? <a key={b.id} href={b.link} target='_blank' rel='noopener noreferrer' style={wrapStyle}>{imgs}</a>
+                                : <div key={b.id} style={wrapStyle}>{imgs}</div>
                         })}
                         {homeBanners.length > 1 && (
                             <div className='absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10'>
