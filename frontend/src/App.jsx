@@ -15,6 +15,7 @@ import RegistrationsAdmin from './pages/admin/RegistrationsAdmin'
 import CulinarianAdmin from './pages/admin/CulinarianAdmin'
 import IndustriesAdmin from './pages/admin/IndustriesAdmin'
 import ChildrensAdmin from './pages/admin/ChildrensAdmin'
+import MarketingAdmin from './pages/admin/MarketingAdmin'
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
         <Route path='/culinaristasAdmin' element={<CulinarianAdmin />} />
         <Route path='/industriasAdmin' element={<IndustriesAdmin />} />
         <Route path='/infantisAdmin' element={<ChildrensAdmin />} />
+        <Route path='/marketingAdmin' element={<MarketingAdmin />} />
     </Routes>
   )
 }

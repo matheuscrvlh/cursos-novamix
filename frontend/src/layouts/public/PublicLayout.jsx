@@ -1,5 +1,6 @@
 // React
 import { Link, NavLink } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 // Icons
 import { MapPin, Building2, MessageCircle } from 'lucide-react'
@@ -7,6 +8,9 @@ import { MapPin, Building2, MessageCircle } from 'lucide-react'
 // Images
 import { whatsapp } from '../../assets/images/icons'
 import { logoNm } from '../../assets/images/logos'
+
+// Services
+import { getBanners } from '../../api/banners.services'
 
 const navLinks = [
   { label: 'Home', to: '/' },
@@ -17,6 +21,23 @@ const navLinks = [
 ]
 
 export default function PublicLayout({ children, bannerHome }) {
+  const [heroBanners, setHeroBanners] = useState([])
+  const [heroIndex, setHeroIndex]     = useState(0)
+
+  useEffect(() => {
+    getBanners('hero').then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        setHeroBanners(data.filter(b => b.ativo))
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    if (heroBanners.length <= 1) return
+    const t = setInterval(() => setHeroIndex(i => (i + 1) % heroBanners.length), 5000)
+    return () => clearInterval(t)
+  }, [heroBanners.length])
+
   return (
     <main className="min-h-screen w-full flex flex-col bg-gray"
     >
@@ -95,29 +116,48 @@ export default function PublicLayout({ children, bannerHome }) {
 
       {/* ================= CONTEÚDO ================= */}
       <section className="flex-grow w-full">
-        <a href='#cursos'
-            className='block w-full'
-        >
-            <section className="w-full overflow-hidden bg-orange-base"
-            >
-                <div className="
-                            w-full
-                            min-h-[160px]
-                            bg-no-repeat
-                            bg-cover
-                            bg-right
-                            sm:min-h-[180px]
-                            md:min-h-[300px] md:bg-center
-                            lg:min-h-[360px]
-                            xl:min-h-[400px]
-                            "
-                    style={{
-                        backgroundImage: `url(${bannerHome})`,
-                        backgroundPosition: '43% center'
-                    }}
-                />
-            </section>
-        </a>
+
+        {/* HERO BANNER — desktop 1920×480 · mobile 425×495 */}
+        {heroBanners.length > 0 ? (
+          <div className='relative w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-4/1'>
+            {heroBanners.map((b, i) => {
+              const visible = i === heroIndex
+              const wrapStyle = {
+                position: 'absolute', inset: 0,
+                opacity: visible ? 1 : 0,
+                transition: 'opacity 0.7s',
+                pointerEvents: visible ? 'auto' : 'none',
+              }
+              const media = (
+                <picture style={{ display: 'block', width: '100%', height: '100%' }}>
+                  <source media='(min-width: 768px)' srcSet={b.imagem} />
+                  <img src={b.imagem_mobile ?? b.imagem} className='w-full h-full object-cover' alt='' />
+                </picture>
+              )
+              return b.link
+                ? <a key={b.id} href={b.link} target='_blank' rel='noopener noreferrer' style={wrapStyle}>{media}</a>
+                : <div key={b.id} style={wrapStyle}>{media}</div>
+            })}
+            {heroBanners.length > 1 && (
+              <div className='absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10'>
+                {heroBanners.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setHeroIndex(i)}
+                    className={`h-2 rounded-full transition-all cursor-pointer ${i === heroIndex ? 'w-4 bg-white' : 'w-2 bg-white/50'}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <a href='#cursos' className='block w-full'>
+            <div className='w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-4/1'>
+              <img src={bannerHome} alt='' className='w-full h-full object-cover object-center' />
+            </div>
+          </a>
+        )}
+
         {children}
       </section>
 

@@ -85,6 +85,9 @@ export default function SideBar() {
                     <LinkSideBar to='/industriasAdmin' onClick={closeMenu}>
                         Industrias
                     </LinkSideBar>
+                    <LinkSideBar to='/marketingAdmin' onClick={closeMenu}>
+                        Marketing
+                    </LinkSideBar>
                 </nav>
 
                 <Link

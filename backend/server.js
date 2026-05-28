@@ -10,6 +10,7 @@ const culinaristasRoutes = require('./routes/culinaristas.routes');
 const industriasRoutes = require('./routes/industrias.routes');
 const cursosInfantisRoutes = require('./routes/cursosInfantis.routes');
 const inscricoesInfantisRoutes = require('./routes/inscricoesInfantis.routes');
+const bannersRoutes = require('./routes/banners.routes');
 const app = express();
 
 app.use(cors());
@@ -25,6 +26,7 @@ app.use('/api/culinaristas', culinaristasRoutes);
 app.use('/api/industrias', industriasRoutes);
 app.use('/api/cursos-infantis', cursosInfantisRoutes);
 app.use('/api/inscricoes-infantis', inscricoesInfantisRoutes);
+app.use('/api/banners', bannersRoutes);
 
 app.listen(3000, () => {
   console.log('Backend torando na porta 3000 --');
