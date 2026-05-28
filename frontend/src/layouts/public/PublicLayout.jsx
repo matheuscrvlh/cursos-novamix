@@ -31,7 +31,7 @@ export default function PublicLayout({ children, bannerHome }) {
               alt="Novamix Cursos"
               className="w-9 h-9 rounded-lg object-cover shadow-sm"
             />
-            <span className="font-bold text-base leading-tight hidden sm:block">
+            <span className="font-bold text-sm sm:text-base leading-tight">
               Novamix<br />
               <span className="font-normal text-white/80 text-xs">Cursos</span>
             </span>
@@ -65,13 +65,13 @@ export default function PublicLayout({ children, bannerHome }) {
             className="flex items-center gap-2 bg-white/15 hover:bg-white/25 transition px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap shrink-0"
           >
             <img src={whatsapp} alt="WhatsApp" className="h-5" />
-            <span className="hidden sm:inline">Atendimento</span>
+            <span className="text-xs sm:text-sm">Atendimento</span>
           </a>
 
         </div>
 
         {/* NAV — mobile (scrollable row abaixo) */}
-        <div className="md:hidden border-t border-white/15 overflow-x-auto">
+        <div className="md:hidden border-t border-white/15 overflow-x-auto min-w-0 w-full">
           <nav className="flex items-center gap-1 px-4 py-2 w-max">
             {navLinks.map(link => (
               <NavLink

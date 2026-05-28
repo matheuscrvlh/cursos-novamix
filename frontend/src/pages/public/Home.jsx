@@ -54,7 +54,8 @@ export default function Home() {
         cursoId: '',
         nome: '',
         cpf: '',
-        telefone: '',
+        celular: '',
+        formaPagamento: '',
         assento: ''
     });
 
@@ -313,16 +314,12 @@ export default function Home() {
     }
 
     const openConfirmacao = () => {
-        if (!enrollment.assento) {
-            alert('Marque algum assento.');
-            return
-        }
         setStep('confirmacao')
     }
 
     const closeModal = () => {
         setStep(null)
-        setEnrollment({ cursoId: '', nome: '', cpf: '', telefone: '', formaPagamento: '', assento: '' })
+        setEnrollment({ cursoId: '', nome: '', cpf: '', celular: '', formaPagamento: '', assento: '' })
         setCursoSelecionado('')
         setRefreshVagas(prev => prev + 1);
         setRefreshVagasInfantis(prev => prev + 1);

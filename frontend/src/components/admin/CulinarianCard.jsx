@@ -21,7 +21,7 @@ export default function CulinarianCard({
         <div className={`bg-white rounded-xl flex flex-col shadow-md hover:shadow-lg transition-shadow overflow-hidden ${className || ''}`}>
 
             {/* IMAGEM com overlay */}
-            <div className='relative h-48 overflow-hidden'>
+            <div className='relative h-48 w-full overflow-hidden'>
                 {imagem ? (
                     <img
                         src={imagem}

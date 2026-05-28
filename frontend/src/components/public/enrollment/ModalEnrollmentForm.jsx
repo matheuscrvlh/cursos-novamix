@@ -31,11 +31,11 @@ function maskPhone(value) {
 
 // ============ VALIDAÇÕES ============
 function isCPFValid(cpf) {
-    return cpf.replace(/\D/g, '').length === 11;
+    return (cpf || '').replace(/\D/g, '').length === 11;
 }
 
 function isPhoneValid(phone) {
-    return phone.replace(/\D/g, '').length >= 12;
+    return (phone || '').replace(/\D/g, '').length >= 12;
 }
 // ====================================
 

@@ -5,12 +5,13 @@ export default function CulinarianCard({
     foto,
     nomeCulinarista,
     lojas,
+    className,
 }) {
     const duasLojas = Array.isArray(lojas) ? lojas.length === 2 : false;
     const lojaUnica = Array.isArray(lojas) ? lojas[0] : lojas;
 
     return (
-        <div className='rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden'>
+        <div className={`rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden ${className || ''}`}>
 
             {/* IMAGEM com overlay */}
             <div className='relative h-72 w-full overflow-hidden'>

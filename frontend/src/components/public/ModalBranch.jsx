@@ -44,10 +44,10 @@ export default function ModalBranch({
                 {...props}
             >
                 {/* HEADER */}
-                <div className='flex items-center justify-between px-6 py-5 border-b border-gray-base/20'>
+                <div className='flex items-center justify-between px-4 py-3 sm:px-6 sm:py-5 border-b border-gray-base/20'>
                     <div>
-                        <p className='text-lg font-bold text-gray-text'>Selecione a loja</p>
-                        <p className='text-sm text-gray-text/60 mt-0.5'>Escolha a unidade para ver os cursos disponíveis</p>
+                        <p className='text-base sm:text-lg font-bold text-gray-text'>Selecione a loja</p>
+                        <p className='hidden sm:block text-sm text-gray-text/60 mt-0.5'>Escolha a unidade para ver os cursos disponíveis</p>
                     </div>
                     <button
                         onClick={onClose}
@@ -58,24 +58,24 @@ export default function ModalBranch({
                 </div>
 
                 {/* CARDS */}
-                <div className='flex flex-col sm:flex-row gap-4 p-6'>
+                <div className='flex flex-row gap-3 p-4 sm:gap-4 sm:p-6'>
 
                     {/* PRADO */}
                     <button
                         onClick={() => selectLoja('Prado')}
                         className='
-                            flex-1 flex flex-col items-center gap-3 p-6
+                            flex-1 flex flex-col items-center gap-2 p-3 sm:gap-3 sm:p-5
                             border-2 border-gray-base/20 rounded-xl
                             hover:border-orange-base hover:bg-orange-base/5
                             transition-all duration-200 cursor-pointer group
                         '
                     >
-                        <div className='w-12 h-12 rounded-full bg-orange-base/10 flex items-center justify-center group-hover:bg-orange-base/20 transition-colors'>
-                            <MapPin size={22} className='text-orange-base' />
+                        <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-base/10 flex items-center justify-center group-hover:bg-orange-base/20 transition-colors'>
+                            <MapPin size={20} className='text-orange-base' />
                         </div>
                         <div className='text-center'>
-                            <p className='font-bold text-gray-text text-base'>Prado</p>
-                            <p className='text-sm text-gray-text/60 mt-0.5'>Nova Friburgo</p>
+                            <p className='font-bold text-gray-text text-sm sm:text-base'>Prado</p>
+                            <p className='text-xs sm:text-sm text-gray-text/60 mt-0.5'>Nova Friburgo</p>
                         </div>
                     </button>
 
@@ -83,18 +83,18 @@ export default function ModalBranch({
                     <button
                         onClick={() => selectLoja('Teresopolis')}
                         className='
-                            flex-1 flex flex-col items-center gap-3 p-6
+                            flex-1 flex flex-col items-center gap-2 p-3 sm:gap-3 sm:p-5
                             border-2 border-gray-base/20 rounded-xl
                             hover:border-blue-base hover:bg-blue-base/5
                             transition-all duration-200 cursor-pointer group
                         '
                     >
-                        <div className='w-12 h-12 rounded-full bg-blue-base/10 flex items-center justify-center group-hover:bg-blue-base/20 transition-colors'>
-                            <MapPin size={22} className='text-blue-base' />
+                        <div className='w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-base/10 flex items-center justify-center group-hover:bg-blue-base/20 transition-colors'>
+                            <MapPin size={20} className='text-blue-base' />
                         </div>
                         <div className='text-center'>
-                            <p className='font-bold text-gray-text text-base'>Várzea</p>
-                            <p className='text-sm text-gray-text/60 mt-0.5'>Teresópolis</p>
+                            <p className='font-bold text-gray-text text-sm sm:text-base'>Várzea</p>
+                            <p className='text-xs sm:text-sm text-gray-text/60 mt-0.5'>Teresópolis</p>
                         </div>
                     </button>
 

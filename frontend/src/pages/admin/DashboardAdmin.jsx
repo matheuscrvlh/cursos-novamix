@@ -282,7 +282,7 @@ export default function DashboardAdmin() {
                                             vagasLivres={vagas.livres}
                                             vagasReservadas={vagas.reservadas}
                                             valor={curso.valor}
-                                            className='min-w-75 shrink-0'
+                                            className='w-75 shrink-0'
                                             imagem={
                                                 curso.fotos?.length
                                                     ? curso.fotos[0]
@@ -311,7 +311,7 @@ export default function DashboardAdmin() {
                                         industria={culinarista.industria}
                                         telefone={culinarista.telefone}
                                         instagram={culinarista.instagram}
-                                        className='min-w-75 shrink-0'
+                                        className='w-75 shrink-0'
                                         lojas={
                                             culinarista.lojas.length === 0
                                                 ? 'Nenhuma'

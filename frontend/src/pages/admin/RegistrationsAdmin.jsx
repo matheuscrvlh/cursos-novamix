@@ -338,7 +338,7 @@ export default function RegistrationsAdmin() {
                                         {[
                                             { label: 'Todas', value: 'todas' },
                                             { label: 'Prado', value: 'Prado' },
-                                            { label: 'Teresópolis', value: 'Teresópolis' },
+                                            { label: 'Teresópolis', value: 'Teresopolis' },
                                         ].map(f => (
                                             <button
                                                 key={f.value}
@@ -517,7 +517,7 @@ export default function RegistrationsAdmin() {
                                         {[
                                             { label: 'Todas', value: 'todas' },
                                             { label: 'Prado', value: 'Prado' },
-                                            { label: 'Teresópolis', value: 'Teresópolis' },
+                                            { label: 'Teresópolis', value: 'Teresopolis' },
                                         ].map(f => (
                                             <button
                                                 key={f.value}

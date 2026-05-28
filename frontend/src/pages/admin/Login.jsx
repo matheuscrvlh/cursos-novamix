@@ -63,30 +63,35 @@ export default function Login() {
                     className='w-[45%] max-w-[140px] mx-auto mb-3'
                 />
                 
-                <Input 
-                    type='text'
-                    placeholder='Usuario' 
-                    className='bg-gray w-full rounded p-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-base'
-                    value={form.user}
-                    onChange={e => setForm({ ...form, user: e.target.value})}
-                />
-                
-                <Input
-                    type='password'
-                    placeholder='Senha' 
-                    className='bg-gray w-full rounded p-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-base'
-                    value={form.password}
-                    onChange={e => setForm({ ...form, password: e.target.value})}
-                />
-                
-                <Button 
-                    className='bg-orange-base text-white font-semibold cursor-pointer hover:bg-orange-light 
-                               hover:shadow-lg w-full rounded p-3 mt-3 transition-all
-                               active:scale-95 text-base'
-                    onClick={Login}
+                <form
+                    className='flex flex-col gap-3'
+                    onSubmit={e => { e.preventDefault(); Login(); }}
                 >
-                    Login
-                </Button>
+                    <Input
+                        type='text'
+                        placeholder='Usuario'
+                        className='bg-gray w-full rounded p-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-base'
+                        value={form.user}
+                        onChange={e => setForm({ ...form, user: e.target.value})}
+                    />
+
+                    <Input
+                        type='password'
+                        placeholder='Senha'
+                        className='bg-gray w-full rounded p-3 text-base focus:outline-none focus:ring-2 focus:ring-orange-base'
+                        value={form.password}
+                        onChange={e => setForm({ ...form, password: e.target.value})}
+                    />
+
+                    <Button
+                        type='submit'
+                        className='bg-orange-base text-white font-semibold cursor-pointer hover:bg-orange-light
+                                   hover:shadow-lg w-full rounded p-3 mt-3 transition-all
+                                   active:scale-95 text-base'
+                    >
+                        Login
+                    </Button>
+                </form>
                 
                 <p className='text-center cursor-pointer text-gray-dark hover:text-red-base 
                                transition-colors mt-2 text-sm'

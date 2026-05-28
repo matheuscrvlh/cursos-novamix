@@ -118,10 +118,7 @@ export default function ChildrensCoursesSections({
                 flex w-full justify-center
             '>  
                 <Link to={'/cursosInfantis'}>
-                    <Button className='
-                        bg-orange-base text-white hover:bg-orange-light px-6 py-2 
-                        cursor-pointer transition
-                    '>
+                    <Button className='bg-orange-base text-white hover:bg-orange-light text-sm px-5 py-1.5 sm:px-6 sm:py-2 cursor-pointer transition'>
                         Ver todos
                     </Button>
                 </Link>

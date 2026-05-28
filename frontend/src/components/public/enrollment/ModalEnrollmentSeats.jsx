@@ -1,5 +1,5 @@
 // React
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 // Icons
 import { X } from "lucide-react"
@@ -16,16 +16,25 @@ export default function ModalEnrollmentSeats({
     assentos,
     ...props
 }) {
+    const [submitted, setSubmitted] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden'
         } else {
             document.body.style.overflow = ''
+            setSubmitted(false)
         }
         return () => { document.body.style.overflow = '' }
     }, [isOpen])
 
     if (!isOpen) return null
+
+    function handleConfirm() {
+        setSubmitted(true);
+        if (!enrollment.assento) return;
+        onClick();
+    }
 
     return (
         <div
@@ -117,10 +126,13 @@ export default function ModalEnrollmentSeats({
 
                     <Button
                         className='bg-orange-base hover:bg-orange-light text-white font-semibold'
-                        onClick={onClick}
+                        onClick={handleConfirm}
                     >
                         Confirmar assento
                     </Button>
+                    {submitted && !enrollment.assento && (
+                        <p className='text-red-base text-xs text-center'>Selecione um assento para continuar</p>
+                    )}
 
                 </div>
             </div>

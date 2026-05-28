@@ -20,7 +20,7 @@ export default function CourseCard({
     <div className={`bg-white rounded-xl flex flex-col shadow-md hover:shadow-lg transition-shadow md:min-w-75 ${className || ''}`}>
 
       {/* IMAGEM */}
-      <div className="relative rounded-t-xl h-48 overflow-hidden">
+      <div className="relative rounded-t-xl h-48 w-full overflow-hidden">
         {imagem ? (
           <img src={imagem} alt={curso} className="w-full h-full object-cover" />
         ) : (
