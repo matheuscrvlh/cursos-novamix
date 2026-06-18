@@ -27,7 +27,6 @@ import { Head } from '../../components/Head'
 
 // IMAGES
 import { bannerHome } from '../../assets/images/banner/'
-import ModalFilters from '../../components/public/ModalFilters';
 
 export default function ChildrensCourses() {
 
@@ -66,9 +65,8 @@ export default function ChildrensCourses() {
     const [cursoSelecionado, setCursoSelecionado] = useState('');
     const [assentos, setAssentos] = useState([]);
 
-    // ========= STATE MODAL ========= 
+    // ========= STATE MODAL =========
     const [step, setStep] = useState(null)
-    const [showModalFilters, setShowModalFilters ] = useState(false)
 
     // ========= FUNCOES  =========
     // =========  FUNCOES CADASTRO CLIENTE ========= 
@@ -202,7 +200,12 @@ export default function ChildrensCourses() {
     // ========= ONLOAD ========= 
     // Carregar filtro de loja inicial
     useEffect(() => {
-        setStep('filterBranch')
+        const lojaGuardada = localStorage.getItem('loja')
+        if (lojaGuardada) {
+            setFilters(prev => ({ ...prev, loja: lojaGuardada }))
+        } else {
+            setStep('filterBranch')
+        }
     }, [])
     
     // FUNDO PAGINA
@@ -224,8 +227,10 @@ export default function ChildrensCourses() {
                     cursosFiltrados={cursosFiltrados}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
-                    showModalFilters={showModalFilters}
-                    setShowModalFilters={setShowModalFilters}
+                    filters={filters}
+                    setFilters={setFilters}
+                    culinaristas={culinaristas}
+                    clearFilters={clearFilters}
                 />
 
                 {/* ================= MODAIS ================= */}
@@ -269,18 +274,6 @@ export default function ChildrensCourses() {
                     onClose={closeModal}
                 />
 
-                {/* ======== MODAL FILTERS ======== */}
-                {showModalFilters && 
-                    <ModalFilters
-                        isOpen={showModalFilters}
-                        nameModal={'Filtros Cursos Infantis'}
-                        onClose={() => setShowModalFilters(!showModalFilters)}
-                        filtersCourses={filters}
-                        setFiltersCourses={setFilters}
-                        culinaristas={culinaristas}
-                        clear={() => clearFilters()}
-                    />
-                }
             </section>
         </PublicLayout>
     )

@@ -64,15 +64,13 @@ export default function ModalEnrollmentForm({
     const erroNome     = submitted && !enrollment.nome.trim();
     const erroCPF      = submitted && !isCPFValid(enrollment.cpf);
     const erroTelefone = submitted && !isPhoneValid(enrollment.celular);
-    const erroPgto     = submitted && !enrollment.formaPagamento;
 
     function handleSubmit() {
         setSubmitted(true);
         if (
             !enrollment.nome.trim() ||
             !isCPFValid(enrollment.cpf) ||
-            !isPhoneValid(enrollment.celular) ||
-            !enrollment.formaPagamento
+            !isPhoneValid(enrollment.celular)
         ) return;
         onClick();
     }
@@ -148,20 +146,6 @@ export default function ModalEnrollmentForm({
                             onChange={e => setEnrollment({ ...enrollment, celular: maskPhone(e.target.value) })}
                         />
                         {erroTelefone && <p className='text-red-base text-xs'>Telefone incompleto — inclua DDI, DDD e número</p>}
-                    </div>
-
-                    {/* Forma de pagamento */}
-                    <div className='flex flex-col gap-1.5'>
-                        <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Forma de pagamento</label>
-                        <select
-                            className={`w-full h-10 px-3 border border-gray-base rounded-md text-gray-text text-sm ${erroPgto ? 'ring-1 ring-red-base' : ''}`}
-                            value={enrollment.formaPagamento}
-                            onChange={e => setEnrollment({ ...enrollment, formaPagamento: e.target.value })}
-                        >
-                            <option value=''>Selecione...</option>
-                            <option value='link'>Link de Pagamento</option>
-                        </select>
-                        {erroPgto && <p className='text-red-base text-xs'>Selecione uma forma de pagamento</p>}
                     </div>
 
                     <Button

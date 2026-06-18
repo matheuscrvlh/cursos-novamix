@@ -1,6 +1,8 @@
 import { Calendar, Clock, User, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function CourseCard({
+  id,
   curso,
   data,
   horario,
@@ -45,9 +47,11 @@ export default function CourseCard({
       </div>
 
       {/* TÍTULO */}
-      <h2 className="text-gray-dark font-bold text-lg px-4 pt-4 pb-2 line-clamp-2 leading-snug">
-        {curso}
-      </h2>
+      <Link to={id ? `/curso/${id}` : '#'} className="hover:text-orange-base transition">
+        <h2 className="text-gray-dark font-bold text-lg px-4 pt-4 pb-2 line-clamp-2 leading-snug">
+          {curso}
+        </h2>
+      </Link>
 
       {/* INFOS */}
       <div className="px-4 pb-4 flex flex-col gap-2 mt-auto">

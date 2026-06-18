@@ -28,6 +28,7 @@ export default function ModalBranch({
     if (!isOpen) return null
 
     function selectLoja(loja) {
+        localStorage.setItem('loja', loja)
         setFiltersCourses({ ...filtersCourses, loja })
         setFiltersChildrensCourses({ ...filtersChildrensCourses, loja })
         onClose()

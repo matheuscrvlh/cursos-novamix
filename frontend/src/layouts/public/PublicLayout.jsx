@@ -1,5 +1,5 @@
 // React
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
 // Icons
@@ -21,6 +21,7 @@ const navLinks = [
 ]
 
 export default function PublicLayout({ children, bannerHome }) {
+  const navigate = useNavigate();
   const [heroBanners, setHeroBanners] = useState([])
   const [heroIndex, setHeroIndex]     = useState(0)
 
@@ -263,6 +264,13 @@ export default function PublicLayout({ children, bannerHome }) {
             >
               RodSchuab
             </a>
+            <span className="mx-1 text-white/20">·</span>
+            <button
+              onClick={() => navigate('/login')}
+              className="text-white/30 hover:text-white/60 transition text-xs cursor-pointer"
+            >
+              admin
+            </button>
           </div>
         </div>
 

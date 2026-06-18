@@ -7,6 +7,8 @@ import Courses from './pages/public/Courses'
 import ChildrensCourses from './pages/public/ChildrensCourses'
 import Culinarians from './pages/public/Culinarians'
 import Industries from './pages/public/Industries'
+import CoursePage from './pages/public/CoursePage'
+import PaymentResult from './pages/public/PaymentResult'
 
 import Login from './pages/admin/Login'
 import DashboardAdmin from './pages/admin/DashboardAdmin'
@@ -16,6 +18,7 @@ import CulinarianAdmin from './pages/admin/CulinarianAdmin'
 import IndustriesAdmin from './pages/admin/IndustriesAdmin'
 import ChildrensAdmin from './pages/admin/ChildrensAdmin'
 import MarketingAdmin from './pages/admin/MarketingAdmin'
+import UsersAdmin from './pages/admin/UsersAdmin'
 
 export default function App() {
   return (
@@ -25,6 +28,10 @@ export default function App() {
         <Route path='/cursosInfantis' element={<ChildrensCourses />} />
         <Route path='/culinaristas' element={<Culinarians />} />
         <Route path='/industrias' element={<Industries />} />
+        <Route path='/curso/:id' element={<CoursePage />} />
+        <Route path='/pagamento/sucesso' element={<PaymentResult status='aprovado' />} />
+        <Route path='/pagamento/falha' element={<PaymentResult status='recusado' />} />
+        <Route path='/pagamento/pendente' element={<PaymentResult status='pendente' />} />
 
         <Route path='/login' element={<Login />} />
         <Route path='/dashboardAdmin' element={<DashboardAdmin />} />
@@ -34,6 +41,7 @@ export default function App() {
         <Route path='/industriasAdmin' element={<IndustriesAdmin />} />
         <Route path='/infantisAdmin' element={<ChildrensAdmin />} />
         <Route path='/marketingAdmin' element={<MarketingAdmin />} />
+        <Route path='/usuariosAdmin' element={<UsersAdmin />} />
     </Routes>
   )
 }

@@ -32,7 +32,6 @@ import { Head } from '../../components/Head'
 
 // IMAGES
 import { bannerHome } from '../../assets/images/banner/'
-import ModalFilters from '../../components/public/ModalFilters';
 
 export default function Home() {
 
@@ -97,8 +96,6 @@ export default function Home() {
 
     // ========= STATE MODAL ========= 
     const [step, setStep] = useState(null)
-    const [showModalFilters, setShowModalFilters ] = useState(false)
-    const [showModalFiltersChildrens, setShowModalFiltersChildrens ] = useState(false)
 
     // ====== FUNCOES
     async function handleSubmitCourse() {
@@ -328,7 +325,13 @@ export default function Home() {
     // ========= ONLOAD ========= 
     // Carregar filtro de loja inicial
     useEffect(() => {
-        setStep('filterBranch')
+        const lojaGuardada = localStorage.getItem('loja')
+        if (lojaGuardada) {
+            setFiltersCourses(prev => ({ ...prev, loja: lojaGuardada }))
+            setFiltersChildrensCourses(prev => ({ ...prev, loja: lojaGuardada }))
+        } else {
+            setStep('filterBranch')
+        }
     }, [])
     
     // FUNDO PAGINA
@@ -347,8 +350,6 @@ export default function Home() {
                     loadingVagasPorCurso={loadingVagasPorCurso}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
-                    showModalFilters={showModalFilters}
-                    setShowModalFilters={setShowModalFilters}
                 />
 
                 {/* ======== CATEGORIAS ======== */}
@@ -361,8 +362,6 @@ export default function Home() {
                     loadingVagasPorCursoInfantis={loadingVagasPorCursoInfantis}
                     vagasPorCursoInfantil={vagasPorCursoInfantil}
                     openForm={openForm}
-                    showModalFilters={showModalFiltersChildrens}
-                    setShowModalFilters={setShowModalFiltersChildrens}
                 />
 
                 {/* ======== CULINARISTAS ======== */}
@@ -424,35 +423,6 @@ export default function Home() {
                     onClose={closeModal}
                 />
 
-                {/* ======== MODAL FILTERS CURSOS ======== */}
-                {showModalFilters && 
-                    <ModalFilters
-                        isOpen={showModalFilters}
-                        nameModal={'Filtros Cursos'}
-                        onClose={() => setShowModalFilters(!showModalFilters)}
-                        filtersCourses={filtersCourses}
-                        setFiltersCourses={setFiltersCourses}
-                        culinaristas={culinaristas}
-                        clear={() => {
-                            clearFilters()
-                        }}
-                    />
-                }
-
-                {/* ======== MODAL FILTERS CURSOS INFANTIS ======== */}
-                {showModalFiltersChildrens && 
-                    <ModalFilters
-                        isOpen={showModalFiltersChildrens}
-                        nameModal={'Filtros Cursos Infantis'}
-                        onClose={() => setShowModalFiltersChildrens(!showModalFiltersChildrens)}
-                        filtersCourses={filtersChildrensCourses}
-                        setFiltersCourses={setFiltersChildrensCourses}
-                        culinaristas={culinaristas}
-                        clear={() => {
-                            clearChildrenFilters()
-                        }}
-                    />
-                }
             </section>
         </PublicLayout>
     )

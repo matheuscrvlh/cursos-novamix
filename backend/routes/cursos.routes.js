@@ -28,6 +28,23 @@ router.get('/', (req, res) => {
   });
 });
 
+// GET curso por id
+router.get('/:id', (req, res) => {
+  db.all(`
+    SELECT c.*,
+    GROUP_CONCAT(f.url) as fotos
+    FROM cursos c
+    LEFT JOIN fotos f ON f.cursoId = c.id
+    WHERE c.id = ?
+    GROUP BY c.id
+  `, [req.params.id], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!rows.length) return res.status(404).json({ message: 'Curso não encontrado' });
+    const curso = { ...rows[0], fotos: rows[0].fotos ? rows[0].fotos.split(',') : [] };
+    res.json(curso);
+  });
+});
+
 // POST novo curso
 router.post('/', uploadCursos.array('fotos', 5), (req, res) => {
   const cursoId = uuidv4();

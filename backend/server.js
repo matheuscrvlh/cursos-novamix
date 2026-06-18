@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -11,6 +12,9 @@ const industriasRoutes = require('./routes/industrias.routes');
 const cursosInfantisRoutes = require('./routes/cursosInfantis.routes');
 const inscricoesInfantisRoutes = require('./routes/inscricoesInfantis.routes');
 const bannersRoutes = require('./routes/banners.routes');
+const pagamentosRoutes = require('./routes/pagamentos.routes');
+const authRoutes = require('./routes/auth.routes');
+const usuariosRoutes = require('./routes/usuarios.routes');
 const app = express();
 
 app.use(cors());
@@ -27,6 +31,9 @@ app.use('/api/industrias', industriasRoutes);
 app.use('/api/cursos-infantis', cursosInfantisRoutes);
 app.use('/api/inscricoes-infantis', inscricoesInfantisRoutes);
 app.use('/api/banners', bannersRoutes);
+app.use('/api/pagamentos', pagamentosRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/usuarios', usuariosRoutes);
 
 app.listen(3000, () => {
   console.log('Backend torando na porta 3000 --');

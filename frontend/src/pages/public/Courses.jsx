@@ -30,7 +30,6 @@ import { Head } from '../../components/Head'
 
 // IMAGES
 import { bannerHome } from '../../assets/images/banner/'
-import ModalFilters from '../../components/public/ModalFilters';
 
 export default function Courses() {
 
@@ -46,7 +45,8 @@ export default function Courses() {
         cursoId: '',
         nome: '',
         cpf: '',
-        telefone: '',
+        celular: '',
+        formaPagamento: 'mercadopago',
         assento: ''
     });
 
@@ -70,19 +70,13 @@ export default function Courses() {
     const [cursoSelecionado, setCursoSelecionado] = useState('');
     const [assentos, setAssentos] = useState([]);
 
-    // ========= STATE MODAL ========= 
+    // ========= STATE MODAL =========
     const [step, setStep] = useState(null)
-    const [showModalFilters, setShowModalFilters ] = useState(false)
 
     // ========= FUNCOES  =========
-    // =========  FUNCOES CADASTRO CLIENTE ========= 
-    function handleSubmit() {
-        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
-            alert('Preencha todos os campos.')
-            return;
-        }
-
-        postEnrollment({
+    // =========  FUNCOES CADASTRO CLIENTE =========
+    async function handleSubmit() {
+        const inscricao = await postEnrollment({
             cursoId: form.cursoId,
             nome: form.nome,
             cpf: form.cpf,
@@ -91,14 +85,31 @@ export default function Courses() {
             assento: form.assento
         });
 
-        setForm({
-            cursoId: '',
-            nome: '',
-            cpf: '',
-            celular: '',
-            formaPagamento: '',
-            assento: ''
-        });
+        if (!inscricao || inscricao.message) {
+            alert(inscricao?.message || 'Erro ao criar inscrição');
+            return;
+        }
+
+        const formaPagamento = form.formaPagamento;
+        setForm({ cursoId: '', nome: '', cpf: '', celular: '', formaPagamento: 'mercadopago', assento: '' });
+
+        if (formaPagamento === 'mercadopago') {
+            const res = await fetch('/api/pagamentos/criar-preferencia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ inscricaoId: inscricao.id }),
+            });
+            const { checkout_url } = await res.json();
+            if (checkout_url) {
+                window.location.href = checkout_url;
+            } else {
+                alert('Erro ao gerar link de pagamento. Tente novamente.');
+            }
+        } else {
+            setStep('confirmacao');
+        }
+
+        setRefreshVagas(prev => prev + 1);
     }
 
     useEffect(() => {
@@ -198,7 +209,7 @@ export default function Courses() {
 
     const closeModal = () => {
         setStep(null)
-        setForm({ cursoId: '', nome: '', cpf: '', telefone: '', formaPagamento: '', assento: '' })
+        setForm({ cursoId: '', nome: '', cpf: '', celular: '', formaPagamento: 'mercadopago', assento: '' })
         setCursoSelecionado('')
         setRefreshVagas(prev => prev + 1);
     }
@@ -206,7 +217,12 @@ export default function Courses() {
     // ========= ONLOAD ========= 
     // Carregar filtro de loja inicial
     useEffect(() => {
-        setStep('filterBranch')
+        const lojaGuardada = localStorage.getItem('loja')
+        if (lojaGuardada) {
+            setFilters(prev => ({ ...prev, loja: lojaGuardada }))
+        } else {
+            setStep('filterBranch')
+        }
     }, [])
     
     // FUNDO PAGINA
@@ -229,8 +245,10 @@ export default function Courses() {
                     loadingCourses={loadingCourses}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
-                    showModalFilters={showModalFilters}
-                    setShowModalFilters={setShowModalFilters}
+                    filters={filters}
+                    setFilters={setFilters}
+                    culinaristas={culinaristas}
+                    clearFilters={clearFilters}
                 />
 
                 {/* ================= MODAIS ================= */}
@@ -257,10 +275,7 @@ export default function Courses() {
                 {/* ======== MODAL ASSENTOS */}
                 <ModalEnrollmentSeats
                     isOpen={step === 'assento'}
-                    onClick={() => {
-                        handleSubmit()
-                        openConfirmacao()
-                    }}
+                    onClick={handleSubmit}
                     onClose={closeModal}
                     enrollment={form}
                     setEnrollment={setForm}
@@ -274,18 +289,6 @@ export default function Courses() {
                     onClose={closeModal}
                 />
 
-                {/* ======== MODAL FILTERS ======== */}
-                {showModalFilters && 
-                    <ModalFilters
-                        isOpen={showModalFilters}
-                        nameModal={'Filtros Cursos'}
-                        onClose={() => setShowModalFilters(!showModalFilters)}
-                        filtersCourses={filters}
-                        setFiltersCourses={setFilters}
-                        culinaristas={culinaristas}
-                        clear={() => clearFilters()}
-                    />
-                }
             </section>
         </PublicLayout>
     )

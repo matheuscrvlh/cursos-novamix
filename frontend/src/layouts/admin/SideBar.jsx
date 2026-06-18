@@ -17,7 +17,9 @@ export default function SideBar() {
     const navigate = useNavigate()
 
     function handleLogout() {
-        navigate('/')
+        localStorage.removeItem('token');
+        localStorage.removeItem('usuario');
+        navigate('/login');
     }
 
     function toggleMenu() {
@@ -53,8 +55,8 @@ export default function SideBar() {
 
             {/* Sidebar */}
             <aside className={`
-                    flex flex-col h-[100dvh] bg-white shadow-sm
-                    fixed top-0 left-0 w-[280px]
+                    flex flex-col h-dvh bg-white shadow-sm
+                    fixed top-0 left-0 w-70
                     transition-transform duration-300 ease-in-out
                     lg:w-[15%]
                     ${isMenuOpen ? 'translate-x-0 z-40' : '-translate-x-full'}
@@ -87,6 +89,9 @@ export default function SideBar() {
                     </LinkSideBar>
                     <LinkSideBar to='/marketingAdmin' onClick={closeMenu}>
                         Marketing
+                    </LinkSideBar>
+                    <LinkSideBar to='/usuariosAdmin' onClick={closeMenu}>
+                        Usuários
                     </LinkSideBar>
                 </nav>
 

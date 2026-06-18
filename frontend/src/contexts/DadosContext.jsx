@@ -55,7 +55,7 @@ export function DadosProvider({ children }) {
     useEffect(() => {
         getCourses()
             .then(data => {
-                setCursos(data)
+                setCursos(Array.isArray(data) ? data : [])
             })
             .catch(err => {
                 console.error('Erro ao buscar cursos', err)
@@ -66,7 +66,7 @@ export function DadosProvider({ children }) {
 
         getCulinarians()
             .then(data => {
-                setCulinaristas(data)
+                setCulinaristas(Array.isArray(data) ? data : [])
             })
             .catch(err => {
                 console.error('Erro ao buscar Culinaristas', err)
@@ -77,7 +77,7 @@ export function DadosProvider({ children }) {
 
         getChildren()
            .then(data => {
-               setCursosInfantis(data)
+               setCursosInfantis(Array.isArray(data) ? data : [])
             })
             .catch(err => {
                 console.error('Erro ao buscar Cursos Infantis', err)
@@ -88,7 +88,7 @@ export function DadosProvider({ children }) {
 
         getIndustries()
             .then(data => {
-                setIndustrias(data)
+                setIndustrias(Array.isArray(data) ? data : [])
             })
             .catch(err => {
                 console.error('Erro ao buscar Industrias', err)

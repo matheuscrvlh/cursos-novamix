@@ -5,20 +5,14 @@ import { Link } from 'react-router-dom'
 import Button from "../../components/Button";
 import CourseCard from "../../components/public/CourseCard";
 
-// ICONS
-import { Menu } from "lucide-react";
-
 export default function CoursesSections({
     cursosFiltrados,
     loadingCourses,
     loadingVagasPorCurso,
     vagasPorCurso,
     openForm,
-    showModalFilters,
-    setShowModalFilters
 }) {
 
-    // layout data
     function layoutData(data) {
         const [ano, mes, dia] = data.split('-');
         return `${dia}/${mes}/${ano}`;
@@ -27,34 +21,11 @@ export default function CoursesSections({
     return (
     <section className='pt-15 md:w-[80vw] md:mx-auto'>
 
-            {/* ======== FILTERS ======== */}
-            <div className='
-                            flex justify-between items-baseline-last pb-5 w-[80%] mx-auto
-                            md:w-[80vw]
-                        '
-            >
-                <div className='md:px-2'>
-                    <p className='
-                                text-lg font-bold text-gray-dark
-                                md:text-3xl
-                            '>
-                        NOSSOS CURSOS
-                    </p>
-                </div>
-                <div onClick={() => setShowModalFilters(!showModalFilters)}
-                    className='
-                                flex gap-2 items-center text-white bg-orange-base px-3 py-2 rounded-xl cursor-pointer font-bold
-                                hover:bg-orange-light transition
-                                md:px-7 md:py-2
-                            '
-                >
-                    <p>Filtros</p>
-                    <Menu
-                        className='
-                             w-6 h-6 
-                        '
-                    />
-                </div>
+            {/* TÍTULO */}
+            <div className='flex justify-between items-baseline pb-5 w-[80%] mx-auto md:w-[80vw]'>
+                <p className='text-lg font-bold text-gray-dark md:text-3xl md:px-2'>
+                    NOSSOS CURSOS
+                </p>
             </div>
 
             {/* ======== CURSOS ======== */}

@@ -45,7 +45,7 @@ router.post('/', (req, res) => {
         celular,
         assentoId,
         formaPagamento,
-        'verificar',
+        formaPagamento === 'mercadopago' ? 'pendente' : 'verificar',
         dataInscricao
       ], function(err) {
         if (err) {
@@ -53,7 +53,8 @@ router.post('/', (req, res) => {
           return res.status(500).json({ message: 'Erro interno no servidor' });
         }
 
-        res.status(201).json({ id, cursoId, nome, cpf, celular, assento: assentoId, formaPagamento, status: 'verificar', dataInscricao });
+        const status = formaPagamento === 'mercadopago' ? 'pendente' : 'verificar';
+        res.status(201).json({ id, cursoId, nome, cpf, celular, assento: assentoId, formaPagamento, status, dataInscricao });
       });
     }
   );

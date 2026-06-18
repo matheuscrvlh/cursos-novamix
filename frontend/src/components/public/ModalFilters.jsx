@@ -31,7 +31,7 @@ export default function ModalFilters({
 
     return (
         <div className={`
-            fixed flex justify-end bg-black/50 top-0 w-dvw h-dvh z-50
+            md:hidden fixed flex justify-end bg-black/50 top-0 w-dvw h-dvh z-50
             transition-opacity duration-300
             ${isOpen ? 'opacity-100' : 'opacity-0'}
         `}>

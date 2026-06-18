@@ -16,6 +16,15 @@ export async function postCourse(formData) {
 }
 
 // ============== GET
+export async function getCourseById(cursoId) {
+    try {
+        const res = await fetch(`${URL}/cursos/${cursoId}`, { method: 'GET' });
+        return res.json()
+    } catch (err) {
+        console.error('Erro ao buscar Curso:', err);
+    }
+}
+
 export async function getCourses() {
     try {
         const res = await fetch((`${URL}/cursos`), {
