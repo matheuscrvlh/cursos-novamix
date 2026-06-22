@@ -6,9 +6,10 @@ const router = express.Router();
 
 // POST nova inscrição
 router.post('/', (req, res) => {
-  const { cursoId, nome, cpf, celular, assento, formaPagamento } = req.body;
+  const { cursoId, nome, cpf, celular, assento } = req.body;
+  const formaPagamento = req.body.formaPagamento || 'mercadopago';
 
-  if (!cursoId || !nome || !cpf || !celular || !formaPagamento || assento === undefined) {
+  if (!cursoId || !nome || !cpf || !celular || assento === undefined) {
     return res.status(400).json({ message: 'Dados incompletos' });
   }
 
@@ -45,7 +46,7 @@ router.post('/', (req, res) => {
         celular,
         assentoId,
         formaPagamento,
-        formaPagamento === 'mercadopago' ? 'pendente' : 'verificar',
+        'pendente',
         dataInscricao
       ], function(err) {
         if (err) {
@@ -53,8 +54,7 @@ router.post('/', (req, res) => {
           return res.status(500).json({ message: 'Erro interno no servidor' });
         }
 
-        const status = formaPagamento === 'mercadopago' ? 'pendente' : 'verificar';
-        res.status(201).json({ id, cursoId, nome, cpf, celular, assento: assentoId, formaPagamento, status, dataInscricao });
+        res.status(201).json({ id, cursoId, nome, cpf, celular, assento: assentoId, formaPagamento, status: 'pendente', dataInscricao });
       });
     }
   );

@@ -49,7 +49,7 @@ router.post('/', (req, res) => {
       idadeCrianca,
       cpf,
       formaPagamento,
-      'verificar',
+      'pendente',
       dataInscricao
     ], function(err) {
       if (err) {
@@ -57,7 +57,7 @@ router.post('/', (req, res) => {
         return res.status(500).json({ message: 'Erro ao criar inscrição' });
       }
 
-      res.status(201).json({ id, cursoId, nomeResponsavel, telefone, nomeCrianca, idadeCrianca, cpf, formaPagamento, status: 'verificar', dataInscricao });
+      res.status(201).json({ id, cursoId, nomeResponsavel, telefone, nomeCrianca, idadeCrianca, cpf, formaPagamento, status: 'pendente', dataInscricao });
     });
   });
 });

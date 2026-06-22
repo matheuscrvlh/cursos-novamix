@@ -1,5 +1,6 @@
-// REACT 
+// REACT
 import { useContext, useState, useEffect } from 'react';
+import { Loader2, XCircle } from 'lucide-react';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -54,7 +55,6 @@ export default function Home() {
         nome: '',
         cpf: '',
         celular: '',
-        formaPagamento: '',
         assento: ''
     });
 
@@ -94,15 +94,16 @@ export default function Home() {
     const [cursoSelecionado, setCursoSelecionado] = useState('');
     const [assentos, setAssentos] = useState([]);
 
-    // ========= STATE MODAL ========= 
+    // ========= STATE MODAL =========
     const [step, setStep] = useState(null)
+    const [loadingPagamento, setLoadingPagamento] = useState(false)
+    const [erroPagamento, setErroPagamento] = useState(null)
 
     // ====== FUNCOES
     async function handleSubmitCourse() {
-        if (!enrollment.nome || !enrollment.cpf || !enrollment.celular || !enrollment.formaPagamento) {
-            alert('Preencha todos os campos.')
-            return;
-        }
+        setStep(null)
+        setLoadingPagamento(true)
+        setErroPagamento(null)
 
         try {
             const res = await postEnrollment({
@@ -110,33 +111,40 @@ export default function Home() {
                 nome: enrollment.nome,
                 cpf: enrollment.cpf,
                 celular: enrollment.celular,
-                formaPagamento: enrollment.formaPagamento,
+                formaPagamento: 'mercadopago',
                 assento: enrollment.assento
             });
 
-            // So dispara se o backend confirmou (tag manager google)
-            if (res && res.id) {
-                window.dataLayer = window.dataLayer || [];
-                window.dataLayer.push({
-                    event: 'form_submit_success',
-                    form_name: 'cadastro_curso'
-                });
+            if (!res || res.message) {
+                setErroPagamento(res?.message || 'Erro ao criar inscrição. Tente novamente.');
+                return;
             }
 
-            setEnrollment({
-                cursoId: '',
-                nome: '',
-                cpf: '',
-                celular: '',
-                formaPagamento: '', 
-                assento: ''
-            });
+            // Tag manager google
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ event: 'form_submit_success', form_name: 'cadastro_curso' });
 
+            setEnrollment({ cursoId: '', nome: '', cpf: '', celular: '', assento: '' });
+
+            const mpRes = await fetch('/api/pagamentos/criar-preferencia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ inscricaoId: res.id }),
+            });
+            const { checkout_url } = await mpRes.json();
+
+            if (checkout_url) {
+                window.location.href = checkout_url;
+            } else {
+                await fetch(`/api/inscricoes/${res.id}`, { method: 'DELETE' }).catch(() => {});
+                setErroPagamento('Não foi possível gerar o link de pagamento. Tente novamente.');
+            }
         } catch (err) {
             console.error(err);
-            alert('Erro ao realizar cadastro. Tente novamente.')
+            setErroPagamento('Ocorreu um erro inesperado. Tente novamente.');
+        } finally {
+            setLoadingPagamento(false)
         }
-        
     }
 
     useEffect(() => {
@@ -213,16 +221,6 @@ export default function Home() {
             setCursosFiltrados(filtrados)
     }, [filtersCourses, cursosAtuais])
 
-    // LIMPAR FILTROS
-    function clearFilters() {
-        setFiltersCourses({
-            dataInicial: '',
-            dataFinal: '',
-            loja: '',
-            culinarista: ''
-        })
-    }
-
     // ========= FUNCOES CURSOS INFANTIS =========
     // buscar vagas livres e reservadas
     useEffect(() => {
@@ -284,15 +282,6 @@ export default function Home() {
             setCursosInfantisFiltrados(filtrados)
     }, [filtersChildrensCourses, cursosInfantisAtuais])
 
-    // LIMPAR FILTROS
-    function clearChildrenFilters() {
-        setFiltersChildrensCourses({
-            dataInicial: '',
-            dataFinal: '',
-            loja: '',
-            culinarista: ''
-        })
-    }
 
     // =========  FUNCOES MODAL ========= 
     const openForm = (cursoId) => {
@@ -302,21 +291,11 @@ export default function Home() {
         console.log(step)
     }
 
-    const openAssento = () => {
-        if (!enrollment.nome || !enrollment.cpf || !enrollment.celular || !enrollment.formaPagamento) {
-            alert('Preencha todos os campos.')
-            return;
-        }
-        setStep('assento')
-    }
-
-    const openConfirmacao = () => {
-        setStep('confirmacao')
-    }
+    const openAssento = () => setStep('assento')
 
     const closeModal = () => {
         setStep(null)
-        setEnrollment({ cursoId: '', nome: '', cpf: '', celular: '', formaPagamento: '', assento: '' })
+        setEnrollment({ cursoId: '', nome: '', cpf: '', celular: '', assento: '' })
         setCursoSelecionado('')
         setRefreshVagas(prev => prev + 1);
         setRefreshVagasInfantis(prev => prev + 1);
@@ -406,10 +385,7 @@ export default function Home() {
                 {/* ======== MODAL ASSENTOS */}
                 <ModalEnrollmentSeats
                     isOpen={step === 'assento'}
-                    onClick={() => {
-                        handleSubmitCourse()
-                        openConfirmacao()
-                    }}
+                    onClick={handleSubmitCourse}
                     onClose={closeModal}
                     enrollment={enrollment}
                     setEnrollment={setEnrollment}
@@ -422,6 +398,39 @@ export default function Home() {
                     onClick={() => closeModal()}
                     onClose={closeModal}
                 />
+
+                {/* Loading pagamento */}
+                {loadingPagamento && (
+                    <div className='flex items-center justify-center fixed inset-0 bg-black/70 z-50'>
+                        <div className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl'>
+                            <Loader2 size={40} className='text-orange-base animate-spin' />
+                            <p className='text-gray-dark font-semibold'>Preparando pagamento...</p>
+                            <p className='text-xs text-gray-text/60'>Você será redirecionado em instantes</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Erro pagamento */}
+                {erroPagamento && (
+                    <div
+                        className='flex items-center justify-center fixed inset-0 bg-black/70 z-50 p-4'
+                        onClick={() => setErroPagamento(null)}
+                    >
+                        <div
+                            className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 max-w-sm w-full shadow-xl'
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <XCircle size={48} className='text-red-500' />
+                            <p className='text-gray-dark font-semibold text-center'>{erroPagamento}</p>
+                            <button
+                                className='bg-orange-base text-white hover:bg-orange-light w-full py-2.5 rounded-lg font-semibold'
+                                onClick={() => { setErroPagamento(null); setStep('form') }}
+                            >
+                                Tentar novamente
+                            </button>
+                        </div>
+                    </div>
+                )}
 
             </section>
         </PublicLayout>

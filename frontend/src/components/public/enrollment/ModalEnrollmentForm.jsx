@@ -35,7 +35,7 @@ function isCPFValid(cpf) {
 }
 
 function isPhoneValid(phone) {
-    return (phone || '').replace(/\D/g, '').length >= 12;
+    return (phone || '').replace(/\D/g, '').length >= 10;
 }
 // ====================================
 
@@ -145,7 +145,7 @@ export default function ModalEnrollmentForm({
                             autoComplete='tel'
                             onChange={e => setEnrollment({ ...enrollment, celular: maskPhone(e.target.value) })}
                         />
-                        {erroTelefone && <p className='text-red-base text-xs'>Telefone incompleto — inclua DDI, DDD e número</p>}
+                        {erroTelefone && <p className='text-red-base text-xs'>Telefone incompleto — inclua DDD e número</p>}
                     </div>
 
                     <Button
@@ -154,6 +154,10 @@ export default function ModalEnrollmentForm({
                     >
                         Confirmar inscrição
                     </Button>
+
+                    <p className='text-center text-xs text-gray-text/50 mt-1'>
+                        Reembolso somente antes de 24h do início do curso.
+                    </p>
 
                 </div>
             </div>

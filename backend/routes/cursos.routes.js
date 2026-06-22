@@ -48,12 +48,16 @@ router.get('/:id', (req, res) => {
 // POST novo curso
 router.post('/', uploadCursos.array('fotos', 5), (req, res) => {
   const cursoId = uuidv4();
-  const { nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor } = req.body
+  const { nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor, ingredientes } = req.body
+
+  if (!nomeCurso || !categoria || !duracao || !data || !hora || !loja || !valor) {
+    return res.status(400).json({ error: 'Campos obrigatórios: nomeCurso, categoria, duracao, data, hora, loja, valor' });
+  }
 
   db.run(`
-    INSERT INTO cursos 
-    (id, nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO cursos
+    (id, nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor, ingredientes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     cursoId,
     nomeCurso,
@@ -63,7 +67,8 @@ router.post('/', uploadCursos.array('fotos', 5), (req, res) => {
     data,
     hora,
     loja,
-    valor
+    valor,
+    ingredientes || null
   ], function(err) {
     if (err) {
       console.error('Erro ao inserir curso:', err);
@@ -107,14 +112,15 @@ router.put('/:id', uploadCursos.array('fotos', 5), (req, res) => {
 
   db.run(`
     UPDATE cursos SET
-      nomeCurso   = COALESCE(?, nomeCurso),
-      culinarista = COALESCE(?, culinarista),
-      categoria   = COALESCE(?, categoria),
-      duracao     = COALESCE(?, duracao),
-      data        = COALESCE(?, data),
-      hora        = COALESCE(?, hora),
-      loja        = COALESCE(?, loja),
-      valor       = COALESCE(?, valor)
+      nomeCurso    = COALESCE(?, nomeCurso),
+      culinarista  = COALESCE(?, culinarista),
+      categoria    = COALESCE(?, categoria),
+      duracao      = COALESCE(?, duracao),
+      data         = COALESCE(?, data),
+      hora         = COALESCE(?, hora),
+      loja         = COALESCE(?, loja),
+      valor        = COALESCE(?, valor),
+      ingredientes = ?
     WHERE id = ?
   `, [
     req.body.nomeCurso,
@@ -125,6 +131,7 @@ router.put('/:id', uploadCursos.array('fotos', 5), (req, res) => {
     req.body.hora,
     req.body.loja,
     req.body.valor,
+    req.body.ingredientes ?? null,
     id
   ], function(err) {
     if (err) {

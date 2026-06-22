@@ -24,11 +24,11 @@ import { getCourses } from '../../api/courses.services';
 import { DadosContext } from '../../contexts/DadosContext';
 
 export default function DashboardAdmin() {
-    // ========= STATE VAGAS ========= 
-    const [vagasPorCurso, setVagasPorCurso] = useState({});
-    const [refreshVagas, setRefreshVagas] = useState(0);
 
-    // ========= STATE INSCRICOES ========= 
+    // ========= STATE VAGAS =========
+    const [vagasPorCurso, setVagasPorCurso] = useState({});
+
+    // ========= STATE INSCRICOES =========
     const [inscricoes, setInscricoes] = useState([]);
     const [loadingInscricoes, setLoadingInscricoes] = useState(true)
 
@@ -46,34 +46,31 @@ export default function DashboardAdmin() {
     } = useContext(DadosContext);
 
     // ======= FUNCOES =========
-    // layout data
+    useEffect(() => {
+        if (!cursos.length) return;
+        async function loadVagas() {
+            const resultado = {};
+            await Promise.all(
+                cursos.map(async (curso) => {
+                    try {
+                        const assentos = await getSeats(curso.id);
+                        const lista = Array.isArray(assentos) ? assentos : [];
+                        resultado[curso.id] = lista.filter(v => v.status === 'livre').length;
+                    } catch {
+                        resultado[curso.id] = 0;
+                    }
+                })
+            );
+            setVagasPorCurso(resultado);
+        }
+        loadVagas();
+    }, [cursos]);
+
     function layoutData(data) {
         const [ano, mes, dia] = data.split('-');
         return `${dia}/${mes}/${ano}`;
     }
 
-    // BUSCA VAGAS LIVRES E RESERVADAS
-    useEffect(() => {
-        if (!cursos.length) return;
-
-        async function loadVagas() {
-            const resultado = {};
-
-            await Promise.all(
-                cursos.map(async (curso) => {
-                    const assentos = await getSeats(curso.id);
-                    resultado[curso.id] = {
-                        livres: assentos.filter(v => v.status === 'livre').length,
-                        reservadas: assentos.filter(v => v.status === 'reservado').length
-                    };
-                })
-            );
-
-            setVagasPorCurso(resultado);
-        }
-
-        loadVagas();
-    }, [cursos, refreshVagas]);
 
     // BUSCA DADOS DASHBOARD
     useEffect(() => {
@@ -105,19 +102,19 @@ export default function DashboardAdmin() {
                 // =============================================
                 // INSCRICOES
                 const inscricoesPagas = dataInscricoes.filter(i => i.status === 'pago').length;
-                const inscricoesVerificar = dataInscricoes.filter(i => i.status === 'verificar').length;
+                const inscricoesPendentes = dataInscricoes.filter(i => i.status === 'pendente').length;
 
-                const inscricoesHojePagas = dataInscricoes.filter(i => 
+                const inscricoesHojePagas = dataInscricoes.filter(i =>
                     i.status === 'pago' &&
                     idCursosHoje.includes(i.cursoId)
                 ).length;
-                
-                const inscricoesHojeVerificar = dataInscricoes.filter(i => 
-                    i.status === 'verificar' &&
+
+                const inscricoesHojePendentes = dataInscricoes.filter(i =>
+                    i.status === 'pendente' &&
                     idCursosHoje.includes(i.cursoId)
                 ).length;
                 // STATE INSCRICOES
-                setInscricoes({pagas: inscricoesPagas, verificar: inscricoesVerificar, hojePagas: inscricoesHojePagas, hojeVerificar: inscricoesHojeVerificar})
+                setInscricoes({pagas: inscricoesPagas, pendentes: inscricoesPendentes, hojePagas: inscricoesHojePagas, hojePendentes: inscricoesHojePendentes})
 
             } catch(err) {
                 console.log('Nao foi possivel pegar as inscricoes', err);
@@ -217,14 +214,14 @@ export default function DashboardAdmin() {
 
                             <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
                                 <div className='flex items-center justify-between'>
-                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>A Verificar</p>
-                                    <div className='w-8 h-8 rounded-full bg-red-base/10 flex items-center justify-center'>
-                                        <AlertCircle size={15} className='text-red-base' />
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Pendentes</p>
+                                    <div className='w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center'>
+                                        <AlertCircle size={15} className='text-yellow-500' />
                                     </div>
                                 </div>
                                 {loadingInscricoes
                                     ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
-                                    : <p className='text-4xl font-bold text-red-base'>{inscricoes.verificar || 0}</p>
+                                    : <p className='text-4xl font-bold text-yellow-500'>{inscricoes.pendentes || 0}</p>
                                 }
                             </div>
 
@@ -243,14 +240,14 @@ export default function DashboardAdmin() {
 
                             <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
                                 <div className='flex items-center justify-between'>
-                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Verificar Hoje</p>
-                                    <div className='w-8 h-8 rounded-full bg-red-base/10 flex items-center justify-center'>
-                                        <AlertCircle size={15} className='text-red-base' />
+                                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Pendentes Hoje</p>
+                                    <div className='w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center'>
+                                        <AlertCircle size={15} className='text-yellow-500' />
                                     </div>
                                 </div>
                                 {loadingInscricoes
                                     ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
-                                    : <p className='text-4xl font-bold text-red-base'>{inscricoes.hojeVerificar || 0}</p>
+                                    : <p className='text-4xl font-bold text-yellow-500'>{inscricoes.hojePendentes || 0}</p>
                                 }
                             </div>
 
@@ -267,7 +264,6 @@ export default function DashboardAdmin() {
                             ? <p className='text-gray-text/60 text-sm'>Nenhum curso encontrado</p>
                             : <div className='flex gap-4 overflow-x-auto pb-3 -mx-4 px-4'>
                                 {cursos.map(curso => {
-                                    const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
                                     return (
                                         <CourseCard
                                             key={curso.id}
@@ -279,8 +275,8 @@ export default function DashboardAdmin() {
                                             culinarista={curso.culinarista}
                                             duracao={curso.duracao}
                                             categoria={curso.categoria}
-                                            vagasLivres={vagas.livres}
-                                            vagasReservadas={vagas.reservadas}
+                                            vagasLivres={vagasPorCurso[curso.id] ?? '...'}
+                                            vagasReservadas={24}
                                             valor={curso.valor}
                                             className='w-75 shrink-0'
                                             imagem={

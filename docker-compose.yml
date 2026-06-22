@@ -4,10 +4,10 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: cursos-backend
+    container_name: cursos-backend-develop
     restart: unless-stopped
     ports:
-      - "3001:3000"
+      - "3009:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -21,10 +21,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: cursos-frontend
+    container_name: cursos-frontend-develop
     restart: unless-stopped
     ports:
-      - "8081:80"
+      - "8089:80"
     depends_on:
       - backend
     networks:

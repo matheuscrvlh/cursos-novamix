@@ -5,7 +5,7 @@ import { useContext, useState, useEffect } from 'react';
 import { Head } from '../../components/Head'
 
 // LUCIDE ICONS
-import { Trash, Edit, Users, Plus, X, Inbox } from 'lucide-react';
+import { Trash, Edit, Users, Plus, X, Inbox, RefreshCw } from 'lucide-react';
 
 // Components
 import CardDash from '../../components/admin/CardDash'
@@ -17,7 +17,7 @@ import SideBar from '../../layouts/admin/SideBar'
 import TopBar from '../../layouts/admin/TopBar'
 
 // SERVICES
-import { getSeats, getEnrollment, getTotalEnrollment, putEnrollment, deleteEnrollment } from '../../api/enrollment.services';
+import { getSeats, getEnrollment, getTotalEnrollment, putEnrollment, deleteEnrollment, verificarPagamentoMP } from '../../api/enrollment.services';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -47,10 +47,13 @@ export default function RegistrationsAdmin() {
             loadingChildren,
         } = useContext(DadosContext);
 
+    const [ verificandoMP, setVerificandoMP ] = useState(null);
+
     // ======= STATE FILTROS - tabela INSCRIÇÕES (topo)
     const [ filtroTipoInsc, setFiltroTipoInsc ] = useState('todos');
     const [ filtroStatusInsc, setFiltroStatusInsc ] = useState('ativos');
     const [ filtroLojaInsc, setFiltroLojaInsc ] = useState('todas');
+    const [ filtroPagamentoInsc, setFiltroPagamentoInsc ] = useState('todos');
 
     // ======= STATE FILTROS - tabela INSCRIÇÕES POR CURSOS (baixo)
     const [ filtroTipo, setFiltroTipo ] = useState('todos');
@@ -76,7 +79,8 @@ export default function RegistrationsAdmin() {
                           : filtroStatusInsc === 'concluidos' ? curso.data < hoje
                           : true;
         const passaLoja = filtroLojaInsc === 'todas' || curso.loja === filtroLojaInsc;
-        return passaTipo && passaStatus && passaLoja;
+        const passaPagamento = filtroPagamentoInsc === 'todos' || i.status === filtroPagamentoInsc;
+        return passaTipo && passaStatus && passaLoja && passaPagamento;
     });
 
     const cursosExibidos = todosCursos.filter(c => {
@@ -109,6 +113,33 @@ export default function RegistrationsAdmin() {
     }
     // ============== DELETE ==============
 
+    function statusBadgeClass(status) {
+        if (status === 'pago')      return 'bg-green-base';
+        if (status === 'pendente')  return 'bg-yellow-500';
+        if (status === 'cancelado') return 'bg-gray-base';
+        return 'bg-orange-base';
+    }
+
+    async function handleVerificarMP(inscricaoId) {
+        setVerificandoMP(inscricaoId);
+        try {
+            const resultado = await verificarPagamentoMP(inscricaoId);
+            if (!resultado || resultado.message) return;
+
+            const novoStatus = resultado.status;
+            setInscricoes(prev =>
+                prev.map(i => i.id === inscricaoId ? { ...i, status: novoStatus } : i)
+            );
+            setInscricoesTotais(prev =>
+                prev.map(i => i.id === inscricaoId ? { ...i, status: novoStatus } : i)
+            );
+        } catch (err) {
+            console.error('Erro ao verificar pagamento MP:', err);
+        } finally {
+            setVerificandoMP(null);
+        }
+    }
+
     // ============== HANDLES ==============
     // ======== INSCRICOES CURSO
     async function handleInscricoesCurso(cursoId) {
@@ -131,7 +162,8 @@ export default function RegistrationsAdmin() {
                 inscricao.id === inscricaoId
             )
 
-            const novoStatus = inscricaoFiltrada.status === 'verificar' ? 'pago' : 'verificar';
+            const ciclo = { pendente: 'pago', pago: 'cancelado', cancelado: 'pendente', verificar: 'pago' };
+            const novoStatus = ciclo[inscricaoFiltrada.status] || 'pendente';
 
             const inscricaoAlterada = {
                 id: inscricaoFiltrada.id,
@@ -173,7 +205,8 @@ export default function RegistrationsAdmin() {
                 inscricao.id === inscricaoId
             )
 
-            const novoStatus = inscricaoFiltrada.status === 'verificar' ? 'pago' : 'verificar';
+            const ciclo = { pendente: 'pago', pago: 'cancelado', cancelado: 'pendente', verificar: 'pago' };
+            const novoStatus = ciclo[inscricaoFiltrada.status] || 'pendente';
 
             const inscricaoAlterada = {
                 id: inscricaoFiltrada.id,
@@ -355,6 +388,33 @@ export default function RegistrationsAdmin() {
                                     </div>
                                 </div>
 
+                                <span className='hidden md:block w-px h-5 bg-gray-base/30' />
+
+                                {/* Status pagamento */}
+                                <div className='flex items-center gap-2'>
+                                    <span className='text-xs font-medium text-gray-text/50 uppercase tracking-wider w-12 shrink-0 md:hidden'>Pgto</span>
+                                    <div className='flex flex-wrap gap-1.5'>
+                                        {[
+                                            { label: 'Todos', value: 'todos' },
+                                            { label: 'Pago', value: 'pago' },
+                                            { label: 'Pendente', value: 'pendente' },
+                                            { label: 'Cancelado', value: 'cancelado' },
+                                        ].map(f => (
+                                            <button
+                                                key={f.value}
+                                                onClick={() => setFiltroPagamentoInsc(f.value)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+                                                    filtroPagamentoInsc === f.value
+                                                        ? 'bg-gray-text text-white'
+                                                        : 'bg-gray text-gray-text hover:bg-gray-base/20'
+                                                }`}
+                                            >
+                                                {f.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                         <hr className='border-gray-base/30 w-full mb-4'/>
@@ -398,10 +458,21 @@ export default function RegistrationsAdmin() {
                                             {curso?.data && <span>{layoutDataInput(curso.data)}</span>}
                                         </div>
                                         <div className='flex items-center justify-between mt-2'>
-                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full text-white ${i.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full text-white ${statusBadgeClass(i.status)}`}>
                                                 {i.status}
                                             </span>
                                             <div className='flex gap-2'>
+                                                {i.formaPagamento === 'mercadopago' && i.status === 'pendente' && (
+                                                    <Tooltip label='Verificar no MP'>
+                                                        <Button
+                                                            className='bg-blue-base p-2 hover:bg-blue-base/80 text-white'
+                                                            onClick={() => handleVerificarMP(i.id)}
+                                                            disabled={verificandoMP === i.id}
+                                                        >
+                                                            <RefreshCw size={16} className={verificandoMP === i.id ? 'animate-spin' : ''} />
+                                                        </Button>
+                                                    </Tooltip>
+                                                )}
                                                 <Tooltip label='Editar status'>
                                                     <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditInscricoesTotais(i.id)}>
                                                         <Edit size={16} />
@@ -430,11 +501,22 @@ export default function RegistrationsAdmin() {
                                         <p>{curso?.data ? layoutDataInput(curso.data) : '-'}</p>
                                         <p className='truncate'>{i.nome}</p>
                                         <p>{i.assento}</p>
-                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${i.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
+                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${statusBadgeClass(i.status)}`}>
                                             {i.status}
                                         </span>
                                         <p>{i.formaPagamento}</p>
                                         <div className='flex gap-2'>
+                                            {i.formaPagamento === 'mercadopago' && i.status === 'pendente' && (
+                                                <Tooltip label='Verificar no MP'>
+                                                    <Button
+                                                        className='bg-blue-base p-2 hover:bg-blue-base/80 text-white'
+                                                        onClick={() => handleVerificarMP(i.id)}
+                                                        disabled={verificandoMP === i.id}
+                                                    >
+                                                        <RefreshCw size={16} className={verificandoMP === i.id ? 'animate-spin' : ''} />
+                                                    </Button>
+                                                </Tooltip>
+                                            )}
                                             <Tooltip label='Editar status'>
                                                 <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditInscricoesTotais(i.id)}>
                                                     <Edit size={16} />
@@ -635,7 +717,7 @@ export default function RegistrationsAdmin() {
                                         {/* Nome + status */}
                                         <div className='flex items-start justify-between gap-2 mb-2'>
                                             <p className='font-semibold text-gray-text text-sm'>{inscricao.nome}</p>
-                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 text-white ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 text-white ${statusBadgeClass(inscricao.status)}`}>
                                                 {inscricao.status}
                                             </span>
                                         </div>
@@ -649,6 +731,15 @@ export default function RegistrationsAdmin() {
                                         </div>
                                         {/* Ações */}
                                         <div className='flex gap-2'>
+                                            {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pendente' && (
+                                                <Button
+                                                    className='bg-blue-base p-2 hover:bg-blue-base/80 text-white rounded-md'
+                                                    onClick={() => handleVerificarMP(inscricao.id)}
+                                                    disabled={verificandoMP === inscricao.id}
+                                                >
+                                                    <RefreshCw size={16} className={verificandoMP === inscricao.id ? 'animate-spin' : ''} />
+                                                </Button>
+                                            )}
                                             <Button
                                                 className='flex-1 bg-orange-base py-2 hover:bg-orange-light text-white text-xs font-semibold flex items-center justify-center gap-1 rounded-md'
                                                 onClick={() => handleEditInscricao(inscricao.id)}
@@ -696,11 +787,22 @@ export default function RegistrationsAdmin() {
                                             <p>{inscricao.cpf}</p>
                                             <p>{inscricao.celular}</p>
                                             <p>{inscricao.formaPagamento}</p>
-                                            <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${inscricao.status === 'pago' ? 'bg-green-base' : 'bg-red-light'}`}>
+                                            <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${statusBadgeClass(inscricao.status)}`}>
                                                 {inscricao.status}
                                             </span>
                                             <p>{layoutDataSistem(inscricao.dataInscricao)}</p>
                                             <div className='flex gap-2'>
+                                                {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pendente' && (
+                                                    <Tooltip label='Verificar no MP'>
+                                                        <Button
+                                                            className='bg-blue-base p-2 hover:bg-blue-base/80 text-white'
+                                                            onClick={() => handleVerificarMP(inscricao.id)}
+                                                            disabled={verificandoMP === inscricao.id}
+                                                        >
+                                                            <RefreshCw size={16} className={verificandoMP === inscricao.id ? 'animate-spin' : ''} />
+                                                        </Button>
+                                                    </Tooltip>
+                                                )}
                                                 <Tooltip label='Editar status'>
                                                     <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditInscricao(inscricao.id)}>
                                                         <Edit size={16} />

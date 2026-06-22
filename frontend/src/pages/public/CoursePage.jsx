@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Calendar, Clock, User, MapPin, Tag, ArrowLeft } from 'lucide-react'
+import { Calendar, Clock, User, MapPin, Tag, ArrowLeft, XCircle, Loader2 } from 'lucide-react'
 
 import PublicLayout from '../../layouts/public/PublicLayout'
 import { Head } from '../../components/Head'
@@ -36,12 +36,13 @@ export default function CoursePage() {
     const [vagasLivres, setVagasLivres]   = useState(0)
     const [fotoIdx, setFotoIdx]           = useState(0)
     const [step, setStep]                 = useState(null)
+    const [loadingPagamento, setLoadingPagamento] = useState(false)
+    const [erroPagamento, setErroPagamento]       = useState(null)
     const [form, setForm]                 = useState({
         cursoId: id,
         nome: '',
         cpf: '',
         celular: '',
-        formaPagamento: 'mercadopago',
         assento: '',
     })
 
@@ -62,42 +63,57 @@ export default function CoursePage() {
     }, [id])
 
     async function handleSubmit() {
-        const inscricao = await postEnrollment({
-            cursoId: form.cursoId,
-            nome: form.nome,
-            cpf: form.cpf,
-            celular: form.celular,
-            formaPagamento: form.formaPagamento,
-            assento: form.assento,
-        })
+        const assentoId = form.assento
+        const formaPagamento = 'mercadopago'
 
-        if (!inscricao || inscricao.message) {
-            alert(inscricao?.message || 'Erro ao criar inscrição')
-            return
-        }
+        setStep(null)
+        setLoadingPagamento(true)
+        setErroPagamento(null)
 
-        const formaPagamento = form.formaPagamento
-        resetForm()
+        try {
+            const inscricao = await postEnrollment({
+                cursoId: form.cursoId,
+                nome: form.nome,
+                cpf: form.cpf,
+                celular: form.celular,
+                formaPagamento,
+                assento: assentoId,
+            })
 
-        if (formaPagamento === 'mercadopago') {
-            const { checkout_url } = await criarPreferencia(inscricao.id)
-            if (checkout_url) {
-                window.location.href = checkout_url
-            } else {
-                alert('Erro ao gerar link de pagamento. Tente novamente.')
+            if (!inscricao || inscricao.message) {
+                setErroPagamento(inscricao?.message || 'Erro ao criar inscrição. Tente novamente.')
+                return
             }
-        } else {
-            setStep('confirmacao')
-        }
 
-        setAssentos(prev => prev.map(a =>
-            a.id === Number(form.assento) ? { ...a, status: 'reservado' } : a
-        ))
-        setVagasLivres(prev => Math.max(prev - 1, 0))
+            resetForm()
+
+            if (formaPagamento === 'mercadopago') {
+                const prefRes = await criarPreferencia(inscricao.id)
+                if (prefRes?.checkout_url) {
+                    window.location.href = prefRes.checkout_url
+                    return
+                } else {
+                    await fetch(`/api/inscricoes/${inscricao.id}`, { method: 'DELETE' }).catch(() => {})
+                    setErroPagamento('Não foi possível gerar o link de pagamento. Tente novamente.')
+                    return
+                }
+            } else {
+                setStep('confirmacao')
+            }
+
+            setAssentos(prev => prev.map(a =>
+                a.id === Number(assentoId) ? { ...a, status: 'reservado' } : a
+            ))
+            setVagasLivres(prev => Math.max(prev - 1, 0))
+        } catch {
+            setErroPagamento('Ocorreu um erro inesperado. Tente novamente.')
+        } finally {
+            setLoadingPagamento(false)
+        }
     }
 
     function resetForm() {
-        setForm({ cursoId: id, nome: '', cpf: '', celular: '', formaPagamento: 'mercadopago', assento: '' })
+        setForm({ cursoId: id, nome: '', cpf: '', celular: '', assento: '' })
     }
 
     function closeModal() {
@@ -206,6 +222,21 @@ export default function CoursePage() {
                     )}
                 </div>
 
+                {/* Ingredientes */}
+                {curso.ingredientes && curso.ingredientes.trim() && (
+                    <div className='bg-white rounded-xl p-5 shadow-sm mb-8'>
+                        <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-3'>Ingredientes</p>
+                        <ul className='flex flex-col gap-1.5'>
+                            {curso.ingredientes.split('\n').filter(i => i.trim()).map((item, idx) => (
+                                <li key={idx} className='flex items-start gap-2 text-sm text-gray-dark'>
+                                    <span className='mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-base shrink-0' />
+                                    {item.trim()}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
                 {/* Vagas */}
                 <div className='bg-white rounded-xl p-4 shadow-sm mb-8 flex items-center justify-between'>
                     <div>
@@ -231,7 +262,44 @@ export default function CoursePage() {
                 >
                     {vagasLivres === 0 ? 'Vagas esgotadas' : 'Garantir minha vaga'}
                 </Button>
+
+                <p className='text-center text-xs text-gray-text/50 mt-3'>
+                    Reembolso somente antes de 24h do início do curso.
+                </p>
             </div>
+
+            {/* Loading pagamento */}
+            {loadingPagamento && (
+                <div className='flex items-center justify-center fixed inset-0 bg-black/70 z-50'>
+                    <div className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl'>
+                        <Loader2 size={40} className='text-orange-base animate-spin' />
+                        <p className='text-gray-dark font-semibold'>Preparando pagamento...</p>
+                        <p className='text-xs text-gray-text/60'>Você será redirecionado em instantes</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Erro pagamento */}
+            {erroPagamento && (
+                <div
+                    className='flex items-center justify-center fixed inset-0 bg-black/70 z-50 p-4'
+                    onClick={() => setErroPagamento(null)}
+                >
+                    <div
+                        className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 max-w-sm w-full shadow-xl'
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <XCircle size={48} className='text-red-500' />
+                        <p className='text-gray-dark font-semibold text-center'>{erroPagamento}</p>
+                        <Button
+                            className='bg-orange-base text-white hover:bg-orange-light w-full'
+                            onClick={() => { setErroPagamento(null); setStep('form') }}
+                        >
+                            Tentar novamente
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* Modais */}
             <ModalEnrollmentForm

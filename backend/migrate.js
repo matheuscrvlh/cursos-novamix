@@ -5,6 +5,55 @@ const { v4: uuidv4 } = require('uuid');
 
 db.serialize(() => {
   db.run(`
+    CREATE TABLE IF NOT EXISTS cursos (
+      id          TEXT PRIMARY KEY,
+      nomeCurso   TEXT NOT NULL,
+      culinarista TEXT,
+      categoria   TEXT,
+      duracao     TEXT,
+      data        TEXT,
+      hora        TEXT,
+      loja        TEXT,
+      valor       REAL,
+      ingredientes TEXT,
+      ativo       TEXT DEFAULT 'true'
+    )
+  `, err => { if (err) console.error('cursos:', err); else console.log('✓ cursos'); });
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS assentos (
+      id      INTEGER NOT NULL,
+      cursoId TEXT NOT NULL,
+      status  TEXT DEFAULT 'livre',
+      PRIMARY KEY (id, cursoId)
+    )
+  `, err => { if (err) console.error('assentos:', err); else console.log('✓ assentos'); });
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS fotos (
+      id      INTEGER PRIMARY KEY AUTOINCREMENT,
+      cursoId TEXT NOT NULL,
+      url     TEXT NOT NULL
+    )
+  `, err => { if (err) console.error('fotos:', err); else console.log('✓ fotos'); });
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS inscricoes (
+      id             TEXT PRIMARY KEY,
+      cursoId        TEXT NOT NULL,
+      nome           TEXT,
+      cpf            TEXT,
+      celular        TEXT,
+      assento        INTEGER,
+      formaPagamento TEXT DEFAULT 'mercadopago',
+      status         TEXT DEFAULT 'pendente',
+      dataInscricao  TEXT,
+      mp_preference_id TEXT,
+      mp_payment_id    TEXT
+    )
+  `, err => { if (err) console.error('inscricoes:', err); else console.log('✓ inscricoes'); });
+
+  db.run(`
     CREATE TABLE IF NOT EXISTS culinaristas (
       id             TEXT PRIMARY KEY,
       nomeCulinarista TEXT,
@@ -69,6 +118,11 @@ db.serialize(() => {
   `, err => { if (err) console.error('inscricoesInfantis:', err); else console.log('✓ inscricoesInfantis'); });
 
   // ALTER TABLE seguro: ignora erro se coluna já existir
+  db.run('ALTER TABLE cursos ADD COLUMN ingredientes TEXT', err => {
+    if (err && !err.message.includes('duplicate column')) console.error('ingredientes:', err);
+    else console.log('✓ cursos.ingredientes');
+  });
+
   db.run('ALTER TABLE inscricoes ADD COLUMN mp_preference_id TEXT', err => {
     if (err && !err.message.includes('duplicate column')) console.error('mp_preference_id:', err);
     else console.log('✓ inscricoes.mp_preference_id');

@@ -1,5 +1,10 @@
 const URL = '/api'
 
+function authHeader() {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 // ============== POST
 export async function postEnrollment(data) {
     try {
@@ -85,5 +90,18 @@ export async function deleteEnrollment(inscricaoId) {
 
     } catch (err) {
         console.error('Erro ao deletar Inscricao:', err);
+    }
+}
+
+// ============== VERIFICAR PAGAMENTO MP (admin)
+export async function verificarPagamentoMP(inscricaoId) {
+    try {
+        const res = await fetch(`${URL}/pagamentos/verificar/${inscricaoId}`, {
+            method: 'POST',
+            headers: { ...authHeader() },
+        });
+        return res.json();
+    } catch (err) {
+        console.error('Erro ao verificar pagamento MP:', err);
     }
 }
