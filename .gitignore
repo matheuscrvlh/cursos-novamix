@@ -53,7 +53,7 @@ Thumbs.db
 frontend/dist
 
 ############################
-backend/data
-backend/uploads
+backend/data/
+backend/uploads/
 
 
