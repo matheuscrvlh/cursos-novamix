@@ -8,14 +8,16 @@ services:
     restart: unless-stopped
     ports:
       - "3009:3000"
+    env_file:
+      - ./backend/.env
     environment:
       - NODE_ENV=production
       - PORT=3000
     volumes:
-      - sqlite_data:/app/data
-      - uploads_data:/app/uploads
+      - sqlite_data_develop:/app/data
+      - uploads_data_develop:/app/uploads
     networks:
-      - app-network
+      - app-network-develop
 
   frontend:
     build:
@@ -28,12 +30,12 @@ services:
     depends_on:
       - backend
     networks:
-      - app-network
+      - app-network-develop
 
 volumes:
-  sqlite_data:
-  uploads_data:
+  sqlite_data_develop:
+  uploads_data_develop:
 
 networks:
-  app-network:
+  app-network-develop:
     driver: bridge
