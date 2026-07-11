@@ -37,6 +37,10 @@ function isCPFValid(cpf) {
 function isPhoneValid(phone) {
     return (phone || '').replace(/\D/g, '').length >= 10;
 }
+
+function isEmailValid(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email || '').trim());
+}
 // ====================================
 
 export default function ModalEnrollmentForm({
@@ -64,13 +68,15 @@ export default function ModalEnrollmentForm({
     const erroNome     = submitted && !enrollment.nome.trim();
     const erroCPF      = submitted && !isCPFValid(enrollment.cpf);
     const erroTelefone = submitted && !isPhoneValid(enrollment.celular);
+    const erroEmail    = submitted && !isEmailValid(enrollment.email);
 
     function handleSubmit() {
         setSubmitted(true);
         if (
             !enrollment.nome.trim() ||
             !isCPFValid(enrollment.cpf) ||
-            !isPhoneValid(enrollment.celular)
+            !isPhoneValid(enrollment.celular) ||
+            !isEmailValid(enrollment.email)
         ) return;
         onClick();
     }
@@ -146,6 +152,20 @@ export default function ModalEnrollmentForm({
                             onChange={e => setEnrollment({ ...enrollment, celular: maskPhone(e.target.value) })}
                         />
                         {erroTelefone && <p className='text-red-base text-xs'>Telefone incompleto — inclua DDD e número</p>}
+                    </div>
+
+                    {/* Email */}
+                    <div className='flex flex-col gap-1.5'>
+                        <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>E-mail</label>
+                        <Input
+                            type='email'
+                            placeholder='seu@email.com'
+                            value={enrollment.email}
+                            className={`w-full ${erroEmail ? 'ring-1 ring-red-base' : ''}`}
+                            autoComplete='email'
+                            onChange={e => setEnrollment({ ...enrollment, email: e.target.value })}
+                        />
+                        {erroEmail && <p className='text-red-base text-xs'>Informe um e-mail válido</p>}
                     </div>
 
                     <Button

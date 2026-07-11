@@ -1,5 +1,10 @@
 const URL = '/api'
 
+function authHeader() {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function getBanners(posicao) {
     try {
         const query = posicao ? `?posicao=${posicao}` : ''
@@ -15,6 +20,7 @@ export async function postBanner(formData) {
     try {
         const res = await fetch(`${URL}/banners`, {
             method: 'POST',
+            headers: { ...authHeader() },
             body: formData
         })
         return res.json()
@@ -28,7 +34,7 @@ export async function putBanner(id, data) {
     try {
         const res = await fetch(`${URL}/banners/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeader() },
             body: JSON.stringify(data)
         })
         return res.json()
@@ -40,7 +46,7 @@ export async function putBanner(id, data) {
 
 export async function deleteBanner(id) {
     try {
-        await fetch(`${URL}/banners/${id}`, { method: 'DELETE' })
+        await fetch(`${URL}/banners/${id}`, { method: 'DELETE', headers: { ...authHeader() } })
     } catch (err) {
         console.error('Erro ao deletar banner:', err)
         throw err

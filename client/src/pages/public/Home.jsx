@@ -56,6 +56,7 @@ export default function Home() {
         nome: '',
         cpf: '',
         celular: '',
+        email: '',
         assento: ''
     });
 
@@ -100,6 +101,7 @@ export default function Home() {
     const [loadingPagamento, setLoadingPagamento] = useState(false)
     const [erroPagamento, setErroPagamento] = useState(null)
     const [inscricaoAtiva, setInscricaoAtiva] = useState(null)
+    const [payerEmail, setPayerEmail] = useState(null)
     const [pagamentoAprovado, setPagamentoAprovado] = useState(true)
 
     // ====== FUNCOES
@@ -114,6 +116,7 @@ export default function Home() {
                 nome: enrollment.nome,
                 cpf: enrollment.cpf,
                 celular: enrollment.celular,
+                email: enrollment.email,
                 formaPagamento: 'mercadopago',
                 assento: enrollment.assento
             });
@@ -127,7 +130,8 @@ export default function Home() {
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ event: 'form_submit_success', form_name: 'cadastro_curso' });
 
-            setEnrollment({ cursoId: '', nome: '', cpf: '', celular: '', assento: '' });
+            setPayerEmail(enrollment.email)
+            setEnrollment({ cursoId: '', nome: '', cpf: '', celular: '', email: '', assento: '' });
 
             setInscricaoAtiva(res.id)
             setStep('pagamento')
@@ -292,9 +296,10 @@ export default function Home() {
 
     const closeModal = () => {
         setStep(null)
-        setEnrollment({ cursoId: '', nome: '', cpf: '', celular: '', assento: '' })
+        setEnrollment({ cursoId: '', nome: '', cpf: '', celular: '', email: '', assento: '' })
         setCursoSelecionado('')
         setInscricaoAtiva(null)
+        setPayerEmail(null)
         setRefreshVagas(prev => prev + 1);
         setRefreshVagasInfantis(prev => prev + 1);
     }
@@ -395,6 +400,7 @@ export default function Home() {
                     isOpen={step === 'pagamento'}
                     inscricaoId={inscricaoAtiva}
                     valor={cursoSelecionadoValor}
+                    payerEmail={payerEmail}
                     onSuccess={(status) => {
                         setPagamentoAprovado(status === 'approved')
                         setStep('confirmacao')

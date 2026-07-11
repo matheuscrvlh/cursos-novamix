@@ -1,92 +1,99 @@
-import { useEffect, useRef, useState } from 'react'
-import { X, Loader2, Copy, Check } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { X, Loader2, Copy, Check, AlertCircle, ArrowLeft } from 'lucide-react'
 
-export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, onSuccess, onClose }) {
+export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, payerEmail, onSuccess, onClose }) {
     const brickRef = useRef(null)
     const pollRef = useRef(null)
     const [pixInfo, setPixInfo] = useState(null)
     const [copied, setCopied] = useState(false)
+    const [erro, setErro] = useState(null)
+
+    const montarBrick = useCallback(() => {
+        if (!window.MercadoPago) return
+
+        if (brickRef.current) {
+            brickRef.current.unmount()
+            brickRef.current = null
+        }
+
+        const PUBLIC_KEY = import.meta.env.VITE_MP_PUBLIC_KEY
+        const mp = new window.MercadoPago(PUBLIC_KEY, { locale: 'pt-BR' })
+
+        mp.bricks().create('payment', 'mp-card-brick-container', {
+            initialization: {
+                amount: Number(valor),
+                payer: payerEmail ? { email: payerEmail } : undefined,
+            },
+            customization: {
+                visual: { style: { theme: 'default' } },
+                paymentMethods: {
+                    creditCard: 'all',
+                    debitCard: 'all',
+                    bankTransfer: 'all',
+                    maxInstallments: 1,
+                },
+            },
+            callbacks: {
+                onReady: () => {},
+                onSubmit: ({ formData }) => {
+                    setErro(null)
+                    return new Promise((resolve, reject) => {
+                        fetch('/api/pagamentos/processar-pagamento', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ inscricaoId, ...formData, payer: { email: formData.payer?.email || payerEmail } }),
+                        })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.status === 'approved') {
+                                    resolve()
+                                    onSuccess('approved')
+                                } else if (formData.payment_method_id === 'pix' && data.status === 'pending') {
+                                    resolve()
+                                    if (brickRef.current) {
+                                        brickRef.current.unmount()
+                                        brickRef.current = null
+                                    }
+                                    setPixInfo({ qrCode: data.qr_code, qrCodeBase64: data.qr_code_base64 })
+                                } else if (data.status === 'pending' || data.status === 'in_process') {
+                                    resolve()
+                                    onSuccess(data.status)
+                                } else {
+                                    const mensagem = data.message || 'Pagamento não aprovado. Verifique os dados e tente novamente.'
+                                    setErro(mensagem)
+                                    reject(new Error(mensagem))
+                                }
+                            })
+                            .catch(err => {
+                                setErro('Não foi possível conectar ao servidor de pagamento. Tente novamente.')
+                                reject(err)
+                            })
+                    })
+                },
+                onError: (err) => {
+                    console.error('[MP Brick]', err)
+                },
+            },
+        }).then(brick => {
+            brickRef.current = brick
+        })
+    }, [inscricaoId, valor, payerEmail, onSuccess])
 
     useEffect(() => {
         if (!isOpen || !inscricaoId || !valor) return
 
-        const PUBLIC_KEY = import.meta.env.VITE_MP_PUBLIC_KEY
-
-        function initBrick() {
-            if (!window.MercadoPago) return
-
-            if (brickRef.current) {
-                brickRef.current.unmount()
-                brickRef.current = null
-            }
-
-            const mp = new window.MercadoPago(PUBLIC_KEY, { locale: 'pt-BR' })
-
-            mp.bricks().create('payment', 'mp-card-brick-container', {
-                initialization: {
-                    amount: Number(valor),
-                },
-                customization: {
-                    visual: { style: { theme: 'default' } },
-                    paymentMethods: {
-                        creditCard: 'all',
-                        debitCard: 'all',
-                        bankTransfer: 'all',
-                        maxInstallments: 1,
-                    },
-                },
-                callbacks: {
-                    onReady: () => {},
-                    onSubmit: ({ formData }) => {
-                        return new Promise((resolve, reject) => {
-                            fetch('/api/pagamentos/processar-pagamento', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ inscricaoId, ...formData }),
-                            })
-                                .then(r => r.json())
-                                .then(data => {
-                                    if (data.status === 'approved') {
-                                        resolve()
-                                        onSuccess('approved')
-                                    } else if (formData.payment_method_id === 'pix' && data.status === 'pending') {
-                                        resolve()
-                                        if (brickRef.current) {
-                                            brickRef.current.unmount()
-                                            brickRef.current = null
-                                        }
-                                        setPixInfo({ qrCode: data.qr_code, qrCodeBase64: data.qr_code_base64 })
-                                    } else if (data.status === 'pending' || data.status === 'in_process') {
-                                        resolve()
-                                        onSuccess(data.status)
-                                    } else {
-                                        reject(new Error(data.status_detail || 'Pagamento não aprovado'))
-                                    }
-                                })
-                                .catch(reject)
-                        })
-                    },
-                    onError: (err) => {
-                        console.error('[MP Brick]', err)
-                    },
-                },
-            }).then(brick => {
-                brickRef.current = brick
-            })
-        }
-
         if (window.MercadoPago) {
-            initBrick()
+            montarBrick()
         } else {
             const existing = document.getElementById('mp-sdk-script')
             if (!existing) {
                 const script = document.createElement('script')
                 script.id = 'mp-sdk-script'
                 script.src = 'https://sdk.mercadopago.com/js/v2'
-                script.onload = initBrick
+                script.onload = montarBrick
                 document.body.appendChild(script)
             } else {
-                existing.addEventListener('load', initBrick)
+                existing.addEventListener('load', montarBrick)
             }
         }
 
@@ -97,8 +104,9 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, onS
             }
             setPixInfo(null)
             setCopied(false)
+            setErro(null)
         }
-    }, [isOpen, inscricaoId, valor])
+    }, [isOpen, inscricaoId, valor, montarBrick])
 
     // Poll pelo status da inscricao enquanto o QR do Pix estiver visivel
     useEffect(() => {
@@ -117,7 +125,7 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, onS
         }, 4000)
 
         return () => clearInterval(pollRef.current)
-    }, [pixInfo, inscricaoId])
+    }, [pixInfo, inscricaoId, onSuccess])
 
     function copiarCodigo() {
         if (!pixInfo?.qrCode) return
@@ -125,6 +133,13 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, onS
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
         })
+    }
+
+    // Volta da tela do QR pra seleção de forma de pagamento, sem fechar o modal
+    function trocarFormaPagamento() {
+        setPixInfo(null)
+        setErro(null)
+        montarBrick()
     }
 
     if (!isOpen) return null
@@ -151,6 +166,21 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, onS
                     </button>
                 </div>
                 <div className='p-5'>
+                    {pixInfo && (
+                        <button
+                            onClick={trocarFormaPagamento}
+                            className='flex items-center gap-1.5 text-gray-text/60 hover:text-gray-dark text-xs font-medium mb-4 cursor-pointer'
+                        >
+                            <ArrowLeft size={14} />
+                            Trocar forma de pagamento
+                        </button>
+                    )}
+                    {erro && (
+                        <div className='flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 mb-4'>
+                            <AlertCircle size={16} className='shrink-0 mt-0.5' />
+                            <p>{erro}</p>
+                        </div>
+                    )}
                     {pixInfo ? (
                         <div className='flex flex-col items-center gap-4 text-center'>
                             {pixInfo.qrCodeBase64 && (

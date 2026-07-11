@@ -47,6 +47,7 @@ export default function Courses() {
         nome: '',
         cpf: '',
         celular: '',
+        email: '',
         formaPagamento: 'mercadopago',
         assento: ''
     });
@@ -76,6 +77,7 @@ export default function Courses() {
     const [loadingPagamento, setLoadingPagamento] = useState(false)
     const [erroPagamento, setErroPagamento] = useState(null)
     const [inscricaoAtiva, setInscricaoAtiva] = useState(null)
+    const [payerEmail, setPayerEmail] = useState(null)
     const [pagamentoAprovado, setPagamentoAprovado] = useState(true)
 
     // ========= FUNCOES  =========
@@ -91,6 +93,7 @@ export default function Courses() {
                 nome: form.nome,
                 cpf: form.cpf,
                 celular: form.celular,
+                email: form.email,
                 formaPagamento: 'mercadopago',
                 assento: form.assento,
             });
@@ -100,7 +103,8 @@ export default function Courses() {
                 return;
             }
 
-            setForm({ cursoId: '', nome: '', cpf: '', celular: '', assento: '' });
+            setPayerEmail(form.email)
+            setForm({ cursoId: '', nome: '', cpf: '', celular: '', email: '', assento: '' });
 
             setInscricaoAtiva(inscricao.id)
             setStep('pagamento')
@@ -196,9 +200,10 @@ export default function Courses() {
 
     const closeModal = () => {
         setStep(null)
-        setForm({ cursoId: '', nome: '', cpf: '', celular: '', assento: '' })
+        setForm({ cursoId: '', nome: '', cpf: '', celular: '', email: '', assento: '' })
         setCursoSelecionado('')
         setInscricaoAtiva(null)
+        setPayerEmail(null)
         setRefreshVagas(prev => prev + 1);
     }
 
@@ -275,6 +280,7 @@ export default function Courses() {
                     isOpen={step === 'pagamento'}
                     inscricaoId={inscricaoAtiva}
                     valor={cursoSelecionadoValor}
+                    payerEmail={payerEmail}
                     onSuccess={(status) => {
                         setPagamentoAprovado(status === 'approved')
                         setStep('confirmacao')

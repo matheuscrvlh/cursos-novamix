@@ -29,6 +29,7 @@ export default function CoursePage() {
     const [fotoIdx, setFotoIdx]           = useState(0)
     const [step, setStep]                 = useState(null)
     const [inscricaoAtiva, setInscricaoAtiva]     = useState(null)
+    const [payerEmail, setPayerEmail]             = useState(null)
     const [loadingPagamento, setLoadingPagamento] = useState(false)
     const [erroPagamento, setErroPagamento]       = useState(null)
     const [pagamentoAprovado, setPagamentoAprovado] = useState(true)
@@ -37,6 +38,7 @@ export default function CoursePage() {
         nome: '',
         cpf: '',
         celular: '',
+        email: '',
         assento: '',
     })
 
@@ -70,6 +72,7 @@ export default function CoursePage() {
                 nome: form.nome,
                 cpf: form.cpf,
                 celular: form.celular,
+                email: form.email,
                 formaPagamento,
                 assento: assentoId,
             })
@@ -79,6 +82,7 @@ export default function CoursePage() {
                 return
             }
 
+            setPayerEmail(form.email)
             resetForm()
 
             setInscricaoAtiva(inscricao.id)
@@ -96,12 +100,13 @@ export default function CoursePage() {
     }
 
     function resetForm() {
-        setForm({ cursoId: id, nome: '', cpf: '', celular: '', assento: '' })
+        setForm({ cursoId: id, nome: '', cpf: '', celular: '', email: '', assento: '' })
     }
 
     function closeModal() {
         setStep(null)
         setInscricaoAtiva(null)
+        setPayerEmail(null)
         resetForm()
     }
 
@@ -306,6 +311,7 @@ export default function CoursePage() {
                 isOpen={step === 'pagamento'}
                 inscricaoId={inscricaoAtiva}
                 valor={curso?.valor}
+                payerEmail={payerEmail}
                 onSuccess={(status) => {
                     setPagamentoAprovado(status === 'approved')
                     setStep('confirmacao')

@@ -1,10 +1,16 @@
 const URL = '/api'
 
+function authHeader() {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 // ============== POST
 export async function postCourse(formData) {
     try {
         const res = await fetch(`${URL}/cursos`, {
             method: "POST",
+            headers: { ...authHeader() },
             body: formData
         });
 
@@ -43,6 +49,7 @@ export async function putCourse(cursoId, body) {
     try {
         const res = await fetch((`${URL}/cursos/${cursoId}`), {
             method: 'PUT',
+            headers: { ...authHeader() },
             body: body
         });
 
@@ -57,7 +64,8 @@ export async function putCourse(cursoId, body) {
 export async function deleteCourse(cursoId) {
     try {
         await fetch((`${URL}/cursos/${cursoId}`), {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { ...authHeader() }
         });
 
     } catch (err) {

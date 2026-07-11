@@ -40,7 +40,8 @@ export async function getSeats(cursoId) {
 export async function getEnrollment(cursoId) {
     try {
         const res = await fetch((`${URL}/inscricoes/curso/${cursoId}`), {
-            method: 'GET'
+            method: 'GET',
+            headers: { ...authHeader() }
         });
 
         return res.json()
@@ -53,7 +54,8 @@ export async function getEnrollment(cursoId) {
 export async function getTotalEnrollment() {
     try {
         const res = await fetch((`${URL}/inscricoes`), {
-            method: 'GET'
+            method: 'GET',
+            headers: { ...authHeader() }
         });
 
         return res.json()
@@ -69,10 +71,11 @@ export async function putEnrollment(inscricaoId, data) {
         const res = await fetch((`${URL}/inscricoes/${inscricaoId}`), {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                ...authHeader()
             },
             body: JSON.stringify(data)
-        }); 
+        });
 
         return res.json()
 
@@ -85,7 +88,8 @@ export async function putEnrollment(inscricaoId, data) {
 export async function deleteEnrollment(inscricaoId) {
     try {
         await fetch((`${URL}/inscricoes/${inscricaoId}`), {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { ...authHeader() }
         });
 
     } catch (err) {

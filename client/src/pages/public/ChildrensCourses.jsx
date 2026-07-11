@@ -1,5 +1,8 @@
-// REACT 
+// REACT
 import { useContext, useState, useEffect } from 'react';
+
+// ICONS
+import { Loader2, XCircle } from 'lucide-react'
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -15,6 +18,7 @@ import ModalBranch from '../../components/public/ModalBranch';
 import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
+import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnrollmentPayment';
 
 // SECTIONS
 import AllChildrensCoursesSections from '../../sections/childrens/AllChildrensCoursesSections';
@@ -41,7 +45,8 @@ export default function ChildrensCourses() {
         cursoId: '',
         nome: '',
         cpf: '',
-        telefone: '',
+        celular: '',
+        email: '',
         assento: ''
     });
 
@@ -67,33 +72,48 @@ export default function ChildrensCourses() {
 
     // ========= STATE MODAL =========
     const [step, setStep] = useState(null)
+    const [loadingPagamento, setLoadingPagamento] = useState(false)
+    const [erroPagamento, setErroPagamento] = useState(null)
+    const [inscricaoAtiva, setInscricaoAtiva] = useState(null)
+    const [payerEmail, setPayerEmail] = useState(null)
+    const [pagamentoAprovado, setPagamentoAprovado] = useState(true)
 
     // ========= FUNCOES  =========
-    // =========  FUNCOES CADASTRO CLIENTE ========= 
-    function handleSubmit() {
-        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
-            alert('Preencha todos os campos.')
-            return;
+    // =========  FUNCOES CADASTRO CLIENTE =========
+    async function handleSubmit() {
+        setStep(null)
+        setLoadingPagamento(true)
+        setErroPagamento(null)
+
+        try {
+            const inscricao = await postEnrollment({
+                cursoId: form.cursoId,
+                nome: form.nome,
+                cpf: form.cpf,
+                celular: form.celular,
+                email: form.email,
+                formaPagamento: 'mercadopago',
+                assento: form.assento,
+            });
+
+            if (!inscricao || inscricao.message) {
+                setErroPagamento(inscricao?.message || 'Erro ao criar inscrição. Tente novamente.');
+                return;
+            }
+
+            setPayerEmail(form.email)
+            setForm({ cursoId: '', nome: '', cpf: '', celular: '', email: '', assento: '' });
+
+            setInscricaoAtiva(inscricao.id)
+            setStep('pagamento')
+        } catch {
+            setErroPagamento('Ocorreu um erro inesperado. Tente novamente.');
+        } finally {
+            setLoadingPagamento(false)
         }
-
-        postEnrollment({
-            cursoId: form.cursoId,
-            nome: form.nome,
-            cpf: form.cpf,
-            celular: form.celular,
-            formaPagamento: form.formaPagamento,
-            assento: form.assento
-        });
-
-        setForm({
-            cursoId: '',
-            nome: '',
-            cpf: '',
-            celular: '',
-            formaPagamento: '',
-            assento: ''
-        });
     }
+
+    const cursoSelecionadoValor = cursosInfantis.find(c => c.id === cursoSelecionado)?.valor
 
     useEffect(() => {
         if (!cursoSelecionado) {
@@ -174,26 +194,14 @@ export default function ChildrensCourses() {
         setCursoSelecionado(cursoId)
     }
 
-    const openAssento = () => {
-        if (!form.nome || !form.cpf || !form.celular || !form.formaPagamento) {
-            alert('Preencha todos os campos.')
-            return;
-        }
-        setStep('assento')
-    }
-
-    const openConfirmacao = () => {
-        if (!form.assento) {
-            alert('Marque algum assento.');
-            return
-        }
-        setStep('confirmacao')
-    }
+    const openAssento = () => setStep('assento')
 
     const closeModal = () => {
         setStep(null)
-        setForm({ cursoId: '', nome: '', cpf: '', telefone: '', formaPagamento: '', assento: '' })
+        setForm({ cursoId: '', nome: '', cpf: '', celular: '', email: '', assento: '' })
         setCursoSelecionado('')
+        setInscricaoAtiva(null)
+        setPayerEmail(null)
         setRefreshVagas(prev => prev + 1);
     }
 
@@ -257,22 +265,65 @@ export default function ChildrensCourses() {
                 {/* ======== MODAL ASSENTOS */}
                 <ModalEnrollmentSeats
                     isOpen={step === 'assento'}
-                    onClick={() => {
-                        handleSubmit()
-                        openConfirmacao()
-                    }}
+                    onClick={handleSubmit}
                     onClose={closeModal}
                     enrollment={form}
                     setEnrollment={setForm}
                     assentos={assentos}
                 />
 
+                {/* ======== MODAL PAGAMENTO ======== */}
+                <ModalEnrollmentPayment
+                    isOpen={step === 'pagamento'}
+                    inscricaoId={inscricaoAtiva}
+                    valor={cursoSelecionadoValor}
+                    payerEmail={payerEmail}
+                    onSuccess={(status) => {
+                        setPagamentoAprovado(status === 'approved')
+                        setStep('confirmacao')
+                    }}
+                    onClose={closeModal}
+                />
+
                 {/* ======== MODAL SUCESS ======== */}
                 <ModalEnrollmentSucess
                     isOpen={step === 'confirmacao'}
+                    pago={pagamentoAprovado}
                     onClick={() => closeModal()}
                     onClose={closeModal}
                 />
+
+                {/* Loading pagamento */}
+                {loadingPagamento && (
+                    <div className='flex items-center justify-center fixed inset-0 bg-black/70 z-50'>
+                        <div className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl'>
+                            <Loader2 size={40} className='text-orange-base animate-spin' />
+                            <p className='text-gray-dark font-semibold'>Preparando pagamento...</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Erro pagamento */}
+                {erroPagamento && (
+                    <div
+                        className='flex items-center justify-center fixed inset-0 bg-black/70 z-50 p-4'
+                        onClick={() => setErroPagamento(null)}
+                    >
+                        <div
+                            className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 max-w-sm w-full shadow-xl'
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <XCircle size={48} className='text-red-500' />
+                            <p className='text-gray-dark font-semibold text-center'>{erroPagamento}</p>
+                            <button
+                                className='bg-orange-base text-white hover:bg-orange-light w-full py-2.5 rounded-lg font-semibold'
+                                onClick={() => { setErroPagamento(null); setStep('form') }}
+                            >
+                                Tentar novamente
+                            </button>
+                        </div>
+                    </div>
+                )}
 
             </section>
         </PublicLayout>
