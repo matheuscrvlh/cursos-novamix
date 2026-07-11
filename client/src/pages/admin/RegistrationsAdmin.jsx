@@ -48,6 +48,12 @@ export default function RegistrationsAdmin() {
         } = useContext(DadosContext);
 
     const [ verificandoMP, setVerificandoMP ] = useState(null);
+    const [ mensagem, setMensagem ] = useState(null); // { tipo: 'sucesso' | 'erro' | 'info', texto }
+
+    function mostrarMensagem(tipo, texto) {
+        setMensagem({ tipo, texto });
+        setTimeout(() => setMensagem(null), 5000);
+    }
 
     // ======= STATE FILTROS - tabela INSCRIÇÕES (topo)
     const [ filtroTipoInsc, setFiltroTipoInsc ] = useState('todos');
@@ -124,7 +130,11 @@ export default function RegistrationsAdmin() {
         setVerificandoMP(inscricaoId);
         try {
             const resultado = await verificarPagamentoMP(inscricaoId);
-            if (!resultado || resultado.message) return;
+
+            if (!resultado || resultado.message) {
+                mostrarMensagem('erro', resultado?.message || 'Erro ao verificar pagamento. Tente novamente.');
+                return;
+            }
 
             const novoStatus = resultado.status;
             setInscricoes(prev =>
@@ -133,8 +143,17 @@ export default function RegistrationsAdmin() {
             setInscricoesTotais(prev =>
                 prev.map(i => i.id === inscricaoId ? { ...i, status: novoStatus } : i)
             );
+
+            if (novoStatus === 'pago') {
+                mostrarMensagem('sucesso', 'Pagamento confirmado no Mercado Pago!');
+            } else if (novoStatus === 'cancelado') {
+                mostrarMensagem('erro', 'Pagamento recusado/cancelado no Mercado Pago. A vaga foi liberada.');
+            } else {
+                mostrarMensagem('info', 'Ainda sem confirmação — o pagamento continua pendente no Mercado Pago.');
+            }
         } catch (err) {
             console.error('Erro ao verificar pagamento MP:', err);
+            mostrarMensagem('erro', 'Erro ao verificar pagamento. Tente novamente.');
         } finally {
             setVerificandoMP(null);
         }
@@ -162,7 +181,7 @@ export default function RegistrationsAdmin() {
                 inscricao.id === inscricaoId
             )
 
-            const ciclo = { pendente: 'pago', pago: 'cancelado', cancelado: 'pendente', verificar: 'pago' };
+            const ciclo = { pendente: 'pago', pago: 'cancelado', cancelado: 'pendente' };
             const novoStatus = ciclo[inscricaoFiltrada.status] || 'pendente';
 
             const inscricaoAlterada = {
@@ -177,25 +196,30 @@ export default function RegistrationsAdmin() {
                 status: novoStatus
             };
 
-            setInscricoes(prev => 
-                prev.map(inscricao => 
+            const resultado = await putEnrollment(inscricaoAlterada.id, inscricaoAlterada);
+            if (!resultado?.ok) {
+                mostrarMensagem('erro', resultado?.message || 'Erro ao alterar status. Tente novamente.');
+                return;
+            }
+
+            setInscricoes(prev =>
+                prev.map(inscricao =>
                     inscricao.id === inscricaoAlterada.id
                     ? inscricaoAlterada
                     : inscricao
                 )
             );
 
-            setInscricoesTotais(prev => 
-                prev.map(inscricao => 
+            setInscricoesTotais(prev =>
+                prev.map(inscricao =>
                     inscricao.id === inscricaoAlterada.id
                     ? inscricaoAlterada
                     : inscricao
                 )
             );
-
-            putEnrollment(inscricaoAlterada.id, inscricaoAlterada);
         } catch(err) {
             console.log('Erro ao editar inscricao', err)
+            mostrarMensagem('erro', 'Erro ao alterar status. Tente novamente.');
         }
     }
 
@@ -205,7 +229,7 @@ export default function RegistrationsAdmin() {
                 inscricao.id === inscricaoId
             )
 
-            const ciclo = { pendente: 'pago', pago: 'cancelado', cancelado: 'pendente', verificar: 'pago' };
+            const ciclo = { pendente: 'pago', pago: 'cancelado', cancelado: 'pendente' };
             const novoStatus = ciclo[inscricaoFiltrada.status] || 'pendente';
 
             const inscricaoAlterada = {
@@ -220,17 +244,22 @@ export default function RegistrationsAdmin() {
                 status: novoStatus
             };
 
-            setInscricoesTotais(prev => 
-                prev.map(inscricao => 
+            const resultado = await putEnrollment(inscricaoAlterada.id, inscricaoAlterada);
+            if (!resultado?.ok) {
+                mostrarMensagem('erro', resultado?.message || 'Erro ao alterar status. Tente novamente.');
+                return;
+            }
+
+            setInscricoesTotais(prev =>
+                prev.map(inscricao =>
                     inscricao.id === inscricaoAlterada.id
                     ? inscricaoAlterada
                     : inscricao
                 )
             );
-
-            putEnrollment(inscricaoAlterada.id, inscricaoAlterada);
         } catch(err) {
             console.log('Erro ao editar inscricao', err)
+            mostrarMensagem('erro', 'Erro ao alterar status. Tente novamente.');
         }
     }
     // ============== HANDLES ==============
@@ -821,6 +850,19 @@ export default function RegistrationsAdmin() {
                             }
                         </div>
                     </Modal>
+
+                    {mensagem && (
+                        <div
+                            className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-lg px-4 py-3 shadow-lg text-sm font-medium text-white cursor-pointer ${
+                                mensagem.tipo === 'sucesso' ? 'bg-green-base'
+                                : mensagem.tipo === 'erro'   ? 'bg-red-base'
+                                : 'bg-blue-base'
+                            }`}
+                            onClick={() => setMensagem(null)}
+                        >
+                            {mensagem.texto}
+                        </div>
+                    )}
                 </section>
             </main>
         </div>

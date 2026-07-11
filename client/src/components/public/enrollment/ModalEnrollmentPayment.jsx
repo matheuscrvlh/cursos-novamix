@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { X, Loader2, Copy, Check, AlertCircle, ArrowLeft } from 'lucide-react'
 
-export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, payerEmail, onSuccess, onClose }) {
+export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, payerEmail, onSuccess, onClose, onTrocarAssento }) {
     const brickRef = useRef(null)
     const pollRef = useRef(null)
     const [pixInfo, setPixInfo] = useState(null)
@@ -166,14 +166,27 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
                     </button>
                 </div>
                 <div className='p-5'>
-                    {pixInfo && (
-                        <button
-                            onClick={trocarFormaPagamento}
-                            className='flex items-center gap-1.5 text-gray-text/60 hover:text-gray-dark text-xs font-medium mb-4 cursor-pointer'
-                        >
-                            <ArrowLeft size={14} />
-                            Trocar forma de pagamento
-                        </button>
+                    {(onTrocarAssento || pixInfo) && (
+                        <div className='flex flex-wrap items-center gap-x-4 gap-y-2 mb-4'>
+                            {onTrocarAssento && (
+                                <button
+                                    onClick={onTrocarAssento}
+                                    className='flex items-center gap-1.5 text-gray-text/60 hover:text-gray-dark text-xs font-medium cursor-pointer'
+                                >
+                                    <ArrowLeft size={14} />
+                                    Trocar assento
+                                </button>
+                            )}
+                            {pixInfo && (
+                                <button
+                                    onClick={trocarFormaPagamento}
+                                    className='flex items-center gap-1.5 text-gray-text/60 hover:text-gray-dark text-xs font-medium cursor-pointer'
+                                >
+                                    <ArrowLeft size={14} />
+                                    Trocar forma de pagamento
+                                </button>
+                            )}
+                        </div>
                     )}
                     {erro && (
                         <div className='flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 mb-4'>

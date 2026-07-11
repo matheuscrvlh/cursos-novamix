@@ -8,7 +8,7 @@ import { Menu, Loader2, XCircle } from 'lucide-react'
 import { DadosContext } from '../../contexts/DadosContext';
 
 // SERVICES
-import { postEnrollment, getSeats } from '../../api/enrollment.services';
+import { postEnrollment, putSeatChange, getSeats } from '../../api/enrollment.services';
 
 // HOOKS
 import { useThemeColor } from '../../hooks/useThemeColor';
@@ -77,6 +77,7 @@ export default function Courses() {
     const [loadingPagamento, setLoadingPagamento] = useState(false)
     const [erroPagamento, setErroPagamento] = useState(null)
     const [inscricaoAtiva, setInscricaoAtiva] = useState(null)
+    const [assentoAtual, setAssentoAtual] = useState(null)
     const [payerEmail, setPayerEmail] = useState(null)
     const [pagamentoAprovado, setPagamentoAprovado] = useState(true)
 
@@ -88,6 +89,19 @@ export default function Courses() {
         setErroPagamento(null)
 
         try {
+            // já existe inscrição ativa: está só trocando de assento, não criando outra
+            if (inscricaoAtiva) {
+                const resultado = await putSeatChange(inscricaoAtiva, form.assento);
+                if (!resultado?.ok) {
+                    setErroPagamento(resultado?.message || 'Não foi possível trocar de assento. Tente novamente.');
+                    setStep('assento');
+                    return;
+                }
+                setAssentoAtual(form.assento);
+                setStep('pagamento');
+                return;
+            }
+
             const inscricao = await postEnrollment({
                 cursoId: form.cursoId,
                 nome: form.nome,
@@ -104,8 +118,9 @@ export default function Courses() {
             }
 
             setPayerEmail(form.email)
-            setForm({ cursoId: '', nome: '', cpf: '', celular: '', email: '', assento: '' });
+            setForm(prev => ({ ...prev, nome: '', cpf: '', celular: '', email: '' }));
 
+            setAssentoAtual(inscricao.assento)
             setInscricaoAtiva(inscricao.id)
             setStep('pagamento')
         } catch {
@@ -113,6 +128,17 @@ export default function Courses() {
         } finally {
             setLoadingPagamento(false)
         }
+    }
+
+    // Volta pra tela de assentos sem cancelar a inscrição já criada
+    async function handleTrocarAssento() {
+        try {
+            const dados = await getSeats(cursoSelecionado);
+            setAssentos(dados);
+        } catch (err) {
+            console.error(err);
+        }
+        setStep('assento');
     }
 
     const cursoSelecionadoValor = cursos.find(c => c.id === cursoSelecionado)?.valor
@@ -203,6 +229,7 @@ export default function Courses() {
         setForm({ cursoId: '', nome: '', cpf: '', celular: '', email: '', assento: '' })
         setCursoSelecionado('')
         setInscricaoAtiva(null)
+        setAssentoAtual(null)
         setPayerEmail(null)
         setRefreshVagas(prev => prev + 1);
     }
@@ -273,6 +300,7 @@ export default function Courses() {
                     enrollment={form}
                     setEnrollment={setForm}
                     assentos={assentos}
+                    assentoAtual={assentoAtual}
                 />
 
                 {/* ======== MODAL PAGAMENTO ======== */}
@@ -281,6 +309,7 @@ export default function Courses() {
                     inscricaoId={inscricaoAtiva}
                     valor={cursoSelecionadoValor}
                     payerEmail={payerEmail}
+                    onTrocarAssento={handleTrocarAssento}
                     onSuccess={(status) => {
                         setPagamentoAprovado(status === 'approved')
                         setStep('confirmacao')
@@ -320,7 +349,7 @@ export default function Courses() {
                             <p className='text-gray-dark font-semibold text-center'>{erroPagamento}</p>
                             <button
                                 className='bg-orange-base text-white hover:bg-orange-light w-full py-2.5 rounded-lg font-semibold'
-                                onClick={() => { setErroPagamento(null); setStep('form') }}
+                                onClick={() => { setErroPagamento(null); setStep(inscricaoAtiva ? 'assento' : 'form') }}
                             >
                                 Tentar novamente
                             </button>

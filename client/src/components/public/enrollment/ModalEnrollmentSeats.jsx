@@ -14,6 +14,8 @@ export default function ModalEnrollmentSeats({
     enrollment,
     setEnrollment,
     assentos,
+    assentoAtual,
+    erro,
     ...props
 }) {
     const [submitted, setSubmitted] = useState(false);
@@ -70,7 +72,8 @@ export default function ModalEnrollmentSeats({
                     {/* Grid de assentos */}
                     <div className='grid grid-cols-6 gap-3'>
                         {assentos.map(assento => {
-                            const isReservado = assento.status === 'reservado';
+                            const isMeuAtual = assentoAtual != null && assento.id === assentoAtual;
+                            const isReservado = assento.status === 'reservado' && !isMeuAtual;
                             const isSelecionado = enrollment.assento === assento.id;
 
                             return (
@@ -91,7 +94,9 @@ export default function ModalEnrollmentSeats({
                                             ? 'bg-gray-base/25'
                                             : isSelecionado
                                                 ? 'bg-gray-dark'
-                                                : 'bg-orange-base'
+                                                : isMeuAtual
+                                                    ? 'bg-blue-base'
+                                                    : 'bg-orange-base'
                                     }`} />
                                     {/* Assento */}
                                     <div className={`w-full h-8 rounded-b-lg flex items-center justify-center font-bold text-xs transition-colors ${
@@ -99,7 +104,9 @@ export default function ModalEnrollmentSeats({
                                             ? 'bg-gray-base/20 text-gray-base/40'
                                             : isSelecionado
                                                 ? 'bg-gray-dark text-white shadow-md'
-                                                : 'bg-orange-base text-white hover:bg-orange-light'
+                                                : isMeuAtual
+                                                    ? 'bg-blue-base text-white shadow-md'
+                                                    : 'bg-orange-base text-white hover:bg-orange-light'
                                     }`}>
                                         {assento.id}
                                     </div>
@@ -109,7 +116,7 @@ export default function ModalEnrollmentSeats({
                     </div>
 
                     {/* Legenda */}
-                    <div className='flex justify-center gap-5'>
+                    <div className='flex flex-wrap justify-center gap-x-5 gap-y-1.5'>
                         <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
                             <span className='w-3 h-3 rounded-sm bg-orange-base' />
                             Disponível
@@ -118,11 +125,21 @@ export default function ModalEnrollmentSeats({
                             <span className='w-3 h-3 rounded-sm bg-gray-dark' />
                             Selecionado
                         </div>
+                        {assentoAtual != null && (
+                            <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
+                                <span className='w-3 h-3 rounded-sm bg-blue-base' />
+                                Seu assento atual
+                            </div>
+                        )}
                         <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
                             <span className='w-3 h-3 rounded-sm bg-gray-base/20' />
                             Ocupado
                         </div>
                     </div>
+
+                    {erro && (
+                        <p className='text-red-base text-xs text-center'>{erro}</p>
+                    )}
 
                     <Button
                         className='bg-orange-base hover:bg-orange-light text-white font-semibold'

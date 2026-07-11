@@ -77,10 +77,31 @@ export async function putEnrollment(inscricaoId, data) {
             body: JSON.stringify(data)
         });
 
-        return res.json()
+        const json = await res.json()
+        return { ...json, ok: res.ok }
 
     } catch (err) {
         console.error('Erro ao editar Inscricao:', err);
+        return { ok: false, message: 'Erro de conexão. Tente novamente.' }
+    }
+}
+
+// Troca de assento — rota pública (o cliente ainda não está logado, é a
+// inscrição dele mesmo antes de pagar)
+export async function putSeatChange(inscricaoId, assento) {
+    try {
+        const res = await fetch((`${URL}/inscricoes/${inscricaoId}/assento`), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assento })
+        });
+
+        const json = await res.json()
+        return { ...json, ok: res.ok }
+
+    } catch (err) {
+        console.error('Erro ao trocar assento:', err);
+        return { ok: false, message: 'Erro de conexão. Tente novamente.' }
     }
 }
 

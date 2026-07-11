@@ -11,7 +11,7 @@ import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrol
 import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnrollmentPayment'
 
 import { getCourseById } from '../../api/courses.services'
-import { postEnrollment, getSeats } from '../../api/enrollment.services'
+import { postEnrollment, putSeatChange, getSeats } from '../../api/enrollment.services'
 
 function formatDate(dateStr) {
     if (!dateStr) return ''
@@ -29,6 +29,7 @@ export default function CoursePage() {
     const [fotoIdx, setFotoIdx]           = useState(0)
     const [step, setStep]                 = useState(null)
     const [inscricaoAtiva, setInscricaoAtiva]     = useState(null)
+    const [assentoAtual, setAssentoAtual]         = useState(null)
     const [payerEmail, setPayerEmail]             = useState(null)
     const [loadingPagamento, setLoadingPagamento] = useState(false)
     const [erroPagamento, setErroPagamento]       = useState(null)
@@ -60,20 +61,38 @@ export default function CoursePage() {
 
     async function handleSubmit() {
         const assentoId = form.assento
-        const formaPagamento = 'mercadopago'
 
         setStep(null)
         setLoadingPagamento(true)
         setErroPagamento(null)
 
         try {
+            // já existe inscrição ativa: está só trocando de assento, não criando outra
+            if (inscricaoAtiva) {
+                const resultado = await putSeatChange(inscricaoAtiva, assentoId);
+                if (!resultado?.ok) {
+                    setErroPagamento(resultado?.message || 'Não foi possível trocar de assento. Tente novamente.');
+                    setStep('assento');
+                    return;
+                }
+
+                setAssentos(prev => prev.map(a => {
+                    if (a.id === assentoAtual) return { ...a, status: 'livre' }
+                    if (a.id === Number(assentoId)) return { ...a, status: 'reservado' }
+                    return a
+                }))
+                setAssentoAtual(Number(assentoId))
+                setStep('pagamento')
+                return
+            }
+
             const inscricao = await postEnrollment({
                 cursoId: form.cursoId,
                 nome: form.nome,
                 cpf: form.cpf,
                 celular: form.celular,
                 email: form.email,
-                formaPagamento,
+                formaPagamento: 'mercadopago',
                 assento: assentoId,
             })
 
@@ -83,8 +102,9 @@ export default function CoursePage() {
             }
 
             setPayerEmail(form.email)
-            resetForm()
+            setForm(prev => ({ ...prev, nome: '', cpf: '', celular: '', email: '' }))
 
+            setAssentoAtual(Number(assentoId))
             setInscricaoAtiva(inscricao.id)
             setStep('pagamento')
 
@@ -99,6 +119,17 @@ export default function CoursePage() {
         }
     }
 
+    // Volta pra tela de assentos sem cancelar a inscrição já criada
+    async function handleTrocarAssento() {
+        try {
+            const dados = await getSeats(id)
+            if (Array.isArray(dados)) setAssentos(dados)
+        } catch (err) {
+            console.error(err)
+        }
+        setStep('assento')
+    }
+
     function resetForm() {
         setForm({ cursoId: id, nome: '', cpf: '', celular: '', email: '', assento: '' })
     }
@@ -106,6 +137,7 @@ export default function CoursePage() {
     function closeModal() {
         setStep(null)
         setInscricaoAtiva(null)
+        setAssentoAtual(null)
         setPayerEmail(null)
         resetForm()
     }
@@ -281,7 +313,7 @@ export default function CoursePage() {
                         <p className='text-gray-dark font-semibold text-center'>{erroPagamento}</p>
                         <Button
                             className='bg-orange-base text-white hover:bg-orange-light w-full'
-                            onClick={() => { setErroPagamento(null); setStep('form') }}
+                            onClick={() => { setErroPagamento(null); setStep(inscricaoAtiva ? 'assento' : 'form') }}
                         >
                             Tentar novamente
                         </Button>
@@ -305,6 +337,7 @@ export default function CoursePage() {
                 enrollment={form}
                 setEnrollment={setForm}
                 assentos={assentos}
+                assentoAtual={assentoAtual}
             />
 
             <ModalEnrollmentPayment
@@ -312,6 +345,7 @@ export default function CoursePage() {
                 inscricaoId={inscricaoAtiva}
                 valor={curso?.valor}
                 payerEmail={payerEmail}
+                onTrocarAssento={handleTrocarAssento}
                 onSuccess={(status) => {
                     setPagamentoAprovado(status === 'approved')
                     setStep('confirmacao')
