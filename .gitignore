@@ -8,17 +8,17 @@
 
 ############################
 # DATA
-backend/data/
+server/data/
 
 ############################
 # UPLOADS
-backend/uploads/
+server/uploads/
 
 ############################
 # BUILDS
-frontend/dist/
-frontend/dist-ssr/
-backend/dist/
+client/dist/
+client/dist-ssr/
+server/dist/
 
 ############################
 # VARIÁVEIS DE AMBIENTE
@@ -49,11 +49,6 @@ frontend/.vite/
 .DS_Store
 Thumbs.db
 
-############################
-frontend/dist
-
-############################
-backend/data/
-backend/uploads/
+client/dist
 
 

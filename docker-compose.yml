@@ -2,14 +2,14 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./server
       dockerfile: Dockerfile
     container_name: cursos-backend-develop
     restart: unless-stopped
     ports:
       - "3009:3000"
     env_file:
-      - ./backend/.env
+      - ./server/.env
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -21,7 +21,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./client
       dockerfile: Dockerfile
     container_name: cursos-frontend-develop
     restart: unless-stopped
