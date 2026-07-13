@@ -16,48 +16,58 @@ router.post('/', (req, res) => {
 
   const assentoId = Number(assento);
 
-  // verificar se assento existe e está livre
+  // verificar se assento existe
   db.get(
     `SELECT * FROM assentos WHERE cursoId = ? AND id = ?`,
     [cursoId, assentoId],
     (err, cadeira) => {
       if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
       if (!cadeira) return res.status(404).json({ message: 'Assento não encontrado' });
-      if (cadeira.status !== 'livre') return res.status(400).json({ message: 'Assento indisponível' });
 
-      // reservar assento
+      // reservar assento de forma atômica: o WHERE status = 'livre' garante que,
+      // sob concorrência, só uma requisição consegue mudar o status (this.changes === 1).
+      // Checar e depois dar UPDATE em passos separados permitia duas pessoas reservarem
+      // o mesmo assento ao mesmo tempo.
       db.run(
-        `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
+        `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ? AND status = 'livre'`,
         [cursoId, assentoId],
-        err => { if (err) console.error('Erro ao reservar assento:', err); }
-      );
+        function (err) {
+          if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
+          if (this.changes === 0) return res.status(400).json({ message: 'Assento indisponível' });
 
-      const id = uuidv4();
-      const dataInscricao = new Date().toISOString();
+          const id = uuidv4();
+          const dataInscricao = new Date().toISOString();
 
-      db.run(`
-        INSERT INTO inscricoes
-          (id, cursoId, nome, cpf, celular, email, assento, formaPagamento, status, dataInscricao)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [
-        id,
-        cursoId,
-        nome,
-        cpf,
-        celular,
-        email,
-        assentoId,
-        formaPagamento,
-        'pendente',
-        dataInscricao
-      ], function(err) {
-        if (err) {
-          console.error('Erro ao inserir inscrição:', err);
-          return res.status(500).json({ message: 'Erro interno no servidor' });
+          db.run(`
+            INSERT INTO inscricoes
+              (id, cursoId, nome, cpf, celular, email, assento, formaPagamento, status, dataInscricao)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `, [
+            id,
+            cursoId,
+            nome,
+            cpf,
+            celular,
+            email,
+            assentoId,
+            formaPagamento,
+            'pendente',
+            dataInscricao
+          ], function(err) {
+            if (err) {
+              console.error('Erro ao inserir inscrição:', err);
+              db.run(
+                `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
+                [cursoId, assentoId],
+                rollbackErr => { if (rollbackErr) console.error('Erro ao liberar assento após falha:', rollbackErr); }
+              );
+              return res.status(500).json({ message: 'Erro interno no servidor' });
+            }
+
+            res.status(201).json({ id, cursoId, nome, cpf, celular, email, assento: assentoId, formaPagamento, status: 'pendente', dataInscricao });
+          });
         }
-
-        res.status(201).json({ id, cursoId, nome, cpf, celular, email, assento: assentoId, formaPagamento, status: 'pendente', dataInscricao });
-      });
+      );
     }
   );
 });
@@ -91,29 +101,33 @@ router.put('/:id/assento', (req, res) => {
       (err, novoAssento) => {
         if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
         if (!novoAssento) return res.status(404).json({ message: 'Novo assento não encontrado' });
-        if (novoAssento.status !== 'livre') return res.status(400).json({ message: 'Esse assento já foi ocupado por outra pessoa.' });
 
+        // reserva atômica do novo assento — evita que duas pessoas troquem para o
+        // mesmo assento ao mesmo tempo (ver comentário equivalente no POST '/')
         db.run(
-          `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
-          [inscricao.cursoId, inscricao.assento],
-          err => { if (err) console.error('Erro ao liberar assento antigo:', err); }
-        );
-
-        db.run(
-          `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
+          `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ? AND status = 'livre'`,
           [inscricao.cursoId, novoAssentoId],
-          err => { if (err) console.error('Erro ao reservar novo assento:', err); }
-        );
+          function (err) {
+            if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
+            if (this.changes === 0) return res.status(400).json({ message: 'Esse assento já foi ocupado por outra pessoa.' });
 
-        db.run(
-          `UPDATE inscricoes SET assento = ? WHERE id = ?`,
-          [novoAssentoId, id],
-          err => {
-            if (err) {
-              console.error('Erro ao atualizar assento da inscrição:', err);
-              return res.status(500).json({ message: 'Erro interno no servidor' });
-            }
-            res.json({ message: 'Atualizado' });
+            db.run(
+              `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
+              [inscricao.cursoId, inscricao.assento],
+              err => { if (err) console.error('Erro ao liberar assento antigo:', err); }
+            );
+
+            db.run(
+              `UPDATE inscricoes SET assento = ? WHERE id = ?`,
+              [novoAssentoId, id],
+              err => {
+                if (err) {
+                  console.error('Erro ao atualizar assento da inscrição:', err);
+                  return res.status(500).json({ message: 'Erro interno no servidor' });
+                }
+                res.json({ message: 'Atualizado' });
+              }
+            );
           }
         );
       }
@@ -202,14 +216,13 @@ router.put('/:id', authMiddleware, (req, res) => {
     if (trocarAssento) {
       const novoAssentoId = Number(assento);
 
-      // verificar novo assento
-      db.get(
-        `SELECT * FROM assentos WHERE cursoId = ? AND id = ?`,
+      // reserva atômica do novo assento (ver comentário equivalente no POST '/')
+      db.run(
+        `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ? AND status = 'livre'`,
         [inscricao.cursoId, novoAssentoId],
-        (err, novoAssento) => {
+        function (err) {
           if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
-          if (!novoAssento) return res.status(404).json({ message: 'Novo assento não encontrado' });
-          if (novoAssento.status !== 'livre') return res.status(400).json({ message: 'Novo assento indisponível' });
+          if (this.changes === 0) return res.status(400).json({ message: 'Novo assento indisponível' });
 
           // liberar assento antigo
           db.run(
@@ -218,33 +231,21 @@ router.put('/:id', authMiddleware, (req, res) => {
             err => { if (err) console.error('Erro ao liberar assento antigo:', err); }
           );
 
-          // reservar novo assento
-          db.run(
-            `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
-            [inscricao.cursoId, novoAssentoId],
-            err => { if (err) console.error('Erro ao reservar novo assento:', err); }
-          );
-
           executarUpdate();
         }
       );
     } else if (reativando) {
       // volta de 'cancelado' pra outro status: a vaga foi liberada quando cancelou,
-      // então precisa conferir se ninguém mais pegou antes de reservar de novo
-      db.get(
-        `SELECT * FROM assentos WHERE cursoId = ? AND id = ?`,
+      // então precisa conferir se ninguém mais pegou antes de reservar de novo —
+      // reserva atômica (ver comentário equivalente no POST '/')
+      db.run(
+        `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ? AND status = 'livre'`,
         [inscricao.cursoId, inscricao.assento],
-        (err, assentoAtual) => {
+        function (err) {
           if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
-          if (!assentoAtual || assentoAtual.status !== 'livre') {
+          if (this.changes === 0) {
             return res.status(400).json({ message: 'Não é possível reativar: essa vaga já foi ocupada por outra pessoa.' });
           }
-
-          db.run(
-            `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
-            [inscricao.cursoId, inscricao.assento],
-            err => { if (err) console.error('Erro ao reservar assento na reativação:', err); }
-          );
 
           executarUpdate();
         }
