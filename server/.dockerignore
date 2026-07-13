@@ -2,3 +2,11 @@ node_modules
 npm-debug.log
 .git
 .gitignore
+
+# segredos e dados reais - nao devem ser assados na imagem
+.env
+.env.*
+!.env.example
+data/
+uploads/
+*.log
