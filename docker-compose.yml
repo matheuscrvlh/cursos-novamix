@@ -14,8 +14,8 @@ services:
       - NODE_ENV=production
       - PORT=3000
     volumes:
-      - sqlite_data_develop:/app/data
-      - uploads_data_develop:/app/uploads
+      - ./server/data:/app/data
+      - ./server/uploads:/app/uploads
     networks:
       - app-network-develop
 
@@ -31,10 +31,6 @@ services:
       - backend
     networks:
       - app-network-develop
-
-volumes:
-  sqlite_data_develop:
-  uploads_data_develop:
 
 networks:
   app-network-develop:
