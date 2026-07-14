@@ -1,12 +1,13 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const authMiddleware = require('../middleware/auth.middleware');
+const { paymentLimiter } = require('../middleware/rateLimit.middleware');
 const db = require('../db');
 
 const router = express.Router();
 
 // POST nova inscrição
-router.post('/', (req, res) => {
+router.post('/', paymentLimiter, (req, res) => {
   const { cursoId, nome, cpf, celular, email, assento } = req.body;
   const formaPagamento = req.body.formaPagamento || 'mercadopago';
 

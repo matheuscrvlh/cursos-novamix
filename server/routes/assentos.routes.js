@@ -16,18 +16,29 @@ router.get('/:cursoId', (req, res) => {
   );
 });
 
-// PUT atualizar assentos de um curso
+// PUT atualizar assentos de um curso (bulk)
 router.put('/:cursoId', authMiddleware, (req, res) => {
   const { cursoId } = req.params;
-  const updatedAssentos = req.body; // array de assentos
+  const updatedAssentos = Array.isArray(req.body) ? req.body : [];
 
   db.serialize(() => {
     updatedAssentos.forEach(assento => {
-      db.run(
-        `UPDATE assentos SET status = ? WHERE id = ? AND cursoId = ?`,
-        [assento.status, assento.id, cursoId],
-        err => { if (err) console.error('Erro ao atualizar assento:', err); }
-      );
+      if (assento.status === 'livre') {
+        // liberar um assento é sempre seguro, não precisa de trava
+        db.run(
+          `UPDATE assentos SET status = 'livre' WHERE id = ? AND cursoId = ?`,
+          [assento.id, cursoId],
+          err => { if (err) console.error('Erro ao liberar assento:', err); }
+        );
+      } else {
+        // trava atômica: só ocupa se ainda estiver livre — evita sobrescrever
+        // um assento que já foi reservado/pago por outra requisição nesse meio tempo
+        db.run(
+          `UPDATE assentos SET status = ? WHERE id = ? AND cursoId = ? AND status = 'livre'`,
+          [assento.status, assento.id, cursoId],
+          err => { if (err) console.error('Erro ao atualizar assento:', err); }
+        );
+      }
     });
 
     res.json({ message: 'Assentos atualizados com sucesso!' });

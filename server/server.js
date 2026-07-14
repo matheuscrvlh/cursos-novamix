@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const db = require('./db');
+const { apiLimiter } = require('./middleware/rateLimit.middleware');
+const expirarReservasPendentes = require('./utils/expirarReservas');
 
 const cursosRoutes = require('./routes/cursos.routes');
 const assentosRoutes = require('./routes/assentos.routes');
@@ -17,9 +19,18 @@ const authRoutes = require('./routes/auth.routes');
 const usuariosRoutes = require('./routes/usuarios.routes');
 const app = express();
 
-app.use(cors());
+// libera só o domínio do frontend em produção (FRONTEND_URL no .env, aceita
+// lista separada por vírgula); sem essa env var, libera geral (dev local)
+const allowedOrigins = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
+app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : true }));
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
+
+app.use('/api', apiLimiter);
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -38,3 +49,8 @@ app.use('/api/usuarios', usuariosRoutes);
 app.listen(3000, () => {
   console.log('Backend torando na porta 3000 --');
 });
+
+// libera assentos de inscrições pendentes esquecidas (cliente abandonou o
+// pagamento e o MP nunca mandou webhook de confirmação/rejeição)
+expirarReservasPendentes(db);
+setInterval(() => expirarReservasPendentes(db), 5 * 60 * 1000);
