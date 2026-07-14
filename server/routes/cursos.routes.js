@@ -166,46 +166,58 @@ router.put('/:id', authMiddleware, uploadCursos.array('fotos', 5), (req, res) =>
 router.delete('/:id', authMiddleware, (req, res) => {
   const id = req.params.id;
 
-  // busca fotos
-  db.all(
-    `SELECT url FROM fotos WHERE cursoId = ?`,
-    [id],
-    (err, fotos) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
+  db.get(`SELECT nomeCurso FROM cursos WHERE id = ?`, [id], (err, curso) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!curso) return res.status(404).json({ error: 'Curso não encontrado' });
 
-      // remove arquivos físicos
-      fotos.forEach(foto => {
-        const filePath = path.join(__dirname, '..', foto.url);
+    // busca fotos
+    db.all(
+      `SELECT url FROM fotos WHERE cursoId = ?`,
+      [id],
+      (err, fotos) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
 
-        fs.unlink(filePath, err => {
-          if (err) {
-            console.error('Erro ao deletar arquivo:', filePath, err.message);
-          }
-        });
-      });
+        // remove arquivos físicos
+        fotos.forEach(foto => {
+          const filePath = path.join(__dirname, '..', foto.url);
 
-      // remove do banco
-      db.serialize(() => {
-        db.run(`DELETE FROM inscricoes WHERE cursoId = ?`, [id]);
-        db.run(`DELETE FROM assentos WHERE cursoId = ?`, [id]);
-        db.run(`DELETE FROM fotos WHERE cursoId = ?`, [id]);
-
-        db.run(
-          `DELETE FROM cursos WHERE id = ?`,
-          [id],
-          function(err) {
+          fs.unlink(filePath, err => {
             if (err) {
-              return res.status(500).json({ error: err.message });
+              console.error('Erro ao deletar arquivo:', filePath, err.message);
             }
+          });
+        });
 
-            res.sendStatus(204);
-          }
-        );
-      });
-    }
-  );
+        // remove do banco
+        db.serialize(() => {
+          // inscrições pagas sobrevivem à exclusão do curso (não pode sumir
+          // com o comprovante de quem já pagou) — guarda o nome do curso
+          // nelas antes, já que a linha em `cursos` vai deixar de existir
+          db.run(
+            `UPDATE inscricoes SET cursoRemovidoNome = ? WHERE cursoId = ? AND status = 'pago'`,
+            [curso.nomeCurso, id]
+          );
+          db.run(`DELETE FROM inscricoes WHERE cursoId = ? AND status != 'pago'`, [id]);
+          db.run(`DELETE FROM assentos WHERE cursoId = ?`, [id]);
+          db.run(`DELETE FROM fotos WHERE cursoId = ?`, [id]);
+
+          db.run(
+            `DELETE FROM cursos WHERE id = ?`,
+            [id],
+            function(err) {
+              if (err) {
+                return res.status(500).json({ error: err.message });
+              }
+
+              res.sendStatus(204);
+            }
+          );
+        });
+      }
+    );
+  });
 });
 
 module.exports = router;

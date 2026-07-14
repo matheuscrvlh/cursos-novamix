@@ -136,6 +136,14 @@ db.serialize(() => {
     else console.log('✓ inscricoes.email');
   });
 
+  // guarda o nome do curso quando ele é apagado mas a inscrição continua
+  // existindo (pagas sobrevivem à exclusão do curso) — sem isso, o admin
+  // perde a referência de qual curso era depois que a linha em `cursos` some
+  db.run('ALTER TABLE inscricoes ADD COLUMN cursoRemovidoNome TEXT', err => {
+    if (err && !err.message.includes('duplicate column')) console.error('cursoRemovidoNome:', err);
+    else console.log('✓ inscricoes.cursoRemovidoNome');
+  });
+
   db.run(`
     CREATE TABLE IF NOT EXISTS usuarios (
       id           TEXT PRIMARY KEY,
