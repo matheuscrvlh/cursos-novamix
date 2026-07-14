@@ -309,6 +309,8 @@ export default function UsersAdmin() {
                 isOpen={!!deletarId}
                 title='Excluir usuário'
                 message='Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.'
+                variant='danger'
+                confirmLabel='Excluir'
                 onConfirm={handleDeletar}
                 onCancel={() => setDeletarId(null)}
             />

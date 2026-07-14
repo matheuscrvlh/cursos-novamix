@@ -13,6 +13,7 @@ import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
 import Tooltip from '../../components/admin/Tooltip';
+import ConfirmModal from '../../components/admin/ModalConfirm';
 
 // Layouts
 import SideBar from '../../layouts/admin/SideBar'
@@ -47,6 +48,9 @@ export default function ChildrensAdmin() {
     const [cursoEditar, setCursoEditar] = useState({});
     const [step, setStep] = useState('close');
     const [previewImagem, setPreviewImagem] = useState(null);
+
+    // controle de confirmação (exclusão/edição)
+    const [confirm, setConfirm] = useState(null); // { message, onConfirm }
 
     // ======= FILTROS
     const [filtroStatus, setFiltroStatus] = useState('todos');
@@ -330,7 +334,13 @@ export default function ChildrensAdmin() {
                                             }
                                             <div className='flex gap-2 mt-2'>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCursoInfantil(c.id)}>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => setConfirm({
+                                        title: 'Excluir curso infantil',
+                                        message: `Excluir o curso infantil "${c.nomeCurso}"?`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => removeCursoInfantil(c.id)
+                                    })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -359,7 +369,13 @@ export default function ChildrensAdmin() {
                                             }
                                             <div className='flex gap-2'>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCursoInfantil(c.id)}>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => setConfirm({
+                                        title: 'Excluir curso infantil',
+                                        message: `Excluir o curso infantil "${c.nomeCurso}"?`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => removeCursoInfantil(c.id)
+                                    })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -487,12 +503,28 @@ export default function ChildrensAdmin() {
                         </div>
 
                         <Button
-                            onClick={salvarEdicao}
+                            onClick={() => setConfirm({
+                                title: 'Salvar alterações',
+                                message: 'Salvar as alterações deste curso infantil?',
+                                variant: 'neutral',
+                                confirmLabel: 'Salvar',
+                                onConfirm: salvarEdicao
+                            })}
                             className='bg-orange-base text-white w-full hover:bg-orange-light'
                         >
                             Salvar Edições
                         </Button>
                     </Modal>
+
+                    <ConfirmModal
+                        isOpen={!!confirm}
+                        title={confirm?.title || 'Confirmação'}
+                        message={confirm?.message}
+                        variant={confirm?.variant}
+                        confirmLabel={confirm?.confirmLabel}
+                        onConfirm={() => { confirm.onConfirm(); setConfirm(null); }}
+                        onCancel={() => setConfirm(null)}
+                    />
 
                 </section>
             </main>

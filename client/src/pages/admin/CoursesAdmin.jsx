@@ -13,6 +13,7 @@ import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
 import Tooltip from '../../components/admin/Tooltip';
+import ConfirmModal from '../../components/admin/ModalConfirm';
 
 // Layouts
 import SideBar from '../../layouts/admin/SideBar'
@@ -97,6 +98,9 @@ export default function CoursesAdmin() {
     const [previewImagemCurso, setPreviewImagemCurso] = useState(null);
     const [filtroStatus, setFiltroStatus] = useState('todos');
     const [filtroLoja, setFiltroLoja]     = useState('todas');
+
+    // controle de confirmação (exclusão/edição)
+    const [confirm, setConfirm] = useState(null); // { message, onConfirm }
 
     // controle de validação
     const [submitted, setSubmitted]         = useState(false);
@@ -488,7 +492,13 @@ export default function CoursesAdmin() {
                                             }
                                             <div className='flex gap-2 mt-2'>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCourse(curso.id)}>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => setConfirm({
+                                        title: 'Excluir curso',
+                                        message: `Excluir o curso "${curso.nomeCurso}"? Inscrições não pagas também serão removidas.`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => removeCourse(curso.id)
+                                    })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -517,7 +527,13 @@ export default function CoursesAdmin() {
                                             }
                                             <div className='flex gap-2'>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCourse(curso.id)}>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => setConfirm({
+                                        title: 'Excluir curso',
+                                        message: `Excluir o curso "${curso.nomeCurso}"? Inscrições não pagas também serão removidas.`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => removeCourse(curso.id)
+                                    })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -696,11 +712,27 @@ export default function CoursesAdmin() {
 
                         <Button
                             className='w-full bg-orange-base hover:bg-orange-light text-white'
-                            onClick={editarCourse}
+                            onClick={() => setConfirm({
+                                title: 'Salvar alterações',
+                                message: 'Salvar as alterações deste curso?',
+                                variant: 'neutral',
+                                confirmLabel: 'Salvar',
+                                onConfirm: editarCourse
+                            })}
                         >
                             Salvar Edições
                         </Button>
                     </Modal>
+
+                    <ConfirmModal
+                        isOpen={!!confirm}
+                        title={confirm?.title || 'Confirmação'}
+                        message={confirm?.message}
+                        variant={confirm?.variant}
+                        confirmLabel={confirm?.confirmLabel}
+                        onConfirm={() => { confirm.onConfirm(); setConfirm(null); }}
+                        onCancel={() => setConfirm(null)}
+                    />
 
                 </section>
             </main>

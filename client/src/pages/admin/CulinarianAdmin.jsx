@@ -17,6 +17,7 @@ import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
 import Tooltip from '../../components/admin/Tooltip';
+import ConfirmModal from '../../components/admin/ModalConfirm';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -62,6 +63,9 @@ export default function CulinarianAdmin() {
 
     // ======= STATE PREVIEW
     const [ previewImagemCulinarista, setPreviewImagemCulinarista ] = useState();
+
+    // controle de confirmação (exclusão/edição)
+    const [confirm, setConfirm] = useState(null); // { message, onConfirm }
     // ============== STATES ==============
 
     // ============== POST ==============
@@ -470,7 +474,13 @@ export default function CulinarianAdmin() {
                                             <p className='text-sm text-gray-text/70'>Cadastro: {layoutDataSistem(c.dataCadastro)}</p>
                                             <div className='flex gap-2 mt-2'>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCulinarian(c.id)}>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => setConfirm({
+                                        title: 'Excluir culinarista',
+                                        message: `Excluir a culinarista "${c.nomeCulinarista}"?`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => removeCulinarian(c.id)
+                                    })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -503,7 +513,13 @@ export default function CulinarianAdmin() {
                                             <p>{layoutDataSistem(c.dataCadastro)}</p>
                                             <div className='flex gap-2'>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => removeCulinarian(c.id)}>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => setConfirm({
+                                        title: 'Excluir culinarista',
+                                        message: `Excluir a culinarista "${c.nomeCulinarista}"?`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => removeCulinarian(c.id)
+                                    })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -687,7 +703,13 @@ export default function CulinarianAdmin() {
 
                         <Button
                             className='w-full bg-orange-base hover:bg-orange-light text-white'
-                            onClick={() => editarCulinarian()}
+                            onClick={() => setConfirm({
+                                title: 'Salvar alterações',
+                                message: 'Salvar as alterações desta culinarista?',
+                                variant: 'neutral',
+                                confirmLabel: 'Salvar',
+                                onConfirm: editarCulinarian
+                            })}
                         >
                             Salvar Edições
                         </Button>
@@ -739,6 +761,16 @@ export default function CulinarianAdmin() {
                         )}
                     </Modal>
                     {/* ====== MODALS ===== */}
+
+                    <ConfirmModal
+                        isOpen={!!confirm}
+                        title={confirm?.title || 'Confirmação'}
+                        message={confirm?.message}
+                        variant={confirm?.variant}
+                        confirmLabel={confirm?.confirmLabel}
+                        onConfirm={() => { confirm.onConfirm(); setConfirm(null); }}
+                        onCancel={() => setConfirm(null)}
+                    />
                 </section>
             </main>
         </div>

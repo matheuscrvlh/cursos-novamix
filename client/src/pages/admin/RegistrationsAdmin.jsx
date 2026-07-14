@@ -5,19 +5,20 @@ import { useContext, useState, useEffect } from 'react';
 import { Head } from '../../components/Head'
 
 // LUCIDE ICONS
-import { Trash, Edit, Users, Plus, X, Inbox, RefreshCw } from 'lucide-react';
+import { Trash, Edit, Users, Plus, X, Inbox, RefreshCw, Undo2 } from 'lucide-react';
 
 // Components
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
+import ConfirmModal from '../../components/admin/ModalConfirm';
 
 // Layouts
 import SideBar from '../../layouts/admin/SideBar'
 import TopBar from '../../layouts/admin/TopBar'
 
 // SERVICES
-import { getSeats, getEnrollment, getTotalEnrollment, putEnrollment, deleteEnrollment, verificarPagamentoMP } from '../../api/enrollment.services';
+import { getSeats, getEnrollment, getTotalEnrollment, putEnrollment, deleteEnrollment, verificarPagamentoMP, reembolsarPagamentoMP } from '../../api/enrollment.services';
 
 // DB
 import { DadosContext } from '../../contexts/DadosContext';
@@ -37,7 +38,12 @@ export default function RegistrationsAdmin() {
 
     // ======= STATE MODAL
     const [ step, setStep ] = useState('close')
+
+    // controle de confirmação (exclusão/edição)
+    const [ confirm, setConfirm ] = useState(null); // { message, onConfirm }
     // ============== STATES ==============
+
+    const CICLO_STATUS = { pendente: 'pago', pago: 'cancelado', cancelado: 'pendente' };
 
     // DADOS CONTEXT
     const {
@@ -48,6 +54,7 @@ export default function RegistrationsAdmin() {
         } = useContext(DadosContext);
 
     const [ verificandoMP, setVerificandoMP ] = useState(null);
+    const [ reembolsando, setReembolsando ] = useState(null);
     const [ mensagem, setMensagem ] = useState(null); // { tipo: 'sucesso' | 'erro' | 'info', texto }
 
     function mostrarMensagem(tipo, texto) {
@@ -156,6 +163,32 @@ export default function RegistrationsAdmin() {
             mostrarMensagem('erro', 'Erro ao verificar pagamento. Tente novamente.');
         } finally {
             setVerificandoMP(null);
+        }
+    }
+
+    async function handleReembolsar(inscricaoId) {
+        setReembolsando(inscricaoId);
+        try {
+            const resultado = await reembolsarPagamentoMP(inscricaoId);
+
+            if (!resultado?.ok) {
+                mostrarMensagem('erro', resultado?.message || 'Erro ao reembolsar. Tente novamente.');
+                return;
+            }
+
+            setInscricoes(prev =>
+                prev.map(i => i.id === inscricaoId ? { ...i, status: 'cancelado' } : i)
+            );
+            setInscricoesTotais(prev =>
+                prev.map(i => i.id === inscricaoId ? { ...i, status: 'cancelado' } : i)
+            );
+
+            mostrarMensagem('sucesso', 'Pagamento reembolsado no Mercado Pago e vaga liberada!');
+        } catch (err) {
+            console.error('Erro ao reembolsar pagamento MP:', err);
+            mostrarMensagem('erro', 'Erro ao reembolsar. Tente novamente.');
+        } finally {
+            setReembolsando(null);
         }
     }
 
@@ -474,12 +507,17 @@ export default function RegistrationsAdmin() {
                                     {/* MOBILE */}
                                     <div className='p-3 text-gray-text md:hidden'>
                                         <div className='flex items-start justify-between gap-2 mb-1'>
-                                            <p className='font-semibold text-sm leading-tight flex-1'>{curso?.nomeCurso}</p>
-                                            {curso?.tipo === 'infantil'
+                                            <p className='font-semibold text-sm leading-tight flex-1'>{curso?.nomeCurso || i.cursoRemovidoNome || '—'}</p>
+                                            {!curso
+                                                ? <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-red-base/15 text-red-base'>Curso apagado</span>
+                                                : curso?.tipo === 'infantil'
                                                 ? <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-green-base/15 text-green-base'>Infantil</span>
                                                 : <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-gray-base/15 text-gray-base'>Curso</span>
                                             }
                                         </div>
+                                        {!curso && (
+                                            <p className='text-xs text-red-base font-medium mb-1'>⚠ O curso desta inscrição foi excluído</p>
+                                        )}
                                         <p className='font-medium text-sm text-gray-text'>{i.nome}</p>
                                         <div className='flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-text/60 mt-1'>
                                             <span>Assento: {i.assento}</span>
@@ -502,13 +540,43 @@ export default function RegistrationsAdmin() {
                                                         </Button>
                                                     </Tooltip>
                                                 )}
+                                                {i.formaPagamento === 'mercadopago' && i.status === 'pago' && (
+                                                    <Tooltip label='Reembolsar'>
+                                                        <Button
+                                                            className='bg-gray-text p-2 hover:bg-gray-dark text-white'
+                                                            onClick={() => setConfirm({
+                                                                title: 'Reembolsar pagamento',
+                                                                message: `Reembolsar o pagamento de "${i.nome}" no Mercado Pago? O valor total será devolvido e a vaga será liberada. Essa ação não pode ser desfeita.`,
+                                                                variant: 'danger',
+                                                                confirmLabel: 'Reembolsar',
+                                                                icon: Undo2,
+                                                                onConfirm: () => handleReembolsar(i.id)
+                                                            })}
+                                                            disabled={reembolsando === i.id}
+                                                        >
+                                                            <Undo2 size={16} className={reembolsando === i.id ? 'animate-spin' : ''} />
+                                                        </Button>
+                                                    </Tooltip>
+                                                )}
                                                 <Tooltip label='Editar status'>
-                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditInscricoesTotais(i.id)}>
+                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => setConfirm({
+                                                title: 'Alterar status',
+                                                message: `Alterar status da inscrição de "${i.nome}" para "${CICLO_STATUS[i.status] || 'pendente'}"?`,
+                                                variant: 'warning',
+                                                confirmLabel: 'Alterar',
+                                                onConfirm: () => handleEditInscricoesTotais(i.id)
+                                            })}>
                                                         <Edit size={16} />
                                                     </Button>
                                                 </Tooltip>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => deletarInscricao(i.id)}>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => setConfirm({
+                                        title: 'Excluir inscrição',
+                                        message: `Excluir a inscrição de "${i.nome}"?`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => deletarInscricao(i.id)
+                                    })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -521,8 +589,12 @@ export default function RegistrationsAdmin() {
                                                     px-3 py-3 items-center text-gray-text text-sm
                                                     hover:bg-gray/60 transition-colors rounded-md'>
                                         <div className='flex items-center gap-2 min-w-0'>
-                                            <p className='truncate font-medium'>{curso?.nomeCurso}</p>
-                                            {curso?.tipo === 'infantil'
+                                            <p className='truncate font-medium' title={!curso ? 'O curso desta inscrição foi excluído' : undefined}>
+                                                {curso?.nomeCurso || i.cursoRemovidoNome || '—'}
+                                            </p>
+                                            {!curso
+                                                ? <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-red-base/15 text-red-base' title='O curso desta inscrição foi excluído'>⚠ Curso apagado</span>
+                                                : curso?.tipo === 'infantil'
                                                 ? <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-green-base/15 text-green-base'>Infantil</span>
                                                 : <span className='text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 bg-gray-base/15 text-gray-base'>Curso</span>
                                             }
@@ -546,13 +618,43 @@ export default function RegistrationsAdmin() {
                                                     </Button>
                                                 </Tooltip>
                                             )}
+                                            {i.formaPagamento === 'mercadopago' && i.status === 'pago' && (
+                                                <Tooltip label='Reembolsar'>
+                                                    <Button
+                                                        className='bg-gray-text p-2 hover:bg-gray-dark text-white'
+                                                        onClick={() => setConfirm({
+                                                            title: 'Reembolsar pagamento',
+                                                            message: `Reembolsar o pagamento de "${i.nome}" no Mercado Pago? O valor total será devolvido e a vaga será liberada. Essa ação não pode ser desfeita.`,
+                                                            variant: 'danger',
+                                                            confirmLabel: 'Reembolsar',
+                                                            icon: Undo2,
+                                                            onConfirm: () => handleReembolsar(i.id)
+                                                        })}
+                                                        disabled={reembolsando === i.id}
+                                                    >
+                                                        <Undo2 size={16} className={reembolsando === i.id ? 'animate-spin' : ''} />
+                                                    </Button>
+                                                </Tooltip>
+                                            )}
                                             <Tooltip label='Editar status'>
-                                                <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditInscricoesTotais(i.id)}>
+                                                <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => setConfirm({
+                                                title: 'Alterar status',
+                                                message: `Alterar status da inscrição de "${i.nome}" para "${CICLO_STATUS[i.status] || 'pendente'}"?`,
+                                                variant: 'warning',
+                                                confirmLabel: 'Alterar',
+                                                onConfirm: () => handleEditInscricoesTotais(i.id)
+                                            })}>
                                                     <Edit size={16} />
                                                 </Button>
                                             </Tooltip>
                                             <Tooltip label='Excluir'>
-                                                <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => deletarInscricao(i.id)}>
+                                                <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => setConfirm({
+                                        title: 'Excluir inscrição',
+                                        message: `Excluir a inscrição de "${i.nome}"?`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => deletarInscricao(i.id)
+                                    })}>
                                                     <Trash size={16} />
                                                 </Button>
                                             </Tooltip>
@@ -769,15 +871,43 @@ export default function RegistrationsAdmin() {
                                                     <RefreshCw size={16} className={verificandoMP === inscricao.id ? 'animate-spin' : ''} />
                                                 </Button>
                                             )}
+                                            {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pago' && (
+                                                <Button
+                                                    className='bg-gray-text p-2 hover:bg-gray-dark text-white rounded-md'
+                                                    onClick={() => setConfirm({
+                                                        title: 'Reembolsar pagamento',
+                                                        message: `Reembolsar o pagamento de "${inscricao.nome}" no Mercado Pago? O valor total será devolvido e a vaga será liberada. Essa ação não pode ser desfeita.`,
+                                                        variant: 'danger',
+                                                        confirmLabel: 'Reembolsar',
+                                                        icon: Undo2,
+                                                        onConfirm: () => handleReembolsar(inscricao.id)
+                                                    })}
+                                                    disabled={reembolsando === inscricao.id}
+                                                >
+                                                    <Undo2 size={16} className={reembolsando === inscricao.id ? 'animate-spin' : ''} />
+                                                </Button>
+                                            )}
                                             <Button
                                                 className='flex-1 bg-orange-base py-2 hover:bg-orange-light text-white text-xs font-semibold flex items-center justify-center gap-1 rounded-md'
-                                                onClick={() => handleEditInscricao(inscricao.id)}
+                                                onClick={() => setConfirm({
+                                                title: 'Alterar status',
+                                                message: `Alterar status da inscrição de "${inscricao.nome}" para "${CICLO_STATUS[inscricao.status] || 'pendente'}"?`,
+                                                variant: 'warning',
+                                                confirmLabel: 'Alterar',
+                                                onConfirm: () => handleEditInscricao(inscricao.id)
+                                            })}
                                             >
                                                 <Edit size={14} /> Alterar status
                                             </Button>
                                             <Button
                                                 className='bg-red-base p-2 hover:bg-red-light text-white rounded-md'
-                                                onClick={() => deletarInscricao(inscricao.id)}
+                                                onClick={() => setConfirm({
+                                                title: 'Excluir inscrição',
+                                                message: `Excluir a inscrição de "${inscricao.nome}"?`,
+                                                variant: 'danger',
+                                                confirmLabel: 'Excluir',
+                                                onConfirm: () => deletarInscricao(inscricao.id)
+                                            })}
                                             >
                                                 <Trash size={16} />
                                             </Button>
@@ -832,13 +962,43 @@ export default function RegistrationsAdmin() {
                                                         </Button>
                                                     </Tooltip>
                                                 )}
+                                                {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pago' && (
+                                                    <Tooltip label='Reembolsar'>
+                                                        <Button
+                                                            className='bg-gray-text p-2 hover:bg-gray-dark text-white'
+                                                            onClick={() => setConfirm({
+                                                                title: 'Reembolsar pagamento',
+                                                                message: `Reembolsar o pagamento de "${inscricao.nome}" no Mercado Pago? O valor total será devolvido e a vaga será liberada. Essa ação não pode ser desfeita.`,
+                                                                variant: 'danger',
+                                                                confirmLabel: 'Reembolsar',
+                                                                icon: Undo2,
+                                                                onConfirm: () => handleReembolsar(inscricao.id)
+                                                            })}
+                                                            disabled={reembolsando === inscricao.id}
+                                                        >
+                                                            <Undo2 size={16} className={reembolsando === inscricao.id ? 'animate-spin' : ''} />
+                                                        </Button>
+                                                    </Tooltip>
+                                                )}
                                                 <Tooltip label='Editar status'>
-                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditInscricao(inscricao.id)}>
+                                                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => setConfirm({
+                                                title: 'Alterar status',
+                                                message: `Alterar status da inscrição de "${inscricao.nome}" para "${CICLO_STATUS[inscricao.status] || 'pendente'}"?`,
+                                                variant: 'warning',
+                                                confirmLabel: 'Alterar',
+                                                onConfirm: () => handleEditInscricao(inscricao.id)
+                                            })}>
                                                         <Edit size={16} />
                                                     </Button>
                                                 </Tooltip>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => deletarInscricao(inscricao.id)}>
+                                                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => setConfirm({
+                                                title: 'Excluir inscrição',
+                                                message: `Excluir a inscrição de "${inscricao.nome}"?`,
+                                                variant: 'danger',
+                                                confirmLabel: 'Excluir',
+                                                onConfirm: () => deletarInscricao(inscricao.id)
+                                            })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -863,6 +1023,17 @@ export default function RegistrationsAdmin() {
                             {mensagem.texto}
                         </div>
                     )}
+
+                    <ConfirmModal
+                        isOpen={!!confirm}
+                        title={confirm?.title || 'Confirmação'}
+                        message={confirm?.message}
+                        variant={confirm?.variant}
+                        confirmLabel={confirm?.confirmLabel}
+                        icon={confirm?.icon}
+                        onConfirm={() => { confirm.onConfirm(); setConfirm(null); }}
+                        onCancel={() => setConfirm(null)}
+                    />
                 </section>
             </main>
         </div>

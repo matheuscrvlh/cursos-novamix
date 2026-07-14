@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router'
 import { useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, LogOut } from 'lucide-react'
 
 // Components
 import LinkSideBar from '../../components/admin/LinkSideBar'
@@ -112,6 +112,9 @@ export default function SideBar() {
                 isOpen={openModal}
                 title='Confirmação de Logout'
                 message='Tem certeza que deseja sair?'
+                variant='warning'
+                confirmLabel='Sair'
+                icon={LogOut}
                 onConfirm={handleLogout}
                 onCancel={() => setOpenModal(false)}
             />

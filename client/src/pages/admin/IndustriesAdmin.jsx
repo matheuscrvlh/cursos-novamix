@@ -17,6 +17,7 @@ import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
 import Tooltip from '../../components/admin/Tooltip';
+import ConfirmModal from '../../components/admin/ModalConfirm';
 
 // Context
 import { DadosContext } from '../../contexts/DadosContext';
@@ -44,6 +45,9 @@ export default function IndustriesAdmin() {
 
     const [industriaEditar, setIndustriaEditar] = useState({});
     const [step, setStep] = useState('close');
+
+    // controle de confirmação (exclusão/edição)
+    const [confirm, setConfirm] = useState(null); // { message, onConfirm }
 
     // ================= CREATE =================
     function handleSubmitIndustria() {
@@ -243,7 +247,13 @@ async function salvarEdicao() {
                                             {i.telefone && <p className='text-sm text-gray-text/70'>Tel: {i.telefone}</p>}
                                             <div className='flex gap-2 mt-2'>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base text-white p-2 hover:bg-red-light' onClick={() => removeIndustry(i.id)}>
+                                                    <Button className='bg-red-base text-white p-2 hover:bg-red-light' onClick={() => setConfirm({
+                                        title: 'Excluir indústria',
+                                        message: `Excluir a indústria "${i.nome}"?`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => removeIndustry(i.id)
+                                    })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -265,7 +275,13 @@ async function salvarEdicao() {
                                             <p>{i.telefone || '-'}</p>
                                             <div className='flex gap-2'>
                                                 <Tooltip label='Excluir'>
-                                                    <Button className='bg-red-base text-white p-2 hover:bg-red-light' onClick={() => removeIndustry(i.id)}>
+                                                    <Button className='bg-red-base text-white p-2 hover:bg-red-light' onClick={() => setConfirm({
+                                        title: 'Excluir indústria',
+                                        message: `Excluir a indústria "${i.nome}"?`,
+                                        variant: 'danger',
+                                        confirmLabel: 'Excluir',
+                                        onConfirm: () => removeIndustry(i.id)
+                                    })}>
                                                         <Trash size={16} />
                                                     </Button>
                                                 </Tooltip>
@@ -380,12 +396,28 @@ async function salvarEdicao() {
                         </div>
 
                         <Button
-                            onClick={salvarEdicao}
+                            onClick={() => setConfirm({
+                                title: 'Salvar alterações',
+                                message: 'Salvar as alterações desta indústria?',
+                                variant: 'neutral',
+                                confirmLabel: 'Salvar',
+                                onConfirm: salvarEdicao
+                            })}
                             className='bg-orange-base text-white w-full hover:bg-orange-light'
                         >
                             Salvar Edições
                         </Button>
                     </Modal>
+
+                    <ConfirmModal
+                        isOpen={!!confirm}
+                        title={confirm?.title || 'Confirmação'}
+                        message={confirm?.message}
+                        variant={confirm?.variant}
+                        confirmLabel={confirm?.confirmLabel}
+                        onConfirm={() => { confirm.onConfirm(); setConfirm(null); }}
+                        onCancel={() => setConfirm(null)}
+                    />
 
                 </section>
             </main>
