@@ -1,5 +1,6 @@
 import { Calendar, Clock, User, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatarPreco } from '../../utils/formatCurrency';
 
 export default function CourseCard({
   id,
@@ -36,7 +37,7 @@ export default function CourseCard({
 
         {/* Valor badge — base esquerda */}
         <span className="absolute bottom-3 left-3 bg-orange-base text-white text-sm font-bold px-3 py-1 rounded-full shadow">
-          R$ {valor}
+          R$ {formatarPreco(valor)}
         </span>
 
         {/* Loja badge — topo direito */}

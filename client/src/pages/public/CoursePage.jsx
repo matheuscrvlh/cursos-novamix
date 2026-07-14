@@ -12,6 +12,7 @@ import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnro
 
 import { getCourseById } from '../../api/courses.services'
 import { postEnrollment, putSeatChange, getSeats } from '../../api/enrollment.services'
+import { formatarPreco } from '../../utils/formatCurrency'
 
 function formatDate(dateStr) {
     if (!dateStr) return ''
@@ -196,7 +197,7 @@ export default function CoursePage() {
                     )}
 
                     <span className='absolute bottom-4 left-4 bg-orange-base text-white text-base font-bold px-4 py-1.5 rounded-full shadow-lg'>
-                        R$ {curso.valor}
+                        R$ {formatarPreco(curso.valor)}
                     </span>
                     {curso.loja && (
                         <span className={`absolute top-4 right-4 text-white text-sm font-semibold px-3 py-1 rounded-full ${curso.loja === 'Prado' ? 'bg-orange-base' : 'bg-blue-base'}`}>
