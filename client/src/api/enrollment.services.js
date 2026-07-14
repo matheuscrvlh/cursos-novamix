@@ -130,3 +130,18 @@ export async function verificarPagamentoMP(inscricaoId) {
         console.error('Erro ao verificar pagamento MP:', err);
     }
 }
+
+// ============== REEMBOLSAR PAGAMENTO MP (admin)
+export async function reembolsarPagamentoMP(inscricaoId) {
+    try {
+        const res = await fetch(`${URL}/pagamentos/reembolsar/${inscricaoId}`, {
+            method: 'POST',
+            headers: { ...authHeader() },
+        });
+        const json = await res.json();
+        return { ...json, ok: res.ok };
+    } catch (err) {
+        console.error('Erro ao reembolsar pagamento MP:', err);
+        return { ok: false, message: 'Erro de conexão. Tente novamente.' };
+    }
+}

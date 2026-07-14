@@ -1,8 +1,9 @@
 const crypto = require('crypto');
 const express = require('express');
-const { MercadoPagoConfig, Payment } = require('mercadopago');
+const { MercadoPagoConfig, Payment, PaymentRefund } = require('mercadopago');
 const db = require('../db');
 const authMiddleware = require('../middleware/auth.middleware');
+const { paymentLimiter } = require('../middleware/rateLimit.middleware');
 
 const router = express.Router();
 
@@ -146,6 +147,60 @@ router.post('/verificar/:inscricaoId', authMiddleware, async (req, res) => {
   });
 });
 
+// POST reembolsar pagamento no Mercado Pago (admin) — devolve o valor total
+// ao cliente e libera a vaga automaticamente. Só a confirmação vem do
+// frontend (modal de confirmação); aqui não tem como desfazer depois de
+// chamado o MP, então validamos tudo antes de mexer no dinheiro.
+router.post('/reembolsar/:inscricaoId', authMiddleware, async (req, res) => {
+  const { inscricaoId } = req.params;
+
+  db.get(`SELECT * FROM inscricoes WHERE id = ?`, [inscricaoId], (err, inscricao) => {
+    if (err) return res.status(500).json({ message: 'Erro interno' });
+    if (!inscricao) return res.status(404).json({ message: 'Inscrição não encontrada' });
+    if (inscricao.status !== 'pago') {
+      return res.status(400).json({ message: 'Só é possível reembolsar inscrições pagas' });
+    }
+    if (!inscricao.mp_payment_id) {
+      return res.status(400).json({ message: 'Sem ID de pagamento para reembolsar no MercadoPago' });
+    }
+
+    // trava atômica: o WHERE status = 'pago' garante que, sob dois cliques
+    // (ou dois admins) quase simultâneos, só uma requisição sai de 'pago' e
+    // chega a chamar o MP — evita reembolsar o mesmo pagamento duas vezes
+    db.run(
+      `UPDATE inscricoes SET status = 'reembolsando' WHERE id = ? AND status = 'pago'`,
+      [inscricaoId],
+      async function (err) {
+        if (err) return res.status(500).json({ message: 'Erro interno' });
+        if (this.changes === 0) {
+          return res.status(409).json({ message: 'Reembolso já em andamento para esta inscrição' });
+        }
+
+        try {
+          const paymentRefund = new PaymentRefund(getMpClient());
+          await paymentRefund.total({ payment_id: inscricao.mp_payment_id });
+
+          // só libera a vaga e cancela a inscrição depois do MP confirmar o reembolso
+          db.run(`UPDATE inscricoes SET status = 'cancelado' WHERE id = ?`, [inscricaoId]);
+          db.run(
+            `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
+            [inscricao.cursoId, inscricao.assento],
+            err => { if (err) console.error('Erro ao liberar assento após reembolso:', err); }
+          );
+
+          res.json({ status: 'cancelado', reembolsado: true });
+        } catch (err) {
+          console.error('Erro ao reembolsar pagamento no MP:', err);
+          // MP não confirmou o reembolso — volta pro estado anterior
+          db.run(`UPDATE inscricoes SET status = 'pago' WHERE id = ?`, [inscricaoId]);
+          const mensagem = err?.cause?.[0]?.description || err?.message || 'Erro ao reembolsar no Mercado Pago';
+          res.status(500).json({ message: mensagem });
+        }
+      }
+    );
+  });
+});
+
 // POST webhook do Mercado Pago
 router.post('/webhook', async (req, res) => {
   if (!validateMpSignature(req)) {
@@ -202,7 +257,7 @@ router.post('/webhook', async (req, res) => {
 });
 
 // POST processar pagamento transparente (cartão ou Pix, via MP Bricks)
-router.post('/processar-pagamento', async (req, res) => {
+router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
   const { inscricaoId, token, issuer_id, payment_method_id, payer } = req.body;
   const isPix = payment_method_id === 'pix';
 
