@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { X, Loader2, Copy, Check, AlertCircle, ArrowLeft } from 'lucide-react'
 
+import useBodyScrollLock from '../../../hooks/useBodyScrollLock'
+
 export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, payerEmail, onSuccess, onClose, onTrocarAssento }) {
     const brickRef = useRef(null)
     const pollRef = useRef(null)
     const [pixInfo, setPixInfo] = useState(null)
     const [copied, setCopied] = useState(false)
     const [erro, setErro] = useState(null)
+
+    useBodyScrollLock(isOpen)
 
     const montarBrick = useCallback(() => {
         if (!window.MercadoPago) return
