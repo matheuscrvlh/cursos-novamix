@@ -4,6 +4,7 @@ import { X } from "lucide-react"
 
 import Input from "../../Input"
 import Button from "../../Button"
+import useBodyScrollLock from "../../../hooks/useBodyScrollLock"
 
 function maskCPF(value) {
     const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -46,14 +47,10 @@ export default function ModalEnrollmentForm({
 }) {
     const [submitted, setSubmitted] = useState(false);
 
+    useBodyScrollLock(isOpen)
+
     useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
-            setSubmitted(false)
-        }
-        return () => { document.body.style.overflow = '' }
+        if (!isOpen) setSubmitted(false)
     }, [isOpen])
 
     if (!isOpen) return null

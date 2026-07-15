@@ -174,6 +174,7 @@ export default function AllChildrensCoursesSections({
                                         vagasReservadas={20}
                                         valor={curso.valor}
                                         onClick={() => openForm(curso.id)}
+                                        className='w-full max-w-95 mx-auto sm:max-w-none'
                                         imagem={curso.fotos?.length ? curso.fotos[0] : null}
                                     />
                                 )

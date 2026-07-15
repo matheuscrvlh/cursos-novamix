@@ -19,6 +19,11 @@ export default function CourseCard({
   className,
   onClick
 }) {
+  const total = vagasReservadas || 0
+  const ocupadas = Math.max(total - (vagasLivres || 0), 0)
+  const percentual = total > 0 ? Math.min(Math.round((ocupadas / total) * 100), 100) : 0
+  const esgotado = total > 0 && ocupadas >= total
+
   return (
     <div className={`bg-white rounded-xl flex flex-col shadow-md hover:shadow-lg transition-shadow md:min-w-75 ${className || ''}`}>
 
@@ -66,11 +71,23 @@ export default function CourseCard({
           <span className="truncate">{culinarista}</span>
         </div>
 
-        <div className="text-xs text-gray-text/50 mt-1">
-          {loadingVagasPorCurso
-            ? <span>Carregando vagas...</span>
-            : <span>Vagas: <span className="font-semibold text-gray-dark">{vagasLivres}/{vagasReservadas}</span></span>
-          }
+        <div className="mt-1">
+          {loadingVagasPorCurso ? (
+            <span className="text-xs text-gray-text/50">Carregando vagas...</span>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between text-xs text-gray-text/60">
+                <span>{esgotado ? 'Vagas esgotadas' : `${vagasLivres} vaga${vagasLivres === 1 ? '' : 's'} livre${vagasLivres === 1 ? '' : 's'}`}</span>
+                <span className="font-semibold text-gray-dark">{percentual}%</span>
+              </div>
+              <div className="w-full h-1.5 bg-gray-base/20 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${esgotado ? 'bg-red-base' : 'bg-orange-base'}`}
+                  style={{ width: `${percentual}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <button

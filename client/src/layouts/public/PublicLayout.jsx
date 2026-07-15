@@ -7,6 +7,7 @@ import { whatsapp } from '../../assets/images/icons'
 import { logoNm } from '../../assets/images/logos'
 
 import { getBanners } from '../../api/banners.services'
+import useBodyScrollLock from '../../hooks/useBodyScrollLock'
 
 const navLinks = [
   { label: 'Home', to: '/' },
@@ -36,10 +37,7 @@ export default function PublicLayout({ children, bannerHome }) {
     return () => clearInterval(t)
   }, [heroBanners.length])
 
-  useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [isMenuOpen])
+  useBodyScrollLock(isMenuOpen)
 
   return (
     <main className="min-h-screen w-full flex flex-col bg-gray"

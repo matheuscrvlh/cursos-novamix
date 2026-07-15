@@ -1,9 +1,8 @@
-import { useEffect } from "react"
-
 import { X } from 'lucide-react'
 
 import Input from "../Input"
 import Button from "../Button"
+import useBodyScrollLock from "../../hooks/useBodyScrollLock"
 
 export default function ModalFilters({
     nameModal,
@@ -14,45 +13,36 @@ export default function ModalFilters({
     setFiltersCourses,
     clear
 }) {
+    useBodyScrollLock(isOpen)
 
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = 'auto'
-        }
-        return () => {
-            document.body.style.overflow = 'auto'
-        }
-    }, [isOpen])
+    if (!isOpen) return null
 
     return (
-        <div className={`
-            md:hidden fixed flex justify-end bg-black/50 top-0 w-dvw h-dvh z-50
-            transition-opacity duration-300
-            ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
-        `}>
-            <div className={`
-                bg-white w-[80dvw] h-full flex flex-col shadow-2xl
-                transform transition-transform duration-300 ease-in-out
-                md:w-[320px]
-                ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-            `}>
-
-                <div className='flex items-center justify-between px-6 py-5 border-b border-gray-base/30'>
-                    <p className='text-gray-dark text-lg font-bold'>{nameModal}</p>
+        <div
+            className='md:hidden flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
+            onClick={onClose}
+        >
+            <div
+                className='bg-white shadow-xl rounded-xl w-[90%] max-w-115 max-h-[90vh] overflow-y-auto'
+                onClick={e => e.stopPropagation()}
+            >
+                <div className='flex items-center justify-between p-5 pb-4 border-b border-gray-base/20'>
+                    <div>
+                        <h2 className='font-bold text-gray-dark text-lg'>{nameModal}</h2>
+                        <p className='text-xs text-gray-text/60 mt-0.5'>Ajuste os filtros para refinar sua busca</p>
+                    </div>
                     <button
                         onClick={onClose}
-                        className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-base/20 transition-colors cursor-pointer'
+                        className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray text-gray-text/60 hover:text-gray-dark transition cursor-pointer'
                     >
-                        <X size={18} className='text-gray-dark' />
+                        <X size={18} />
                     </button>
                 </div>
 
-                <div className='flex flex-col flex-1 gap-5 px-6 py-7 overflow-y-auto'>
+                <div className='flex flex-col gap-4 p-5'>
 
                     <div className='flex flex-col gap-1.5'>
-                        <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Data Inicial</label>
+                        <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Data Inicial</label>
                         <Input
                             type='date'
                             className='w-full cursor-pointer'
@@ -62,7 +52,7 @@ export default function ModalFilters({
                     </div>
 
                     <div className='flex flex-col gap-1.5'>
-                        <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Data Final</label>
+                        <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Data Final</label>
                         <Input
                             type='date'
                             className='w-full cursor-pointer'
@@ -72,7 +62,7 @@ export default function ModalFilters({
                     </div>
 
                     <div className='flex flex-col gap-1.5'>
-                        <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Loja</label>
+                        <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Loja</label>
                         <select
                             className='p-2 w-full border border-gray-base rounded-md text-gray-text bg-white cursor-pointer'
                             value={filtersCourses.loja}
@@ -85,7 +75,7 @@ export default function ModalFilters({
                     </div>
 
                     <div className='flex flex-col gap-1.5'>
-                        <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
+                        <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Culinarista</label>
                         <select
                             className='p-2 w-full border border-gray-base rounded-md text-gray-text bg-white cursor-pointer'
                             value={filtersCourses.culinarista}
@@ -98,17 +88,14 @@ export default function ModalFilters({
                         </select>
                     </div>
 
-                </div>
-
-                <div className='px-6 py-5 border-t border-gray-base/30'>
                     <Button
-                        className='bg-orange-base hover:bg-orange-light text-white w-full'
+                        className='bg-orange-base hover:bg-orange-light text-white mt-2 font-semibold'
                         onClick={clear}
                     >
                         Limpar filtros
                     </Button>
-                </div>
 
+                </div>
             </div>
         </div>
     )

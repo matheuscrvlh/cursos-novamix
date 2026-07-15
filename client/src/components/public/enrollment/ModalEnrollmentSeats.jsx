@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 
 import Button from "../../Button"
+import useBodyScrollLock from "../../../hooks/useBodyScrollLock"
 
 export default function ModalEnrollmentSeats({
     isOpen,
@@ -17,14 +18,10 @@ export default function ModalEnrollmentSeats({
 }) {
     const [submitted, setSubmitted] = useState(false);
 
+    useBodyScrollLock(isOpen)
+
     useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
-            setSubmitted(false)
-        }
-        return () => { document.body.style.overflow = '' }
+        if (!isOpen) setSubmitted(false)
     }, [isOpen])
 
     if (!isOpen) return null

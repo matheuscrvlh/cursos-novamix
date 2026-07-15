@@ -1,8 +1,7 @@
-import { useEffect } from "react"
-
 import { CheckCircle2, PartyPopper } from "lucide-react"
 
 import Button from "../../Button"
+import useBodyScrollLock from "../../../hooks/useBodyScrollLock"
 
 export default function ModalEnrollmentSucess({
     isOpen,
@@ -11,14 +10,7 @@ export default function ModalEnrollmentSucess({
     pago = true,
     ...props
 }) {
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
-        }
-        return () => { document.body.style.overflow = '' }
-    }, [isOpen])
+    useBodyScrollLock(isOpen)
 
     if (!isOpen) return null
 

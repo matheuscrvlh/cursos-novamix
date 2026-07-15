@@ -1,6 +1,6 @@
-import { useEffect } from "react"
-
 import { MapPin, X } from "lucide-react"
+
+import useBodyScrollLock from "../../hooks/useBodyScrollLock"
 
 export default function ModalBranch({
     isOpen,
@@ -11,17 +11,7 @@ export default function ModalBranch({
     setFiltersChildrensCourses,
     ...props
 }) {
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
-        }
-
-        return () => {
-            document.body.style.overflow = ''
-        }
-    }, [isOpen])
+    useBodyScrollLock(isOpen)
 
     if (!isOpen) return null
 

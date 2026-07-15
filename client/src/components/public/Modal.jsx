@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import useBodyScrollLock from "../../hooks/useBodyScrollLock"
 
 export default function Modal({
     as = 'div',
@@ -11,17 +11,7 @@ export default function Modal({
     onClose,
     ...props
 }) {
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden'
-        } else {
-            document.body.style.overflow = ''
-        }
-
-        return () => {
-            document.body.style.overflow = ''
-        }
-    }, [isOpen])
+    useBodyScrollLock(isOpen)
 
     if (!isOpen) return null
 
