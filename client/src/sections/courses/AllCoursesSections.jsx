@@ -28,7 +28,7 @@ export default function AllCoursesSections({
     }
 
     return (
-        <section className='w-[92vw] max-w-7xl mx-auto pt-10 md:pt-14 pb-16'>
+        <section className='w-full px-10 sm:w-[92vw] sm:px-0 max-w-7xl mx-auto pt-10 md:pt-14 pb-16'>
 
             <div className='flex items-center justify-between mb-7'>
                 <h2 className='text-xl font-bold text-gray-dark md:text-3xl tracking-tight'>
@@ -179,7 +179,7 @@ export default function AllCoursesSections({
                                         vagasReservadas={24}
                                         valor={curso.valor}
                                         onClick={() => openForm(curso.id)}
-                                        className='w-full max-w-95 mx-auto sm:max-w-none'
+                                        className='w-full'
                                         imagem={curso.fotos?.length ? curso.fotos[0] : null}
                                     />
                                 )
