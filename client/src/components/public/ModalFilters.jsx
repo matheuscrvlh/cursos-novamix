@@ -30,7 +30,7 @@ export default function ModalFilters({
         <div className={`
             md:hidden fixed flex justify-end bg-black/50 top-0 w-dvw h-dvh z-50
             transition-opacity duration-300
-            ${isOpen ? 'opacity-100' : 'opacity-0'}
+            ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
         `}>
             <div className={`
                 bg-white w-[80dvw] h-full flex flex-col shadow-2xl

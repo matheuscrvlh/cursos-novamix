@@ -9,6 +9,7 @@ import { postEnrollment, putSeatChange, getSeats } from '../../api/enrollment.se
 import { useThemeColor } from '../../hooks/useThemeColor';
 
 import ModalBranch from '../../components/public/ModalBranch';
+import ModalFilters from '../../components/public/ModalFilters';
 import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
@@ -46,6 +47,7 @@ export default function Courses() {
         loja: '',
         culinarista: ''
     });
+    const [showModalFilters, setShowModalFilters] = useState(false);
 
     const [cursosAtuais, setCursosAtuais] = useState([]);
     const [cursosFiltrados, setCursosFiltrados] = useState([]);
@@ -233,10 +235,22 @@ export default function Courses() {
                     loadingCourses={loadingCourses}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
+                    showModalFilters={showModalFilters}
+                    setShowModalFilters={setShowModalFilters}
                     filters={filters}
                     setFilters={setFilters}
                     culinaristas={culinaristas}
                     clearFilters={clearFilters}
+                />
+
+                <ModalFilters
+                    isOpen={showModalFilters}
+                    onClose={() => setShowModalFilters(false)}
+                    nameModal='Filtros'
+                    culinaristas={culinaristas}
+                    filtersCourses={filters}
+                    setFiltersCourses={setFilters}
+                    clear={() => { clearFilters(); setShowModalFilters(false); }}
                 />
 
                 <ModalBranch

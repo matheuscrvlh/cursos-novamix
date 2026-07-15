@@ -1,7 +1,7 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-import { MapPin, Building2, MessageCircle } from 'lucide-react'
+import { MapPin, Building2, MessageCircle, Menu, X } from 'lucide-react'
 
 import { whatsapp } from '../../assets/images/icons'
 import { logoNm } from '../../assets/images/logos'
@@ -20,6 +20,7 @@ export default function PublicLayout({ children, bannerHome }) {
   const navigate = useNavigate();
   const [heroBanners, setHeroBanners] = useState([])
   const [heroIndex, setHeroIndex]     = useState(0)
+  const [isMenuOpen, setIsMenuOpen]   = useState(false)
 
   useEffect(() => {
     getBanners('hero').then(data => {
@@ -34,6 +35,11 @@ export default function PublicLayout({ children, bannerHome }) {
     const t = setInterval(() => setHeroIndex(i => (i + 1) % heroBanners.length), 5000)
     return () => clearInterval(t)
   }, [heroBanners.length])
+
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [isMenuOpen])
 
   return (
     <main className="min-h-screen w-full flex flex-col bg-gray"
@@ -72,39 +78,82 @@ export default function PublicLayout({ children, bannerHome }) {
             ))}
           </nav>
 
-          <a
-            href="https://api.whatsapp.com/send?phone=5522998336225"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-white/15 hover:bg-white/25 transition px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap shrink-0"
-          >
-            <img src={whatsapp} alt="WhatsApp" className="h-5" />
-            <span className="text-xs sm:text-sm">Atendimento</span>
-          </a>
+          <div className="flex items-center gap-2 shrink-0">
+            <a
+              href="https://api.whatsapp.com/send?phone=5522998336225"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-white/15 hover:bg-white/25 transition px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap"
+            >
+              <img src={whatsapp} alt="WhatsApp" className="h-5" />
+              <span className="text-xs sm:text-sm">Atendimento</span>
+            </a>
 
-        </div>
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition"
+              aria-label="Abrir menu"
+            >
+              <Menu size={20} />
+            </button>
+          </div>
 
-        <div className="md:hidden border-t border-white/15 overflow-x-auto min-w-0 w-full">
-          <nav className="flex items-center gap-1 px-4 py-2 w-max">
-            {navLinks.map(link => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === '/'}
-                className={({ isActive }) =>
-                  `px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap transition ${
-                    isActive
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/75 hover:text-white hover:bg-white/10'
-                  }`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
         </div>
       </header>
+
+      <div
+        className={`md:hidden fixed inset-0 bg-black z-60 transition-opacity duration-300 ${
+          isMenuOpen ? 'opacity-50 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setIsMenuOpen(false)}
+      />
+
+      <aside
+        className={`md:hidden fixed top-0 right-0 h-dvh w-70 max-w-[80dvw] bg-white shadow-2xl z-60 flex flex-col
+          transform transition-transform duration-300 ease-in-out
+          ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-base/20">
+          <img src={logoNm} alt="Novamix Cursos" className="w-9 h-9 rounded-lg object-cover shadow-sm" />
+          <button
+            onClick={() => setIsMenuOpen(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray transition-colors cursor-pointer"
+            aria-label="Fechar menu"
+          >
+            <X size={18} className="text-gray-dark" />
+          </button>
+        </div>
+
+        <nav className="flex flex-col gap-1 p-4">
+          {navLinks.map(link => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.to === '/'}
+              onClick={() => setIsMenuOpen(false)}
+              className={({ isActive }) =>
+                `px-4 py-3 rounded-lg text-sm font-semibold transition ${
+                  isActive
+                    ? 'bg-orange-base text-white'
+                    : 'text-gray-dark hover:bg-gray'
+                }`
+              }
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <a
+          href="https://api.whatsapp.com/send?phone=5522998336225"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-auto mx-4 mb-5 flex items-center justify-center gap-2 bg-orange-base hover:bg-orange-light transition text-white py-3 rounded-lg font-semibold text-sm"
+        >
+          <img src={whatsapp} alt="WhatsApp" className="h-5" />
+          Atendimento
+        </a>
+      </aside>
 
       <section className="flex-grow w-full">
 
