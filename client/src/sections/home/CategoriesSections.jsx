@@ -1,7 +1,5 @@
-// REACT
 import { Link } from 'react-router-dom'
 
-// IMAGES
 import { cursos, culinaristas, cursosInfantis, industrias } from '../../assets/images/categorias';
 
 const categorias = [
@@ -18,7 +16,6 @@ export default function CategoriesSections() {
                 {categorias.map(cat => (
                     <Link key={cat.to} to={cat.to} className='group flex flex-col items-center gap-3'>
 
-                        {/* CÍRCULO */}
                         <div className='
                             w-28 h-28
                             md:w-40 md:h-40
@@ -39,7 +36,6 @@ export default function CategoriesSections() {
                             />
                         </div>
 
-                        {/* LABEL */}
                         <p className='
                             font-bold text-sm md:text-base text-gray-dark text-center leading-tight
                             transition-colors duration-200

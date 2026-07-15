@@ -6,7 +6,6 @@ const db = require('../db');
 
 const router = express.Router();
 
-// POST nova inscrição
 router.post('/', paymentLimiter, (req, res) => {
   const { cursoId, nome, cpf, celular, email, assento } = req.body;
   const formaPagamento = req.body.formaPagamento || 'mercadopago';
@@ -17,7 +16,6 @@ router.post('/', paymentLimiter, (req, res) => {
 
   const assentoId = Number(assento);
 
-  // verificar se assento existe
   db.get(
     `SELECT * FROM assentos WHERE cursoId = ? AND id = ?`,
     [cursoId, assentoId],
@@ -136,7 +134,6 @@ router.put('/:id/assento', (req, res) => {
   });
 });
 
-// GET inscrições por curso
 router.get('/curso/:cursoId', authMiddleware, (req, res) => {
   db.all(
     `SELECT * FROM inscricoes WHERE cursoId = ?`,
@@ -151,7 +148,6 @@ router.get('/curso/:cursoId', authMiddleware, (req, res) => {
   );
 });
 
-// GET todas as inscrições
 router.get('/', authMiddleware, (req, res) => {
   db.all(`SELECT * FROM inscricoes`, [], (err, rows) => {
     if (err) {
@@ -162,7 +158,6 @@ router.get('/', authMiddleware, (req, res) => {
   });
 });
 
-// PUT atualizar inscrição
 router.put('/:id', authMiddleware, (req, res) => {
   const { id } = req.params;
   const { nome, cpf, celular, email, assento, status, formaPagamento } = req.body;
@@ -225,7 +220,6 @@ router.put('/:id', authMiddleware, (req, res) => {
           if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
           if (this.changes === 0) return res.status(400).json({ message: 'Novo assento indisponível' });
 
-          // liberar assento antigo
           db.run(
             `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
             [inscricao.cursoId, inscricao.assento],
@@ -257,7 +251,6 @@ router.put('/:id', authMiddleware, (req, res) => {
   });
 });
 
-// DELETE inscrição — libera assento associado
 router.delete('/:id', authMiddleware, (req, res) => {
   const { id } = req.params;
 
@@ -265,7 +258,6 @@ router.delete('/:id', authMiddleware, (req, res) => {
     if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
     if (!inscricao) return res.status(404).json({ message: 'Inscrição não encontrada' });
 
-    // liberar assento
     db.run(
       `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
       [inscricao.cursoId, inscricao.assento],

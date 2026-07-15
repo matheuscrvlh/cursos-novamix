@@ -1,7 +1,4 @@
-// React
 import { useEffect } from "react"
-
-// Components
 
 export default function Modal({
     as = 'div',

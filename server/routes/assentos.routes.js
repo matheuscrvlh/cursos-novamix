@@ -4,7 +4,6 @@ const db = require('../db');
 
 const router = express.Router();
 
-// GET assentos por curso
 router.get('/:cursoId', (req, res) => {
   db.all(
     `SELECT * FROM assentos WHERE cursoId = ? ORDER BY id ASC`,
@@ -16,7 +15,6 @@ router.get('/:cursoId', (req, res) => {
   );
 });
 
-// PUT atualizar assentos de um curso (bulk)
 router.put('/:cursoId', authMiddleware, (req, res) => {
   const { cursoId } = req.params;
   const updatedAssentos = Array.isArray(req.body) ? req.body : [];

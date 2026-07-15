@@ -5,7 +5,6 @@ function authHeader() {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// ============== POST
 export async function postCulinarian(formData) {
     try {
         const res = await fetch(`${URL}/culinaristas`, {
@@ -21,7 +20,6 @@ export async function postCulinarian(formData) {
     }
 }
 
-// ============== GET
 export async function getCulinarians() {
     try {
         const res = await fetch((`${URL}/culinaristas`), {
@@ -35,7 +33,6 @@ export async function getCulinarians() {
     }
 }
 
-// ============== PUT
 export async function putCulinarian(culinarianId, formData) {
     try {
         const res = await fetch((`${URL}/culinaristas/${culinarianId}`), {
@@ -51,7 +48,6 @@ export async function putCulinarian(culinarianId, formData) {
     }
 }
 
-// ============== DELETE
 export async function deleteCulinarian(culinarianId) {
     try {
         await fetch((`${URL}/culinaristas/${culinarianId}`), {

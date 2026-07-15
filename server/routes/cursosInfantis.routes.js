@@ -9,7 +9,6 @@ const db = require('../db');
 const uploadCursosInfantis = createUpload('cursosInfantis');
 const router = express.Router();
 
-// GET todos os cursos infantis
 router.get('/', (req, res) => {
   db.all(`
     SELECT ci.*,
@@ -29,7 +28,6 @@ router.get('/', (req, res) => {
   });
 });
 
-// GET curso infantil por id
 router.get('/:id', (req, res) => {
   db.get(`
     SELECT ci.*,
@@ -49,7 +47,6 @@ router.get('/:id', (req, res) => {
   });
 });
 
-// POST novo curso infantil
 router.post('/', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req, res) => {
   const cursoId = uuidv4();
   const valor = parseFloat(req.body.valor);
@@ -75,7 +72,6 @@ router.post('/', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req, r
       return res.status(500).json({ message: 'Erro ao criar curso infantil' });
     }
 
-    // fotos
     if (req.files && req.files.length > 0) {
       const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
@@ -93,7 +89,7 @@ router.post('/', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req, r
       });
     }
 
-    // assentos — cursos infantis têm 20 (vs 24 dos adultos)
+    // cursos infantis têm 20 assentos (vs 24 dos adultos)
     for (let i = 1; i <= 20; i++) {
       db.run(
         `INSERT INTO assentos (id, cursoId, status) VALUES (?, ?, ?)`,
@@ -106,11 +102,9 @@ router.post('/', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req, r
   });
 });
 
-// PUT atualizar curso infantil
 router.put('/:id', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req, res) => {
   const { id } = req.params;
 
-  // se vieram novas fotos, apaga as antigas do disco e do banco
   if (req.files && req.files.length > 0) {
     db.all(`SELECT url FROM fotos WHERE cursoId = ?`, [id], (err, fotos) => {
       if (!err) {
@@ -180,7 +174,6 @@ router.put('/:id', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req,
   });
 });
 
-// DELETE curso infantil e tudo relacionado
 router.delete('/:id', authMiddleware, (req, res) => {
   const { id } = req.params;
 
@@ -188,7 +181,6 @@ router.delete('/:id', authMiddleware, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!curso) return res.status(404).json({ message: 'Curso infantil não encontrado' });
 
-    // apagar fotos do disco
     db.all(`SELECT url FROM fotos WHERE cursoId = ?`, [id], (err, fotos) => {
       if (!err) {
         fotos.forEach(({ url }) => {

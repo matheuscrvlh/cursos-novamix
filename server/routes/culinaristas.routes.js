@@ -9,7 +9,6 @@ const db = require('../db');
 const uploadCulinaristas = createUpload('culinaristas');
 const router = express.Router();
 
-// GET todos os culinaristas
 router.get('/', (req, res) => {
   db.all(`SELECT * FROM culinaristas`, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -24,7 +23,6 @@ router.get('/', (req, res) => {
   });
 });
 
-// POST novo culinarista
 router.post('/', authMiddleware, uploadCulinaristas.single('foto'), (req, res) => {
   const { nomeCulinarista, cpf, lojas, cursos, instagram, industria, telefone } = req.body;
 
@@ -61,7 +59,6 @@ router.post('/', authMiddleware, uploadCulinaristas.single('foto'), (req, res) =
   });
 });
 
-// PUT atualizar culinarista
 router.put('/:id', authMiddleware, uploadCulinaristas.single('foto'), (req, res) => {
   const { id } = req.params;
 
@@ -69,7 +66,6 @@ router.put('/:id', authMiddleware, uploadCulinaristas.single('foto'), (req, res)
     if (err) return res.status(500).json({ error: err.message });
     if (!culinarista) return res.status(404).json({ message: 'Culinarista não encontrado' });
 
-    // apagar foto antiga se uma nova for enviada
     if (req.file && culinarista.foto) {
       const fotoPath = path.join(__dirname, '..', culinarista.foto);
       if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
@@ -111,7 +107,6 @@ router.put('/:id', authMiddleware, uploadCulinaristas.single('foto'), (req, res)
   });
 });
 
-// DELETE culinarista
 router.delete('/:id', authMiddleware, (req, res) => {
   const { id } = req.params;
 

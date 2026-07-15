@@ -13,7 +13,6 @@ export default function CulinarianCard({
     return (
         <div className={`rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden ${className || ''}`}>
 
-            {/* IMAGEM com overlay */}
             <div className='relative h-72 w-full overflow-hidden'>
                 {foto ? (
                     <img
@@ -27,10 +26,8 @@ export default function CulinarianCard({
                     </div>
                 )}
 
-                {/* Gradient */}
                 <div className='absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent' />
 
-                {/* Nome + loja sobre a imagem */}
                 <div className='absolute bottom-0 left-0 right-0 p-4'>
                     <p className='text-white font-bold text-lg leading-tight mb-1.5'>{nomeCulinarista}</p>
 

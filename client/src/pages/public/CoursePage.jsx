@@ -177,7 +177,6 @@ export default function CoursePage() {
 
             <div className='max-w-4xl mx-auto px-4 py-8 md:px-8'>
 
-                {/* Voltar */}
                 <Link
                     to='/cursos'
                     className='inline-flex items-center gap-1.5 text-sm text-gray-text/60 hover:text-orange-base transition mb-6'
@@ -186,7 +185,6 @@ export default function CoursePage() {
                     Voltar para cursos
                 </Link>
 
-                {/* Imagem principal */}
                 <div className='relative w-full rounded-2xl overflow-hidden bg-gray-base/10 aspect-video mb-8'>
                     {imagemAtual ? (
                         <img src={imagemAtual} alt={curso.nomeCurso} className='w-full h-full object-cover' />
@@ -218,12 +216,10 @@ export default function CoursePage() {
                     )}
                 </div>
 
-                {/* Título */}
                 <h1 className='text-2xl md:text-3xl font-bold text-gray-dark mb-6 leading-snug'>
                     {curso.nomeCurso}
                 </h1>
 
-                {/* Grid de informações */}
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8'>
                     <InfoCard icon={<Calendar size={18} className='text-orange-base' />} label='Data'>
                         {formatDate(curso.data)} às {curso.hora}h
@@ -244,7 +240,6 @@ export default function CoursePage() {
                     )}
                 </div>
 
-                {/* Ingredientes */}
                 {curso.ingredientes && curso.ingredientes.trim() && (
                     <div className='bg-white rounded-xl p-5 shadow-sm mb-8'>
                         <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-3'>Ingredientes</p>
@@ -259,7 +254,6 @@ export default function CoursePage() {
                     </div>
                 )}
 
-                {/* Vagas */}
                 <div className='bg-white rounded-xl p-4 shadow-sm mb-8 flex items-center justify-between'>
                     <div>
                         <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-0.5'>Vagas disponíveis</p>
@@ -276,7 +270,6 @@ export default function CoursePage() {
                     </div>
                 </div>
 
-                {/* Botão */}
                 <Button
                     className='w-full bg-orange-base hover:bg-orange-light text-white font-semibold text-base py-3 cursor-pointer transition'
                     onClick={() => setStep('form')}
@@ -290,7 +283,6 @@ export default function CoursePage() {
                 </p>
             </div>
 
-            {/* Loading pagamento */}
             {loadingPagamento && (
                 <div className='flex items-center justify-center fixed inset-0 bg-black/70 z-50'>
                     <div className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl'>
@@ -300,7 +292,6 @@ export default function CoursePage() {
                 </div>
             )}
 
-            {/* Erro pagamento */}
             {erroPagamento && (
                 <div
                     className='flex items-center justify-center fixed inset-0 bg-black/70 z-50 p-4'
@@ -322,7 +313,6 @@ export default function CoursePage() {
                 </div>
             )}
 
-            {/* Modais */}
             <ModalEnrollmentForm
                 isOpen={step === 'form'}
                 onClick={() => setStep('assento')}

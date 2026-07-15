@@ -1,7 +1,5 @@
-// REACT
 import { useState } from 'react'
 
-// ICONS
 import { MapPin, Clock } from 'lucide-react'
 
 export default function LocationSections() {
@@ -26,17 +24,14 @@ export default function LocationSections() {
         <section className='w-[90vw] mx-auto mt-16 pb-12 md:mt-30'>
             <div className='flex flex-col md:flex-row md:items-start md:gap-10'>
 
-                {/* ===== LEFT: heading + tabs + info ===== */}
                 <div className='flex flex-col gap-5 md:w-[38%]'>
 
-                    {/* HEADING */}
                     <h2 className='text-3xl sm:text-4xl md:text-6xl font-bold text-gray-dark leading-tight'>
                         CONFIRA<br />
                         <span className='text-orange-base'>NOSSA</span><br />
                         LOCALIZAÇÃO
                     </h2>
 
-                    {/* TOGGLE TABS */}
                     <div className='flex gap-2 bg-gray rounded-xl p-1'>
                         {[
                             { key: 'friburgo',    label: 'Friburgo' },
@@ -56,7 +51,6 @@ export default function LocationSections() {
                         ))}
                     </div>
 
-                    {/* INFO */}
                     <div className='flex flex-col gap-3'>
                         <div className='flex items-start gap-2.5'>
                             <MapPin size={16} className='text-orange-base shrink-0 mt-0.5' />
@@ -75,7 +69,6 @@ export default function LocationSections() {
                     </div>
                 </div>
 
-                {/* ===== RIGHT: mapa ===== */}
                 <iframe
                     key={active}
                     src={location.iframe}

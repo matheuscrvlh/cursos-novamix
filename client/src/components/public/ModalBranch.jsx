@@ -1,7 +1,5 @@
-// React
 import { useEffect } from "react"
 
-// Icons
 import { MapPin, X } from "lucide-react"
 
 export default function ModalBranch({
@@ -44,7 +42,6 @@ export default function ModalBranch({
                 onClick={e => e.stopPropagation()}
                 {...props}
             >
-                {/* HEADER */}
                 <div className='flex items-center justify-between px-4 py-3 sm:px-6 sm:py-5 border-b border-gray-base/20'>
                     <div>
                         <p className='text-base sm:text-lg font-bold text-gray-text'>Selecione a loja</p>
@@ -58,10 +55,8 @@ export default function ModalBranch({
                     </button>
                 </div>
 
-                {/* CARDS */}
                 <div className='flex flex-row gap-3 p-4 sm:gap-4 sm:p-6'>
 
-                    {/* PRADO */}
                     <button
                         onClick={() => selectLoja('Prado')}
                         className='
@@ -80,7 +75,6 @@ export default function ModalBranch({
                         </div>
                     </button>
 
-                    {/* TERESÓPOLIS */}
                     <button
                         onClick={() => selectLoja('Teresopolis')}
                         className='

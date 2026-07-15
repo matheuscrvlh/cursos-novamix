@@ -20,7 +20,6 @@ export default function CulinarianCard({
     return (
         <div className={`bg-white rounded-xl flex flex-col shadow-md hover:shadow-lg transition-shadow overflow-hidden ${className || ''}`}>
 
-            {/* IMAGEM com overlay */}
             <div className='relative h-48 w-full overflow-hidden'>
                 {imagem ? (
                     <img
@@ -34,10 +33,8 @@ export default function CulinarianCard({
                     </div>
                 )}
 
-                {/* Gradient */}
                 <div className='absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent' />
 
-                {/* Nome + loja na base da foto */}
                 <div className='absolute bottom-0 left-0 right-0 p-3'>
                     <p className='text-white font-bold text-base leading-tight mb-1.5'>{culinarista}</p>
 
@@ -61,7 +58,6 @@ export default function CulinarianCard({
                 </div>
             </div>
 
-            {/* INFOS */}
             <div className='p-3 flex flex-col gap-1.5 flex-1'>
 
                 {industria && (
@@ -92,7 +88,6 @@ export default function CulinarianCard({
 
             </div>
 
-            {/* BOTÃO */}
             {onClick && (
                 <div className='px-3 pb-3'>
                     <button

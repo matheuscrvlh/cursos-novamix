@@ -1,4 +1,3 @@
-// COMPONENTS
 import CulinarianCard from "../../components/public/CulinarianCard"
 
 export default function AllCulinariansSections({ culinaristas }) {
@@ -6,7 +5,6 @@ export default function AllCulinariansSections({ culinaristas }) {
     return (
         <section className='w-[80vw] mx-auto pt-15'>
 
-            {/* ========== CULINARISTAS =========== */}
             <div className='w-[80vw] mx-auto'>
                 <p className='
                     text-lg font-bold text-gray-dark

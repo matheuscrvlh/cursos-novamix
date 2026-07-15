@@ -1,20 +1,9 @@
-// React
 import { useState, useEffect, useRef } from 'react'
-
-// Head
-import { Head } from '../../components/Head'
-
-// Layouts
-import SideBar from '../../layouts/admin/SideBar'
-import TopBar from '../../layouts/admin/TopBar'
-
-// Icons
 import { Trash, ArrowUp, ArrowDown, Plus, Link, Image, ExternalLink } from 'lucide-react'
 
-// Services
+import AdminPage from '../../layouts/admin/AdminPage'
 import { getBanners, postBanner, putBanner, deleteBanner } from '../../api/banners.services'
 
-// ─── área de upload de uma imagem ────────────────────────────────────────────
 function UploadArea({ label, hint, aspectClass, preview, inputRef, onChange }) {
     return (
         <div className='flex flex-col gap-1.5'>
@@ -39,7 +28,6 @@ function UploadArea({ label, hint, aspectClass, preview, inputRef, onChange }) {
     )
 }
 
-// ─── formulário de adição de banner ──────────────────────────────────────────
 function BannerForm({ posicao, onAdded }) {
     const [imagemDesktop, setImagemDesktop]   = useState(null)
     const [previewDesktop, setPreviewDesktop] = useState(null)
@@ -88,7 +76,6 @@ function BannerForm({ posicao, onAdded }) {
         <form onSubmit={handleSubmit} className='border border-dashed border-gray-base/30 rounded-xl p-5 flex flex-col gap-4 bg-gray/40'>
             <p className='text-sm font-semibold text-gray-text/60 uppercase tracking-wider'>Adicionar banner</p>
 
-            {/* uploads lado a lado */}
             <div className='grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-start'>
                 <UploadArea
                     label='Desktop'
@@ -108,7 +95,6 @@ function BannerForm({ posicao, onAdded }) {
                 />
             </div>
 
-            {/* link */}
             <div className='flex items-center gap-2 bg-white border border-gray-base/25 rounded-lg px-3 py-2'>
                 <Link size={15} className='text-gray-base/50 shrink-0' />
                 <input
@@ -132,7 +118,6 @@ function BannerForm({ posicao, onAdded }) {
     )
 }
 
-// ─── item de banner na lista ──────────────────────────────────────────────────
 function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast }) {
     const [link, setLink]         = useState(banner.link || '')
     const [editingLink, setEditingLink] = useState(false)
@@ -151,7 +136,6 @@ function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast })
     return (
         <div className='flex gap-3 items-center bg-white border border-gray-base/15 rounded-xl p-3 shadow-sm'>
 
-            {/* thumbnails desktop + mobile */}
             <div className='flex gap-2 shrink-0'>
                 <div className='flex flex-col gap-1'>
                     <p className='text-[10px] text-gray-text/30 uppercase text-center'>Desktop</p>
@@ -170,7 +154,6 @@ function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast })
                 </div>
             </div>
 
-            {/* link + info */}
             <div className='flex-1 min-w-0'>
                 <p className='text-xs text-gray-text/40 uppercase tracking-wider mb-1'>Link</p>
                 {editingLink ? (
@@ -210,7 +193,6 @@ function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast })
                 )}
             </div>
 
-            {/* ações */}
             <div className='flex flex-col gap-1 shrink-0'>
                 <button
                     onClick={onMoveUp}
@@ -238,7 +220,6 @@ function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast })
     )
 }
 
-// ─── seção de uma posição (hero ou home) ─────────────────────────────────────
 function BannerSection({ posicao, title, description }) {
     const [banners, setBanners] = useState([])
     const [loading, setLoading] = useState(true)
@@ -267,10 +248,8 @@ function BannerSection({ posicao, title, description }) {
         const target = index + direction
         if (target < 0 || target >= next.length) return
 
-        // troca posições
         ;[next[index], next[target]] = [next[target], next[index]]
 
-        // atualiza ordem localmente e no backend
         const updated = next.map((b, i) => ({ ...b, ordem: i }))
         setBanners(updated)
         await Promise.all([
@@ -288,7 +267,6 @@ function BannerSection({ posicao, title, description }) {
 
             <hr className='border-gray-base/20' />
 
-            {/* lista */}
             <div className='flex flex-col gap-3'>
                 {loading ? (
                     <p className='text-sm text-gray-text/40 text-center py-6'>Carregando...</p>
@@ -309,37 +287,25 @@ function BannerSection({ posicao, title, description }) {
                 )}
             </div>
 
-            {/* formulário de adição */}
             <BannerForm posicao={posicao} onAdded={handleAdded} />
         </div>
     )
 }
 
-// ─── página principal ─────────────────────────────────────────────────────────
 export default function MarketingAdmin() {
     return (
-        <div className='flex w-full min-h-screen bg-gray overflow-x-hidden'>
-            <Head title='Admin | Marketing' />
-            <SideBar />
-            <main className='flex-1 p-4 pt-20 lg:p-15 lg:ml-[15%] lg:pt-0'>
-                <TopBar title='Marketing' />
+        <AdminPage title='Marketing'>
+            <BannerSection
+                posicao='hero'
+                title='Banner Principal'
+                description='Aparece no topo de todas as páginas como carrossel. A ordem define a sequência de exibição.'
+            />
 
-                <section className='flex flex-col gap-8 mt-10 w-[92dvw] lg:w-[78vw]'>
-
-                    <BannerSection
-                        posicao='hero'
-                        title='Banner Principal'
-                        description='Aparece no topo de todas as páginas como carrossel. A ordem define a sequência de exibição.'
-                    />
-
-                    <BannerSection
-                        posicao='home'
-                        title='Banner Home'
-                        description='Aparece na seção de Culinaristas da página inicial. Apenas o primeiro banner ativo é exibido.'
-                    />
-
-                </section>
-            </main>
-        </div>
+            <BannerSection
+                posicao='home'
+                title='Banner Home'
+                description='Aparece na seção de Culinaristas da página inicial. Apenas o primeiro banner ativo é exibido.'
+            />
+        </AdminPage>
     )
 }

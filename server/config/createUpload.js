@@ -18,7 +18,6 @@ function createUpload(folderName) {
     folderName
   );
 
-  // garantir que a pasta exista
   ensureDirExists(uploadDir);
 
   const storage = multer.diskStorage({

@@ -1,14 +1,10 @@
-// React
 import { useEffect, useState } from "react"
 
-// Icons
 import { X } from "lucide-react"
 
-// Components
 import Input from "../../Input"
 import Button from "../../Button"
 
-// ============ MÁSCARAS ============
 function maskCPF(value) {
     const digits = value.replace(/\D/g, '').slice(0, 11);
     if (digits.length <= 3) return digits;
@@ -27,9 +23,7 @@ function maskPhone(value) {
     if (num.length <= 8) return `+${digits.slice(0, 2)} (${digits.slice(2, 4)}) ${num.slice(0, 4)}-${num.slice(4)}`;
     return `+${digits.slice(0, 2)} (${digits.slice(2, 4)}) ${num.slice(0, 5)}-${num.slice(5)}`;
 }
-// ==================================
 
-// ============ VALIDAÇÕES ============
 function isCPFValid(cpf) {
     return (cpf || '').replace(/\D/g, '').length === 11;
 }
@@ -41,7 +35,6 @@ function isPhoneValid(phone) {
 function isEmailValid(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email || '').trim());
 }
-// ====================================
 
 export default function ModalEnrollmentForm({
     isOpen,
@@ -91,7 +84,6 @@ export default function ModalEnrollmentForm({
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                {/* HEADER */}
                 <div className='flex items-center justify-between p-5 pb-4 border-b border-gray-base/20'>
                     <div>
                         <h2 className='font-bold text-gray-dark text-lg'>Suas informações</h2>
@@ -105,10 +97,8 @@ export default function ModalEnrollmentForm({
                     </button>
                 </div>
 
-                {/* FORM */}
                 <div className='flex flex-col gap-4 p-5'>
 
-                    {/* Nome */}
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Nome completo</label>
                         <Input
@@ -122,7 +112,6 @@ export default function ModalEnrollmentForm({
                         {erroNome && <p className='text-red-base text-xs'>Preencha seu nome completo</p>}
                     </div>
 
-                    {/* CPF */}
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>CPF</label>
                         <Input
@@ -138,7 +127,6 @@ export default function ModalEnrollmentForm({
                         {erroCPF && <p className='text-red-base text-xs'>CPF incompleto — preencha os 11 dígitos</p>}
                     </div>
 
-                    {/* Telefone */}
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Telefone</label>
                         <Input
@@ -154,7 +142,6 @@ export default function ModalEnrollmentForm({
                         {erroTelefone && <p className='text-red-base text-xs'>Telefone incompleto — inclua DDD e número</p>}
                     </div>
 
-                    {/* Email */}
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>E-mail</label>
                         <Input

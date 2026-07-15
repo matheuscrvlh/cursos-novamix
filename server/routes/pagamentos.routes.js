@@ -91,7 +91,6 @@ function validateMpSignature(req) {
   }
 }
 
-// GET status da inscrição (para verificar após retorno do MP)
 router.get('/status/:inscricaoId', (req, res) => {
   const { inscricaoId } = req.params;
   db.get(
@@ -105,7 +104,6 @@ router.get('/status/:inscricaoId', (req, res) => {
   );
 });
 
-// POST verificar pagamento manualmente no MP (admin)
 router.post('/verificar/:inscricaoId', authMiddleware, async (req, res) => {
   const { inscricaoId } = req.params;
 
@@ -147,10 +145,9 @@ router.post('/verificar/:inscricaoId', authMiddleware, async (req, res) => {
   });
 });
 
-// POST reembolsar pagamento no Mercado Pago (admin) — devolve o valor total
-// ao cliente e libera a vaga automaticamente. Só a confirmação vem do
-// frontend (modal de confirmação); aqui não tem como desfazer depois de
-// chamado o MP, então validamos tudo antes de mexer no dinheiro.
+// Devolve o valor total ao cliente e libera a vaga. Só a confirmação vem do
+// frontend; depois de chamado o MP não tem como desfazer, então validamos
+// tudo antes de mexer no dinheiro.
 router.post('/reembolsar/:inscricaoId', authMiddleware, async (req, res) => {
   const { inscricaoId } = req.params;
 
@@ -201,7 +198,6 @@ router.post('/reembolsar/:inscricaoId', authMiddleware, async (req, res) => {
   });
 });
 
-// POST webhook do Mercado Pago
 router.post('/webhook', async (req, res) => {
   if (!validateMpSignature(req)) {
     console.warn('Webhook MP com assinatura inválida rejeitado');
@@ -256,7 +252,6 @@ router.post('/webhook', async (req, res) => {
   }
 });
 
-// POST processar pagamento transparente (cartão ou Pix, via MP Bricks)
 router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
   const { inscricaoId, token, issuer_id, payment_method_id, payer } = req.body;
   const isPix = payment_method_id === 'pix';

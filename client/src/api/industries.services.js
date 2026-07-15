@@ -5,7 +5,6 @@ function authHeader() {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// ============== POST
 export async function postIndustry(formData) {
     try {
         const res = await fetch(`${URL}/industrias`, {
@@ -21,7 +20,6 @@ export async function postIndustry(formData) {
     }
 }
 
-// ============== GET
 export async function getIndustries() {
     try {
         const res = await fetch((`${URL}/industrias`), {
@@ -35,7 +33,6 @@ export async function getIndustries() {
     }
 }
 
-// ============== PUT
 export async function putIndustry(industryId, formData) {
     try {
         const res = await fetch((`${URL}/industrias/${industryId}`), {
@@ -51,7 +48,6 @@ export async function putIndustry(industryId, formData) {
     }
 }
 
-// ============== DELETE
 export async function deleteIndustry(industryId) {
     try {
         await fetch((`${URL}/industrias/${industryId}`), {

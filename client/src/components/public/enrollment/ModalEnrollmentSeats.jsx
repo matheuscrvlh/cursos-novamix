@@ -1,10 +1,7 @@
-// React
 import { useEffect, useState } from "react"
 
-// Icons
 import { X } from "lucide-react"
 
-// Components
 import Button from "../../Button"
 
 export default function ModalEnrollmentSeats({
@@ -48,7 +45,6 @@ export default function ModalEnrollmentSeats({
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                {/* HEADER */}
                 <div className='flex items-center justify-between p-5 pb-4 border-b border-gray-base/20'>
                     <div>
                         <h2 className='font-bold text-gray-dark text-lg'>Escolha seu assento</h2>
@@ -64,12 +60,10 @@ export default function ModalEnrollmentSeats({
 
                 <div className='p-5 flex flex-col gap-5'>
 
-                    {/* Balcão */}
                     <div className='bg-gray-dark rounded-lg py-3 text-center text-sm font-bold text-white uppercase tracking-widest'>
                         Balcão
                     </div>
 
-                    {/* Grid de assentos */}
                     <div className='grid grid-cols-6 gap-3'>
                         {assentos.map(assento => {
                             const isMeuAtual = assentoAtual != null && assento.id === assentoAtual;
@@ -88,7 +82,6 @@ export default function ModalEnrollmentSeats({
                                         isReservado ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105'
                                     }`}
                                 >
-                                    {/* Encosto */}
                                     <div className={`w-3/5 h-3 rounded-t-md transition-colors ${
                                         isReservado
                                             ? 'bg-gray-base/25'
@@ -98,7 +91,6 @@ export default function ModalEnrollmentSeats({
                                                     ? 'bg-blue-base'
                                                     : 'bg-orange-base'
                                     }`} />
-                                    {/* Assento */}
                                     <div className={`w-full h-8 rounded-b-lg flex items-center justify-center font-bold text-xs transition-colors ${
                                         isReservado
                                             ? 'bg-gray-base/20 text-gray-base/40'
@@ -115,7 +107,6 @@ export default function ModalEnrollmentSeats({
                         })}
                     </div>
 
-                    {/* Legenda */}
                     <div className='flex flex-wrap justify-center gap-x-5 gap-y-1.5'>
                         <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
                             <span className='w-3 h-3 rounded-sm bg-orange-base' />

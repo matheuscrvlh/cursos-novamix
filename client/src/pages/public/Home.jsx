@@ -1,24 +1,18 @@
-// REACT
 import { useContext, useState, useEffect } from 'react';
 import { Loader2, XCircle } from 'lucide-react';
 
-// DB
 import { DadosContext } from '../../contexts/DadosContext';
 
-// SERVICES
 import { postEnrollment, putSeatChange, getSeats } from '../../api/enrollment.services';
 
-// HOOKS
 import { useThemeColor } from '../../hooks/useThemeColor';
 
-// COMPONENTS
 import ModalBranch from '../../components/public/ModalBranch';
 import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
 import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnrollmentPayment';
 
-// SECTIONS
 import CoursesSections from '../../sections/home/CoursesSections';
 import CategoriesSections from '../../sections/home/CategoriesSections';
 import ChildrensCoursesSections from '../../sections/home/ChildrensCoursesSections';
@@ -26,18 +20,14 @@ import CulinariansSections from '../../sections/home/CulinariansSections';
 import IndustriesSections from '../../sections/home/IndustriesSections';
 import LocationSections from '../../sections/home/LocationSections';
 
-// LAYOUTS
 import PublicLayout from '../../layouts/public/PublicLayout'
 
-// HEAD 
 import { Head } from '../../components/Head'
 
-// IMAGES
 import { bannerHome } from '../../assets/images/banner/'
 
 export default function Home() {
 
-    // CONTEXT
     const {
         cursos,
         cursosInfantis,
@@ -49,8 +39,6 @@ export default function Home() {
         loadingChildren
     } = useContext(DadosContext);
 
-    // ========= STATES  =========
-    // ========= STATE CADASTRO CLIENTE  ========= 
     const [enrollment, setEnrollment] = useState({
         cursoId: '',
         nome: '',
@@ -60,7 +48,6 @@ export default function Home() {
         assento: ''
     });
 
-    // ========= STATE FILTERS CURSOS ========= 
     const [filtersCourses, setFiltersCourses] = useState({
         dataInicial: '',
         dataFinal: '',
@@ -68,7 +55,6 @@ export default function Home() {
         culinarista: ''
     });
 
-    // ========= STATE FILTERS CURSOS INFANTIS ========= 
     const [filtersChildrensCourses, setFiltersChildrensCourses] = useState({
         dataInicial: '',
         dataFinal: '',
@@ -76,14 +62,12 @@ export default function Home() {
         culinarista: ''
     });
 
-    // ========= STATE CURSOS ========= 
     const [cursosAtuais, setCursosAtuais] = useState([]);
     const [cursosFiltrados, setCursosFiltrados] = useState([]);
 
     const [cursosInfantisAtuais, setCursosInfantisAtuais] = useState([]);
     const [cursosInfantisFiltrados, setCursosInfantisFiltrados] = useState([]);
 
-    // ========= STATE VAGAS ========= 
     const [loadingVagasPorCurso, setLoadingVagasPorCurso] = useState(true);
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);
@@ -92,11 +76,9 @@ export default function Home() {
     const [vagasPorCursoInfantil, setVagasPorCursoInfantil] = useState({});
     const [refreshVagasInfantis, setRefreshVagasInfantis] = useState(0);
 
-    // ========= STATE ASSENTOS ========= 
     const [cursoSelecionado, setCursoSelecionado] = useState('');
     const [assentos, setAssentos] = useState([]);
 
-    // ========= STATE MODAL =========
     const [step, setStep] = useState(null)
     const [loadingPagamento, setLoadingPagamento] = useState(false)
     const [erroPagamento, setErroPagamento] = useState(null)
@@ -105,7 +87,6 @@ export default function Home() {
     const [payerEmail, setPayerEmail] = useState(null)
     const [pagamentoAprovado, setPagamentoAprovado] = useState(true)
 
-    // ====== FUNCOES
     async function handleSubmitCourse() {
         setStep(null)
         setLoadingPagamento(true)
@@ -140,7 +121,6 @@ export default function Home() {
                 return;
             }
 
-            // Tag manager google
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ event: 'form_submit_success', form_name: 'cadastro_curso' });
 
@@ -182,11 +162,9 @@ export default function Home() {
         getSeats(cursoSelecionado)
             .then(setAssentos)
             .catch(console.error)
-        
+
     }, [cursoSelecionado])
 
-    // ========= FUNCOES CURSOS =========
-    // buscar vagas livres e reservadas
     useEffect(() => {
         if (!cursos.length) return;
 
@@ -221,7 +199,6 @@ export default function Home() {
 
     }, [cursos, refreshVagas]);
 
-    // PEGAR CURSOS ATUAIS
     useEffect(() => {
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
@@ -238,7 +215,6 @@ export default function Home() {
         setCursosAtuais(cursosFiltrados);
     }, [cursos]);
 
-    // FILTRAR CURSOS
     useEffect(() => {
             const filtrados = cursosAtuais
                 .filter(c =>  !filtersCourses.dataInicial || new Date(c.data) >= new Date(filtersCourses.dataInicial) )
@@ -248,8 +224,6 @@ export default function Home() {
             setCursosFiltrados(filtrados)
     }, [filtersCourses, cursosAtuais])
 
-    // ========= FUNCOES CURSOS INFANTIS =========
-    // buscar vagas livres e reservadas
     useEffect(() => {
         if (!cursosInfantis.length) return;
 
@@ -268,7 +242,7 @@ export default function Home() {
                         };
                     })
                 );
-                
+
                 setVagasPorCursoInfantil(resultado);
 
             } catch (err) {
@@ -282,7 +256,6 @@ export default function Home() {
         loadVagas();
     }, [cursosInfantis, refreshVagasInfantis]);
 
-    // PEGAR CURSOS ATUAIS
     useEffect(() => {
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
@@ -299,7 +272,6 @@ export default function Home() {
         setCursosInfantisAtuais(cursosFiltrados);
     }, [cursosInfantis]);
 
-    // FILTRAR CURSOS
     useEffect(() => {
             const filtrados = cursosInfantisAtuais
                 .filter(c =>  !filtersChildrensCourses.dataInicial || new Date(c.data) >= new Date(filtersChildrensCourses.dataInicial) )
@@ -310,7 +282,6 @@ export default function Home() {
     }, [filtersChildrensCourses, cursosInfantisAtuais])
 
 
-    // =========  FUNCOES MODAL ========= 
     const openForm = (cursoId) => {
         setEnrollment(prev => ({ ...prev, cursoId }))
         setStep('form')
@@ -331,8 +302,6 @@ export default function Home() {
         setRefreshVagasInfantis(prev => prev + 1);
     }
 
-    // ========= ONLOAD ========= 
-    // Carregar filtro de loja inicial
     useEffect(() => {
         const lojaGuardada = localStorage.getItem('loja')
         if (lojaGuardada) {
@@ -342,17 +311,14 @@ export default function Home() {
             setStep('filterBranch')
         }
     }, [])
-    
-    // FUNDO PAGINA
+
     useThemeColor('#FF8D0A');
 
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Loja Novamix | Cursos' />
             <section className='bg-gray mb-20'>
-                
-                {/* ================= CONTEUDO ================= */}
-                {/* ======== CURSOS ======== */}
+
                 <CoursesSections
                     cursosFiltrados={cursosFiltrados}
                     loadingCourses={loadingCourses}
@@ -361,10 +327,8 @@ export default function Home() {
                     openForm={openForm}
                 />
 
-                {/* ======== CATEGORIAS ======== */}
                 <CategoriesSections />
 
-                {/* ======== CURSOS INFANTIS ======== */}
                 <ChildrensCoursesSections
                     cursosInfantisFiltrados={cursosInfantisFiltrados}
                     loadingChildren={loadingChildren}
@@ -373,14 +337,12 @@ export default function Home() {
                     openForm={openForm}
                 />
 
-                {/* ======== CULINARISTAS ======== */}
-                <CulinariansSections 
+                <CulinariansSections
                     culinaristas={culinaristas}
                     loadingCulinarian={loadingCulinarian}
                 />
 
-                {/* ======== INDUSTRIAS ======== */}
-                {industrias.length === 0 
+                {industrias.length === 0
                     ? ''
                     :<IndustriesSections
                         industrias={industrias}
@@ -388,12 +350,9 @@ export default function Home() {
                     />
                 }
 
-                {/* ======== LOCALIZAÇÃO ======== */}
                 <LocationSections/>
 
-                {/* ================= MODAIS ================= */}
-                {/* ======== MODAL SELECIONAR FILIAL ONLOAD ======== */}
-                <ModalBranch 
+                <ModalBranch
                     isOpen={step === 'filterBranch'}
                     onClose={() => closeModal()}
                     filtersCourses={filtersCourses}
@@ -402,8 +361,6 @@ export default function Home() {
                     setFiltersChildrensCourses={setFiltersChildrensCourses}
                 />
 
-                {/* ======== MODAIS INSCRICOES CURSOS ======== */}
-                {/* ======== MODAL FORM ======== */}
                 <ModalEnrollmentForm
                     isOpen={step === 'form'}
                     onClick={() => openAssento()}
@@ -412,7 +369,6 @@ export default function Home() {
                     setEnrollment={setEnrollment}
                 />
 
-                {/* ======== MODAL ASSENTOS */}
                 <ModalEnrollmentSeats
                     isOpen={step === 'assento'}
                     onClick={handleSubmitCourse}
@@ -423,7 +379,6 @@ export default function Home() {
                     assentoAtual={assentoAtual}
                 />
 
-                {/* ======== MODAL PAGAMENTO ======== */}
                 <ModalEnrollmentPayment
                     isOpen={step === 'pagamento'}
                     inscricaoId={inscricaoAtiva}
@@ -437,7 +392,6 @@ export default function Home() {
                     onClose={closeModal}
                 />
 
-                {/* ======== MODAL SUCESS ======== */}
                 <ModalEnrollmentSucess
                     isOpen={step === 'confirmacao'}
                     pago={pagamentoAprovado}
@@ -445,7 +399,6 @@ export default function Home() {
                     onClose={closeModal}
                 />
 
-                {/* Loading pagamento */}
                 {loadingPagamento && (
                     <div className='flex items-center justify-center fixed inset-0 bg-black/70 z-50'>
                         <div className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl'>
@@ -455,7 +408,6 @@ export default function Home() {
                     </div>
                 )}
 
-                {/* Erro pagamento */}
                 {erroPagamento && (
                     <div
                         className='flex items-center justify-center fixed inset-0 bg-black/70 z-50 p-4'
@@ -481,4 +433,3 @@ export default function Home() {
         </PublicLayout>
     )
 }
-

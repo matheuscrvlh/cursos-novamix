@@ -5,7 +5,6 @@ function authHeader() {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// ============== POST
 export async function postCourse(formData) {
     try {
         const res = await fetch(`${URL}/cursos`, {
@@ -21,7 +20,6 @@ export async function postCourse(formData) {
     }
 }
 
-// ============== GET
 export async function getCourseById(cursoId) {
     try {
         const res = await fetch(`${URL}/cursos/${cursoId}`, { method: 'GET' });
@@ -44,7 +42,6 @@ export async function getCourses() {
     }
 }
 
-// ============== PUT
 export async function putCourse(cursoId, body) {
     try {
         const res = await fetch((`${URL}/cursos/${cursoId}`), {
@@ -60,7 +57,6 @@ export async function putCourse(cursoId, body) {
     }
 }
 
-// ============== DELETE
 export async function deleteCourse(cursoId) {
     try {
         await fetch((`${URL}/cursos/${cursoId}`), {

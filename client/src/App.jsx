@@ -1,7 +1,5 @@
-// ======== REACT
 import { Routes, Route } from 'react-router-dom'
 
-// ======== PAGES
 import Home from './pages/public/Home'
 import Courses from './pages/public/Courses'
 import ChildrensCourses from './pages/public/ChildrensCourses'
@@ -9,6 +7,7 @@ import Culinarians from './pages/public/Culinarians'
 import Industries from './pages/public/Industries'
 import CoursePage from './pages/public/CoursePage'
 
+import RequireAuth from './components/RequireAuth'
 import Login from './pages/admin/Login'
 import DashboardAdmin from './pages/admin/DashboardAdmin'
 import CoursesAdmin from './pages/admin/CoursesAdmin'
@@ -30,14 +29,17 @@ export default function App() {
         <Route path='/curso/:id' element={<CoursePage />} />
 
         <Route path='/login' element={<Login />} />
-        <Route path='/dashboardAdmin' element={<DashboardAdmin />} />
-        <Route path='/cursosAdmin' element={<CoursesAdmin />} />
-        <Route path='/inscricoesAdmin' element={<RegistrationsAdmin />} />
-        <Route path='/culinaristasAdmin' element={<CulinarianAdmin />} />
-        <Route path='/industriasAdmin' element={<IndustriesAdmin />} />
-        <Route path='/infantisAdmin' element={<ChildrensAdmin />} />
-        <Route path='/marketingAdmin' element={<MarketingAdmin />} />
-        <Route path='/usuariosAdmin' element={<UsersAdmin />} />
+
+        <Route element={<RequireAuth />}>
+          <Route path='/dashboardAdmin' element={<DashboardAdmin />} />
+          <Route path='/cursosAdmin' element={<CoursesAdmin />} />
+          <Route path='/inscricoesAdmin' element={<RegistrationsAdmin />} />
+          <Route path='/culinaristasAdmin' element={<CulinarianAdmin />} />
+          <Route path='/industriasAdmin' element={<IndustriesAdmin />} />
+          <Route path='/infantisAdmin' element={<ChildrensAdmin />} />
+          <Route path='/marketingAdmin' element={<MarketingAdmin />} />
+          <Route path='/usuariosAdmin' element={<UsersAdmin />} />
+        </Route>
     </Routes>
   )
 }

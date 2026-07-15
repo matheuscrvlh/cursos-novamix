@@ -5,7 +5,6 @@ const db = require('../db');
 
 const router = express.Router();
 
-// GET todas as inscrições infantis
 router.get('/', authMiddleware, (req, res) => {
   db.all(`SELECT * FROM inscricoesInfantis`, [], (err, rows) => {
     if (err) return res.status(500).json({ message: 'Erro interno do servidor' });
@@ -13,7 +12,6 @@ router.get('/', authMiddleware, (req, res) => {
   });
 });
 
-// GET inscrições infantis por curso
 router.get('/curso/:cursoId', authMiddleware, (req, res) => {
   db.all(
     `SELECT * FROM inscricoesInfantis WHERE cursoId = ?`,
@@ -25,11 +23,9 @@ router.get('/curso/:cursoId', authMiddleware, (req, res) => {
   );
 });
 
-// POST nova inscrição infantil
 router.post('/', (req, res) => {
   const { cursoId, nomeResponsavel, telefone, nomeCrianca, idadeCrianca, formaPagamento, cpf } = req.body;
 
-  // verificar se o curso infantil existe
   db.get(`SELECT * FROM cursosInfantis WHERE id = ?`, [cursoId], (err, curso) => {
     if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
     if (!curso) return res.status(404).json({ message: 'Curso infantil não encontrado' });
@@ -63,7 +59,6 @@ router.post('/', (req, res) => {
   });
 });
 
-// PUT atualizar inscrição infantil
 router.put('/:id', authMiddleware, (req, res) => {
   const { id } = req.params;
 
@@ -103,7 +98,6 @@ router.put('/:id', authMiddleware, (req, res) => {
   });
 });
 
-// DELETE inscrição infantil
 router.delete('/:id', authMiddleware, (req, res) => {
   const { id } = req.params;
 

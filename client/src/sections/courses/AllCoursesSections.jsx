@@ -30,13 +30,11 @@ export default function AllCoursesSections({
     return (
         <section className='w-[92vw] max-w-7xl mx-auto pt-10 md:pt-14 pb-16'>
 
-            {/* HEADER */}
             <div className='flex items-center justify-between mb-7'>
                 <h2 className='text-xl font-bold text-gray-dark md:text-3xl tracking-tight'>
                     NOSSOS CURSOS
                 </h2>
 
-                {/* Botão filtros — só mobile */}
                 <button
                     onClick={() => setShowModalFilters(!showModalFilters)}
                     className='relative md:hidden flex items-center gap-2 bg-orange-base hover:bg-orange-light text-white px-4 py-2 rounded-xl font-semibold text-sm transition cursor-pointer'
@@ -51,14 +49,11 @@ export default function AllCoursesSections({
                 </button>
             </div>
 
-            {/* LAYOUT: sidebar + grid */}
             <div className='md:flex md:items-start md:gap-7'>
 
-                {/* ——— SIDEBAR — desktop only ——— */}
                 <aside className='hidden md:flex flex-col gap-4 w-60 xl:w-68 shrink-0 sticky top-24'>
                     <div className='bg-white rounded-2xl shadow-sm border border-gray-base/10 p-5 flex flex-col gap-5'>
 
-                        {/* Cabeçalho */}
                         <div className='flex items-center justify-between'>
                             <div className='flex items-center gap-2'>
                                 <SlidersHorizontal size={15} className='text-orange-base' />
@@ -79,7 +74,6 @@ export default function AllCoursesSections({
                             )}
                         </div>
 
-                        {/* Loja */}
                         <div className='flex flex-col gap-2'>
                             <label className='text-[11px] font-semibold text-gray-text/50 uppercase tracking-wider'>Loja</label>
                             <div className='flex gap-2'>
@@ -106,7 +100,6 @@ export default function AllCoursesSections({
                             </div>
                         </div>
 
-                        {/* Período */}
                         <div className='flex flex-col gap-2'>
                             <label className='text-[11px] font-semibold text-gray-text/50 uppercase tracking-wider'>Período</label>
                             <div className='flex flex-col gap-2'>
@@ -131,7 +124,6 @@ export default function AllCoursesSections({
                             </div>
                         </div>
 
-                        {/* Culinarista */}
                         {culinaristas.length > 0 && (
                             <div className='flex flex-col gap-2'>
                                 <label className='text-[11px] font-semibold text-gray-text/50 uppercase tracking-wider'>Culinarista</label>
@@ -150,7 +142,6 @@ export default function AllCoursesSections({
                     </div>
                 </aside>
 
-                {/* ——— GRID DE CURSOS ——— */}
                 <div className='flex-1 min-w-0'>
                     {loadingCourses ? (
                         <div className='flex items-center justify-center mt-24'>

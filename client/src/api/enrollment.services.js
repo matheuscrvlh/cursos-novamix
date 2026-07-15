@@ -5,7 +5,6 @@ function authHeader() {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// ============== POST
 export async function postEnrollment(data) {
     try {
         const res = await fetch(`${URL}/inscricoes`, {
@@ -23,7 +22,6 @@ export async function postEnrollment(data) {
     }
 }
 
-// ============== GET
 export async function getSeats(cursoId) {
     try {
         const res = await fetch((`${URL}/assentos/${cursoId}`), {
@@ -65,7 +63,6 @@ export async function getTotalEnrollment() {
     }
 }
 
-// ============== PUT
 export async function putEnrollment(inscricaoId, data) {
     try {
         const res = await fetch((`${URL}/inscricoes/${inscricaoId}`), {
@@ -105,7 +102,6 @@ export async function putSeatChange(inscricaoId, assento) {
     }
 }
 
-// ============== DELETE
 export async function deleteEnrollment(inscricaoId) {
     try {
         await fetch((`${URL}/inscricoes/${inscricaoId}`), {
@@ -118,7 +114,6 @@ export async function deleteEnrollment(inscricaoId) {
     }
 }
 
-// ============== VERIFICAR PAGAMENTO MP (admin)
 export async function verificarPagamentoMP(inscricaoId) {
     try {
         const res = await fetch(`${URL}/pagamentos/verificar/${inscricaoId}`, {
@@ -131,7 +126,6 @@ export async function verificarPagamentoMP(inscricaoId) {
     }
 }
 
-// ============== REEMBOLSAR PAGAMENTO MP (admin)
 export async function reembolsarPagamentoMP(inscricaoId) {
     try {
         const res = await fetch(`${URL}/pagamentos/reembolsar/${inscricaoId}`, {

@@ -9,7 +9,6 @@ const uploadCursos = createUpload('cursos');
 const router = express.Router();
 const fs = require('fs');
 
-// GET todos os cursos
 router.get('/', (req, res) => {
   db.all(`
     SELECT c.*, 
@@ -29,7 +28,6 @@ router.get('/', (req, res) => {
   });
 });
 
-// GET curso por id
 router.get('/:id', (req, res) => {
   db.all(`
     SELECT c.*,
@@ -46,7 +44,6 @@ router.get('/:id', (req, res) => {
   });
 });
 
-// POST novo curso
 router.post('/', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
   const cursoId = uuidv4();
   const { nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor, ingredientes } = req.body
@@ -76,7 +73,6 @@ router.post('/', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
       return res.status(500).json({ error: err.message });
     }
 
-    // fotos
     if (req.files && req.files.length > 0) {
       const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
@@ -94,7 +90,6 @@ router.post('/', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
       });
     }
 
-    // assentos
     for (let i = 1; i <= 24; i++) {
       db.run(
         `INSERT INTO assentos (id, cursoId, status) VALUES (?, ?, ?)`,
@@ -107,7 +102,6 @@ router.post('/', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
   });
 });
 
-// PUT atualizar curso
 router.put('/:id', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
   const id = req.params.id;
 
@@ -140,7 +134,6 @@ router.put('/:id', authMiddleware, uploadCursos.array('fotos', 5), (req, res) =>
       return res.status(500).json({ error: err.message });
     }
 
-    // novas fotos enviadas no PUT
     if (req.files && req.files.length > 0) {
       const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
@@ -162,7 +155,6 @@ router.put('/:id', authMiddleware, uploadCursos.array('fotos', 5), (req, res) =>
   });
 });
 
-// DELETE curso e tudo relacionado
 router.delete('/:id', authMiddleware, (req, res) => {
   const id = req.params.id;
 

@@ -7,10 +7,8 @@ const authMiddleware = require('../middleware/auth.middleware');
 
 const SALT_ROUNDS = 12;
 
-// Todas as rotas exigem autenticação
 router.use(authMiddleware);
 
-// GET /api/usuarios — lista todos (sem senha)
 router.get('/', (req, res) => {
     db.all('SELECT id, usuario, dataCadastro FROM usuarios ORDER BY dataCadastro DESC', [], (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -18,7 +16,6 @@ router.get('/', (req, res) => {
     });
 });
 
-// POST /api/usuarios — cria usuário
 router.post('/', async (req, res) => {
     const { usuario, senha } = req.body;
 
@@ -48,7 +45,6 @@ router.post('/', async (req, res) => {
     );
 });
 
-// PUT /api/usuarios/:id — atualiza usuário
 router.put('/:id', async (req, res) => {
     const { usuario, senha } = req.body;
     const { id } = req.params;
@@ -94,7 +90,6 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE /api/usuarios/:id — remove usuário
 router.delete('/:id', (req, res) => {
     db.get('SELECT COUNT(*) as total FROM usuarios', [], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });

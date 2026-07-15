@@ -15,7 +15,6 @@ export default function IndustryCard({
     return (
         <div className='bg-white rounded-xl flex flex-col shadow-md hover:shadow-lg transition-shadow overflow-hidden w-full'>
 
-            {/* IMAGEM com overlay */}
             <div className='relative h-44 overflow-hidden'>
                 {foto ? (
                     <img src={foto} alt={nome} className='w-full h-full object-cover' />
@@ -25,10 +24,8 @@ export default function IndustryCard({
                     </div>
                 )}
 
-                {/* Gradient */}
                 <div className='absolute inset-0 bg-linear-to-t from-black/65 via-black/20 to-transparent' />
 
-                {/* Nome + razao social na base */}
                 <div className='absolute bottom-0 left-0 right-0 p-3'>
                     <p className='text-white font-bold text-base leading-tight'>{nome}</p>
                     {razaoSocial && razaoSocial !== nome && (
@@ -37,7 +34,6 @@ export default function IndustryCard({
                 </div>
             </div>
 
-            {/* INFOS */}
             <div className='p-4 flex flex-col gap-2 flex-1'>
 
                 {telefone && (

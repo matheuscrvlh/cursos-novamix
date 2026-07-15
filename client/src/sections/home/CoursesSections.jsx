@@ -1,7 +1,5 @@
-// REACT
 import { Link } from 'react-router-dom'
 
-// COMPONENTS
 import Button from "../../components/Button";
 import CourseCard from "../../components/public/CourseCard";
 
@@ -21,14 +19,12 @@ export default function CoursesSections({
     return (
     <section className='pt-15 md:w-[80vw] md:mx-auto'>
 
-            {/* TÍTULO */}
             <div className='flex justify-between items-baseline pb-5 w-[80%] mx-auto md:w-[80vw]'>
                 <p className='text-lg font-bold text-gray-dark md:text-3xl md:px-2'>
                     NOSSOS CURSOS
                 </p>
             </div>
 
-            {/* ======== CURSOS ======== */}
             <div className='
                     bg-gray flex justify-center w-full pb-7 md:pb-10
             '>
@@ -86,10 +82,9 @@ export default function CoursesSections({
                 )}
             </div>
 
-            {/* ======== BUTTON ======== */}
             <div className='
                 flex w-full justify-center
-            '>  
+            '>
                 <Link to={'/cursos'}>
                     <Button className='bg-orange-base text-white hover:bg-orange-light text-sm px-5 py-1.5 sm:px-6 sm:py-2 cursor-pointer transition'>
                         Ver todos

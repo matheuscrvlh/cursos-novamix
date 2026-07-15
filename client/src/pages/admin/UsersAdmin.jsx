@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Pencil, UserPlus, Users, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 
-import { Head } from '../../components/Head';
-import SideBar from '../../layouts/admin/SideBar';
-import TopBar from '../../layouts/admin/TopBar';
 import CardDash from '../../components/admin/CardDash';
 import Modal from '../../components/public/Modal';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import ConfirmModal from '../../components/admin/ModalConfirm';
+import AdminPage from '../../layouts/admin/AdminPage';
 
 import { getUsuarios, postUsuario, putUsuario, deleteUsuario } from '../../api/users.services';
 
@@ -27,7 +25,6 @@ export default function UsersAdmin() {
     const [showSenha, setShowSenha] = useState(false);
     const [deletarId, setDeletarId] = useState(null);
 
-    // ─── carrega lista ───
     async function carregar() {
         setLoading(true);
         try {
@@ -42,7 +39,6 @@ export default function UsersAdmin() {
 
     useEffect(() => { carregar(); }, []);
 
-    // ─── abrir modal cadastro ───
     function abrirCadastro() {
         setForm(formVazio);
         setErro('');
@@ -51,7 +47,6 @@ export default function UsersAdmin() {
         setStep('form');
     }
 
-    // ─── abrir modal edição ───
     function abrirEdicao(usuario) {
         setForm({ usuario: usuario.usuario, senha: '', confirmarSenha: '' });
         setErro('');
@@ -66,7 +61,6 @@ export default function UsersAdmin() {
         setEditando(null);
     }
 
-    // ─── salvar (POST ou PUT) ───
     async function handleSalvar() {
         setErro('');
 
@@ -116,7 +110,6 @@ export default function UsersAdmin() {
         }
     }
 
-    // ─── deletar ───
     async function handleDeletar() {
         if (!deletarId) return;
         try {
@@ -136,16 +129,9 @@ export default function UsersAdmin() {
     }
 
     return (
-        <main className='flex w-full min-h-screen bg-gray'>
-            <Head title='Admin | Usuários' />
-            <SideBar />
+        <AdminPage title='Usuários'>
+                <div className='flex flex-col gap-6'>
 
-            <div className='flex flex-col flex-1 lg:ml-[15%] min-w-0'>
-                <TopBar />
-
-                <div className='p-6 flex flex-col gap-6'>
-
-                    {/* HEADER */}
                     <CardDash className='flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between'>
                         <div className='flex items-center gap-3'>
                             <div className='bg-orange-base/10 p-2.5 rounded-lg'>
@@ -165,7 +151,6 @@ export default function UsersAdmin() {
                         </Button>
                     </CardDash>
 
-                    {/* TABELA */}
                     <CardDash className='overflow-x-auto'>
                         {loading ? (
                             <div className='flex justify-center items-center py-16'>
@@ -226,9 +211,7 @@ export default function UsersAdmin() {
                         )}
                     </CardDash>
                 </div>
-            </div>
 
-            {/* ── MODAL CADASTRO / EDIÇÃO ── */}
             <Modal
                 isOpen={step === 'form'}
                 onClose={fechar}
@@ -304,7 +287,6 @@ export default function UsersAdmin() {
                 </div>
             </Modal>
 
-            {/* ── MODAL CONFIRMAR DELETE ── */}
             <ConfirmModal
                 isOpen={!!deletarId}
                 title='Excluir usuário'
@@ -314,6 +296,6 @@ export default function UsersAdmin() {
                 onConfirm={handleDeletar}
                 onCancel={() => setDeletarId(null)}
             />
-        </main>
+        </AdminPage>
     );
 }

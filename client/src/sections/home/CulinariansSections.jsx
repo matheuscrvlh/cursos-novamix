@@ -1,15 +1,11 @@
-// REACT
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-// BANNERS
 import { bannerCulinarista } from "../../assets/images/banner"
 
-// COMPONENTS
 import Button from '../../components/Button'
 import CulinarianCard from '../../components/public/CulinarianCard'
 
-// SERVICES
 import { getBanners } from '../../api/banners.services'
 
 export default function CulinariansSections({
@@ -75,7 +71,6 @@ export default function CulinariansSections({
                 )}
             </div>
 
-            {/* ========== CULINARISTAS =========== */}
             <div className='mt-10 md:mt-20 md:w-[80vw] md:mx-auto'>
                 <p className='
                     text-lg pl-10 font-bold text-gray-dark mb-5
@@ -104,10 +99,9 @@ export default function CulinariansSections({
                 </div>
             </div>
 
-            {/* ========== BUTTON =========== */}
             <div className='
                 flex w-full justify-center mt-5 md:mt-10
-            '>  
+            '>
                 <Link to={'/culinaristas'}>
                     <Button className='bg-orange-base text-white hover:bg-orange-light text-sm px-5 py-1.5 sm:px-6 sm:py-2 cursor-pointer transition'>
                         Ver mais

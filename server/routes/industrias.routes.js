@@ -9,7 +9,6 @@ const db = require('../db');
 const uploadIndustria = createUpload('industrias');
 const router = express.Router();
 
-// GET todas as indústrias
 router.get('/', (req, res) => {
   db.all(`SELECT * FROM industrias`, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -17,7 +16,6 @@ router.get('/', (req, res) => {
   });
 });
 
-// GET indústria por id
 router.get('/:id', (req, res) => {
   db.get(`SELECT * FROM industrias WHERE id = ?`, [req.params.id], (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -26,7 +24,6 @@ router.get('/:id', (req, res) => {
   });
 });
 
-// POST nova indústria
 router.post('/', authMiddleware, uploadIndustria.single('foto'), (req, res) => {
   const { razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site } = req.body;
   const id = uuidv4();
@@ -59,7 +56,6 @@ router.post('/', authMiddleware, uploadIndustria.single('foto'), (req, res) => {
   });
 });
 
-// PUT atualizar indústria
 router.put('/:id', authMiddleware, uploadIndustria.single('foto'), (req, res) => {
   const { id } = req.params;
 
@@ -67,7 +63,6 @@ router.put('/:id', authMiddleware, uploadIndustria.single('foto'), (req, res) =>
     if (err) return res.status(500).json({ error: err.message });
     if (!industria) return res.status(404).json({ message: 'Indústria não encontrada' });
 
-    // apagar foto antiga se uma nova for enviada
     if (req.file && industria.foto) {
       const oldPath = path.join(__dirname, '..', industria.foto);
       if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
@@ -111,7 +106,6 @@ router.put('/:id', authMiddleware, uploadIndustria.single('foto'), (req, res) =>
   });
 });
 
-// DELETE indústria
 router.delete('/:id', authMiddleware, (req, res) => {
   const { id } = req.params;
 

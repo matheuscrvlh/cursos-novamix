@@ -1,10 +1,7 @@
-// REACT
 import { useEffect } from "react"
 
-// ICONS
 import { X } from 'lucide-react'
 
-// COMPONENTS
 import Input from "../Input"
 import Button from "../Button"
 
@@ -42,7 +39,6 @@ export default function ModalFilters({
                 ${isOpen ? 'translate-x-0' : 'translate-x-full'}
             `}>
 
-                {/* HEADER */}
                 <div className='flex items-center justify-between px-6 py-5 border-b border-gray-base/30'>
                     <p className='text-gray-dark text-lg font-bold'>{nameModal}</p>
                     <button
@@ -53,7 +49,6 @@ export default function ModalFilters({
                     </button>
                 </div>
 
-                {/* BODY */}
                 <div className='flex flex-col flex-1 gap-5 px-6 py-7 overflow-y-auto'>
 
                     <div className='flex flex-col gap-1.5'>
@@ -105,7 +100,6 @@ export default function ModalFilters({
 
                 </div>
 
-                {/* FOOTER */}
                 <div className='px-6 py-5 border-t border-gray-base/30'>
                     <Button
                         className='bg-orange-base hover:bg-orange-light text-white w-full'

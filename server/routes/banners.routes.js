@@ -24,7 +24,6 @@ db.run(`
 // migração segura: adiciona coluna se ainda não existir
 db.run(`ALTER TABLE banners ADD COLUMN imagem_mobile TEXT`, () => {});
 
-// GET /api/banners?posicao=hero
 router.get('/', (req, res) => {
   const { posicao } = req.query;
   const sql    = posicao
@@ -37,7 +36,6 @@ router.get('/', (req, res) => {
   });
 });
 
-// POST /api/banners  (multipart: "imagem" obrigatório, "imagem_mobile" opcional)
 const uploadFields = uploadBanners.fields([
   { name: 'imagem',        maxCount: 1 },
   { name: 'imagem_mobile', maxCount: 1 },
@@ -65,7 +63,6 @@ router.post('/', authMiddleware, uploadFields, (req, res) => {
   );
 });
 
-// PUT /api/banners/:id  (atualiza link, ordem e/ou ativo)
 router.put('/:id', authMiddleware, (req, res) => {
   const { link, ordem, ativo } = req.body;
   db.run(
@@ -87,7 +84,6 @@ router.put('/:id', authMiddleware, (req, res) => {
   );
 });
 
-// DELETE /api/banners/:id
 router.delete('/:id', authMiddleware, (req, res) => {
   db.get(`SELECT imagem, imagem_mobile FROM banners WHERE id = ?`, [req.params.id], (err, row) => {
     if (err)  return res.status(500).json({ error: err.message });

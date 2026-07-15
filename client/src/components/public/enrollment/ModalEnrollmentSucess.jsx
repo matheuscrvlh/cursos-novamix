@@ -1,10 +1,7 @@
-// React
 import { useEffect } from "react"
 
-// Icons
 import { CheckCircle2, PartyPopper } from "lucide-react"
 
-// Components
 import Button from "../../Button"
 
 export default function ModalEnrollmentSucess({
@@ -35,7 +32,6 @@ export default function ModalEnrollmentSucess({
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
-                {/* Topo verde */}
                 <div className='bg-green-base/10 flex flex-col items-center justify-center py-10 px-6'>
                     <div className='w-20 h-20 rounded-full bg-green-base/15 flex items-center justify-center mb-4'>
                         <CheckCircle2 size={42} className='text-green-base' />
@@ -44,7 +40,6 @@ export default function ModalEnrollmentSucess({
                     <p className='text-sm text-gray-text/60 text-center mt-1'>Você está na lista do curso 🎉</p>
                 </div>
 
-                {/* Corpo */}
                 <div className='p-6 flex flex-col gap-4'>
                     <p className='text-sm text-gray-text/70 text-center leading-relaxed'>
                         {pago

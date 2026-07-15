@@ -1,35 +1,25 @@
-// REACT
 import { useContext, useState, useEffect } from 'react';
 
-// ICONS
 import { Loader2, XCircle } from 'lucide-react'
 
-// DB
 import { DadosContext } from '../../contexts/DadosContext';
 
-// SERVICES
 import { postEnrollment, putSeatChange, getSeats } from '../../api/enrollment.services';
 
-// HOOKS
 import { useThemeColor } from '../../hooks/useThemeColor';
 
-// COMPONENTS
 import ModalBranch from '../../components/public/ModalBranch';
 import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
 import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnrollmentPayment';
 
-// SECTIONS
 import AllChildrensCoursesSections from '../../sections/childrens/AllChildrensCoursesSections';
 
-// LAYOUTS
 import PublicLayout from '../../layouts/public/PublicLayout'
 
-// HEAD 
 import { Head } from '../../components/Head'
 
-// IMAGES
 import { bannerHome } from '../../assets/images/banner/'
 
 export default function ChildrensCourses() {
@@ -39,8 +29,6 @@ export default function ChildrensCourses() {
         culinaristas,
     } = useContext(DadosContext);
 
-    // ========= STATES  =========
-    // ========= STATE CADASTRO CLIENTE  ========= 
     const [form, setForm] = useState({
         cursoId: '',
         nome: '',
@@ -50,7 +38,6 @@ export default function ChildrensCourses() {
         assento: ''
     });
 
-    // ========= STATE FILTERS ========= 
     const [filters, setFilters] = useState({
         dataInicial: '',
         dataFinal: '',
@@ -58,19 +45,15 @@ export default function ChildrensCourses() {
         culinarista: ''
     });
 
-    // ========= STATE CURSOS ========= 
     const [cursosAtuais, setCursosAtuais] = useState([]);
     const [cursosFiltrados, setCursosFiltrados] = useState([]);
 
-    // ========= STATE VAGAS ========= 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);
 
-    // ========= STATE ASSENTOS ========= 
     const [cursoSelecionado, setCursoSelecionado] = useState('');
     const [assentos, setAssentos] = useState([]);
 
-    // ========= STATE MODAL =========
     const [step, setStep] = useState(null)
     const [loadingPagamento, setLoadingPagamento] = useState(false)
     const [erroPagamento, setErroPagamento] = useState(null)
@@ -79,8 +62,6 @@ export default function ChildrensCourses() {
     const [payerEmail, setPayerEmail] = useState(null)
     const [pagamentoAprovado, setPagamentoAprovado] = useState(true)
 
-    // ========= FUNCOES  =========
-    // =========  FUNCOES CADASTRO CLIENTE =========
     async function handleSubmit() {
         setStep(null)
         setLoadingPagamento(true)
@@ -151,9 +132,6 @@ export default function ChildrensCourses() {
             .catch(console.error)
     }, [cursoSelecionado])
 
-    // ====== FUNCOES
-
-    // buscar vagas livres e reservadas
     useEffect(() => {
         if (!cursosInfantis.length) return;
 
@@ -176,7 +154,6 @@ export default function ChildrensCourses() {
         loadVagas();
     }, [cursosInfantis, refreshVagas]);
 
-    // PEGAR CURSOS ATUAIS
     useEffect(() => {
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
@@ -193,7 +170,6 @@ export default function ChildrensCourses() {
         setCursosAtuais(cursosFiltrados);
     }, [cursosInfantis]);
 
-    // FILTRAR CURSOS
     useEffect(() => {
             const filtrados = cursosAtuais
                 .filter(c =>  !filters.dataInicial || new Date(c.data) >= new Date(filters.dataInicial) )
@@ -203,7 +179,6 @@ export default function ChildrensCourses() {
             setCursosFiltrados(filtrados)
     }, [filters, cursosAtuais])
 
-    // LIMPAR FILTROS
     function clearFilters() {
         setFilters({
             dataInicial: '',
@@ -213,7 +188,6 @@ export default function ChildrensCourses() {
         })
     }
 
-    // =========  FUNCOES MODAL ========= 
     const openForm = (cursoId) => {
         setForm(prev => ({ ...prev, cursoId }))
         setStep('form')
@@ -232,8 +206,6 @@ export default function ChildrensCourses() {
         setRefreshVagas(prev => prev + 1);
     }
 
-    // ========= ONLOAD ========= 
-    // Carregar filtro de loja inicial
     useEffect(() => {
         const lojaGuardada = localStorage.getItem('loja')
         if (lojaGuardada) {
@@ -242,11 +214,9 @@ export default function ChildrensCourses() {
             setStep('filterBranch')
         }
     }, [])
-    
-    // FUNDO PAGINA
+
     useThemeColor('#FF8D0A');
 
-    // ROLAR TELA AO TOPO
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth'})
     }, [])
@@ -256,8 +226,6 @@ export default function ChildrensCourses() {
             <Head title='Loja Novamix | Cursos Infantis' />
             <section className='bg-gray mb-20'>
 
-                {/* ================= CONTEUDO ================= */}
-                {/* ======== CURSOS ======== */}
                 <AllChildrensCoursesSections
                     cursosFiltrados={cursosFiltrados}
                     vagasPorCurso={vagasPorCurso}
@@ -268,9 +236,7 @@ export default function ChildrensCourses() {
                     clearFilters={clearFilters}
                 />
 
-                {/* ================= MODAIS ================= */}
-                {/* ======== MODAL SELECIONAR FILIAL ONLOAD ======== */}
-                <ModalBranch 
+                <ModalBranch
                     isOpen={step === 'filterBranch'}
                     onClose={() => closeModal()}
                     filtersCourses={filters}
@@ -279,8 +245,6 @@ export default function ChildrensCourses() {
                     setFiltersChildrensCourses={setFilters}
                 />
 
-                {/* ======== MODAIS INSCRICOES CURSOS ======== */}
-                {/* ======== MODAL FORM ======== */}
                 <ModalEnrollmentForm
                     isOpen={step === 'form'}
                     onClick={() => openAssento()}
@@ -289,7 +253,6 @@ export default function ChildrensCourses() {
                     setEnrollment={setForm}
                 />
 
-                {/* ======== MODAL ASSENTOS */}
                 <ModalEnrollmentSeats
                     isOpen={step === 'assento'}
                     onClick={handleSubmit}
@@ -300,7 +263,6 @@ export default function ChildrensCourses() {
                     assentoAtual={assentoAtual}
                 />
 
-                {/* ======== MODAL PAGAMENTO ======== */}
                 <ModalEnrollmentPayment
                     isOpen={step === 'pagamento'}
                     inscricaoId={inscricaoAtiva}
@@ -314,7 +276,6 @@ export default function ChildrensCourses() {
                     onClose={closeModal}
                 />
 
-                {/* ======== MODAL SUCESS ======== */}
                 <ModalEnrollmentSucess
                     isOpen={step === 'confirmacao'}
                     pago={pagamentoAprovado}
@@ -322,7 +283,6 @@ export default function ChildrensCourses() {
                     onClose={closeModal}
                 />
 
-                {/* Loading pagamento */}
                 {loadingPagamento && (
                     <div className='flex items-center justify-center fixed inset-0 bg-black/70 z-50'>
                         <div className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl'>
@@ -332,7 +292,6 @@ export default function ChildrensCourses() {
                     </div>
                 )}
 
-                {/* Erro pagamento */}
                 {erroPagamento && (
                     <div
                         className='flex items-center justify-center fixed inset-0 bg-black/70 z-50 p-4'
@@ -358,4 +317,3 @@ export default function ChildrensCourses() {
         </PublicLayout>
     )
 }
-

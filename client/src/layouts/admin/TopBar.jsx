@@ -8,7 +8,6 @@ export default function TopBar({ title }) {
         year: 'numeric',
     })
 
-    // capitaliza primeira letra
     const dataFormatada = hoje.charAt(0).toUpperCase() + hoje.slice(1)
 
     return (

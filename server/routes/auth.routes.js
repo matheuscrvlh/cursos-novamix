@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 const db = require('../db');
 const { loginLimiter } = require('../middleware/rateLimit.middleware');
 
-// POST /api/auth/login
 router.post('/login', loginLimiter, (req, res) => {
     const { usuario, senha } = req.body;
 

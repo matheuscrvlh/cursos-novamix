@@ -1,15 +1,11 @@
-// React
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-// Icons
 import { MapPin, Building2, MessageCircle } from 'lucide-react'
 
-// Images
 import { whatsapp } from '../../assets/images/icons'
 import { logoNm } from '../../assets/images/logos'
 
-// Services
 import { getBanners } from '../../api/banners.services'
 
 const navLinks = [
@@ -42,11 +38,9 @@ export default function PublicLayout({ children, bannerHome }) {
   return (
     <main className="min-h-screen w-full flex flex-col bg-gray"
     >
-      {/* ================= HEADER ================= */}
       <header className="w-full bg-orange-base text-white shadow-md sticky top-0 z-50">
         <div className="max-w-350 mx-auto px-5 py-3 flex items-center justify-between gap-4">
 
-          {/* LOGO */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
             <img
               src={logoNm}
@@ -59,7 +53,6 @@ export default function PublicLayout({ children, bannerHome }) {
             </span>
           </Link>
 
-          {/* NAV — desktop */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map(link => (
               <NavLink
@@ -79,7 +72,6 @@ export default function PublicLayout({ children, bannerHome }) {
             ))}
           </nav>
 
-          {/* WHATSAPP CTA */}
           <a
             href="https://api.whatsapp.com/send?phone=5522998336225"
             target="_blank"
@@ -92,7 +84,6 @@ export default function PublicLayout({ children, bannerHome }) {
 
         </div>
 
-        {/* NAV — mobile (scrollable row abaixo) */}
         <div className="md:hidden border-t border-white/15 overflow-x-auto min-w-0 w-full">
           <nav className="flex items-center gap-1 px-4 py-2 w-max">
             {navLinks.map(link => (
@@ -115,7 +106,6 @@ export default function PublicLayout({ children, bannerHome }) {
         </div>
       </header>
 
-      {/* ================= CONTEÚDO ================= */}
       <section className="flex-grow w-full">
 
         {/* HERO BANNER — desktop 1920×480 · mobile 425×495 */}
@@ -162,14 +152,11 @@ export default function PublicLayout({ children, bannerHome }) {
         {children}
       </section>
 
-      {/* ================= FOOTER ================= */}
       <footer className="w-full mt-auto bg-orange-base text-white">
 
-        {/* MAIN */}
         <div className="max-w-350 mx-auto px-6 py-12 md:px-16">
           <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
 
-            {/* MARCA */}
             <div className="flex flex-col gap-4">
               <p className="font-bold text-xl tracking-tight">Novamix Cursos</p>
               <p className="text-white/70 text-sm leading-relaxed">
@@ -186,7 +173,6 @@ export default function PublicLayout({ children, bannerHome }) {
               </a>
             </div>
 
-            {/* NAVEGAÇÃO */}
             <div>
               <p className="font-semibold text-xs uppercase tracking-widest text-white/50 mb-4">Navegação</p>
               <div className="flex flex-col gap-2.5">
@@ -208,7 +194,6 @@ export default function PublicLayout({ children, bannerHome }) {
               </div>
             </div>
 
-            {/* CONTATO */}
             <div>
               <p className="font-semibold text-xs uppercase tracking-widest text-white/50 mb-4">Onde estamos</p>
               <div className="flex flex-col gap-3">
@@ -237,10 +222,8 @@ export default function PublicLayout({ children, bannerHome }) {
           </div>
         </div>
 
-        {/* DIVISOR */}
         <div className="border-t border-white/15" />
 
-        {/* BOTTOM BAR */}
         <div className="max-w-350 mx-auto px-6 py-5 md:px-16 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-1">
             <p className="text-white/55 text-xs">

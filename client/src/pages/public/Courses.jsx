@@ -1,35 +1,25 @@
-// REACT
 import { useContext, useState, useEffect } from 'react';
 
-// ICONS
 import { Menu, Loader2, XCircle } from 'lucide-react'
 
-// DB
 import { DadosContext } from '../../contexts/DadosContext';
 
-// SERVICES
 import { postEnrollment, putSeatChange, getSeats } from '../../api/enrollment.services';
 
-// HOOKS
 import { useThemeColor } from '../../hooks/useThemeColor';
 
-// COMPONENTS
 import ModalBranch from '../../components/public/ModalBranch';
 import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
 import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnrollmentPayment';
 
-// SECTIONS
 import AllCoursesSections from '../../sections/courses/AllCoursesSections';
 
-// LAYOUTS
 import PublicLayout from '../../layouts/public/PublicLayout'
 
-// HEAD 
 import { Head } from '../../components/Head'
 
-// IMAGES
 import { bannerHome } from '../../assets/images/banner/'
 
 export default function Courses() {
@@ -40,8 +30,6 @@ export default function Courses() {
         culinaristas,
     } = useContext(DadosContext);
 
-    // ========= STATES  =========
-    // ========= STATE CADASTRO CLIENTE  ========= 
     const [form, setForm] = useState({
         cursoId: '',
         nome: '',
@@ -52,7 +40,6 @@ export default function Courses() {
         assento: ''
     });
 
-    // ========= STATE FILTERS ========= 
     const [filters, setFilters] = useState({
         dataInicial: '',
         dataFinal: '',
@@ -60,19 +47,15 @@ export default function Courses() {
         culinarista: ''
     });
 
-    // ========= STATE CURSOS ========= 
     const [cursosAtuais, setCursosAtuais] = useState([]);
     const [cursosFiltrados, setCursosFiltrados] = useState([]);
 
-    // ========= STATE VAGAS ========= 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
     const [refreshVagas, setRefreshVagas] = useState(0);
 
-    // ========= STATE ASSENTOS ========= 
     const [cursoSelecionado, setCursoSelecionado] = useState('');
     const [assentos, setAssentos] = useState([]);
 
-    // ========= STATE MODAL =========
     const [step, setStep] = useState(null)
     const [loadingPagamento, setLoadingPagamento] = useState(false)
     const [erroPagamento, setErroPagamento] = useState(null)
@@ -81,8 +64,6 @@ export default function Courses() {
     const [payerEmail, setPayerEmail] = useState(null)
     const [pagamentoAprovado, setPagamentoAprovado] = useState(true)
 
-    // ========= FUNCOES  =========
-    // =========  FUNCOES CADASTRO CLIENTE =========
     async function handleSubmit() {
         setStep(null)
         setLoadingPagamento(true)
@@ -153,9 +134,6 @@ export default function Courses() {
             .catch(console.error)
     }, [cursoSelecionado])
 
-    // ====== FUNCOES
-
-    // buscar vagas livres e reservadas
     useEffect(() => {
         if (!cursos.length) return;
 
@@ -178,7 +156,6 @@ export default function Courses() {
         loadVagas();
     }, [cursos, refreshVagas]);
 
-    // PEGAR CURSOS ATUAIS
     useEffect(() => {
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
@@ -195,7 +172,6 @@ export default function Courses() {
         setCursosAtuais(cursosFiltrados);
     }, [cursos]);
 
-    // FILTRAR CURSOS
     useEffect(() => {
             const filtrados = cursosAtuais
                 .filter(c =>  !filters.dataInicial || new Date(c.data) >= new Date(filters.dataInicial) )
@@ -205,7 +181,6 @@ export default function Courses() {
             setCursosFiltrados(filtrados)
     }, [filters, cursosAtuais])
 
-    // LIMPAR FILTROS
     function clearFilters() {
         setFilters({
             dataInicial: '',
@@ -215,7 +190,6 @@ export default function Courses() {
         })
     }
 
-    // =========  FUNCOES MODAL ========= 
     const openForm = (cursoId) => {
         setForm(prev => ({ ...prev, cursoId }))
         setStep('form')
@@ -234,8 +208,6 @@ export default function Courses() {
         setRefreshVagas(prev => prev + 1);
     }
 
-    // ========= ONLOAD ========= 
-    // Carregar filtro de loja inicial
     useEffect(() => {
         const lojaGuardada = localStorage.getItem('loja')
         if (lojaGuardada) {
@@ -244,11 +216,9 @@ export default function Courses() {
             setStep('filterBranch')
         }
     }, [])
-    
-    // FUNDO PAGINA
+
     useThemeColor('#FF8D0A');
 
-    // ROLAR TELA AO TOPO
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth'})
     }, [])
@@ -258,8 +228,6 @@ export default function Courses() {
             <Head title='Loja Novamix | Cursos' />
             <section className='bg-gray mb-20'>
 
-                {/* ================= CONTEUDO ================= */}
-                {/* ======== CURSOS ======== */}
                 <AllCoursesSections
                     cursosFiltrados={cursosFiltrados}
                     loadingCourses={loadingCourses}
@@ -271,9 +239,7 @@ export default function Courses() {
                     clearFilters={clearFilters}
                 />
 
-                {/* ================= MODAIS ================= */}
-                {/* ======== MODAL SELECIONAR FILIAL ONLOAD ======== */}
-                <ModalBranch 
+                <ModalBranch
                     isOpen={step === 'filterBranch'}
                     onClose={() => closeModal()}
                     filtersCourses={filters}
@@ -282,8 +248,6 @@ export default function Courses() {
                     setFiltersChildrensCourses={setFilters}
                 />
 
-                {/* ======== MODAIS INSCRICOES CURSOS ======== */}
-                {/* ======== MODAL FORM ======== */}
                 <ModalEnrollmentForm
                     isOpen={step === 'form'}
                     onClick={() => openAssento()}
@@ -292,7 +256,6 @@ export default function Courses() {
                     setEnrollment={setForm}
                 />
 
-                {/* ======== MODAL ASSENTOS */}
                 <ModalEnrollmentSeats
                     isOpen={step === 'assento'}
                     onClick={handleSubmit}
@@ -303,7 +266,6 @@ export default function Courses() {
                     assentoAtual={assentoAtual}
                 />
 
-                {/* ======== MODAL PAGAMENTO ======== */}
                 <ModalEnrollmentPayment
                     isOpen={step === 'pagamento'}
                     inscricaoId={inscricaoAtiva}
@@ -317,7 +279,6 @@ export default function Courses() {
                     onClose={closeModal}
                 />
 
-                {/* ======== MODAL SUCESS ======== */}
                 <ModalEnrollmentSucess
                     isOpen={step === 'confirmacao'}
                     pago={pagamentoAprovado}
@@ -325,7 +286,6 @@ export default function Courses() {
                     onClose={closeModal}
                 />
 
-                {/* Loading pagamento */}
                 {loadingPagamento && (
                     <div className='flex items-center justify-center fixed inset-0 bg-black/70 z-50'>
                         <div className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl'>
@@ -335,7 +295,6 @@ export default function Courses() {
                     </div>
                 )}
 
-                {/* Erro pagamento */}
                 {erroPagamento && (
                     <div
                         className='flex items-center justify-center fixed inset-0 bg-black/70 z-50 p-4'
@@ -361,4 +320,3 @@ export default function Courses() {
         </PublicLayout>
     )
 }
-

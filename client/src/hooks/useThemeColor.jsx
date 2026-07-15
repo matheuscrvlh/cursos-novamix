@@ -17,7 +17,6 @@ export function useThemeColor(color) {
     document.body.style.background = color;
 
     return () => {
-      // resetar quando sair da página
       document.documentElement.style.background = "";
       document.body.style.background = "";
     };

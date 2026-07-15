@@ -1,14 +1,11 @@
-// React
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router'
 import { useState } from 'react'
 import { Menu, X, LogOut } from 'lucide-react'
 
-// Components
 import LinkSideBar from '../../components/admin/LinkSideBar'
 import ConfirmModal from '../../components/admin/ModalConfirm'
 
-// Images
 import { logoNm } from '../../assets/images/logos/'
 
 export default function SideBar() {
@@ -32,7 +29,6 @@ export default function SideBar() {
 
     return (
         <>
-            {/* menu hambuerguer*/}
             <button
                 onClick={toggleMenu}
                 className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-orange-base rounded-md shadow-lg hover:bg-orange-light transition-colors"
@@ -45,7 +41,6 @@ export default function SideBar() {
                 )}
             </button>
 
-            {/* apenas para mobile */}
             <div className={`
                     lg:hidden fixed inset-0 bg-black transition-opacity duration-300
                     ${isMenuOpen ? 'opacity-50 z-30 pointer-events-auto' : 'opacity-0 pointer-events-none'}
@@ -53,7 +48,6 @@ export default function SideBar() {
                 onClick={closeMenu}
             ></div>
 
-            {/* Sidebar */}
             <aside className={`
                     flex flex-col h-dvh bg-white shadow-sm
                     fixed top-0 left-0 w-70
