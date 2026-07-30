@@ -1,10 +1,10 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 
 import { Menu, Loader2, XCircle } from 'lucide-react'
 
 import { DadosContext } from '../../contexts/DadosContext';
 
-import { postEnrollment, putSeatChange, getSeats } from '../../api/enrollment.services';
+import { postEnrollment, putSeatChange, getSeats, cancelEnrollment } from '../../api/enrollment.services';
 
 import { useThemeColor } from '../../hooks/useThemeColor';
 
@@ -65,6 +65,26 @@ export default function Courses() {
     const [assentoAtual, setAssentoAtual] = useState(null)
     const [payerEmail, setPayerEmail] = useState(null)
     const [pagamentoAprovado, setPagamentoAprovado] = useState(true)
+
+    // Mantém a inscrição ativa acessível fora do ciclo de render, pra liberar
+    // o assento mesmo quando o cliente sai sem passar pelo botão de fechar
+    // (fecha a aba, dá refresh ou navega pra outra rota do site)
+    const inscricaoAtivaRef = useRef(null)
+    useEffect(() => { inscricaoAtivaRef.current = inscricaoAtiva }, [inscricaoAtiva])
+
+    useEffect(() => {
+        function cancelarInscricaoAtiva() {
+            if (inscricaoAtivaRef.current) {
+                navigator.sendBeacon(`/api/inscricoes/${inscricaoAtivaRef.current}/cancelar`)
+            }
+        }
+
+        window.addEventListener('pagehide', cancelarInscricaoAtiva)
+        return () => {
+            window.removeEventListener('pagehide', cancelarInscricaoAtiva)
+            cancelarInscricaoAtiva()
+        }
+    }, [])
 
     async function handleSubmit() {
         setStep(null)
@@ -200,7 +220,12 @@ export default function Courses() {
 
     const openAssento = () => setStep('assento')
 
-    const closeModal = () => {
+    // Fecha o modal e, se havia uma inscrição pendente em aberto (cliente
+    // desistiu no meio do pagamento), cancela ela e libera o assento na hora
+    const closeModal = async () => {
+        if (inscricaoAtiva) {
+            try { await cancelEnrollment(inscricaoAtiva) } catch (err) { console.error(err) }
+        }
         setStep(null)
         setForm({ cursoId: '', nome: '', cpf: '', celular: '', email: '', assento: '' })
         setCursoSelecionado('')
