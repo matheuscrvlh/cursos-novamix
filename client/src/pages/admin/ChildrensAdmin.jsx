@@ -14,6 +14,28 @@ import { DadosContext } from '../../contexts/DadosContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 import { formatDateBR } from '../../utils/formatDate';
 
+function maskValor(value) {
+    const digits = value.replace(/\D/g, '');
+    if (!digits) return '';
+    const padded = digits.padStart(3, '0');
+    const intPart = padded.slice(0, -2).replace(/^0+(\d)/, '$1');
+    const decPart = padded.slice(-2);
+    const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${intFormatted || '0'},${decPart}`;
+}
+
+function valorParaSalvar(valor) {
+    return valor.replace(/\./g, '').replace(',', '.');
+}
+
+function formatValorDisplay(val) {
+    if (val === '' || val == null) return '';
+    const n = parseFloat(String(val).replace(',', '.'));
+    if (isNaN(n)) return '';
+    const cents = Math.round(n * 100).toString();
+    return maskValor(cents);
+}
+
 const CURSO_VAZIO = {
     nomeCurso: '',
     data: '',
@@ -77,7 +99,7 @@ export default function ChildrensAdmin() {
 
         Object.entries(form).forEach(([key, value]) => {
             if (!value) return;
-            formData.append(key, value);
+            formData.append(key, key === 'valor' ? valorParaSalvar(value) : value);
         });
 
         addCursoInfantil(formData);
@@ -88,7 +110,7 @@ export default function ChildrensAdmin() {
         const curso = cursosInfantis.find(c => c.id === id);
         if (!curso) return;
 
-        setCursoEditar(curso);
+        setCursoEditar({ ...curso, valor: formatValorDisplay(curso.valor) });
         setStep('edit');
 
         if (curso.fotos?.[0]) {
@@ -108,6 +130,8 @@ export default function ChildrensAdmin() {
                 if (value instanceof File) {
                     formData.append('fotos', value);
                 }
+            } else if (key === 'valor') {
+                formData.append('valor', valorParaSalvar(value));
             } else {
                 formData.append(key, value);
             }
@@ -184,10 +208,18 @@ export default function ChildrensAdmin() {
 
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Valor</label>
-                        <Input placeholder='Valor'
-                            value={form.valor}
-                            onChange={e => setForm({ ...form, valor: e.target.value })}
-                        />
+                        <div className='flex items-center border border-gray-base rounded-md overflow-hidden'>
+                            <span className='px-2 text-sm text-gray-text/60 bg-gray border-r border-gray-base h-full flex items-center'>R$</span>
+                            <input
+                                type='text'
+                                placeholder='0,00'
+                                inputMode='decimal'
+                                value={form.valor}
+                                className='flex-1 p-2 text-sm text-gray-text bg-white outline-none'
+                                onFocus={e => e.target.select()}
+                                onChange={e => setForm({ ...form, valor: maskValor(e.target.value) })}
+                            />
+                        </div>
                     </div>
 
                     <div className='flex flex-col gap-1.5'>
@@ -415,10 +447,18 @@ export default function ChildrensAdmin() {
                     </div>
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Valor</label>
-                        <Input
-                            value={cursoEditar.valor || ''}
-                            onChange={e => setCursoEditar({ ...cursoEditar, valor: e.target.value })}
-                        />
+                        <div className='flex items-center border border-gray-base rounded-md overflow-hidden'>
+                            <span className='px-2 text-sm text-gray-text/60 bg-gray border-r border-gray-base h-full flex items-center'>R$</span>
+                            <input
+                                type='text'
+                                placeholder='0,00'
+                                inputMode='decimal'
+                                value={cursoEditar.valor || ''}
+                                className='flex-1 p-2 text-sm text-gray-text bg-white outline-none'
+                                onFocus={e => e.target.select()}
+                                onChange={e => setCursoEditar({ ...cursoEditar, valor: maskValor(e.target.value) })}
+                            />
+                        </div>
                     </div>
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Duração</label>
