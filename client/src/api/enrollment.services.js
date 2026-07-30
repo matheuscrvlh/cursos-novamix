@@ -102,6 +102,21 @@ export async function putSeatChange(inscricaoId, assento) {
     }
 }
 
+// Cancela a própria inscrição pendente e libera o assento — rota pública
+// (o cliente ainda não está logado, é a inscrição dele mesmo antes de pagar)
+export async function cancelEnrollment(inscricaoId) {
+    try {
+        const res = await fetch((`${URL}/inscricoes/${inscricaoId}/cancelar`), {
+            method: 'POST'
+        });
+
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao cancelar Inscricao:', err);
+    }
+}
+
 export async function deleteEnrollment(inscricaoId) {
     try {
         await fetch((`${URL}/inscricoes/${inscricaoId}`), {

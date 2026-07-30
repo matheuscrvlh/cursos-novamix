@@ -11,7 +11,7 @@ import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrol
 import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnrollmentPayment'
 
 import { getCourseById } from '../../api/courses.services'
-import { postEnrollment, putSeatChange, getSeats } from '../../api/enrollment.services'
+import { postEnrollment, putSeatChange, getSeats, cancelEnrollment } from '../../api/enrollment.services'
 import { formatarPreco } from '../../utils/formatCurrency'
 
 function formatDate(dateStr) {
@@ -135,7 +135,12 @@ export default function CoursePage() {
         setForm({ cursoId: id, nome: '', cpf: '', celular: '', email: '', assento: '' })
     }
 
-    function closeModal() {
+    // Fecha o modal e, se havia uma inscrição pendente em aberto (cliente
+    // desistiu no meio do pagamento), cancela ela e libera o assento na hora
+    async function closeModal() {
+        if (inscricaoAtiva) {
+            try { await cancelEnrollment(inscricaoAtiva) } catch (err) { console.error(err) }
+        }
         setStep(null)
         setInscricaoAtiva(null)
         setAssentoAtual(null)

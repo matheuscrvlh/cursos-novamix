@@ -134,6 +134,40 @@ router.put('/:id/assento', (req, res) => {
   });
 });
 
+// Cancela a própria inscrição pendente — rota pública (cliente ainda não
+// logado, é a inscrição dele mesmo antes de pagar). Usada quando o cliente
+// fecha o modal de pagamento sem concluir, pra liberar o assento na hora em
+// vez de deixá-lo preso até o cron de expiração (30min) rodar.
+router.post('/:id/cancelar', (req, res) => {
+  const { id } = req.params;
+
+  db.get(`SELECT * FROM inscricoes WHERE id = ?`, [id], (err, inscricao) => {
+    if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
+    if (!inscricao) return res.status(404).json({ message: 'Inscrição não encontrada' });
+
+    // trava atômica: só cancela se ainda estiver 'pendente' — não deixa cancelar
+    // uma inscrição que já foi paga ou já cancelada
+    db.run(
+      `UPDATE inscricoes SET status = 'cancelado' WHERE id = ? AND status = 'pendente'`,
+      [id],
+      function (err) {
+        if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
+        if (this.changes === 0) {
+          return res.status(400).json({ message: 'Inscrição não pode ser cancelada' });
+        }
+
+        db.run(
+          `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
+          [inscricao.cursoId, inscricao.assento],
+          err => { if (err) console.error('Erro ao liberar assento:', err); }
+        );
+
+        res.json({ message: 'Inscrição cancelada' });
+      }
+    );
+  });
+});
+
 router.get('/curso/:cursoId', authMiddleware, (req, res) => {
   db.all(
     `SELECT * FROM inscricoes WHERE cursoId = ?`,
