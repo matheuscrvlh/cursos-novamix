@@ -10,6 +10,10 @@ const router = express.Router();
 function getMpClient() {
   return new MercadoPagoConfig({
     accessToken: process.env.MP_ACCESS_TOKEN || '',
+    // sem isso, uma lentidão/instabilidade na API do MP trava a requisição
+    // (e a tela do cliente) esperando pra sempre — com timeout, ao menos
+    // devolve erro pro cliente tentar de novo em vez de ficar girando
+    options: { timeout: 15000 },
   });
 }
 
@@ -126,9 +130,9 @@ router.post('/verificar/:inscricaoId', authMiddleware, async (req, res) => {
         novoStatus = 'pago';
         db.run(`UPDATE inscricoes SET status = 'pago' WHERE id = ?`, [inscricaoId]);
       } else if (mpStatus === 'rejected' || mpStatus === 'cancelled') {
-        novoStatus = 'cancelado';
-        db.run(`UPDATE inscricoes SET status = 'cancelado' WHERE id = ?`, [inscricaoId]);
-        if (inscricao.status !== 'cancelado') {
+        novoStatus = mpStatus === 'rejected' ? 'recusado' : 'cancelado';
+        db.run(`UPDATE inscricoes SET status = ? WHERE id = ?`, [novoStatus, inscricaoId]);
+        if (inscricao.status !== novoStatus) {
           db.run(
             `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
             [inscricao.cursoId, inscricao.assento],
@@ -227,6 +231,9 @@ router.post('/webhook', async (req, res) => {
         err => { if (err) console.error('Erro ao marcar pago:', err); }
       );
     } else if (status === 'rejected' || status === 'cancelled') {
+      // 'rejected' = recusado pela operadora/banco, 'cancelled' = cancelado
+      // (ex: Pix expirado) — status diferentes pro admin não confundir
+      const novoStatus = status === 'rejected' ? 'recusado' : 'cancelado';
       db.get(`SELECT * FROM inscricoes WHERE id = ? AND status = 'pendente'`, [inscricaoId], (err, inscricao) => {
         if (err || !inscricao) return;
         db.run(
@@ -235,9 +242,9 @@ router.post('/webhook', async (req, res) => {
           err => { if (err) console.error('Erro ao liberar assento:', err); }
         );
         db.run(
-          `UPDATE inscricoes SET status = 'cancelado', mp_payment_id = ? WHERE id = ?`,
-          [paymentId, inscricaoId],
-          err => { if (err) console.error('Erro ao marcar cancelado:', err); }
+          `UPDATE inscricoes SET status = ?, mp_payment_id = ? WHERE id = ?`,
+          [novoStatus, paymentId, inscricaoId],
+          err => { if (err) console.error('Erro ao marcar', novoStatus, ':', err); }
         );
       });
     } else if (status === 'pending' || status === 'in_process') {
@@ -321,15 +328,19 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
             err => { if (err) console.error('Erro ao marcar pago:', err); }
           );
         } else if (status === 'rejected' || status === 'cancelled') {
+          // 'rejected' = recusado pela operadora/banco (cartão), 'cancelled' =
+          // pagamento cancelado (ex: Pix expirado) — status diferentes pro
+          // admin não confundir recusa de cartão com cancelamento
+          const novoStatus = status === 'rejected' ? 'recusado' : 'cancelado';
           db.run(
             `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
             [inscricao.cursoId, inscricao.assento],
             err => { if (err) console.error('Erro ao liberar assento:', err); }
           );
           db.run(
-            `UPDATE inscricoes SET status = 'cancelado', mp_payment_id = ?, metodoPagamento = ? WHERE id = ?`,
-            [paymentId, metodoPagamento, inscricaoId],
-            err => { if (err) console.error('Erro ao marcar cancelado:', err); }
+            `UPDATE inscricoes SET status = ?, mp_payment_id = ?, metodoPagamento = ? WHERE id = ?`,
+            [novoStatus, paymentId, metodoPagamento, inscricaoId],
+            err => { if (err) console.error('Erro ao marcar', novoStatus, ':', err); }
           );
         } else {
           db.run(

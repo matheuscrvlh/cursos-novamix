@@ -42,13 +42,20 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
                 onSubmit: ({ formData }) => {
                     setErro(null)
                     return new Promise((resolve, reject) => {
+                        // sem timeout, uma API do MP lenta/instável deixa essa tela
+                        // girando pra sempre sem nenhum feedback pro cliente
+                        const controller = new AbortController()
+                        const timeoutId = setTimeout(() => controller.abort(), 20000)
+
                         fetch('/api/pagamentos/processar-pagamento', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ inscricaoId, ...formData, payer: { email: formData.payer?.email || payerEmail } }),
+                            signal: controller.signal,
                         })
                             .then(r => r.json())
                             .then(data => {
+                                clearTimeout(timeoutId)
                                 if (data.status === 'approved') {
                                     resolve()
                                     onSuccess('approved')
@@ -69,7 +76,11 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
                                 }
                             })
                             .catch(err => {
-                                setErro('Não foi possível conectar ao servidor de pagamento. Tente novamente.')
+                                clearTimeout(timeoutId)
+                                const mensagem = err.name === 'AbortError'
+                                    ? 'A confirmação do pagamento demorou demais. Tente novamente.'
+                                    : 'Não foi possível conectar ao servidor de pagamento. Tente novamente.'
+                                setErro(mensagem)
                                 reject(err)
                             })
                     })

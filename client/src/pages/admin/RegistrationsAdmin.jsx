@@ -38,6 +38,7 @@ const FILTROS_PAGAMENTO = [
     { label: 'Pago', value: 'pago' },
     { label: 'Pendente', value: 'pendente' },
     { label: 'Cancelado', value: 'cancelado' },
+    { label: 'Recusado', value: 'recusado' },
     { label: 'Reembolsado', value: 'reembolsado' },
 ];
 
@@ -45,6 +46,7 @@ function statusBadgeClass(status) {
     if (status === 'pago')        return 'bg-green-base';
     if (status === 'pendente')    return 'bg-yellow-500';
     if (status === 'cancelado')   return 'bg-gray-base';
+    if (status === 'recusado')    return 'bg-red-light';
     if (status === 'reembolsado') return 'bg-red-base';
     return 'bg-orange-base';
 }
@@ -200,8 +202,10 @@ export default function RegistrationsAdmin() {
 
             if (novoStatus === 'pago') {
                 mostrarMensagem('sucesso', 'Pagamento confirmado no Mercado Pago!');
+            } else if (novoStatus === 'recusado') {
+                mostrarMensagem('erro', 'Pagamento recusado pela operadora/banco. A vaga foi liberada.');
             } else if (novoStatus === 'cancelado') {
-                mostrarMensagem('erro', 'Pagamento recusado/cancelado no Mercado Pago. A vaga foi liberada.');
+                mostrarMensagem('erro', 'Pagamento cancelado no Mercado Pago. A vaga foi liberada.');
             } else {
                 mostrarMensagem('info', 'Ainda sem confirmação — o pagamento continua pendente no Mercado Pago.');
             }
