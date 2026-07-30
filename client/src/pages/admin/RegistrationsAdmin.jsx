@@ -49,7 +49,18 @@ function statusBadgeClass(status) {
     return 'bg-orange-base';
 }
 
-function InscricaoAcoes({ inscricao, verificandoMP, reembolsando, onVerificarMP, onReembolsar, onEditar, onExcluir }) {
+// Reembolso só faz sentido enquanto o curso ainda não rolou e com pelo menos
+// 24h de antecedência do início — depois disso, o Mercado Pago ainda aceitaria
+// o reembolso, mas não faz sentido devolver o dinheiro de um curso que já vai
+// acontecer/aconteceu em menos de um dia.
+function podeReembolsar(curso) {
+    if (!curso?.data) return false;
+    const inicioCurso = new Date(`${curso.data}T${curso.hora || '00:00'}`);
+    const limiteReembolso = new Date(inicioCurso.getTime() - 24 * 60 * 60 * 1000);
+    return new Date() < limiteReembolso;
+}
+
+function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, onVerificarMP, onReembolsar, onEditar, onExcluir }) {
     return (
         <>
             {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pendente' && (
@@ -63,7 +74,7 @@ function InscricaoAcoes({ inscricao, verificandoMP, reembolsando, onVerificarMP,
                     </Button>
                 </Tooltip>
             )}
-            {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pago' && (
+            {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pago' && podeReembolsar(curso) && (
                 <Tooltip label='Reembolsar'>
                     <Button
                         className='bg-gray-text p-2 hover:bg-gray-dark text-white'
@@ -74,11 +85,13 @@ function InscricaoAcoes({ inscricao, verificandoMP, reembolsando, onVerificarMP,
                     </Button>
                 </Tooltip>
             )}
-            <Tooltip label='Editar status'>
-                <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={onEditar}>
-                    <Edit size={16} />
-                </Button>
-            </Tooltip>
+            {inscricao.status !== 'pago' && (
+                <Tooltip label='Editar status'>
+                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={onEditar}>
+                        <Edit size={16} />
+                    </Button>
+                </Tooltip>
+            )}
             <Tooltip label='Excluir'>
                 <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={onExcluir}>
                     <Trash size={16} />
@@ -95,6 +108,7 @@ export default function RegistrationsAdmin() {
     const [inscricoes, setInscricoes] = useState([])
 
     const [step, setStep] = useState('close')
+    const [cursoSelecionado, setCursoSelecionado] = useState(null)
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
 
@@ -129,6 +143,8 @@ export default function RegistrationsAdmin() {
         ...cursos.map(c => ({ ...c, tipo: 'normal' })),
         ...cursosInfantis.map(c => ({ ...c, tipo: 'infantil' })),
     ];
+
+    const cursoModal = todosCursos.find(c => c.id === cursoSelecionado);
 
     const inscricoesFiltradas = inscricoesTotais.filter(i => {
         const curso = todosCursos.find(c => c.id === i.cursoId);
@@ -221,6 +237,7 @@ export default function RegistrationsAdmin() {
     async function handleInscricoesCurso(cursoId) {
         try {
             setStep('inscricoes');
+            setCursoSelecionado(cursoId);
 
             const inscricoes = await getEnrollment(cursoId);
             setInscricoes(inscricoes);
@@ -263,6 +280,7 @@ export default function RegistrationsAdmin() {
 
     function closeModal() {
         setInscricoes([]);
+        setCursoSelecionado(null);
         setStep('close');
     }
 
@@ -369,6 +387,7 @@ export default function RegistrationsAdmin() {
                                     <div className='flex gap-2'>
                                         <InscricaoAcoes
                                             inscricao={i}
+                                            curso={curso}
                                             verificandoMP={verificandoMP === i.id}
                                             reembolsando={reembolsando === i.id}
                                             onVerificarMP={() => handleVerificarMP(i.id)}
@@ -404,6 +423,7 @@ export default function RegistrationsAdmin() {
                                 <div className='flex gap-2'>
                                     <InscricaoAcoes
                                         inscricao={i}
+                                        curso={curso}
                                         verificandoMP={verificandoMP === i.id}
                                         reembolsando={reembolsando === i.id}
                                         onVerificarMP={() => handleVerificarMP(i.id)}
@@ -538,6 +558,7 @@ export default function RegistrationsAdmin() {
                                 <div className='flex gap-2'>
                                     <InscricaoAcoes
                                         inscricao={inscricao}
+                                        curso={cursoModal}
                                         verificandoMP={verificandoMP === inscricao.id}
                                         reembolsando={reembolsando === inscricao.id}
                                         onVerificarMP={() => handleVerificarMP(inscricao.id)}
@@ -585,6 +606,7 @@ export default function RegistrationsAdmin() {
                                     <div className='flex gap-2'>
                                         <InscricaoAcoes
                                             inscricao={inscricao}
+                                            curso={cursoModal}
                                             verificandoMP={verificandoMP === inscricao.id}
                                             reembolsando={reembolsando === inscricao.id}
                                             onVerificarMP={() => handleVerificarMP(inscricao.id)}
