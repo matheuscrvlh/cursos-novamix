@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Calendar, Clock, User, MapPin, Tag, ArrowLeft, XCircle, Loader2 } from 'lucide-react'
 
@@ -59,6 +59,26 @@ export default function CoursePage() {
             }
         })
     }, [id])
+
+    // Mantém a inscrição ativa acessível fora do ciclo de render, pra liberar
+    // o assento mesmo quando o cliente sai sem passar pelo botão de fechar
+    // (fecha a aba, dá refresh ou navega pra outra rota do site)
+    const inscricaoAtivaRef = useRef(null)
+    useEffect(() => { inscricaoAtivaRef.current = inscricaoAtiva }, [inscricaoAtiva])
+
+    useEffect(() => {
+        function cancelarInscricaoAtiva() {
+            if (inscricaoAtivaRef.current) {
+                navigator.sendBeacon(`/api/inscricoes/${inscricaoAtivaRef.current}/cancelar`)
+            }
+        }
+
+        window.addEventListener('pagehide', cancelarInscricaoAtiva)
+        return () => {
+            window.removeEventListener('pagehide', cancelarInscricaoAtiva)
+            cancelarInscricaoAtiva()
+        }
+    }, [])
 
     async function handleSubmit() {
         const assentoId = form.assento
