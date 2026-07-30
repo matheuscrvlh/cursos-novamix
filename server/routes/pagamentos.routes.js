@@ -255,6 +255,7 @@ router.post('/webhook', async (req, res) => {
 router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
   const { inscricaoId, token, issuer_id, payment_method_id, payer } = req.body;
   const isPix = payment_method_id === 'pix';
+  const metodoPagamento = isPix ? 'pix' : 'cartao';
 
   if (!inscricaoId || (!isPix && !token)) {
     return res.status(400).json({ message: 'Dados de pagamento incompletos' });
@@ -315,8 +316,8 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
 
         if (status === 'approved') {
           db.run(
-            `UPDATE inscricoes SET status = 'pago', mp_payment_id = ? WHERE id = ? AND status != 'pago'`,
-            [paymentId, inscricaoId],
+            `UPDATE inscricoes SET status = 'pago', mp_payment_id = ?, metodoPagamento = ? WHERE id = ? AND status != 'pago'`,
+            [paymentId, metodoPagamento, inscricaoId],
             err => { if (err) console.error('Erro ao marcar pago:', err); }
           );
         } else if (status === 'rejected' || status === 'cancelled') {
@@ -326,14 +327,14 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
             err => { if (err) console.error('Erro ao liberar assento:', err); }
           );
           db.run(
-            `UPDATE inscricoes SET status = 'cancelado', mp_payment_id = ? WHERE id = ?`,
-            [paymentId, inscricaoId],
+            `UPDATE inscricoes SET status = 'cancelado', mp_payment_id = ?, metodoPagamento = ? WHERE id = ?`,
+            [paymentId, metodoPagamento, inscricaoId],
             err => { if (err) console.error('Erro ao marcar cancelado:', err); }
           );
         } else {
           db.run(
-            `UPDATE inscricoes SET mp_payment_id = ? WHERE id = ?`,
-            [paymentId, inscricaoId],
+            `UPDATE inscricoes SET mp_payment_id = ?, metodoPagamento = ? WHERE id = ?`,
+            [paymentId, metodoPagamento, inscricaoId],
             err => { if (err) console.error('Erro ao salvar payment_id:', err); }
           );
         }

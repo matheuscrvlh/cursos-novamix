@@ -144,6 +144,14 @@ db.serialize(() => {
     else console.log('✓ inscricoes.cursoRemovidoNome');
   });
 
+  // método de pagamento de verdade (pix/cartao), preenchido só depois que o
+  // cliente escolhe no Brick — formaPagamento continua fixo em 'mercadopago'
+  // (é o gateway, usado pra decidir se mostra Verificar/Reembolsar no admin)
+  db.run('ALTER TABLE inscricoes ADD COLUMN metodoPagamento TEXT', err => {
+    if (err && !err.message.includes('duplicate column')) console.error('metodoPagamento:', err);
+    else console.log('✓ inscricoes.metodoPagamento');
+  });
+
   db.run(`
     CREATE TABLE IF NOT EXISTS usuarios (
       id           TEXT PRIMARY KEY,

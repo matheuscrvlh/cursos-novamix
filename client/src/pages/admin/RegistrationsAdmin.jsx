@@ -49,6 +49,14 @@ function statusBadgeClass(status) {
     return 'bg-orange-base';
 }
 
+// metodoPagamento só é preenchido depois que o cliente escolhe Pix ou cartão
+// no Brick — antes disso (inscrição recém-criada) ainda não existe
+function metodoPagamentoLabel(metodo) {
+    if (metodo === 'pix')    return 'Pix';
+    if (metodo === 'cartao') return 'Cartão';
+    return '—';
+}
+
 // Reembolso só faz sentido enquanto o curso ainda não rolou e com pelo menos
 // 24h de antecedência do início — depois disso, o Mercado Pago ainda aceitaria
 // o reembolso, mas não faz sentido devolver o dinheiro de um curso que já vai
@@ -329,7 +337,7 @@ export default function RegistrationsAdmin() {
                                 <p className='font-medium text-sm text-gray-text'>{i.nome}</p>
                                 <div className='flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-text/60 mt-1'>
                                     <span>Assento: {i.assento}</span>
-                                    <span>{i.formaPagamento}</span>
+                                    <span>{metodoPagamentoLabel(i.metodoPagamento)}</span>
                                     {curso?.data && <span>{formatDateBR(curso.data)}</span>}
                                 </div>
                                 <div className='flex items-center justify-between mt-2'>
@@ -370,7 +378,7 @@ export default function RegistrationsAdmin() {
                                 <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${statusBadgeClass(i.status)}`}>
                                     {i.status}
                                 </span>
-                                <p>{i.formaPagamento}</p>
+                                <p>{metodoPagamentoLabel(i.metodoPagamento)}</p>
                                 <div className='flex gap-2'>
                                     <InscricaoAcoes
                                         inscricao={i}
@@ -502,7 +510,7 @@ export default function RegistrationsAdmin() {
                                     <span><span className='font-medium text-gray-text'>Assento </span>{inscricao.assento}</span>
                                     <span><span className='font-medium text-gray-text'>CPF </span>{inscricao.cpf}</span>
                                     <span><span className='font-medium text-gray-text'>Celular </span>{inscricao.celular}</span>
-                                    <span><span className='font-medium text-gray-text'>Pagamento </span>{inscricao.formaPagamento}</span>
+                                    <span><span className='font-medium text-gray-text'>Pagamento </span>{metodoPagamentoLabel(inscricao.metodoPagamento)}</span>
                                     <span className='col-span-2'><span className='font-medium text-gray-text'>Inscrição </span>{formatDateTimeBR(inscricao.dataInscricao)}</span>
                                 </div>
                                 <div className='flex gap-2'>
@@ -547,7 +555,7 @@ export default function RegistrationsAdmin() {
                                     <p className='truncate'>{inscricao.nome}</p>
                                     <p>{inscricao.cpf}</p>
                                     <p>{inscricao.celular}</p>
-                                    <p>{inscricao.formaPagamento}</p>
+                                    <p>{metodoPagamentoLabel(inscricao.metodoPagamento)}</p>
                                     <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${statusBadgeClass(inscricao.status)}`}>
                                         {inscricao.status}
                                     </span>
