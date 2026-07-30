@@ -177,15 +177,15 @@ router.post('/reembolsar/:inscricaoId', authMiddleware, async (req, res) => {
           const paymentRefund = new PaymentRefund(getMpClient());
           await paymentRefund.total({ payment_id: inscricao.mp_payment_id });
 
-          // só libera a vaga e cancela a inscrição depois do MP confirmar o reembolso
-          db.run(`UPDATE inscricoes SET status = 'cancelado' WHERE id = ?`, [inscricaoId]);
+          // só libera a vaga e marca como reembolsada depois do MP confirmar o reembolso
+          db.run(`UPDATE inscricoes SET status = 'reembolsado' WHERE id = ?`, [inscricaoId]);
           db.run(
             `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
             [inscricao.cursoId, inscricao.assento],
             err => { if (err) console.error('Erro ao liberar assento após reembolso:', err); }
           );
 
-          res.json({ status: 'cancelado', reembolsado: true });
+          res.json({ status: 'reembolsado', reembolsado: true });
         } catch (err) {
           console.error('Erro ao reembolsar pagamento no MP:', err);
           // MP não confirmou o reembolso — volta pro estado anterior

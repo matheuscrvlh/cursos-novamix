@@ -85,7 +85,7 @@ router.put('/:id/assento', (req, res) => {
   db.get(`SELECT * FROM inscricoes WHERE id = ?`, [id], (err, inscricao) => {
     if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
     if (!inscricao) return res.status(404).json({ message: 'Inscrição não encontrada' });
-    if (inscricao.status === 'pago' || inscricao.status === 'cancelado') {
+    if (inscricao.status !== 'pendente') {
       return res.status(400).json({ message: 'Não é possível trocar de assento dessa inscrição.' });
     }
 

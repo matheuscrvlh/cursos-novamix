@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Trash, Edit, Users, Inbox, RefreshCw, Undo2 } from 'lucide-react';
+import { Trash, Users, Inbox, RefreshCw, Undo2 } from 'lucide-react';
 
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
@@ -9,13 +9,11 @@ import FilterPills from '../../components/admin/FilterPills';
 import Tooltip from '../../components/admin/Tooltip';
 import AdminPage from '../../layouts/admin/AdminPage';
 
-import { getEnrollment, getTotalEnrollment, putEnrollment, deleteEnrollment, verificarPagamentoMP, reembolsarPagamentoMP } from '../../api/enrollment.services';
+import { getEnrollment, getTotalEnrollment, deleteEnrollment, verificarPagamentoMP, reembolsarPagamentoMP } from '../../api/enrollment.services';
 
 import { DadosContext } from '../../contexts/DadosContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 import { formatDateBR, formatDateTimeBR } from '../../utils/formatDate';
-
-const CICLO_STATUS = { pendente: 'pago', pago: 'cancelado', cancelado: 'pendente' };
 
 const FILTROS_TIPO = [
     { label: 'Todos', value: 'todos' },
@@ -40,12 +38,14 @@ const FILTROS_PAGAMENTO = [
     { label: 'Pago', value: 'pago' },
     { label: 'Pendente', value: 'pendente' },
     { label: 'Cancelado', value: 'cancelado' },
+    { label: 'Reembolsado', value: 'reembolsado' },
 ];
 
 function statusBadgeClass(status) {
-    if (status === 'pago')      return 'bg-green-base';
-    if (status === 'pendente')  return 'bg-yellow-500';
-    if (status === 'cancelado') return 'bg-gray-base';
+    if (status === 'pago')        return 'bg-green-base';
+    if (status === 'pendente')    return 'bg-yellow-500';
+    if (status === 'cancelado')   return 'bg-gray-base';
+    if (status === 'reembolsado') return 'bg-red-base';
     return 'bg-orange-base';
 }
 
@@ -60,7 +60,7 @@ function podeReembolsar(curso) {
     return new Date() < limiteReembolso;
 }
 
-function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, onVerificarMP, onReembolsar, onEditar, onExcluir }) {
+function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, onVerificarMP, onReembolsar, onExcluir }) {
     return (
         <>
             {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pendente' && (
@@ -82,13 +82,6 @@ function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, onVerif
                         disabled={reembolsando}
                     >
                         <Undo2 size={16} className={reembolsando ? 'animate-spin' : ''} />
-                    </Button>
-                </Tooltip>
-            )}
-            {inscricao.status !== 'pago' && (
-                <Tooltip label='Editar status'>
-                    <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={onEditar}>
-                        <Edit size={16} />
                     </Button>
                 </Tooltip>
             )}
@@ -222,8 +215,8 @@ export default function RegistrationsAdmin() {
                 return;
             }
 
-            setInscricoes(prev => prev.map(i => i.id === inscricaoId ? { ...i, status: 'cancelado' } : i));
-            setInscricoesTotais(prev => prev.map(i => i.id === inscricaoId ? { ...i, status: 'cancelado' } : i));
+            setInscricoes(prev => prev.map(i => i.id === inscricaoId ? { ...i, status: 'reembolsado' } : i));
+            setInscricoesTotais(prev => prev.map(i => i.id === inscricaoId ? { ...i, status: 'reembolsado' } : i));
 
             mostrarMensagem('sucesso', 'Pagamento reembolsado no Mercado Pago e vaga liberada!');
         } catch (err) {
@@ -247,37 +240,6 @@ export default function RegistrationsAdmin() {
         }
     }
 
-    async function alterarStatus(inscricaoId, origem) {
-        try {
-            const inscricaoFiltrada = origem.find(inscricao => inscricao.id === inscricaoId)
-            const novoStatus = CICLO_STATUS[inscricaoFiltrada.status] || 'pendente';
-
-            const inscricaoAlterada = {
-                id: inscricaoFiltrada.id,
-                cursoId: inscricaoFiltrada.cursoId,
-                nome: inscricaoFiltrada.nome,
-                cpf: inscricaoFiltrada.cpf,
-                celular: inscricaoFiltrada.celular,
-                formaPagamento: inscricaoFiltrada.formaPagamento,
-                assento: inscricaoFiltrada.assento,
-                dataInscricao: inscricaoFiltrada.dataInscricao,
-                status: novoStatus
-            };
-
-            const resultado = await putEnrollment(inscricaoAlterada.id, inscricaoAlterada);
-            if (!resultado?.ok) {
-                mostrarMensagem('erro', resultado?.message || 'Erro ao alterar status. Tente novamente.');
-                return;
-            }
-
-            setInscricoes(prev => prev.map(inscricao => inscricao.id === inscricaoAlterada.id ? inscricaoAlterada : inscricao));
-            setInscricoesTotais(prev => prev.map(inscricao => inscricao.id === inscricaoAlterada.id ? inscricaoAlterada : inscricao));
-        } catch(err) {
-            console.log('Erro ao editar inscricao', err)
-            mostrarMensagem('erro', 'Erro ao alterar status. Tente novamente.');
-        }
-    }
-
     function closeModal() {
         setInscricoes([]);
         setCursoSelecionado(null);
@@ -291,16 +253,6 @@ export default function RegistrationsAdmin() {
             variant: 'danger',
             confirmLabel: 'Excluir',
             onConfirm: () => deletarInscricao(inscricao.id)
-        })
-    }
-
-    function confirmarAlteracaoStatus(inscricao, origem) {
-        ask({
-            title: 'Alterar status',
-            message: `Alterar status da inscrição de "${inscricao.nome}" para "${CICLO_STATUS[inscricao.status] || 'pendente'}"?`,
-            variant: 'warning',
-            confirmLabel: 'Alterar',
-            onConfirm: () => alterarStatus(inscricao.id, origem)
         })
     }
 
@@ -392,7 +344,6 @@ export default function RegistrationsAdmin() {
                                             reembolsando={reembolsando === i.id}
                                             onVerificarMP={() => handleVerificarMP(i.id)}
                                             onReembolsar={() => confirmarReembolso(i)}
-                                            onEditar={() => confirmarAlteracaoStatus(i, inscricoesTotais)}
                                             onExcluir={() => confirmarExclusao(i)}
                                         />
                                     </div>
@@ -428,7 +379,6 @@ export default function RegistrationsAdmin() {
                                         reembolsando={reembolsando === i.id}
                                         onVerificarMP={() => handleVerificarMP(i.id)}
                                         onReembolsar={() => confirmarReembolso(i)}
-                                        onEditar={() => confirmarAlteracaoStatus(i, inscricoesTotais)}
                                         onExcluir={() => confirmarExclusao(i)}
                                     />
                                 </div>
@@ -563,7 +513,6 @@ export default function RegistrationsAdmin() {
                                         reembolsando={reembolsando === inscricao.id}
                                         onVerificarMP={() => handleVerificarMP(inscricao.id)}
                                         onReembolsar={() => confirmarReembolso(inscricao)}
-                                        onEditar={() => confirmarAlteracaoStatus(inscricao, inscricoes)}
                                         onExcluir={() => confirmarExclusao(inscricao)}
                                     />
                                 </div>
@@ -611,7 +560,6 @@ export default function RegistrationsAdmin() {
                                             reembolsando={reembolsando === inscricao.id}
                                             onVerificarMP={() => handleVerificarMP(inscricao.id)}
                                             onReembolsar={() => confirmarReembolso(inscricao)}
-                                            onEditar={() => confirmarAlteracaoStatus(inscricao, inscricoes)}
                                             onExcluir={() => confirmarExclusao(inscricao)}
                                         />
                                     </div>
