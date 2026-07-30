@@ -190,6 +190,14 @@ router.delete('/:id', authMiddleware, (req, res) => {
       }
 
       db.serialize(() => {
+        // as inscrições reais de curso infantil ficam na tabela `inscricoes`
+        // (compartilhada com curso normal) — preserva o histórico guardando
+        // o nome do curso nelas antes de a linha em `cursosInfantis` sumir
+        db.run(
+          `UPDATE inscricoes SET cursoRemovidoNome = ? WHERE cursoId = ?`,
+          [curso.nomeCurso, id],
+          err => { if (err) console.error('Erro ao preservar nome do curso nas inscrições:', err); }
+        );
         db.run(`DELETE FROM inscricoesInfantis WHERE cursoId = ?`, [id],
           err => { if (err) console.error('Erro ao deletar inscrições:', err); }
         );

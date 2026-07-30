@@ -184,14 +184,14 @@ router.delete('/:id', authMiddleware, (req, res) => {
 
         // remove do banco
         db.serialize(() => {
-          // inscrições pagas sobrevivem à exclusão do curso (não pode sumir
-          // com o comprovante de quem já pagou) — guarda o nome do curso
-          // nelas antes, já que a linha em `cursos` vai deixar de existir
+          // todas as inscrições sobrevivem à exclusão do curso, seja qual for
+          // o status (não pode sumir com o histórico de quem já pagou,
+          // reembolsou, etc.) — guarda o nome do curso nelas antes, já que a
+          // linha em `cursos` vai deixar de existir
           db.run(
-            `UPDATE inscricoes SET cursoRemovidoNome = ? WHERE cursoId = ? AND status = 'pago'`,
+            `UPDATE inscricoes SET cursoRemovidoNome = ? WHERE cursoId = ?`,
             [curso.nomeCurso, id]
           );
-          db.run(`DELETE FROM inscricoes WHERE cursoId = ? AND status != 'pago'`, [id]);
           db.run(`DELETE FROM assentos WHERE cursoId = ?`, [id]);
           db.run(`DELETE FROM fotos WHERE cursoId = ?`, [id]);
 
