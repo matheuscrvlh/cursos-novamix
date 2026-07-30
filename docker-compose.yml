@@ -4,10 +4,10 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: cursos-backend-develop
+    container_name: cursos-novamix-server
     restart: unless-stopped
     ports:
-      - "3009:3000"
+      - "3001:3000"
     env_file:
       - ./server/.env
     environment:
@@ -23,10 +23,10 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
-    container_name: cursos-frontend-develop
+    container_name: cursos-novamix-client
     restart: unless-stopped
     ports:
-      - "8089:80"
+      - "8081:80"
     depends_on:
       - backend
     networks:
