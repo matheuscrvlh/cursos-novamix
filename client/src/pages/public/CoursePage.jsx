@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Calendar, Clock, User, MapPin, Tag, ArrowLeft, XCircle, Loader2 } from 'lucide-react'
+import { Calendar, Clock, User, MapPin, Tag, ArrowLeft, XCircle, Loader2, Printer } from 'lucide-react'
 
 import PublicLayout from '../../layouts/public/PublicLayout'
 import { Head } from '../../components/Head'
@@ -155,6 +155,42 @@ export default function CoursePage() {
         setForm({ cursoId: id, nome: '', cpf: '', celular: '', email: '', assento: '' })
     }
 
+    // Abre uma aba só com a lista de ingredientes e já chama o print — o
+    // cliente não precisa imprimir a página inteira do curso
+    function imprimirIngredientes() {
+        const escapeHtml = texto => texto.replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]))
+
+        const itens = curso.ingredientes.split('\n').filter(i => i.trim()).map(escapeHtml)
+        const nomeCurso = escapeHtml(curso.nomeCurso || '')
+        const janela = window.open('', '_blank')
+        if (!janela) return
+
+        janela.document.write(`
+            <html>
+                <head>
+                    <title>Ingredientes — ${nomeCurso}</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 32px; color: #1f2937; }
+                        h1 { font-size: 20px; margin-bottom: 4px; }
+                        p { color: #6b7280; font-size: 13px; margin-top: 0; margin-bottom: 24px; }
+                        ul { padding-left: 20px; }
+                        li { font-size: 15px; margin-bottom: 8px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${nomeCurso}</h1>
+                    <p>Lista de ingredientes</p>
+                    <ul>${itens.map(item => `<li>${item}</li>`).join('')}</ul>
+                </body>
+            </html>
+        `)
+        janela.document.close()
+        janela.focus()
+        janela.print()
+    }
+
     // Fecha o modal e, se havia uma inscrição pendente em aberto (cliente
     // desistiu no meio do pagamento), cancela ela e libera o assento na hora
     async function closeModal() {
@@ -267,7 +303,16 @@ export default function CoursePage() {
 
                 {curso.ingredientes && curso.ingredientes.trim() && (
                     <div className='bg-white rounded-xl p-5 shadow-sm mb-8'>
-                        <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-3'>Ingredientes</p>
+                        <div className='flex items-center justify-between mb-3'>
+                            <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider'>Ingredientes</p>
+                            <button
+                                onClick={imprimirIngredientes}
+                                className='flex items-center gap-1.5 text-orange-base hover:text-orange-light text-xs font-semibold cursor-pointer'
+                            >
+                                <Printer size={14} />
+                                Imprimir
+                            </button>
+                        </div>
                         <ul className='flex flex-col gap-1.5'>
                             {curso.ingredientes.split('\n').filter(i => i.trim()).map((item, idx) => (
                                 <li key={idx} className='flex items-start gap-2 text-sm text-gray-dark'>

@@ -14,15 +14,22 @@ function maskCPF(value) {
     return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
 
-function maskPhone(value) {
-    const digits = value.replace(/\D/g, '').slice(0, 13);
+// o +55 é fixo na tela (fora do campo) — aqui só mascara DDD + número, sem
+// pedir o código do país, que era o que a maioria dos clientes esquecia
+function maskPhoneLocal(value) {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
     if (digits.length === 0) return '';
-    if (digits.length <= 2) return `+${digits}`;
-    if (digits.length <= 4) return `+${digits.slice(0, 2)} (${digits.slice(2)}`;
-    if (digits.length <= 9) return `+${digits.slice(0, 2)} (${digits.slice(2, 4)}) ${digits.slice(4)}`;
-    const num = digits.slice(4);
-    if (num.length <= 8) return `+${digits.slice(0, 2)} (${digits.slice(2, 4)}) ${num.slice(0, 4)}-${num.slice(4)}`;
-    return `+${digits.slice(0, 2)} (${digits.slice(2, 4)}) ${num.slice(0, 5)}-${num.slice(5)}`;
+    if (digits.length <= 2) return `(${digits}`;
+    const ddd = digits.slice(0, 2);
+    const resto = digits.slice(2);
+    if (resto.length <= 4) return `(${ddd}) ${resto}`;
+    // celular tem 9 digitos (corta 5+4), fixo tem 8 (corta 4+4)
+    const corte = resto.length > 8 ? 5 : 4;
+    return `(${ddd}) ${resto.slice(0, corte)}-${resto.slice(corte)}`;
+}
+
+function semPrefixo(celular) {
+    return (celular || '').replace(/^\+55\s?/, '');
 }
 
 function isCPFValid(cpf) {
@@ -30,7 +37,8 @@ function isCPFValid(cpf) {
 }
 
 function isPhoneValid(phone) {
-    return (phone || '').replace(/\D/g, '').length >= 10;
+    const digits = semPrefixo(phone).replace(/\D/g, '');
+    return digits.length === 10 || digits.length === 11;
 }
 
 function isEmailValid(email) {
@@ -126,16 +134,24 @@ export default function ModalEnrollmentForm({
 
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Telefone</label>
-                        <Input
-                            type='tel'
-                            placeholder='+55 (21) 99999-9999'
-                            value={enrollment.celular}
-                            className={`w-full ${erroTelefone ? 'ring-1 ring-red-base' : ''}`}
-                            inputMode='numeric'
-                            maxLength={19}
-                            autoComplete='tel'
-                            onChange={e => setEnrollment({ ...enrollment, celular: maskPhone(e.target.value) })}
-                        />
+                        <div className={`flex items-stretch gap-2 ${erroTelefone ? 'ring-1 ring-red-base rounded-md' : ''}`}>
+                            <span className='shrink-0 flex items-center gap-1 px-3 border border-gray-base rounded-md text-gray-text/70 text-sm font-medium bg-gray/40'>
+                                🇧🇷 +55
+                            </span>
+                            <Input
+                                type='tel'
+                                placeholder='(21) 99999-9999'
+                                value={semPrefixo(enrollment.celular)}
+                                className='w-full'
+                                inputMode='numeric'
+                                maxLength={15}
+                                autoComplete='tel-national'
+                                onChange={e => {
+                                    const local = maskPhoneLocal(e.target.value)
+                                    setEnrollment({ ...enrollment, celular: local ? `+55 ${local}` : '' })
+                                }}
+                            />
+                        </div>
                         {erroTelefone && <p className='text-red-base text-xs'>Telefone incompleto — inclua DDD e número</p>}
                     </div>
 
