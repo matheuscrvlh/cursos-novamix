@@ -47,7 +47,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 
 app.listen(3000, () => {
-  console.log('Backend torando na porta 3000 --');
+  console.log('Backend torando na porta 3000 -- teste deploy 31/07 🚀');
 });
 
 // libera assentos de inscrições pendentes esquecidas (cliente abandonou o
