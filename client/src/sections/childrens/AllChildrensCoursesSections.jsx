@@ -1,6 +1,7 @@
 import { SlidersHorizontal } from 'lucide-react'
 import CourseCard from '../../components/public/CourseCard'
 import Input from '../../components/Input'
+import { setLojaStorage } from '../../utils/lojaStorage'
 
 function layoutData(data) {
     const [ano, mes, dia] = data.split('-')
@@ -22,7 +23,7 @@ export default function AllChildrensCoursesSections({
 
     function toggleLoja(loja) {
         const next = filters.loja === loja ? '' : loja
-        localStorage.setItem('loja', next)
+        setLojaStorage(next)
         setFilters(prev => ({ ...prev, loja: next }))
     }
 

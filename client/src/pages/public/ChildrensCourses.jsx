@@ -20,6 +20,7 @@ import AllChildrensCoursesSections from '../../sections/childrens/AllChildrensCo
 import PublicLayout from '../../layouts/public/PublicLayout'
 
 import { Head } from '../../components/Head'
+import { getLojaStorage } from '../../utils/lojaStorage'
 
 import { bannerHome } from '../../assets/images/banner/'
 
@@ -234,7 +235,7 @@ export default function ChildrensCourses() {
     }
 
     useEffect(() => {
-        const lojaGuardada = localStorage.getItem('loja')
+        const lojaGuardada = getLojaStorage()
         if (lojaGuardada) {
             setFilters(prev => ({ ...prev, loja: lojaGuardada }))
         } else {

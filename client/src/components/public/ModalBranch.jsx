@@ -1,6 +1,7 @@
 import { MapPin, X } from "lucide-react"
 
 import useBodyScrollLock from "../../hooks/useBodyScrollLock"
+import { setLojaStorage } from "../../utils/lojaStorage"
 
 export default function ModalBranch({
     isOpen,
@@ -16,7 +17,7 @@ export default function ModalBranch({
     if (!isOpen) return null
 
     function selectLoja(loja) {
-        localStorage.setItem('loja', loja)
+        setLojaStorage(loja)
         setFiltersCourses({ ...filtersCourses, loja })
         setFiltersChildrensCourses({ ...filtersChildrensCourses, loja })
         onClose()

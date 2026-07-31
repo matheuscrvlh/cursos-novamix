@@ -23,6 +23,7 @@ import LocationSections from '../../sections/home/LocationSections';
 import PublicLayout from '../../layouts/public/PublicLayout'
 
 import { Head } from '../../components/Head'
+import { getLojaStorage } from '../../utils/lojaStorage'
 
 import { bannerHome } from '../../assets/images/banner/'
 
@@ -328,7 +329,7 @@ export default function Home() {
     }
 
     useEffect(() => {
-        const lojaGuardada = localStorage.getItem('loja')
+        const lojaGuardada = getLojaStorage()
         if (lojaGuardada) {
             setFiltersCourses(prev => ({ ...prev, loja: lojaGuardada }))
             setFiltersChildrensCourses(prev => ({ ...prev, loja: lojaGuardada }))
