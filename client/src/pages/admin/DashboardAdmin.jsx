@@ -8,6 +8,7 @@ import AdminPage from '../../layouts/admin/AdminPage';
 
 import { getSeats, getTotalEnrollment } from '../../api/enrollment.services';
 import { getCourses } from '../../api/courses.services';
+import { getChildren } from '../../api/children.services';
 
 import { DadosContext } from '../../contexts/DadosContext';
 import { formatDateBR } from '../../utils/formatDate';
@@ -48,7 +49,11 @@ export default function DashboardAdmin() {
     }, [cursos]);
 
     useEffect(() => {
-        const hoje = new Date().toLocaleDateString('PT-BR');
+        // formato ISO (YYYY-MM-DD), igual ao que vem do banco em c.data — comparável
+        // direto com < / >=. Comparar strings já formatadas em DD/MM/YYYY quebra entre
+        // meses diferentes (ex: "04/08" viraria "menor" que "31/07" na ordem de string)
+        const now = new Date();
+        const hoje = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
         async function buscarDadosDashboard() {
             setLoadingInscricoes(true);
@@ -56,29 +61,36 @@ export default function DashboardAdmin() {
             try {
                 const dataInscricoes = await getTotalEnrollment();
                 const dataCursos = await getCourses();
+                const dataCursosInfantis = await getChildren();
 
-                const cursosHojeFiltrados = dataCursos.filter(c => formatDateBR(c.data) === hoje);
-
+                const cursosHojeFiltrados = dataCursos.filter(c => c.data === hoje);
                 const contagemCursosHoje = cursosHojeFiltrados.length
-                const idCursosHoje = cursosHojeFiltrados.map(c => c.id)
 
-                const cursosConcluidos = dataCursos.filter(c => formatDateBR(c.data) < hoje).length;
-                const cursosAtivos = dataCursos.filter(c => formatDateBR(c.data) >= hoje).length;
+                const cursosAtivosFiltrados = dataCursos.filter(c => c.data >= hoje);
+                const cursosConcluidos = dataCursos.filter(c => c.data < hoje).length;
+                const cursosAtivos = cursosAtivosFiltrados.length;
 
                 setFiltroCursos({ cursosHoje: contagemCursosHoje, cursosConcluidos, cursosAtivos })
 
-                const inscricoesPagas = dataInscricoes.filter(i => i.status === 'pago').length;
-                const inscricoesPendentes = dataInscricoes.filter(i => i.status === 'pendente').length;
+                // a tabela de inscrições mistura cursos normais e infantis pelo mesmo
+                // cursoId, então precisa considerar as duas listas pra saber quais ainda
+                // não aconteceram — só essas entram no resumo de inscrições
+                const idCursosAtivos = [
+                    ...cursosAtivosFiltrados.map(c => c.id),
+                    ...dataCursosInfantis.filter(c => c.data >= hoje).map(c => c.id),
+                ];
 
-                const inscricoesHojePagas = dataInscricoes.filter(i =>
-                    i.status === 'pago' && idCursosHoje.includes(i.cursoId)
-                ).length;
+                const inscricoesAtivas = dataInscricoes.filter(i => idCursosAtivos.includes(i.cursoId));
 
-                const inscricoesHojePendentes = dataInscricoes.filter(i =>
-                    i.status === 'pendente' && idCursosHoje.includes(i.cursoId)
-                ).length;
+                const contarStatus = status => inscricoesAtivas.filter(i => i.status === status).length;
 
-                setInscricoes({ pagas: inscricoesPagas, pendentes: inscricoesPendentes, hojePagas: inscricoesHojePagas, hojePendentes: inscricoesHojePendentes })
+                setInscricoes({
+                    pagas: contarStatus('pago'),
+                    pendentes: contarStatus('pendente'),
+                    canceladas: contarStatus('cancelado'),
+                    recusadas: contarStatus('recusado'),
+                    reembolsadas: contarStatus('reembolsado'),
+                })
 
             } catch(err) {
                 console.log('Nao foi possivel pegar as inscricoes', err);
@@ -153,7 +165,7 @@ export default function DashboardAdmin() {
 
             <div className='flex flex-col gap-3 -mt-4'>
                 <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Inscrições</p>
-                <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
+                <div className='grid grid-cols-2 lg:grid-cols-5 gap-4'>
 
                     <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
                         <div className='flex items-center justify-between'>
@@ -183,27 +195,40 @@ export default function DashboardAdmin() {
 
                     <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
                         <div className='flex items-center justify-between'>
-                            <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Pagas Hoje</p>
-                            <div className='w-8 h-8 rounded-full bg-green-base/10 flex items-center justify-center'>
-                                <CreditCard size={15} className='text-green-base' />
+                            <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Canceladas</p>
+                            <div className='w-8 h-8 rounded-full bg-gray-base/10 flex items-center justify-center'>
+                                <AlertCircle size={15} className='text-gray-base' />
                             </div>
                         </div>
                         {loadingInscricoes
                             ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
-                            : <p className='text-4xl font-bold text-green-base'>{inscricoes.hojePagas || 0}</p>
+                            : <p className='text-4xl font-bold text-gray-base'>{inscricoes.canceladas || 0}</p>
                         }
                     </div>
 
                     <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
                         <div className='flex items-center justify-between'>
-                            <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Pendentes Hoje</p>
-                            <div className='w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center'>
-                                <AlertCircle size={15} className='text-yellow-500' />
+                            <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Recusadas</p>
+                            <div className='w-8 h-8 rounded-full bg-red-light/10 flex items-center justify-center'>
+                                <AlertCircle size={15} className='text-red-light' />
                             </div>
                         </div>
                         {loadingInscricoes
                             ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
-                            : <p className='text-4xl font-bold text-yellow-500'>{inscricoes.hojePendentes || 0}</p>
+                            : <p className='text-4xl font-bold text-red-light'>{inscricoes.recusadas || 0}</p>
+                        }
+                    </div>
+
+                    <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                        <div className='flex items-center justify-between'>
+                            <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Reembolsadas</p>
+                            <div className='w-8 h-8 rounded-full bg-red-base/10 flex items-center justify-center'>
+                                <CreditCard size={15} className='text-red-base' />
+                            </div>
+                        </div>
+                        {loadingInscricoes
+                            ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                            : <p className='text-4xl font-bold text-red-base'>{inscricoes.reembolsadas || 0}</p>
                         }
                     </div>
 
