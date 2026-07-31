@@ -19,9 +19,10 @@ const authRoutes = require('./routes/auth.routes');
 const usuariosRoutes = require('./routes/usuarios.routes');
 const app = express();
 
-// atrás de 1 proxy reverso (nginx na VPS) — sem isso o rate limiter usa o IP
-// interno do proxy pra todo mundo e o limite estoura com poucos acessos
-app.set('trust proxy', 1);
+// atrás de 2 proxies reversos (nginx do host + nginx do container frontend)
+// — sem isso o rate limiter usa o IP interno do proxy pra todo mundo e o
+// limite estoura com poucos acessos
+app.set('trust proxy', 2);
 
 // libera só o domínio do frontend em produção (FRONTEND_URL no .env, aceita
 // lista separada por vírgula); sem essa env var, libera geral (dev local)
