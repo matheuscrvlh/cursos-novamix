@@ -60,6 +60,54 @@ function mensagemAmigavelMp(mpErrOuCodigo) {
   return MENSAGENS_MP[code] || 'Não foi possível processar o pagamento. Verifique os dados e tente novamente.';
 }
 
+// Confirma o pagamento como 'pago' e reocupa o assento — a menos que, nesse
+// meio-tempo (reserva expirada + webhook/verificação atrasada), o assento já
+// tenha sido vendido pra outra inscrição. Nesse caso, em vez de duplicar a
+// vaga, estorna automaticamente esse pagamento no Mercado Pago e marca a
+// inscrição como 'reembolsado' — quem pagou não fica no prejuízo, só sem vaga.
+async function confirmarPagamentoOuReembolsarConflito({ inscricaoId, cursoId, assento, paymentId }) {
+  return new Promise(resolve => {
+    db.get(
+      `SELECT id FROM inscricoes WHERE cursoId = ? AND assento = ? AND id != ? AND status IN ('pendente', 'pago', 'reembolsando')`,
+      [cursoId, assento, inscricaoId],
+      async (err, conflito) => {
+        if (err) {
+          console.error('Erro ao checar conflito de assento:', err);
+          return resolve({ ok: false });
+        }
+
+        if (conflito) {
+          try {
+            const paymentRefund = new PaymentRefund(getMpClient());
+            await paymentRefund.total({ payment_id: paymentId });
+            db.run(
+              `UPDATE inscricoes SET status = 'reembolsado', mp_payment_id = ? WHERE id = ?`,
+              [paymentId, inscricaoId],
+              err => { if (err) console.error('Erro ao marcar reembolsado após conflito de assento:', err); }
+            );
+            console.warn(`[conflito de assento] Inscrição ${inscricaoId} paga porém assento ${assento} do curso ${cursoId} já ocupado por outra inscrição — reembolsada automaticamente`);
+          } catch (refundErr) {
+            console.error(`[conflito de assento] Falha ao reembolsar automaticamente a inscrição ${inscricaoId} — requer ação manual:`, refundErr);
+          }
+          return resolve({ ok: false, conflito: true });
+        }
+
+        db.run(
+          `UPDATE inscricoes SET status = 'pago', mp_payment_id = ? WHERE id = ? AND status != 'pago'`,
+          [paymentId, inscricaoId],
+          err => { if (err) console.error('Erro ao marcar pago:', err); }
+        );
+        db.run(
+          `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
+          [cursoId, assento],
+          err => { if (err) console.error('Erro ao reocupar assento:', err); }
+        );
+        resolve({ ok: true });
+      }
+    );
+  });
+}
+
 function validateMpSignature(req) {
   const secret = process.env.MP_WEBHOOK_SECRET;
   if (!secret) {
@@ -127,15 +175,17 @@ router.post('/verificar/:inscricaoId', authMiddleware, async (req, res) => {
       let novoStatus = inscricao.status;
 
       if (mpStatus === 'approved') {
-        novoStatus = 'pago';
-        db.run(`UPDATE inscricoes SET status = 'pago' WHERE id = ?`, [inscricaoId]);
-        // reocupa o assento mesmo se ele tiver sido liberado por engano nesse meio-tempo
-        // (ex: cliente fechou a aba e o cancelamento automático correu antes dessa confirmação)
-        db.run(
-          `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
-          [inscricao.cursoId, inscricao.assento],
-          err => { if (err) console.error('Erro ao reocupar assento:', err); }
-        );
+        if (inscricao.status === 'pago') {
+          novoStatus = 'pago';
+        } else {
+          const resultado = await confirmarPagamentoOuReembolsarConflito({
+            inscricaoId,
+            cursoId: inscricao.cursoId,
+            assento: inscricao.assento,
+            paymentId: inscricao.mp_payment_id,
+          });
+          novoStatus = resultado.conflito ? 'reembolsado' : 'pago';
+        }
       } else if (mpStatus === 'rejected' || mpStatus === 'cancelled') {
         novoStatus = mpStatus === 'rejected' ? 'recusado' : 'cancelado';
         db.run(`UPDATE inscricoes SET status = ? WHERE id = ?`, [novoStatus, inscricaoId]);
@@ -231,21 +281,14 @@ router.post('/webhook', async (req, res) => {
     if (!inscricaoId) return;
 
     if (status === 'approved') {
-      // Guarda idempotente: só atualiza se ainda não está pago
-      db.run(
-        `UPDATE inscricoes SET status = 'pago', mp_payment_id = ? WHERE id = ? AND status != 'pago'`,
-        [paymentId, inscricaoId],
-        err => { if (err) console.error('Erro ao marcar pago:', err); }
-      );
-      // reocupa o assento mesmo se ele tiver sido liberado por engano nesse meio-tempo
-      // (ex: cliente fechou a aba e o cancelamento automático correu antes desse webhook chegar)
-      db.get(`SELECT cursoId, assento FROM inscricoes WHERE id = ?`, [inscricaoId], (err, inscricao) => {
-        if (err || !inscricao) return;
-        db.run(
-          `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
-          [inscricao.cursoId, inscricao.assento],
-          err => { if (err) console.error('Erro ao reocupar assento:', err); }
-        );
+      db.get(`SELECT cursoId, assento, status AS statusAtual FROM inscricoes WHERE id = ?`, [inscricaoId], (err, inscricao) => {
+        if (err || !inscricao || inscricao.statusAtual === 'pago') return;
+        confirmarPagamentoOuReembolsarConflito({
+          inscricaoId,
+          cursoId: inscricao.cursoId,
+          assento: inscricao.assento,
+          paymentId,
+        });
       });
     } else if (status === 'rejected' || status === 'cancelled') {
       // 'rejected' = recusado pela operadora/banco, 'cancelled' = cancelado
@@ -337,20 +380,24 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
 
         const status = paymentData.status;
         const paymentId = String(paymentData.id);
+        let conflitoAssento = false;
+
+        // registra o mp_payment_id/metodoPagamento da tentativa independente
+        // do resultado — usado como referência caso precise verificar depois
+        db.run(
+          `UPDATE inscricoes SET mp_payment_id = ?, metodoPagamento = ? WHERE id = ?`,
+          [paymentId, metodoPagamento, inscricaoId],
+          err => { if (err) console.error('Erro ao salvar payment_id:', err); }
+        );
 
         if (status === 'approved') {
-          db.run(
-            `UPDATE inscricoes SET status = 'pago', mp_payment_id = ?, metodoPagamento = ? WHERE id = ? AND status != 'pago'`,
-            [paymentId, metodoPagamento, inscricaoId],
-            err => { if (err) console.error('Erro ao marcar pago:', err); }
-          );
-          // reocupa o assento mesmo se ele tiver sido liberado por engano nesse meio-tempo
-          // (ex: cliente fechou a aba e o cancelamento automático correu antes dessa confirmação)
-          db.run(
-            `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
-            [inscricao.cursoId, inscricao.assento],
-            err => { if (err) console.error('Erro ao reocupar assento:', err); }
-          );
+          const resultado = await confirmarPagamentoOuReembolsarConflito({
+            inscricaoId,
+            cursoId: inscricao.cursoId,
+            assento: inscricao.assento,
+            paymentId,
+          });
+          conflitoAssento = !!resultado.conflito;
         } else if (status === 'rejected' || status === 'cancelled') {
           // 'rejected' = recusado pela operadora/banco (cartão), 'cancelled' =
           // pagamento cancelado (ex: Pix expirado) — status diferentes pro
@@ -362,24 +409,20 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
             err => { if (err) console.error('Erro ao liberar assento:', err); }
           );
           db.run(
-            `UPDATE inscricoes SET status = ?, mp_payment_id = ?, metodoPagamento = ? WHERE id = ?`,
-            [novoStatus, paymentId, metodoPagamento, inscricaoId],
+            `UPDATE inscricoes SET status = ? WHERE id = ?`,
+            [novoStatus, inscricaoId],
             err => { if (err) console.error('Erro ao marcar', novoStatus, ':', err); }
-          );
-        } else {
-          db.run(
-            `UPDATE inscricoes SET mp_payment_id = ?, metodoPagamento = ? WHERE id = ?`,
-            [paymentId, metodoPagamento, inscricaoId],
-            err => { if (err) console.error('Erro ao salvar payment_id:', err); }
           );
         }
 
         const transactionData = paymentData.point_of_interaction?.transaction_data;
 
         res.json({
-          status,
-          status_detail: paymentData.status_detail,
-          message: status === 'rejected' ? mensagemAmigavelMp(paymentData.status_detail) : undefined,
+          status: conflitoAssento ? 'cancelled' : status,
+          status_detail: conflitoAssento ? 'seat_conflict_refunded' : paymentData.status_detail,
+          message: conflitoAssento
+            ? 'Pagamento aprovado, porém a vaga já havia sido ocupada por outra pessoa nesse meio-tempo. O valor foi estornado automaticamente no Mercado Pago.'
+            : (status === 'rejected' ? mensagemAmigavelMp(paymentData.status_detail) : undefined),
           id: paymentId,
           qr_code: transactionData?.qr_code,
           qr_code_base64: transactionData?.qr_code_base64,
