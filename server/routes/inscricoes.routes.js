@@ -145,10 +145,13 @@ router.post('/:id/cancelar', (req, res) => {
     if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
     if (!inscricao) return res.status(404).json({ message: 'Inscrição não encontrada' });
 
-    // trava atômica: só cancela se ainda estiver 'pendente' — não deixa cancelar
-    // uma inscrição que já foi paga ou já cancelada
+    // trava atômica: só cancela se ainda estiver 'pendente' e sem pagamento em
+    // andamento — mp_payment_id setado significa que já existe uma tentativa junto
+    // ao Mercado Pago cuja confirmação (aprovado/recusado) pode chegar a qualquer
+    // momento; cancelar aqui correria o risco de liberar o assento bem na hora em
+    // que o pagamento é aprovado, deixando a inscrição "paga" com assento livre
     db.run(
-      `UPDATE inscricoes SET status = 'cancelado' WHERE id = ? AND status = 'pendente'`,
+      `UPDATE inscricoes SET status = 'cancelado' WHERE id = ? AND status = 'pendente' AND mp_payment_id IS NULL`,
       [id],
       function (err) {
         if (err) return res.status(500).json({ message: 'Erro interno no servidor' });

@@ -129,6 +129,13 @@ router.post('/verificar/:inscricaoId', authMiddleware, async (req, res) => {
       if (mpStatus === 'approved') {
         novoStatus = 'pago';
         db.run(`UPDATE inscricoes SET status = 'pago' WHERE id = ?`, [inscricaoId]);
+        // reocupa o assento mesmo se ele tiver sido liberado por engano nesse meio-tempo
+        // (ex: cliente fechou a aba e o cancelamento automático correu antes dessa confirmação)
+        db.run(
+          `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
+          [inscricao.cursoId, inscricao.assento],
+          err => { if (err) console.error('Erro ao reocupar assento:', err); }
+        );
       } else if (mpStatus === 'rejected' || mpStatus === 'cancelled') {
         novoStatus = mpStatus === 'rejected' ? 'recusado' : 'cancelado';
         db.run(`UPDATE inscricoes SET status = ? WHERE id = ?`, [novoStatus, inscricaoId]);
@@ -230,6 +237,16 @@ router.post('/webhook', async (req, res) => {
         [paymentId, inscricaoId],
         err => { if (err) console.error('Erro ao marcar pago:', err); }
       );
+      // reocupa o assento mesmo se ele tiver sido liberado por engano nesse meio-tempo
+      // (ex: cliente fechou a aba e o cancelamento automático correu antes desse webhook chegar)
+      db.get(`SELECT cursoId, assento FROM inscricoes WHERE id = ?`, [inscricaoId], (err, inscricao) => {
+        if (err || !inscricao) return;
+        db.run(
+          `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
+          [inscricao.cursoId, inscricao.assento],
+          err => { if (err) console.error('Erro ao reocupar assento:', err); }
+        );
+      });
     } else if (status === 'rejected' || status === 'cancelled') {
       // 'rejected' = recusado pela operadora/banco, 'cancelled' = cancelado
       // (ex: Pix expirado) — status diferentes pro admin não confundir
@@ -326,6 +343,13 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
             `UPDATE inscricoes SET status = 'pago', mp_payment_id = ?, metodoPagamento = ? WHERE id = ? AND status != 'pago'`,
             [paymentId, metodoPagamento, inscricaoId],
             err => { if (err) console.error('Erro ao marcar pago:', err); }
+          );
+          // reocupa o assento mesmo se ele tiver sido liberado por engano nesse meio-tempo
+          // (ex: cliente fechou a aba e o cancelamento automático correu antes dessa confirmação)
+          db.run(
+            `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
+            [inscricao.cursoId, inscricao.assento],
+            err => { if (err) console.error('Erro ao reocupar assento:', err); }
           );
         } else if (status === 'rejected' || status === 'cancelled') {
           // 'rejected' = recusado pela operadora/banco (cartão), 'cancelled' =
