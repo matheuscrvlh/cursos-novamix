@@ -60,6 +60,25 @@ function mensagemAmigavelMp(mpErrOuCodigo) {
   return MENSAGENS_MP[code] || 'Não foi possível processar o pagamento. Verifique os dados e tente novamente.';
 }
 
+// Erros específicos do endpoint de estorno — separados de MENSAGENS_MP porque
+// o texto padrão fala de "pagamento recusado", que não faz sentido pra quem
+// está tentando reembolsar
+const MENSAGENS_REEMBOLSO_MP = {
+  // code 120049: o MP ainda não "assentou" a transação pro estorno — comum
+  // tentar reembolsar segundos/minutos depois do pagamento ser aprovado
+  120049: 'Este pagamento foi aprovado há pouco tempo e o Mercado Pago ainda não liberou o estorno para ele. Aguarde alguns minutos e tente novamente.',
+  // instabilidade genérica da API do MP (cause vem vazio, sem código específico)
+  internal_server_error: 'O Mercado Pago apresentou uma instabilidade ao processar o estorno. Tente novamente em alguns instantes.',
+};
+
+function mensagemAmigavelReembolso(err) {
+  const code = err?.cause?.[0]?.code ?? err?.error;
+  return MENSAGENS_REEMBOLSO_MP[code]
+    || err?.cause?.[0]?.description
+    || err?.message
+    || 'Erro ao reembolsar no Mercado Pago';
+}
+
 // Confirma o pagamento como 'pago' e reocupa o assento — a menos que, nesse
 // meio-tempo (reserva expirada + webhook/verificação atrasada), o assento já
 // tenha sido vendido pra outra inscrição. Nesse caso, em vez de duplicar a
@@ -251,8 +270,7 @@ router.post('/reembolsar/:inscricaoId', authMiddleware, async (req, res) => {
           console.error('Erro ao reembolsar pagamento no MP:', err);
           // MP não confirmou o reembolso — volta pro estado anterior
           db.run(`UPDATE inscricoes SET status = 'pago' WHERE id = ?`, [inscricaoId]);
-          const mensagem = err?.cause?.[0]?.description || err?.message || 'Erro ao reembolsar no Mercado Pago';
-          res.status(500).json({ message: mensagem });
+          res.status(500).json({ message: mensagemAmigavelReembolso(err) });
         }
       }
     );
