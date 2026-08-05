@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { Trash, ArrowUp, ArrowDown, Plus, Link, Image, ExternalLink } from 'lucide-react'
 
 import AdminPage from '../../layouts/admin/AdminPage'
+import ConfirmModal from '../../components/admin/ModalConfirm'
+import useConfirmAction from '../../hooks/useConfirmAction'
 import { getBanners, postBanner, putBanner, deleteBanner } from '../../api/banners.services'
 
 function UploadArea({ label, hint, aspectClass, preview, inputRef, onChange }) {
@@ -223,6 +225,7 @@ function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast })
 function BannerSection({ posicao, title, description }) {
     const [banners, setBanners] = useState([])
     const [loading, setLoading] = useState(true)
+    const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction()
 
     useEffect(() => {
         getBanners(posicao)
@@ -243,7 +246,18 @@ function BannerSection({ posicao, title, description }) {
         }
     }
 
+    function confirmarExclusao(id) {
+        ask({
+            title: 'Excluir banner',
+            message: 'Excluir este banner? Essa ação não pode ser desfeita.',
+            variant: 'danger',
+            confirmLabel: 'Excluir',
+            onConfirm: () => handleDelete(id)
+        })
+    }
+
     async function move(index, direction) {
+        const anterior = banners
         const next = [...banners]
         const target = index + direction
         if (target < 0 || target >= next.length) return
@@ -252,10 +266,15 @@ function BannerSection({ posicao, title, description }) {
 
         const updated = next.map((b, i) => ({ ...b, ordem: i }))
         setBanners(updated)
-        await Promise.all([
-            putBanner(updated[index].id,  { ordem: updated[index].ordem }),
-            putBanner(updated[target].id, { ordem: updated[target].ordem }),
-        ])
+        try {
+            await Promise.all([
+                putBanner(updated[index].id,  { ordem: updated[index].ordem }),
+                putBanner(updated[target].id, { ordem: updated[target].ordem }),
+            ])
+        } catch {
+            setBanners(anterior)
+            alert('Erro ao reordenar banners.')
+        }
     }
 
     return (
@@ -279,7 +298,7 @@ function BannerSection({ posicao, title, description }) {
                             banner={b}
                             isFirst={i === 0}
                             isLast={i === banners.length - 1}
-                            onDelete={() => handleDelete(b.id)}
+                            onDelete={() => confirmarExclusao(b.id)}
                             onMoveUp={() => move(i, -1)}
                             onMoveDown={() => move(i, 1)}
                         />
@@ -288,6 +307,16 @@ function BannerSection({ posicao, title, description }) {
             </div>
 
             <BannerForm posicao={posicao} onAdded={handleAdded} />
+
+            <ConfirmModal
+                isOpen={!!confirm}
+                title={confirm?.title || 'Confirmação'}
+                message={confirm?.message}
+                variant={confirm?.variant}
+                confirmLabel={confirm?.confirmLabel}
+                onConfirm={handleConfirm}
+                onCancel={handleCancel}
+            />
         </div>
     )
 }

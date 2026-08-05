@@ -68,7 +68,7 @@ export default function CoursesSections({
                                         categoria={curso.categoria}
                                         loadingVagasPorCurso={loadingVagasPorCurso}
                                         vagasLivres={vagas.livres}
-                                        vagasReservadas={24}
+                                        vagasReservadas={vagas.livres + vagas.reservadas}
                                         valor={curso.valor}
                                         onClick={() => openForm(curso.id)}
                                         className='

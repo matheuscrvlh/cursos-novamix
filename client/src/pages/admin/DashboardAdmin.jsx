@@ -37,9 +37,9 @@ export default function DashboardAdmin() {
                     try {
                         const assentos = await getSeats(curso.id);
                         const lista = Array.isArray(assentos) ? assentos : [];
-                        resultado[curso.id] = lista.filter(v => v.status === 'livre').length;
+                        resultado[curso.id] = { livres: lista.filter(v => v.status === 'livre').length, total: lista.length };
                     } catch {
-                        resultado[curso.id] = 0;
+                        resultado[curso.id] = { livres: 0, total: 0 };
                     }
                 })
             );
@@ -255,8 +255,8 @@ export default function DashboardAdmin() {
                                     culinarista={curso.culinarista}
                                     duracao={curso.duracao}
                                     categoria={curso.categoria}
-                                    vagasLivres={vagasPorCurso[curso.id] ?? '...'}
-                                    vagasReservadas={24}
+                                    vagasLivres={vagasPorCurso[curso.id]?.livres ?? '...'}
+                                    vagasReservadas={vagasPorCurso[curso.id]?.total ?? 0}
                                     valor={curso.valor}
                                     className='w-75 shrink-0'
                                     imagem={

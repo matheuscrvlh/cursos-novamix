@@ -30,32 +30,49 @@ router.post('/', (req, res) => {
     if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
     if (!curso) return res.status(404).json({ message: 'Curso infantil não encontrado' });
 
-    const id = uuidv4();
-    const dataInscricao = new Date().toISOString();
+    // curso infantil não reserva assento nominal (não tem coluna `assento`
+    // aqui), então trava a vaga contando contra a capacidade da tabela
+    // `assentos` gerada na criação do curso (20 por curso) — sem isso, um
+    // curso lotado continuava aceitando inscrições sem limite
+    db.get(
+      `SELECT
+         (SELECT COUNT(*) FROM assentos WHERE cursoId = ?) AS capacidade,
+         (SELECT COUNT(*) FROM inscricoesInfantis WHERE cursoId = ? AND status != 'cancelado') AS ocupadas`,
+      [cursoId, cursoId],
+      (err2, contagem) => {
+        if (err2) return res.status(500).json({ message: 'Erro interno no servidor' });
+        if (contagem.capacidade > 0 && contagem.ocupadas >= contagem.capacidade) {
+          return res.status(400).json({ message: 'Curso lotado' });
+        }
 
-    db.run(`
-      INSERT INTO inscricoesInfantis
-        (id, cursoId, nomeResponsavel, telefone, nomeCrianca, idadeCrianca, cpf, formaPagamento, status, dataInscricao)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      id,
-      cursoId,
-      nomeResponsavel,
-      telefone,
-      nomeCrianca,
-      idadeCrianca,
-      cpf,
-      formaPagamento,
-      'pendente',
-      dataInscricao
-    ], function(err) {
-      if (err) {
-        console.error('Erro ao criar inscrição infantil:', err);
-        return res.status(500).json({ message: 'Erro ao criar inscrição' });
+        const id = uuidv4();
+        const dataInscricao = new Date().toISOString();
+
+        db.run(`
+          INSERT INTO inscricoesInfantis
+            (id, cursoId, nomeResponsavel, telefone, nomeCrianca, idadeCrianca, cpf, formaPagamento, status, dataInscricao)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          id,
+          cursoId,
+          nomeResponsavel,
+          telefone,
+          nomeCrianca,
+          idadeCrianca,
+          cpf,
+          formaPagamento,
+          'pendente',
+          dataInscricao
+        ], function(err3) {
+          if (err3) {
+            console.error('Erro ao criar inscrição infantil:', err3);
+            return res.status(500).json({ message: 'Erro ao criar inscrição' });
+          }
+
+          res.status(201).json({ id, cursoId, nomeResponsavel, telefone, nomeCrianca, idadeCrianca, cpf, formaPagamento, status: 'pendente', dataInscricao });
+        });
       }
-
-      res.status(201).json({ id, cursoId, nomeResponsavel, telefone, nomeCrianca, idadeCrianca, cpf, formaPagamento, status: 'pendente', dataInscricao });
-    });
+    );
   });
 });
 

@@ -51,6 +51,10 @@ router.post('/', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req, r
   const cursoId = uuidv4();
   const valor = parseFloat(req.body.valor);
 
+  if (!(valor > 0)) {
+    return res.status(400).json({ message: 'Valor do curso inválido' });
+  }
+
   db.run(`
     INSERT INTO cursosInfantis
       (id, nomeCurso, tipo, culinarista, categoria, duracao, data, hora, loja, valor)
@@ -104,6 +108,10 @@ router.post('/', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req, r
 
 router.put('/:id', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req, res) => {
   const { id } = req.params;
+
+  if (req.body.valor !== undefined && req.body.valor !== '' && !(parseFloat(req.body.valor) > 0)) {
+    return res.status(400).json({ message: 'Valor do curso inválido' });
+  }
 
   if (req.files && req.files.length > 0) {
     db.all(`SELECT url FROM fotos WHERE cursoId = ?`, [id], (err, fotos) => {
@@ -169,6 +177,7 @@ router.put('/:id', authMiddleware, uploadCursosInfantis.array('fotos', 5), (req,
       console.error('Erro ao atualizar curso infantil:', err);
       return res.status(500).json({ message: 'Erro ao atualizar curso infantil' });
     }
+    if (this.changes === 0) return res.status(404).json({ message: 'Curso infantil não encontrado' });
 
     res.json({ message: 'Atualizado' });
   });

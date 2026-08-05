@@ -91,10 +91,15 @@ export default function CourseCard({
         </div>
 
         <button
-          className="mt-2 bg-orange-base text-white font-semibold text-sm py-2.5 rounded-lg w-full hover:bg-orange-light hover:shadow-md transition-all cursor-pointer"
-          onClick={onClick || undefined}
+          className={`mt-2 font-semibold text-sm py-2.5 rounded-lg w-full transition-all ${
+            esgotado
+              ? 'bg-gray-base/20 text-gray-text/50 cursor-not-allowed'
+              : 'bg-orange-base text-white hover:bg-orange-light hover:shadow-md cursor-pointer'
+          }`}
+          onClick={esgotado ? undefined : (onClick || undefined)}
+          disabled={esgotado}
         >
-          Garantir minha vaga
+          {esgotado ? 'Curso lotado' : 'Garantir minha vaga'}
         </button>
       </div>
     </div>

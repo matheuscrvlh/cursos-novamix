@@ -75,7 +75,8 @@ export function DadosProvider({ children }) {
 
     async function addCourses(formData) {
         try {
-            await postCourse(formData);
+            const res = await postCourse(formData);
+            if (!res.ok) return alert(res.message || res.error || 'Erro ao adicionar curso');
             await refreshCourses();
         } catch (error) {
             console.error('Erro ao adicionar curso:', error);
@@ -85,16 +86,19 @@ export function DadosProvider({ children }) {
 
     async function addCursoInfantil(formData) {
         try {
-            await postChildren(formData);
+            const res = await postChildren(formData);
+            if (!res.ok) return alert(res.message || 'Erro ao cadastrar curso infantil');
             await refreshChildren();
         } catch (error) {
             console.error('Erro ao cadastrar curso infantil', error);
+            alert('Erro ao cadastrar curso infantil');
         }
     }
 
     async function addCulinarian(formData) {
         try {
-            await postCulinarian(formData);
+            const res = await postCulinarian(formData);
+            if (!res.ok) return alert(res.message || 'Erro ao cadastrar culinarista');
             await refreshCulinarians();
         } catch (error) {
             console.error('Erro ao cadastrar culinarista', error);
@@ -104,7 +108,8 @@ export function DadosProvider({ children }) {
 
     async function addIndustry(formData) {
         try {
-            await postIndustry(formData);
+            const res = await postIndustry(formData);
+            if (!res.ok) return alert(res.message || res.error || 'Erro ao cadastrar industria');
             await refreshIndustries();
         } catch (error) {
             console.error('Erro ao cadastrar Industria', error);
@@ -114,7 +119,8 @@ export function DadosProvider({ children }) {
 
     async function editCourse(formData) {
         try {
-            await putCourse(formData.get('id'), formData);
+            const res = await putCourse(formData.get('id'), formData);
+            if (!res.ok) return alert(res.message || res.error || 'Erro ao editar curso');
             await refreshCourses();
         } catch (err) {
             console.error('Erro ao editar curso', err);
@@ -124,34 +130,41 @@ export function DadosProvider({ children }) {
 
     async function editCulinarian(formData) {
         try {
-            await putCulinarian(formData.get('id'), formData);
+            const res = await putCulinarian(formData.get('id'), formData);
+            if (!res.ok) return alert(res.message || res.error || 'Erro ao editar culinarista');
             await refreshCulinarians();
         } catch (err) {
             console.error('Erro ao editar culinarista', err);
+            alert('Erro ao editar culinarista');
         }
     }
 
     async function editCursoInfantil(formData) {
         try {
-            await putChildren(formData.get('id'), formData);
+            const res = await putChildren(formData.get('id'), formData);
+            if (!res.ok) return alert(res.message || 'Erro ao editar curso infantil');
             await refreshChildren();
         } catch (err) {
             console.error('Erro ao editar curso infantil', err);
+            alert('Erro ao editar curso infantil');
         }
     }
 
     async function editIndustry(formData) {
         try {
-            await putIndustry(formData.get('id'), formData);
+            const res = await putIndustry(formData.get('id'), formData);
+            if (!res.ok) return alert(res.message || res.error || 'Erro ao editar industria');
             await refreshIndustries();
         } catch (err) {
             console.error('Erro ao editar Industrias', err);
+            alert('Erro ao editar industria');
         }
     }
 
     async function removeCourse(cursoId) {
         try {
-            await deleteCourse(cursoId);
+            const res = await deleteCourse(cursoId);
+            if (!res.ok) return alert(res.message || 'Erro ao remover curso');
             setCursos(prev => prev.filter(curso => curso.id !== cursoId));
         } catch (err) {
             console.error('Erro ao remover curso', err);
@@ -161,28 +174,34 @@ export function DadosProvider({ children }) {
 
     async function removeCursoInfantil(id) {
         try {
-            await deleteChildren(id);
+            const res = await deleteChildren(id);
+            if (!res.ok) return alert(res.message || 'Erro ao deletar curso infantil');
             setCursosInfantis(prev => prev.filter(c => c.id !== id));
         } catch (err) {
             console.error('Erro ao deletar curso infantil', err);
+            alert('Erro ao deletar curso infantil');
         }
     }
 
     async function removeCulinarian(culinarianId) {
         try {
-            await deleteCulinarian(culinarianId);
+            const res = await deleteCulinarian(culinarianId);
+            if (!res.ok) return alert(res.message || 'Erro ao deletar culinarista');
             setCulinaristas(prev => prev.filter(c => c.id !== culinarianId));
         } catch (err) {
             console.error('Erro ao deletar culinarista', err);
+            alert('Erro ao deletar culinarista');
         }
     }
 
     async function removeIndustry(industryId) {
         try {
-            await deleteIndustry(industryId);
+            const res = await deleteIndustry(industryId);
+            if (!res.ok) return alert(res.message || 'Erro ao deletar industria');
             setIndustrias(prev => prev.filter(c => c.id !== industryId));
         } catch (err) {
             console.error('Erro ao deletar Industria', err);
+            alert('Erro ao deletar industria');
         }
     }
 

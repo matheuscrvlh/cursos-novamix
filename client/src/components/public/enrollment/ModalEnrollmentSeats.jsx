@@ -17,18 +17,23 @@ export default function ModalEnrollmentSeats({
     ...props
 }) {
     const [submitted, setSubmitted] = useState(false);
+    const [enviando, setEnviando] = useState(false);
 
     useBodyScrollLock(isOpen)
 
     useEffect(() => {
-        if (!isOpen) setSubmitted(false)
+        if (!isOpen) { setSubmitted(false); setEnviando(false); }
     }, [isOpen])
 
     if (!isOpen) return null
 
     function handleConfirm() {
         setSubmitted(true);
-        if (!enrollment.assento) return;
+        if (!enrollment.assento || enviando) return;
+        // trava local: setStep(null) no pai só fecha o modal no próximo
+        // render — sem isso, um segundo clique/tap antes desse re-render
+        // dispara onClick() de novo e cria uma inscrição duplicada
+        setEnviando(true);
         onClick();
     }
 
@@ -130,10 +135,11 @@ export default function ModalEnrollmentSeats({
                     )}
 
                     <Button
-                        className='bg-orange-base hover:bg-orange-light text-white font-semibold'
+                        className='bg-orange-base hover:bg-orange-light text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed'
                         onClick={handleConfirm}
+                        disabled={enviando}
                     >
-                        Confirmar assento
+                        {enviando ? 'Confirmando...' : 'Confirmar assento'}
                     </Button>
                     {submitted && !enrollment.assento && (
                         <p className='text-red-base text-xs text-center'>Selecione um assento para continuar</p>

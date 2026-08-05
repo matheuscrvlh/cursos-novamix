@@ -176,13 +176,18 @@ export default function RegistrationsAdmin() {
 
     async function deletarInscricao(inscricaoId) {
         try {
-            await deleteEnrollment(inscricaoId)
+            const resultado = await deleteEnrollment(inscricaoId)
+            if (!resultado?.ok) {
+                alert(resultado?.message || 'Erro ao excluir inscrição.')
+                return
+            }
 
             setInscricoes(prev => prev.filter(inscricao => inscricao.id != inscricaoId));
             setInscricoesTotais(prev => prev.filter(inscricao => inscricao.id != inscricaoId));
 
         } catch(err) {
             console.log('Erro ao deletar inscrição', err)
+            alert('Erro ao excluir inscrição.')
         }
     }
 

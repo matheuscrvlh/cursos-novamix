@@ -13,19 +13,28 @@ router.post('/login', loginLimiter, (req, res) => {
     }
 
     db.get('SELECT * FROM usuarios WHERE usuario = ?', [usuario], async (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
-        if (!row) return res.status(401).json({ error: 'Usuário ou senha inválidos.' });
+        try {
+            if (err) return res.status(500).json({ error: err.message });
+            if (!row) return res.status(401).json({ error: 'Usuário ou senha inválidos.' });
 
-        const senhaCorreta = await bcrypt.compare(senha, row.senha);
-        if (!senhaCorreta) return res.status(401).json({ error: 'Usuário ou senha inválidos.' });
+            const senhaCorreta = await bcrypt.compare(senha, row.senha);
+            if (!senhaCorreta) return res.status(401).json({ error: 'Usuário ou senha inválidos.' });
 
-        const token = jwt.sign(
-            { id: row.id, usuario: row.usuario },
-            process.env.JWT_SECRET,
-            { expiresIn: '8h' }
-        );
+            const token = jwt.sign(
+                { id: row.id, usuario: row.usuario },
+                process.env.JWT_SECRET,
+                { expiresIn: '8h' }
+            );
 
-        res.json({ token, usuario: row.usuario });
+            res.json({ token, usuario: row.usuario });
+        } catch (err2) {
+            // esse callback roda fora do ciclo de request/response do Express
+            // (é invocado pela lib do sqlite3), então uma exceção aqui — ex:
+            // jwt.sign falhando por JWT_SECRET ausente — não seria capturada
+            // por nada e derrubaria o processo inteiro (unhandled rejection)
+            console.error('Erro no login:', err2);
+            res.status(500).json({ error: 'Erro interno no servidor' });
+        }
     });
 });
 

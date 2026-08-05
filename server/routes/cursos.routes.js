@@ -52,6 +52,10 @@ router.post('/', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
     return res.status(400).json({ error: 'Campos obrigatórios: nomeCurso, categoria, duracao, data, hora, loja, valor' });
   }
 
+  if (!(parseFloat(valor) > 0)) {
+    return res.status(400).json({ error: 'Valor do curso inválido' });
+  }
+
   db.run(`
     INSERT INTO cursos
     (id, nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor, ingredientes)
@@ -105,6 +109,14 @@ router.post('/', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
 router.put('/:id', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
   const id = req.params.id;
 
+  // valor vazio/inválido não pode virar '' no banco (COALESCE só preserva o
+  // valor antigo quando o parâmetro é NULL) — sem isso, um campo deixado em
+  // branco no form sobrescrevia o preço do curso, e cobranças futuras caíam
+  // no fallback de R$1 em pagamentos.routes.js
+  if (req.body.valor !== undefined && !(parseFloat(req.body.valor) > 0)) {
+    return res.status(400).json({ error: 'Valor do curso inválido' });
+  }
+
   db.run(`
     UPDATE cursos SET
       nomeCurso    = COALESCE(?, nomeCurso),
@@ -133,6 +145,7 @@ router.put('/:id', authMiddleware, uploadCursos.array('fotos', 5), (req, res) =>
       console.error('Erro ao atualizar curso:', err);
       return res.status(500).json({ error: err.message });
     }
+    if (this.changes === 0) return res.status(404).json({ error: 'Curso não encontrado' });
 
     if (req.files && req.files.length > 0) {
       const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -210,6 +223,12 @@ router.delete('/:id', authMiddleware, (req, res) => {
       }
     );
   });
+});
+
+// Handler de erro do Multer
+router.use((err, req, res, next) => {
+  if (err) return res.status(400).json({ error: err.message });
+  next();
 });
 
 module.exports = router;

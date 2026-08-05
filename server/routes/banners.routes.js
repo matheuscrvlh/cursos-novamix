@@ -79,6 +79,7 @@ router.put('/:id', authMiddleware, (req, res) => {
     ],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) return res.status(404).json({ error: 'Banner não encontrado' });
       res.json({ message: 'Atualizado' });
     }
   );

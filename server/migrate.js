@@ -1,4 +1,5 @@
 require('dotenv').config();
+const crypto = require('crypto');
 const db = require('./db');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
@@ -166,13 +167,17 @@ db.serialize(() => {
     // Seed: cria admin padrão se não existir nenhum usuário
     db.get('SELECT COUNT(*) as total FROM usuarios', [], async (err2, row) => {
       if (err2 || row.total > 0) return;
-      const hash = await bcrypt.hash(process.env.ADMIN_SEED_SENHA || 'changeme', 12);
+
+      // sem ADMIN_SEED_SENHA no .env, gera uma senha aleatória em vez de usar
+      // um valor fixo adivinhável — evita expor admin/changeme em produção
+      const senha = process.env.ADMIN_SEED_SENHA || crypto.randomBytes(12).toString('base64url');
+      const hash = await bcrypt.hash(senha, 12);
       db.run(
         'INSERT INTO usuarios (id, usuario, senha, dataCadastro) VALUES (?, ?, ?, ?)',
         [uuidv4(), 'admin', hash, new Date().toISOString()],
         (err3) => {
           if (err3) console.error('seed admin:', err3);
-          else console.log('✓ usuário admin criado (senha: admin123)');
+          else console.log(`✓ usuário admin criado (usuário: admin, senha: ${senha}) — anote agora, essa senha só é exibida uma vez`);
         }
       );
     });

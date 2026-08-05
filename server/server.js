@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 const db = require('./db');
 const { apiLimiter } = require('./middleware/rateLimit.middleware');
@@ -19,6 +20,20 @@ const authRoutes = require('./routes/auth.routes');
 const usuariosRoutes = require('./routes/usuarios.routes');
 const app = express();
 
+// falha cedo (com mensagem clara) em vez de deixar o processo subir e
+// quebrar de forma obscura no primeiro login/requisição que precisar dessas
+// variáveis — ex: JWT_SECRET ausente já derrubou o processo inteiro no login
+// (jwt.sign lançando exceção não capturada), e FRONTEND_URL ausente em
+// produção deixava o CORS aberto pra qualquer origem
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET não configurado — defina no .env antes de subir o servidor');
+  process.exit(1);
+}
+if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
+  console.error('FRONTEND_URL não configurado em produção — defina no .env (CORS ficaria aberto pra qualquer origem)');
+  process.exit(1);
+}
+
 // atrás de 1 proxy reverso (nginx do host, que manda /api direto pro
 // container backend em 127.0.0.1:3001 — não passa pelo nginx do frontend)
 // — sem isso o rate limiter usa o IP interno do proxy pra todo mundo e o
@@ -32,9 +47,14 @@ const allowedOrigins = (process.env.FRONTEND_URL || '')
   .map(o => o.trim())
   .filter(Boolean);
 
+app.use(helmet());
 app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : true }));
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ limit: '100mb', extended: true }));
+// uploads de arquivo vão por multipart/form-data (multer), não por aqui —
+// 2mb é folga de sobra pros campos de texto (ex: lista de ingredientes) e
+// evita que uma rota pública sem auth (ex: POST /api/inscricoes) aceite
+// corpos JSON enormes antes mesmo do rate limiter contar a requisição
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
 app.use('/api', apiLimiter);
 

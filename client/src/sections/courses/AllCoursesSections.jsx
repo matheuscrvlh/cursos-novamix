@@ -177,7 +177,7 @@ export default function AllCoursesSections({
                                         duracao={curso.duracao}
                                         categoria={curso.categoria}
                                         vagasLivres={vagas.livres}
-                                        vagasReservadas={24}
+                                        vagasReservadas={vagas.livres + vagas.reservadas}
                                         valor={curso.valor}
                                         onClick={() => openForm(curso.id)}
                                         className='w-full'

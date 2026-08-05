@@ -4,12 +4,15 @@ const db = require('../db');
 
 const router = express.Router();
 
+const STATUS_VALIDOS = ['livre', 'reservado', 'pago'];
+
 router.get('/:cursoId', (req, res) => {
   db.all(
     `SELECT * FROM assentos WHERE cursoId = ? ORDER BY id ASC`,
     [req.params.cursoId],
     (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
+      if (!rows.length) return res.status(404).json({ error: 'Curso não encontrado' });
       res.json(rows);
     }
   );
@@ -17,7 +20,8 @@ router.get('/:cursoId', (req, res) => {
 
 router.put('/:cursoId', authMiddleware, (req, res) => {
   const { cursoId } = req.params;
-  const updatedAssentos = Array.isArray(req.body) ? req.body : [];
+  const updatedAssentos = (Array.isArray(req.body) ? req.body : [])
+    .filter(a => STATUS_VALIDOS.includes(a.status));
 
   db.serialize(() => {
     updatedAssentos.forEach(assento => {

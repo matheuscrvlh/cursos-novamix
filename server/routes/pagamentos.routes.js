@@ -86,36 +86,55 @@ function mensagemAmigavelReembolso(err) {
 // inscrição como 'reembolsado' — quem pagou não fica no prejuízo, só sem vaga.
 async function confirmarPagamentoOuReembolsarConflito({ inscricaoId, cursoId, assento, paymentId }) {
   return new Promise(resolve => {
-    db.get(
-      `SELECT id FROM inscricoes WHERE cursoId = ? AND assento = ? AND id != ? AND status IN ('pendente', 'pago', 'reembolsando')`,
-      [cursoId, assento, inscricaoId],
-      async (err, conflito) => {
+    // checagem de conflito e confirmação precisam ser um único UPDATE atômico:
+    // antes, o SELECT de conflito rodava separado do UPDATE, então duas chamadas
+    // concorrentes (webhook + verificação manual + resposta síncrona do Brick,
+    // todas podem disparar essa função pro mesmo assento) podiam passar pelo
+    // SELECT ao mesmo tempo, ambas concluírem "sem conflito" e ambas confirmarem
+    // 'pago' pro mesmo assento — daí pra frente qualquer liberação/expiração de
+    // uma delas mexia na mesma linha de `assentos` e desfazia o status da outra
+    db.run(
+      `UPDATE inscricoes SET status = 'pago', mp_payment_id = ?
+       WHERE id = ? AND status != 'pago'
+         AND NOT EXISTS (
+           SELECT 1 FROM inscricoes i2
+           WHERE i2.cursoId = ? AND i2.assento = ? AND i2.id != ?
+             AND i2.status IN ('pendente', 'pago', 'reembolsando')
+         )`,
+      [paymentId, inscricaoId, cursoId, assento, inscricaoId],
+      async function (err) {
         if (err) {
-          console.error('Erro ao checar conflito de assento:', err);
+          console.error('Erro ao confirmar pagamento:', err);
           return resolve({ ok: false });
         }
 
-        if (conflito) {
-          try {
-            const paymentRefund = new PaymentRefund(getMpClient());
-            await paymentRefund.total({ payment_id: paymentId });
-            db.run(
-              `UPDATE inscricoes SET status = 'reembolsado', mp_payment_id = ? WHERE id = ?`,
-              [paymentId, inscricaoId],
-              err => { if (err) console.error('Erro ao marcar reembolsado após conflito de assento:', err); }
-            );
-            console.warn(`[conflito de assento] Inscrição ${inscricaoId} paga porém assento ${assento} do curso ${cursoId} já ocupado por outra inscrição — reembolsada automaticamente`);
-          } catch (refundErr) {
-            console.error(`[conflito de assento] Falha ao reembolsar automaticamente a inscrição ${inscricaoId} — requer ação manual:`, refundErr);
-          }
-          return resolve({ ok: false, conflito: true });
+        if (this.changes === 0) {
+          // não confirmou: já estava 'pago' (chamada concorrente ganhou primeiro,
+          // nada a fazer) ou existe conflito real de assento (precisa reembolsar)
+          db.get(`SELECT status FROM inscricoes WHERE id = ?`, [inscricaoId], async (err2, row) => {
+            if (err2) {
+              console.error('Erro ao checar status após tentativa de confirmação:', err2);
+              return resolve({ ok: false });
+            }
+            if (row?.status === 'pago') return resolve({ ok: true });
+
+            try {
+              const paymentRefund = new PaymentRefund(getMpClient());
+              await paymentRefund.total({ payment_id: paymentId });
+              db.run(
+                `UPDATE inscricoes SET status = 'reembolsado', mp_payment_id = ? WHERE id = ?`,
+                [paymentId, inscricaoId],
+                err => { if (err) console.error('Erro ao marcar reembolsado após conflito de assento:', err); }
+              );
+              console.warn(`[conflito de assento] Inscrição ${inscricaoId} paga porém assento ${assento} do curso ${cursoId} já ocupado por outra inscrição — reembolsada automaticamente`);
+            } catch (refundErr) {
+              console.error(`[conflito de assento] Falha ao reembolsar automaticamente a inscrição ${inscricaoId} — requer ação manual:`, refundErr);
+            }
+            resolve({ ok: false, conflito: true });
+          });
+          return;
         }
 
-        db.run(
-          `UPDATE inscricoes SET status = 'pago', mp_payment_id = ? WHERE id = ? AND status != 'pago'`,
-          [paymentId, inscricaoId],
-          err => { if (err) console.error('Erro ao marcar pago:', err); }
-        );
         db.run(
           `UPDATE assentos SET status = 'reservado' WHERE cursoId = ? AND id = ?`,
           [cursoId, assento],
@@ -206,9 +225,20 @@ router.post('/verificar/:inscricaoId', authMiddleware, async (req, res) => {
           novoStatus = resultado.conflito ? 'reembolsado' : 'pago';
         }
       } else if (mpStatus === 'rejected' || mpStatus === 'cancelled') {
-        novoStatus = mpStatus === 'rejected' ? 'recusado' : 'cancelado';
-        db.run(`UPDATE inscricoes SET status = ? WHERE id = ?`, [novoStatus, inscricaoId]);
-        if (inscricao.status !== novoStatus) {
+        const statusRevertido = mpStatus === 'rejected' ? 'recusado' : 'cancelado';
+        // só reverte/libera se ainda estiver 'pendente' — sem essa trava, um
+        // payment_id antigo/reconsultado podia sobrescrever uma inscrição que
+        // já tinha sido confirmada como 'pago' por outra via (webhook, etc.)
+        const changes = await new Promise((resolve, reject) => {
+          db.run(
+            `UPDATE inscricoes SET status = ? WHERE id = ? AND status = 'pendente'`,
+            [statusRevertido, inscricaoId],
+            function (err) { if (err) reject(err); else resolve(this.changes); }
+          );
+        });
+
+        if (changes > 0) {
+          novoStatus = statusRevertido;
           db.run(
             `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
             [inscricao.cursoId, inscricao.assento],
@@ -369,7 +399,13 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
         return res.status(400).json({ message: 'O CPF cadastrado na inscrição é inválido. Corrija o CPF e tente novamente.' });
       }
 
-      const valor = Math.max(parseFloat(inscricao.cursoValor) || 1, 0.01);
+      // sem essa checagem, um curso com preço ausente/corrompido no banco
+      // caía no fallback e cobrava R$1,00 do cliente silenciosamente
+      const valor = parseFloat(inscricao.cursoValor);
+      if (!(valor > 0)) {
+        console.error(`Valor inválido pro curso ${inscricao.cursoId} (cursoValor="${inscricao.cursoValor}") — pagamento da inscrição ${inscricaoId} bloqueado`);
+        return res.status(500).json({ message: 'Não foi possível determinar o valor do curso. Contate o suporte.' });
+      }
 
       const body = {
         transaction_amount: valor,
@@ -421,15 +457,23 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
           // pagamento cancelado (ex: Pix expirado) — status diferentes pro
           // admin não confundir recusa de cartão com cancelamento
           const novoStatus = status === 'rejected' ? 'recusado' : 'cancelado';
+          // só reverte/libera se ainda estiver 'pendente' — entre o carregamento
+          // da inscrição e a resposta do payment.create (chamada de rede que pode
+          // demorar), outra tentativa concorrente para a mesma inscrição pode já
+          // ter sido aprovada; sem essa trava isso sobrescreveria um pagamento
+          // já confirmado de volta pra 'recusado'/'cancelado' e liberaria o assento
           db.run(
-            `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
-            [inscricao.cursoId, inscricao.assento],
-            err => { if (err) console.error('Erro ao liberar assento:', err); }
-          );
-          db.run(
-            `UPDATE inscricoes SET status = ? WHERE id = ?`,
+            `UPDATE inscricoes SET status = ? WHERE id = ? AND status = 'pendente'`,
             [novoStatus, inscricaoId],
-            err => { if (err) console.error('Erro ao marcar', novoStatus, ':', err); }
+            function (err) {
+              if (err) return console.error('Erro ao marcar', novoStatus, ':', err);
+              if (this.changes === 0) return;
+              db.run(
+                `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
+                [inscricao.cursoId, inscricao.assento],
+                err => { if (err) console.error('Erro ao liberar assento:', err); }
+              );
+            }
           );
         }
 

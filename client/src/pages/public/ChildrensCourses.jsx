@@ -145,15 +145,19 @@ export default function ChildrensCourses() {
 
     const cursoSelecionadoValor = cursosInfantis.find(c => c.id === cursoSelecionado)?.valor
 
+    // refaz a busca de assentos toda vez que a tela de seleção abre (não só na
+    // primeira vez que o curso é selecionado) — sem isso, quem demora no
+    // formulário (ou tenta de novo depois de um erro) reusa a mesma lista de
+    // assentos desatualizada, podendo escolher um assento já ocupado em loop
     useEffect(() => {
-        if (!cursoSelecionado) {
+        if (!cursoSelecionado || step !== 'assento') {
             return
         }
 
         getSeats(cursoSelecionado)
             .then(setAssentos)
             .catch(console.error)
-    }, [cursoSelecionado])
+    }, [cursoSelecionado, step])
 
     useEffect(() => {
         if (!cursosInfantis.length) return;

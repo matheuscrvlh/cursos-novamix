@@ -119,13 +119,20 @@ export async function cancelEnrollment(inscricaoId) {
 
 export async function deleteEnrollment(inscricaoId) {
     try {
-        await fetch((`${URL}/inscricoes/${inscricaoId}`), {
+        const res = await fetch((`${URL}/inscricoes/${inscricaoId}`), {
             method: 'DELETE',
             headers: { ...authHeader() }
         });
 
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            return { ok: false, message: data.message || 'Erro ao excluir inscrição.' };
+        }
+        return { ok: true };
+
     } catch (err) {
         console.error('Erro ao deletar Inscricao:', err);
+        return { ok: false, message: 'Erro de conexão. Tente novamente.' };
     }
 }
 

@@ -60,6 +60,20 @@ export default function CoursePage() {
         })
     }, [id])
 
+    // refaz a busca de assentos toda vez que a tela de seleção abre — sem
+    // isso, quem demora no formulário (ou tenta de novo depois de um erro)
+    // via o mesmo `assentos` buscado só uma vez no mount, podendo escolher
+    // repetidamente um assento que outra pessoa já ocupou nesse meio-tempo
+    useEffect(() => {
+        if (step !== 'assento' || !id) return
+        getSeats(id).then(data => {
+            if (Array.isArray(data)) {
+                setAssentos(data)
+                setVagasLivres(data.filter(a => a.status === 'livre').length)
+            }
+        })
+    }, [step, id])
+
     // Mantém a inscrição ativa acessível fora do ciclo de render, pra liberar
     // o assento mesmo quando o cliente sai sem passar pelo botão de fechar
     // (fecha a aba, dá refresh ou navega pra outra rota do site)
