@@ -173,7 +173,7 @@ router.post('/:id/cancelar', (req, res) => {
 
 router.get('/curso/:cursoId', authMiddleware, (req, res) => {
   db.all(
-    `SELECT * FROM inscricoes WHERE cursoId = ?`,
+    `SELECT * FROM inscricoes WHERE cursoId = ? ORDER BY dataInscricao ASC`,
     [req.params.cursoId],
     (err, rows) => {
       if (err) {
@@ -186,7 +186,7 @@ router.get('/curso/:cursoId', authMiddleware, (req, res) => {
 });
 
 router.get('/', authMiddleware, (req, res) => {
-  db.all(`SELECT * FROM inscricoes`, [], (err, rows) => {
+  db.all(`SELECT * FROM inscricoes ORDER BY dataInscricao ASC`, [], (err, rows) => {
     if (err) {
       console.error('Erro ao obter inscrições:', err);
       return res.status(500).json({ message: 'Erro interno do servidor' });
@@ -203,9 +203,13 @@ router.put('/:id', authMiddleware, (req, res) => {
     if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
     if (!inscricao) return res.status(404).json({ message: 'Inscrição não encontrada' });
 
+    // qualquer status terminal (não só 'cancelado') precisa liberar o assento —
+    // senão editar manualmente pra 'recusado'/'reembolsado' por aqui deixava
+    // o assento preso como 'reservado' pra sempre, mesmo sem inscrição ativa
+    const ESTADOS_TERMINAIS = ['cancelado', 'recusado', 'reembolsado'];
     const trocarAssento = assento !== undefined && Number(assento) !== inscricao.assento;
-    const cancelando = status === 'cancelado' && inscricao.status !== 'cancelado';
-    const reativando = status !== undefined && status !== 'cancelado' && inscricao.status === 'cancelado';
+    const cancelando = status !== undefined && ESTADOS_TERMINAIS.includes(status) && !ESTADOS_TERMINAIS.includes(inscricao.status);
+    const reativando = status !== undefined && !ESTADOS_TERMINAIS.includes(status) && ESTADOS_TERMINAIS.includes(inscricao.status);
 
     const executarUpdate = () => {
       db.run(`
@@ -295,9 +299,19 @@ router.delete('/:id', authMiddleware, (req, res) => {
     if (err) return res.status(500).json({ message: 'Erro interno no servidor' });
     if (!inscricao) return res.status(404).json({ message: 'Inscrição não encontrada' });
 
+    // só libera se não existir OUTRA inscrição ativa pro mesmo assento — sem
+    // essa checagem, excluir uma das duas inscrições de um assento duplicado
+    // (pra "resolver" o conflito manualmente) liberava o assento por baixo da
+    // inscrição paga que sobrou, fazendo o cliente que pagou sumir do mapa
     db.run(
-      `UPDATE assentos SET status = 'livre' WHERE cursoId = ? AND id = ?`,
-      [inscricao.cursoId, inscricao.assento],
+      `UPDATE assentos SET status = 'livre'
+       WHERE cursoId = ? AND id = ?
+         AND NOT EXISTS (
+           SELECT 1 FROM inscricoes i2
+           WHERE i2.cursoId = ? AND i2.assento = ? AND i2.id != ?
+             AND i2.status IN ('pendente', 'pago', 'reembolsando')
+         )`,
+      [inscricao.cursoId, inscricao.assento, inscricao.cursoId, inscricao.assento, id],
       err => { if (err) console.error('Erro ao liberar assento:', err); }
     );
 

@@ -11,11 +11,12 @@ const fs = require('fs');
 
 router.get('/', (req, res) => {
   db.all(`
-    SELECT c.*, 
+    SELECT c.*,
     GROUP_CONCAT(f.url) as fotos
     FROM cursos c
     LEFT JOIN fotos f ON f.cursoId = c.id
     GROUP BY c.id
+    ORDER BY c.data ASC, c.hora ASC
   `, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
 

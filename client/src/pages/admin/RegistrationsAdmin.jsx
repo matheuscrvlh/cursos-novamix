@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Trash, Users, Inbox, RefreshCw, Undo2 } from 'lucide-react';
+import { Trash, Users, Inbox, RefreshCw, Undo2, Search } from 'lucide-react';
 
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
@@ -41,6 +41,61 @@ const FILTROS_PAGAMENTO = [
     { label: 'Recusado', value: 'recusado' },
     { label: 'Reembolsado', value: 'reembolsado' },
 ];
+
+const FILTROS_DATA = [
+    { label: 'Hoje', value: 'hoje' },
+    { label: 'Ontem', value: 'ontem' },
+    { label: 'Essa semana', value: 'semana' },
+];
+
+// todas as comparações usam o horário local do navegador — dataInscricao vem
+// em ISO UTC (new Date().toISOString() no backend), e o construtor Date já
+// converte pra hora local sozinho, então não precisa de nenhum ajuste manual
+function inicioDoDia(data) {
+    // "YYYY-MM-DD" (valor de <input type="date">) precisa ser montado como
+    // data local manualmente — new Date("YYYY-MM-DD") interpreta como UTC
+    // meia-noite, o que em fusos negativos (Brasil) vira o dia anterior local
+    if (typeof data === 'string') {
+        const [ano, mes, dia] = data.split('-').map(Number);
+        return new Date(ano, mes - 1, dia, 0, 0, 0, 0);
+    }
+    const d = new Date(data);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
+function inicioDaSemana() {
+    const d = inicioDoDia(new Date());
+    d.setDate(d.getDate() - d.getDay()); // volta até domingo
+    return d;
+}
+
+function passaFiltroData(dataInscricaoISO, filtro, periodoInicio, periodoFim) {
+    const dataInsc = new Date(dataInscricaoISO);
+    if (Number.isNaN(dataInsc.getTime())) return true;
+
+    if (filtro === 'hoje') {
+        return dataInsc >= inicioDoDia(new Date());
+    }
+    if (filtro === 'ontem') {
+        const inicioOntem = inicioDoDia(new Date());
+        inicioOntem.setDate(inicioOntem.getDate() - 1);
+        return dataInsc >= inicioOntem && dataInsc < inicioDoDia(new Date());
+    }
+    if (filtro === 'semana') {
+        return dataInsc >= inicioDaSemana();
+    }
+    if (filtro === 'periodo') {
+        if (periodoInicio && dataInsc < inicioDoDia(periodoInicio)) return false;
+        if (periodoFim) {
+            const fim = inicioDoDia(periodoFim);
+            fim.setDate(fim.getDate() + 1); // inclui o dia final inteiro
+            if (dataInsc >= fim) return false;
+        }
+        return true;
+    }
+    return true;
+}
 
 function statusBadgeClass(status) {
     if (status === 'pago')        return 'bg-green-base';
@@ -135,23 +190,51 @@ export default function RegistrationsAdmin() {
     const [filtroStatusInsc, setFiltroStatusInsc] = useState('ativos');
     const [filtroLojaInsc, setFiltroLojaInsc] = useState('todas');
     const [filtroPagamentoInsc, setFiltroPagamentoInsc] = useState('todos');
+    const [filtroDataInsc, setFiltroDataInsc] = useState('hoje');
+    const [periodoInicio, setPeriodoInicio] = useState('');
+    const [periodoFim, setPeriodoFim] = useState('');
+    const [buscaCliente, setBuscaCliente] = useState('');
 
     const [filtroTipo, setFiltroTipo] = useState('todos');
     const [filtroStatus, setFiltroStatus] = useState('ativos');
     const [filtroLoja, setFiltroLoja] = useState('todas');
 
-    const hoje = new Date().toISOString().split('T')[0];
+    // usa componentes locais (não toISOString, que é UTC) — perto da meia-noite
+    // isso pode acusar o dia errado dependendo do fuso do navegador
+    const agora = new Date();
+    const hoje = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+
+    function selecionarPeriodo(campo, valor) {
+        if (campo === 'inicio') setPeriodoInicio(valor); else setPeriodoFim(valor);
+        setFiltroDataInsc('periodo');
+    }
+
+    function selecionarFiltroDataRapido(valor) {
+        setFiltroDataInsc(valor);
+        setPeriodoInicio('');
+        setPeriodoFim('');
+    }
 
     const todosCursos = [
         ...cursos.map(c => ({ ...c, tipo: 'normal' })),
         ...cursosInfantis.map(c => ({ ...c, tipo: 'infantil' })),
-    ];
+    ].sort((a, b) => new Date(`${a.data}T${a.hora || '00:00'}`) - new Date(`${b.data}T${b.hora || '00:00'}`));
 
     const cursoModal = todosCursos.find(c => c.id === cursoSelecionado);
 
     const inscricoesFiltradas = inscricoesTotais.filter(i => {
+        // busca por nome (texto) ou CPF (dígitos) — só compara dígitos de CPF
+        // quando a busca de fato tiver algum dígito, senão "123".includes('')
+        // seria sempre verdadeiro e a busca por nome deixaria de filtrar nada
+        const queryDigits = buscaCliente.replace(/\D/g, '');
+        const queryLower = buscaCliente.trim().toLowerCase();
+        const passaBusca = !queryLower
+            || (i.nome || '').toLowerCase().includes(queryLower)
+            || (queryDigits.length > 0 && (i.cpf || '').replace(/\D/g, '').includes(queryDigits));
+
         const curso = todosCursos.find(c => c.id === i.cursoId);
-        if (!curso) return true;
+        if (!curso) return passaBusca;
+
         const passaTipo = filtroTipoInsc === 'normais' ? curso.tipo === 'normal'
                         : filtroTipoInsc === 'infantis' ? curso.tipo === 'infantil'
                         : true;
@@ -160,7 +243,8 @@ export default function RegistrationsAdmin() {
                           : true;
         const passaLoja = filtroLojaInsc === 'todas' || curso.loja === filtroLojaInsc;
         const passaPagamento = filtroPagamentoInsc === 'todos' || i.status === filtroPagamentoInsc;
-        return passaTipo && passaStatus && passaLoja && passaPagamento;
+        const passaData = passaFiltroData(i.dataInscricao, filtroDataInsc, periodoInicio, periodoFim);
+        return passaTipo && passaStatus && passaLoja && passaPagamento && passaData && passaBusca;
     });
 
     const cursosExibidos = todosCursos.filter(c => {
@@ -296,6 +380,16 @@ export default function RegistrationsAdmin() {
             <CardDash className='bg-white h-full w-full rounded-md p-4 md:p-10 shadow-sm'>
                 <div className='flex flex-col gap-3 mb-4'>
                     <p className='font-bold text-xl text-gray-text'>INSCRIÇÕES</p>
+                    <div className='relative w-full md:max-w-xs'>
+                        <Search size={15} className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-text/40' />
+                        <input
+                            type='text'
+                            placeholder='Buscar por nome ou CPF'
+                            value={buscaCliente}
+                            onChange={e => setBuscaCliente(e.target.value)}
+                            className='w-full text-sm border border-gray-base/30 rounded-md pl-9 pr-3 py-2 text-gray-text outline-none focus:border-orange-base'
+                        />
+                    </div>
                     <div className='flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-2'>
                         <FilterPills value={filtroTipoInsc} onChange={setFiltroTipoInsc} options={FILTROS_TIPO} />
                         <span className='hidden md:block w-px h-5 bg-gray-base/30' />
@@ -305,12 +399,34 @@ export default function RegistrationsAdmin() {
                         <span className='hidden md:block w-px h-5 bg-gray-base/30' />
                         <FilterPills value={filtroPagamentoInsc} onChange={setFiltroPagamentoInsc} options={FILTROS_PAGAMENTO} activeClass='bg-gray-text text-white' />
                     </div>
+                    <div className='flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:gap-x-3 md:gap-y-2'>
+                        <FilterPills value={filtroDataInsc} onChange={selecionarFiltroDataRapido} options={FILTROS_DATA} activeClass='bg-blue-base text-white' />
+                        <span className='hidden md:block w-px h-5 bg-gray-base/30' />
+                        <div className='flex items-center gap-1.5 text-xs text-gray-text/70'>
+                            <label htmlFor='periodoInicio'>De</label>
+                            <input
+                                id='periodoInicio'
+                                type='date'
+                                value={periodoInicio}
+                                onChange={e => selecionarPeriodo('inicio', e.target.value)}
+                                className='border border-gray-base/30 rounded-md px-2 py-1 text-xs text-gray-text outline-none focus:border-orange-base'
+                            />
+                            <label htmlFor='periodoFim'>até</label>
+                            <input
+                                id='periodoFim'
+                                type='date'
+                                value={periodoFim}
+                                onChange={e => selecionarPeriodo('fim', e.target.value)}
+                                className='border border-gray-base/30 rounded-md px-2 py-1 text-xs text-gray-text outline-none focus:border-orange-base'
+                            />
+                        </div>
+                    </div>
                 </div>
                 <hr className='border-gray-base/30 w-full mb-4'/>
 
                 <div className='max-h-100 overflow-y-auto'>
 
-                    <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-2
+                    <div className='hidden md:grid grid-cols-[1.3fr_0.7fr_0.5fr_0.5fr_0.5fr_0.5fr_0.9fr_0.5fr] gap-2
                                     text-xs font-semibold text-gray-text uppercase tracking-wider
                                     bg-gray px-3 py-2 rounded-md mb-1 sticky top-0 z-10'>
                         <p>CURSO</p>
@@ -319,6 +435,7 @@ export default function RegistrationsAdmin() {
                         <p>ASSENTO</p>
                         <p>STATUS</p>
                         <p>PAGAMENTO</p>
+                        <p>INSCRITO EM</p>
                         <p>FUNÇÕES</p>
                     </div>
 
@@ -348,6 +465,7 @@ export default function RegistrationsAdmin() {
                                     <span>Assento: {i.assento}</span>
                                     <span>{metodoPagamentoLabel(i.metodoPagamento)}</span>
                                     {curso?.data && <span>{formatDateBR(curso.data)}</span>}
+                                    <span>Inscrito em {formatDateTimeBR(i.dataInscricao)}</span>
                                 </div>
                                 <div className='flex items-center justify-between mt-2'>
                                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full text-white ${statusBadgeClass(i.status)}`}>
@@ -367,7 +485,7 @@ export default function RegistrationsAdmin() {
                                 </div>
                             </div>
 
-                            <div className='hidden md:grid grid-cols-[1.5fr_0.8fr_0.5fr_0.5fr_0.5fr_0.5fr_0.5fr] gap-2
+                            <div className='hidden md:grid grid-cols-[1.3fr_0.7fr_0.5fr_0.5fr_0.5fr_0.5fr_0.9fr_0.5fr] gap-2
                                             px-3 py-3 items-center text-gray-text text-sm
                                             hover:bg-gray/60 transition-colors rounded-md'>
                                 <div className='flex items-center gap-2 min-w-0'>
@@ -388,6 +506,7 @@ export default function RegistrationsAdmin() {
                                     {i.status}
                                 </span>
                                 <p>{metodoPagamentoLabel(i.metodoPagamento)}</p>
+                                <p className='text-xs'>{formatDateTimeBR(i.dataInscricao)}</p>
                                 <div className='flex gap-2'>
                                     <InscricaoAcoes
                                         inscricao={i}

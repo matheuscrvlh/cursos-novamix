@@ -16,6 +16,7 @@ router.get('/', (req, res) => {
     FROM cursosInfantis ci
     LEFT JOIN fotos f ON f.cursoId = ci.id
     GROUP BY ci.id
+    ORDER BY ci.data ASC, ci.hora ASC
   `, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
 

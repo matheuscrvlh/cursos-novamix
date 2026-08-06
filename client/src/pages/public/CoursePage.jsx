@@ -354,6 +354,43 @@ export default function CoursePage() {
                     </div>
                 </div>
 
+                {assentos.length > 0 && (
+                    <div className='bg-white rounded-xl p-5 shadow-sm mb-8'>
+                        <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-4'>Mapa de assentos</p>
+
+                        <div className='bg-gray-dark rounded-lg py-3 text-center text-sm font-bold text-white uppercase tracking-widest mb-4'>
+                            Balcão
+                        </div>
+
+                        <div className='grid grid-cols-6 sm:grid-cols-8 gap-3 mb-4'>
+                            {assentos.map(assento => {
+                                const ocupado = assento.status !== 'livre'
+                                return (
+                                    <div key={assento.id} className='flex flex-col items-center'>
+                                        <div className={`w-3/5 h-3 rounded-t-md ${ocupado ? 'bg-gray-base/25' : 'bg-orange-base'}`} />
+                                        <div className={`w-full h-8 rounded-b-lg flex items-center justify-center font-bold text-xs ${
+                                            ocupado ? 'bg-gray-base/20 text-gray-base/40' : 'bg-orange-base text-white'
+                                        }`}>
+                                            {assento.id}
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+
+                        <div className='flex flex-wrap justify-center gap-x-5 gap-y-1.5'>
+                            <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
+                                <span className='w-3 h-3 rounded-sm bg-orange-base' />
+                                Disponível
+                            </div>
+                            <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
+                                <span className='w-3 h-3 rounded-sm bg-gray-base/20' />
+                                Ocupado
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <Button
                     className='w-full bg-orange-base hover:bg-orange-light text-white font-semibold text-base py-3 cursor-pointer transition'
                     onClick={() => setStep('form')}
