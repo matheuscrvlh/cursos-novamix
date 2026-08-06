@@ -96,7 +96,7 @@ export default function CoursesAdmin() {
     const [cursoEditar, setCursoEditar] = useState(EDITAR_VAZIO);
     const [step, setStep]               = useState('close');
     const [previewImagemCurso, setPreviewImagemCurso] = useState(null);
-    const [filtroStatus, setFiltroStatus] = useState('todos');
+    const [filtroStatus, setFiltroStatus] = useState('ativos');
     const [filtroLoja, setFiltroLoja]     = useState('todas');
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();

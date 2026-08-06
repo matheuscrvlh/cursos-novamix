@@ -28,6 +28,13 @@ export default function DashboardAdmin() {
         loadingCourses,
     } = useContext(DadosContext);
 
+    // formato ISO (YYYY-MM-DD), igual ao que vem do banco em c.data — comparável
+    // direto com < / >=, e usado tanto pras estatísticas quanto pra filtrar os
+    // cards de curso abaixo, que devem mostrar só os ainda não concluídos
+    const now = new Date();
+    const hoje = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const cursosAtivos = cursos.filter(c => c.data >= hoje);
+
     useEffect(() => {
         if (!cursos.length) return;
         async function loadVagas() {
@@ -49,12 +56,6 @@ export default function DashboardAdmin() {
     }, [cursos]);
 
     useEffect(() => {
-        // formato ISO (YYYY-MM-DD), igual ao que vem do banco em c.data — comparável
-        // direto com < / >=. Comparar strings já formatadas em DD/MM/YYYY quebra entre
-        // meses diferentes (ex: "04/08" viraria "menor" que "31/07" na ordem de string)
-        const now = new Date();
-        const hoje = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
         async function buscarDadosDashboard() {
             setLoadingInscricoes(true);
 
@@ -99,7 +100,7 @@ export default function DashboardAdmin() {
             }
         }
         buscarDadosDashboard()
-    }, [])
+    }, [hoje])
 
     return (
         <AdminPage title='Dashboard'>
@@ -240,10 +241,10 @@ export default function DashboardAdmin() {
                     <h2 className='font-bold text-gray-text text-lg shrink-0'>CURSOS</h2>
                     <div className='flex-1 h-px bg-gray-base/20'/>
                 </div>
-                {cursos.length === 0
-                    ? <p className='text-gray-text/60 text-sm'>Nenhum curso encontrado</p>
+                {cursosAtivos.length === 0
+                    ? <p className='text-gray-text/60 text-sm'>Nenhum curso ativo encontrado</p>
                     : <div className='flex gap-4 overflow-x-auto pb-3 -mx-4 px-4'>
-                        {cursos.map(curso => {
+                        {cursosAtivos.map(curso => {
                             return (
                                 <CourseCard
                                     key={curso.id}
