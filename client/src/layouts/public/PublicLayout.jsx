@@ -296,7 +296,7 @@ export default function PublicLayout({ children, bannerHome }) {
             </a>
             <span className="mx-1 text-white/20">·</span>
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate('/dashboardAdmin')}
               className="text-white/30 hover:text-white/60 transition text-xs cursor-pointer"
             >
               admin

@@ -1,15 +1,14 @@
+// Curso infantil é um curso normal com tipo='infantil' na mesma tabela —
+// esses wrappers existem só pra manter a assinatura que ChildrensAdmin.jsx
+// já usa, sem precisar mexer no componente.
 const URL = '/api'
 
-function authHeader() {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 export async function postChildren(formData) {
+    formData.set('tipo', 'infantil')
     try {
-        const res = await fetch(`${URL}/cursos-infantis`, {
+        const res = await fetch(`${URL}/cursos`, {
             method: "POST",
-            headers: { ...authHeader() },
+            credentials: 'include',
             body: formData
         });
 
@@ -24,7 +23,7 @@ export async function postChildren(formData) {
 
 export async function getChildren() {
     try {
-        const res = await fetch((`${URL}/cursos-infantis`), {
+        const res = await fetch((`${URL}/cursos?tipo=infantil`), {
             method: 'GET'
         });
 
@@ -39,10 +38,11 @@ export async function getChildren() {
 }
 
 export async function putChildren(cursoId, formData) {
+    formData.set('tipo', 'infantil')
     try {
-        const res = await fetch((`${URL}/cursos-infantis/${cursoId}`), {
+        const res = await fetch((`${URL}/cursos/${cursoId}`), {
             method: 'PUT',
-            headers: { ...authHeader() },
+            credentials: 'include',
             body: formData
         });
 
@@ -57,9 +57,9 @@ export async function putChildren(cursoId, formData) {
 
 export async function deleteChildren(cursoId) {
     try {
-        const res = await fetch((`${URL}/cursos-infantis/${cursoId}`), {
+        const res = await fetch((`${URL}/cursos/${cursoId}`), {
             method: 'DELETE',
-            headers: { ...authHeader() }
+            credentials: 'include'
         });
 
         if (!res.ok) {

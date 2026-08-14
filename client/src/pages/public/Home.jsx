@@ -133,7 +133,6 @@ export default function Home() {
                 cpf: enrollment.cpf,
                 celular: enrollment.celular,
                 email: enrollment.email,
-                formaPagamento: 'mercadopago',
                 assento: enrollment.assento
             });
 

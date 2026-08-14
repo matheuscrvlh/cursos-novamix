@@ -23,7 +23,6 @@ import {
 
 import {
     postChildren,
-    getChildren,
     putChildren,
     deleteChildren,
 } from '../api/children.services';
@@ -41,9 +40,14 @@ export function DadosProvider({ children }) {
     const [loadingIndustries, setLoadingIndustries] = useState(true);
     const [loadingChildren, setLoadingChildren] = useState(true);
 
+    // curso normal e infantil vivem na mesma tabela (coluna `tipo`) — busca
+    // /api/cursos uma vez só e deriva os dois arrays aqui, em vez de bater
+    // duas vezes na API pra pegar o que já veio junto na primeira resposta
     async function refreshCourses() {
         const data = await getCourses();
-        setCursos(Array.isArray(data) ? data : []);
+        const todos = Array.isArray(data) ? data : [];
+        setCursos(todos.filter(c => c.tipo !== 'infantil'));
+        setCursosInfantis(todos.filter(c => c.tipo === 'infantil'));
     }
 
     async function refreshCulinarians() {
@@ -56,17 +60,18 @@ export function DadosProvider({ children }) {
         setIndustrias(Array.isArray(data) ? data : []);
     }
 
-    async function refreshChildren() {
-        const data = await getChildren();
-        setCursosInfantis(Array.isArray(data) ? data : []);
-    }
+    // alias — mantém os dois nomes que o resto do app já usa (add/edit de
+    // curso infantil chamam refreshChildren), mas ambos recarregam a mesma
+    // busca única de /api/cursos
+    const refreshChildren = refreshCourses;
 
     useEffect(() => {
         async function carregarInicial() {
             await Promise.all([
-                refreshCourses().catch(err => console.error('Erro ao buscar cursos', err)).finally(() => setLoadingCourses(false)),
+                refreshCourses()
+                    .catch(err => console.error('Erro ao buscar cursos', err))
+                    .finally(() => { setLoadingCourses(false); setLoadingChildren(false); }),
                 refreshCulinarians().catch(err => console.error('Erro ao buscar Culinaristas', err)).finally(() => setLoadingCulinarian(false)),
-                refreshChildren().catch(err => console.error('Erro ao buscar Cursos Infantis', err)).finally(() => setLoadingChildren(false)),
                 refreshIndustries().catch(err => console.error('Erro ao buscar Industrias', err)).finally(() => setLoadingIndustries(false)),
             ]);
         }

@@ -127,7 +127,6 @@ export default function CoursePage() {
                 cpf: form.cpf,
                 celular: form.celular,
                 email: form.email,
-                formaPagamento: 'mercadopago',
                 assento: assentoId,
             })
 

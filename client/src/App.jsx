@@ -8,7 +8,6 @@ import Industries from './pages/public/Industries'
 import CoursePage from './pages/public/CoursePage'
 
 import RequireAuth from './components/RequireAuth'
-import Login from './pages/admin/Login'
 import DashboardAdmin from './pages/admin/DashboardAdmin'
 import CoursesAdmin from './pages/admin/CoursesAdmin'
 import RegistrationsAdmin from './pages/admin/RegistrationsAdmin'
@@ -16,7 +15,6 @@ import CulinarianAdmin from './pages/admin/CulinarianAdmin'
 import IndustriesAdmin from './pages/admin/IndustriesAdmin'
 import ChildrensAdmin from './pages/admin/ChildrensAdmin'
 import MarketingAdmin from './pages/admin/MarketingAdmin'
-import UsersAdmin from './pages/admin/UsersAdmin'
 
 export default function App() {
   return (
@@ -28,8 +26,6 @@ export default function App() {
         <Route path='/industrias' element={<Industries />} />
         <Route path='/curso/:id' element={<CoursePage />} />
 
-        <Route path='/login' element={<Login />} />
-
         <Route element={<RequireAuth />}>
           <Route path='/dashboardAdmin' element={<DashboardAdmin />} />
           <Route path='/cursosAdmin' element={<CoursesAdmin />} />
@@ -38,7 +34,6 @@ export default function App() {
           <Route path='/industriasAdmin' element={<IndustriesAdmin />} />
           <Route path='/infantisAdmin' element={<ChildrensAdmin />} />
           <Route path='/marketingAdmin' element={<MarketingAdmin />} />
-          <Route path='/usuariosAdmin' element={<UsersAdmin />} />
         </Route>
     </Routes>
   )

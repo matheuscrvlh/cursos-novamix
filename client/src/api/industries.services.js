@@ -1,15 +1,10 @@
 const URL = '/api'
 
-function authHeader() {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 export async function postIndustry(formData) {
     try {
         const res = await fetch(`${URL}/industrias`, {
             method: "POST",
-            headers: { ...authHeader() },
+            credentials: 'include',
             body: formData
         });
 
@@ -41,7 +36,7 @@ export async function putIndustry(industryId, formData) {
     try {
         const res = await fetch((`${URL}/industrias/${industryId}`), {
             method: 'PUT',
-            headers: { ...authHeader() },
+            credentials: 'include',
             body: formData
         });
 
@@ -58,7 +53,7 @@ export async function deleteIndustry(industryId) {
     try {
         const res = await fetch((`${URL}/industrias/${industryId}`), {
             method: 'DELETE',
-            headers: { ...authHeader() }
+            credentials: 'include'
         });
 
         if (!res.ok) {

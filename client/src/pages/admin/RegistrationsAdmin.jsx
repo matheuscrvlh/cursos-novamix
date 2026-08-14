@@ -128,7 +128,7 @@ function podeReembolsar(curso) {
 function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, onVerificarMP, onReembolsar, onExcluir }) {
     return (
         <>
-            {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pendente' && (
+            {inscricao.status === 'pendente' && (
                 <Tooltip label='Verificar no MP'>
                     <Button
                         className='bg-blue-base p-2 hover:bg-blue-base/80 text-white'
@@ -139,7 +139,7 @@ function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, onVerif
                     </Button>
                 </Tooltip>
             )}
-            {inscricao.formaPagamento === 'mercadopago' && inscricao.status === 'pago' && podeReembolsar(curso) && (
+            {inscricao.status === 'pago' && podeReembolsar(curso) && (
                 <Tooltip label='Reembolsar'>
                     <Button
                         className='bg-gray-text p-2 hover:bg-gray-dark text-white'

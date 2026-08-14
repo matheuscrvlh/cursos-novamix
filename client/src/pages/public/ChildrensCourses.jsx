@@ -110,7 +110,6 @@ export default function ChildrensCourses() {
                 cpf: form.cpf,
                 celular: form.celular,
                 email: form.email,
-                formaPagamento: 'mercadopago',
                 assento: form.assento,
             });
 

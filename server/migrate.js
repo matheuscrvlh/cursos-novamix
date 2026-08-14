@@ -1,187 +1,176 @@
 require('dotenv').config();
-const crypto = require('crypto');
-const db = require('./db');
-const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
+const pool = require('./db');
 
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS cursos (
-      id          TEXT PRIMARY KEY,
-      nomeCurso   TEXT NOT NULL,
-      culinarista TEXT,
-      categoria   TEXT,
-      duracao     TEXT,
-      data        TEXT,
-      hora        TEXT,
-      loja        TEXT,
-      valor       REAL,
-      ingredientes TEXT,
-      ativo       TEXT DEFAULT 'true'
-    )
-  `, err => { if (err) console.error('cursos:', err); else console.log('✓ cursos'); });
+// Todas as tabelas vivem no schema `cursos` (não no `public` padrão) — cada
+// CREATE/ALTER aqui é qualificado com "cursos." explicitamente; as rotas não
+// precisam repetir o prefixo porque o pool já seta search_path=cursos,public
+// em toda conexão nova (ver db.js).
+//
+// Identificadores em camelCase precisam ficar entre aspas duplas em todo
+// CREATE/ALTER/SELECT/INSERT/UPDATE — sem aspas, o Postgres dobra tudo pra
+// minúsculo (ex: "nomeCurso" viraria nomecurso) e quebraria o formato que o
+// frontend espera de volta no JSON (nomeCurso, cursoId, dataInscricao, etc.)
+//
+// Este arquivo só ADICIONA schema (CREATE TABLE/ADD COLUMN, sempre com
+// IF NOT EXISTS) — é seguro rodar em toda subida do servidor. A transformação
+// pontual de dados existentes (mesclar cursosInfantis em cursos, extrair
+// pagamentos de inscricoes, dropar colunas/tabelas antigas) foi feita uma
+// única vez por scripts/migrate-schema-v2.js, já rodado contra produção.
+async function migrate() {
+  await pool.query(`CREATE SCHEMA IF NOT EXISTS cursos`);
+  console.log('✓ schema cursos');
 
-  db.run(`
-    CREATE TABLE IF NOT EXISTS assentos (
-      id      INTEGER NOT NULL,
-      cursoId TEXT NOT NULL,
-      status  TEXT DEFAULT 'livre',
-      PRIMARY KEY (id, cursoId)
-    )
-  `, err => { if (err) console.error('assentos:', err); else console.log('✓ assentos'); });
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS fotos (
-      id      INTEGER PRIMARY KEY AUTOINCREMENT,
-      cursoId TEXT NOT NULL,
-      url     TEXT NOT NULL
-    )
-  `, err => { if (err) console.error('fotos:', err); else console.log('✓ fotos'); });
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS inscricoes (
-      id             TEXT PRIMARY KEY,
-      cursoId        TEXT NOT NULL,
-      nome           TEXT,
-      cpf            TEXT,
-      celular        TEXT,
-      assento        INTEGER,
-      formaPagamento TEXT DEFAULT 'mercadopago',
-      status         TEXT DEFAULT 'pendente',
-      dataInscricao  TEXT,
-      mp_preference_id TEXT,
-      mp_payment_id    TEXT
-    )
-  `, err => { if (err) console.error('inscricoes:', err); else console.log('✓ inscricoes'); });
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS culinaristas (
-      id             TEXT PRIMARY KEY,
-      nomeCulinarista TEXT,
-      cpf            TEXT,
-      industria      TEXT,
-      telefone       TEXT,
-      instagram      TEXT,
-      lojas          TEXT,
-      cursos         TEXT,
-      foto           TEXT,
-      dataCadastro   TEXT
-    )
-  `, err => { if (err) console.error('culinaristas:', err); else console.log('✓ culinaristas'); });
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS industrias (
+  // curso normal e infantil vivem na mesma tabela — "tipo" distingue, e
+  // "capacidade" substitui os 24/20 assentos que antes eram hardcoded em
+  // loops separados de criação
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cursos.cursos (
       id           TEXT PRIMARY KEY,
-      razaoSocial  TEXT,
-      nome         TEXT,
-      cnpj         TEXT,
-      telefone     TEXT,
-      email        TEXT,
-      endereco     TEXT,
-      instagram    TEXT,
-      site         TEXT,
-      foto         TEXT,
-      dataCadastro TEXT
+      "nomeCurso"  TEXT NOT NULL,
+      tipo         TEXT DEFAULT 'normal',
+      culinarista  TEXT,
+      categoria    TEXT,
+      duracao      TEXT,
+      data         TEXT,
+      hora         TEXT,
+      loja         TEXT,
+      valor        REAL,
+      ingredientes TEXT,
+      capacidade   INTEGER DEFAULT 24,
+      ativo        TEXT DEFAULT 'true'
     )
-  `, err => { if (err) console.error('industrias:', err); else console.log('✓ industrias'); });
+  `);
+  await pool.query(`ALTER TABLE cursos.cursos ADD COLUMN IF NOT EXISTS tipo TEXT DEFAULT 'normal'`);
+  await pool.query(`ALTER TABLE cursos.cursos ADD COLUMN IF NOT EXISTS capacidade INTEGER DEFAULT 24`);
+  console.log('✓ cursos.cursos');
 
-  db.run(`
-    CREATE TABLE IF NOT EXISTS cursosInfantis (
-      id              TEXT PRIMARY KEY,
-      nomeCurso       TEXT,
-      tipo            TEXT,
-      culinarista     TEXT,
-      categoria       TEXT,
-      duracao         TEXT,
-      data            TEXT,
-      hora            TEXT,
-      loja            TEXT,
-      valor           REAL,
-      nomeResponsavel TEXT,
-      nomeAluno       TEXT,
-      modalidade      TEXT
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cursos.assentos (
+      id        INTEGER NOT NULL,
+      "cursoId" TEXT NOT NULL,
+      status    TEXT DEFAULT 'livre',
+      PRIMARY KEY (id, "cursoId")
     )
-  `, err => { if (err) console.error('cursosInfantis:', err); else console.log('✓ cursosInfantis'); });
+  `);
+  console.log('✓ cursos.assentos');
 
-  db.run(`
-    CREATE TABLE IF NOT EXISTS inscricoesInfantis (
-      id              TEXT PRIMARY KEY,
-      cursoId         TEXT,
-      nomeResponsavel TEXT,
-      telefone        TEXT,
-      nomeCrianca     TEXT,
-      idadeCrianca    TEXT,
-      cpf             TEXT,
-      formaPagamento  TEXT,
-      status          TEXT,
-      dataInscricao   TEXT
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cursos.fotos (
+      id        SERIAL PRIMARY KEY,
+      "cursoId" TEXT NOT NULL,
+      url       TEXT NOT NULL
     )
-  `, err => { if (err) console.error('inscricoesInfantis:', err); else console.log('✓ inscricoesInfantis'); });
+  `);
+  console.log('✓ cursos.fotos');
 
-  // ALTER TABLE seguro: ignora erro se coluna já existir
-  db.run('ALTER TABLE cursos ADD COLUMN ingredientes TEXT', err => {
-    if (err && !err.message.includes('duplicate column')) console.error('ingredientes:', err);
-    else console.log('✓ cursos.ingredientes');
-  });
+  // dados de pagamento (mp_payment_id, método, status por tentativa) vivem
+  // em cursos.pagamentos — inscricoes guarda só o essencial da inscrição em
+  // si; "status" aqui é quem decide reservar/liberar assento, sem mudança
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cursos.inscricoes (
+      id                  TEXT PRIMARY KEY,
+      "cursoId"           TEXT NOT NULL,
+      nome                TEXT,
+      cpf                 TEXT,
+      celular             TEXT,
+      email               TEXT,
+      assento             INTEGER,
+      status              TEXT DEFAULT 'pendente',
+      "dataInscricao"     TEXT,
+      "cursoRemovidoNome" TEXT
+    )
+  `);
+  console.log('✓ cursos.inscricoes');
 
-  db.run('ALTER TABLE inscricoes ADD COLUMN mp_preference_id TEXT', err => {
-    if (err && !err.message.includes('duplicate column')) console.error('mp_preference_id:', err);
-    else console.log('✓ inscricoes.mp_preference_id');
-  });
-  db.run('ALTER TABLE inscricoes ADD COLUMN mp_payment_id TEXT', err => {
-    if (err && !err.message.includes('duplicate column')) console.error('mp_payment_id:', err);
-    else console.log('✓ inscricoes.mp_payment_id');
-  });
-  db.run('ALTER TABLE inscricoes ADD COLUMN email TEXT', err => {
-    if (err && !err.message.includes('duplicate column')) console.error('email:', err);
-    else console.log('✓ inscricoes.email');
-  });
+  // uma linha por tentativa de pagamento — mp_payment_id é único porque
+  // webhook/verificação/resposta síncrona do Brick podem todos tentar
+  // registrar a mesma tentativa, e isso deve atualizar a linha, não duplicar
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cursos.pagamentos (
+      id                 TEXT PRIMARY KEY,
+      "inscricaoId"      TEXT NOT NULL,
+      "metodoPagamento"  TEXT,
+      mp_payment_id      TEXT UNIQUE,
+      status             TEXT DEFAULT 'pendente',
+      "criadoEm"         TEXT,
+      "atualizadoEm"     TEXT
+    )
+  `);
+  console.log('✓ cursos.pagamentos');
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cursos.culinaristas (
+      id                 TEXT PRIMARY KEY,
+      "nomeCulinarista"  TEXT,
+      cpf                TEXT,
+      industria          TEXT,
+      telefone           TEXT,
+      instagram          TEXT,
+      lojas              TEXT,
+      cursos             TEXT,
+      foto               TEXT,
+      "dataCadastro"     TEXT
+    )
+  `);
+  console.log('✓ cursos.culinaristas');
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cursos.industrias (
+      id             TEXT PRIMARY KEY,
+      "razaoSocial"  TEXT,
+      nome           TEXT,
+      cnpj           TEXT,
+      telefone       TEXT,
+      email          TEXT,
+      endereco       TEXT,
+      instagram      TEXT,
+      site           TEXT,
+      foto           TEXT,
+      "dataCadastro" TEXT
+    )
+  `);
+  console.log('✓ cursos.industrias');
+
+  await pool.query(`ALTER TABLE cursos.cursos ADD COLUMN IF NOT EXISTS ingredientes TEXT`);
+  console.log('✓ cursos.cursos.ingredientes');
+
+  await pool.query(`ALTER TABLE cursos.inscricoes ADD COLUMN IF NOT EXISTS email TEXT`);
+  console.log('✓ cursos.inscricoes.email');
 
   // guarda o nome do curso quando ele é apagado mas a inscrição continua
   // existindo (pagas sobrevivem à exclusão do curso) — sem isso, o admin
   // perde a referência de qual curso era depois que a linha em `cursos` some
-  db.run('ALTER TABLE inscricoes ADD COLUMN cursoRemovidoNome TEXT', err => {
-    if (err && !err.message.includes('duplicate column')) console.error('cursoRemovidoNome:', err);
-    else console.log('✓ inscricoes.cursoRemovidoNome');
-  });
+  await pool.query(`ALTER TABLE cursos.inscricoes ADD COLUMN IF NOT EXISTS "cursoRemovidoNome" TEXT`);
+  console.log('✓ cursos.inscricoes.cursoRemovidoNome');
 
-  // método de pagamento de verdade (pix/cartao), preenchido só depois que o
-  // cliente escolhe no Brick — formaPagamento continua fixo em 'mercadopago'
-  // (é o gateway, usado pra decidir se mostra Verificar/Reembolsar no admin)
-  db.run('ALTER TABLE inscricoes ADD COLUMN metodoPagamento TEXT', err => {
-    if (err && !err.message.includes('duplicate column')) console.error('metodoPagamento:', err);
-    else console.log('✓ inscricoes.metodoPagamento');
-  });
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS usuarios (
-      id           TEXT PRIMARY KEY,
-      usuario      TEXT UNIQUE NOT NULL,
-      senha        TEXT NOT NULL,
-      dataCadastro TEXT
+  // tabela de banners — antes era criada dentro de banners.routes.js na
+  // primeira requisição; centralizada aqui junto com o resto do schema
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cursos.banners (
+      id            TEXT    PRIMARY KEY,
+      posicao       TEXT    NOT NULL,
+      imagem        TEXT    NOT NULL,
+      imagem_mobile TEXT,
+      link          TEXT,
+      ordem         INTEGER DEFAULT 0,
+      ativo         INTEGER DEFAULT 1
     )
-  `, async (err) => {
-    if (err) { console.error('usuarios:', err); return; }
-    console.log('✓ usuarios');
+  `);
+  await pool.query(`ALTER TABLE cursos.banners ADD COLUMN IF NOT EXISTS imagem_mobile TEXT`);
+  console.log('✓ cursos.banners');
 
-    // Seed: cria admin padrão se não existir nenhum usuário
-    db.get('SELECT COUNT(*) as total FROM usuarios', [], async (err2, row) => {
-      if (err2 || row.total > 0) return;
+  // cursos.usuarios (login local) não é mais gerenciada por aqui — login
+  // passou a ser via hub-novamix (ver server/middleware/auth.middleware.js).
+  // A tabela continua existindo no banco com os dados antigos, só não
+  // criamos/populamos ela mais.
+}
 
-      // sem ADMIN_SEED_SENHA no .env, gera uma senha aleatória em vez de usar
-      // um valor fixo adivinhável — evita expor admin/changeme em produção
-      const senha = process.env.ADMIN_SEED_SENHA || crypto.randomBytes(12).toString('base64url');
-      const hash = await bcrypt.hash(senha, 12);
-      db.run(
-        'INSERT INTO usuarios (id, usuario, senha, dataCadastro) VALUES (?, ?, ?, ?)',
-        [uuidv4(), 'admin', hash, new Date().toISOString()],
-        (err3) => {
-          if (err3) console.error('seed admin:', err3);
-          else console.log(`✓ usuário admin criado (usuário: admin, senha: ${senha}) — anote agora, essa senha só é exibida uma vez`);
-        }
-      );
-    });
+migrate()
+  .then(() => {
+    console.log('Migração concluída.');
+    process.exit(0);
+  })
+  .catch(err => {
+    console.error('Erro na migração:', err);
+    process.exit(1);
   });
-});
-
-setTimeout(() => { db.close(); console.log('Migração concluída.'); }, 1500);

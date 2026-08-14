@@ -1,15 +1,10 @@
 const URL = '/api'
 
-function authHeader() {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 export async function postCulinarian(formData) {
     try {
         const res = await fetch(`${URL}/culinaristas`, {
             method: "POST",
-            headers: { ...authHeader() },
+            credentials: 'include',
             body: formData
         });
 
@@ -41,7 +36,7 @@ export async function putCulinarian(culinarianId, formData) {
     try {
         const res = await fetch((`${URL}/culinaristas/${culinarianId}`), {
             method: 'PUT',
-            headers: { ...authHeader() },
+            credentials: 'include',
             body: formData
         });
 
@@ -58,7 +53,7 @@ export async function deleteCulinarian(culinarianId) {
     try {
         const res = await fetch((`${URL}/culinaristas/${culinarianId}`), {
             method: 'DELETE',
-            headers: { ...authHeader() }
+            credentials: 'include'
         });
 
         if (!res.ok) {

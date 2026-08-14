@@ -38,7 +38,6 @@ export default function Courses() {
         cpf: '',
         celular: '',
         email: '',
-        formaPagamento: 'mercadopago',
         assento: ''
     });
 
@@ -112,7 +111,6 @@ export default function Courses() {
                 cpf: form.cpf,
                 celular: form.celular,
                 email: form.email,
-                formaPagamento: 'mercadopago',
                 assento: form.assento,
             });
 

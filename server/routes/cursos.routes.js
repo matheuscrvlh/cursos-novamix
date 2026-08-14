@@ -2,23 +2,25 @@ const express = require('express');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
-const authMiddleware = require('../middleware/auth.middleware');
-const db = require('../db');
+const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
+const pool = require('../db');
 
 const uploadCursos = createUpload('cursos');
 const router = express.Router();
 const fs = require('fs');
 
-router.get('/', (req, res) => {
-  db.all(`
-    SELECT c.*,
-    GROUP_CONCAT(f.url) as fotos
-    FROM cursos c
-    LEFT JOIN fotos f ON f.cursoId = c.id
-    GROUP BY c.id
-    ORDER BY c.data ASC, c.hora ASC
-  `, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+router.get('/', async (req, res) => {
+  try {
+    const { tipo } = req.query;
+    const { rows } = await pool.query(`
+      SELECT c.*,
+      STRING_AGG(f.url, ',') as fotos
+      FROM cursos c
+      LEFT JOIN fotos f ON f."cursoId" = c.id
+      ${tipo ? 'WHERE c.tipo = $1' : ''}
+      GROUP BY c.id
+      ORDER BY c.data ASC, c.hora ASC
+    `, tipo ? [tipo] : []);
 
     const cursos = rows.map(c => ({
       ...c,
@@ -26,28 +28,37 @@ router.get('/', (req, res) => {
     }));
 
     res.json(cursos);
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.get('/:id', (req, res) => {
-  db.all(`
-    SELECT c.*,
-    GROUP_CONCAT(f.url) as fotos
-    FROM cursos c
-    LEFT JOIN fotos f ON f.cursoId = c.id
-    WHERE c.id = ?
-    GROUP BY c.id
-  `, [req.params.id], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+router.get('/:id', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT c.*,
+      STRING_AGG(f.url, ',') as fotos
+      FROM cursos c
+      LEFT JOIN fotos f ON f."cursoId" = c.id
+      WHERE c.id = $1
+      GROUP BY c.id
+    `, [req.params.id]);
+
     if (!rows.length) return res.status(404).json({ message: 'Curso não encontrado' });
     const curso = { ...rows[0], fotos: rows[0].fotos ? rows[0].fotos.split(',') : [] };
     res.json(curso);
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
+router.post('/', authenticate, requireCursosAccess, uploadCursos.array('fotos', 5), async (req, res) => {
   const cursoId = uuidv4();
   const { nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor, ingredientes } = req.body
+  const tipo = req.body.tipo === 'infantil' ? 'infantil' : 'normal';
+  // curso infantil tem 20 assentos por padrão, normal tem 24 — dá pra
+  // sobrescrever mandando capacidade explícita no body
+  const capacidade = Number(req.body.capacidade) || (tipo === 'infantil' ? 20 : 24);
 
   if (!nomeCurso || !categoria || !duracao || !data || !hora || !loja || !valor) {
     return res.status(400).json({ error: 'Campos obrigatórios: nomeCurso, categoria, duracao, data, hora, loja, valor' });
@@ -57,57 +68,65 @@ router.post('/', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
     return res.status(400).json({ error: 'Valor do curso inválido' });
   }
 
-  db.run(`
-    INSERT INTO cursos
-    (id, nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor, ingredientes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
-    cursoId,
-    nomeCurso,
-    culinarista,
-    categoria,
-    duracao,
-    data,
-    hora,
-    loja,
-    valor,
-    ingredientes || null
-  ], function(err) {
-    if (err) {
-      console.error('Erro ao inserir curso:', err);
-      return res.status(500).json({ error: err.message });
-    }
+  try {
+    await pool.query(`
+      INSERT INTO cursos
+      (id, "nomeCurso", tipo, culinarista, categoria, duracao, data, hora, loja, valor, ingredientes, capacidade)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    `, [
+      cursoId,
+      nomeCurso,
+      tipo,
+      culinarista,
+      categoria,
+      duracao,
+      data,
+      hora,
+      loja,
+      valor,
+      ingredientes || null,
+      capacidade
+    ]);
 
     if (req.files && req.files.length > 0) {
       const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
-      req.files.forEach(file => {
+      for (const file of req.files) {
         if (!permitidos.includes(file.mimetype)) {
           console.warn(`Arquivo ignorado (tipo não permitido): ${file.originalname}`);
-          return;
+          continue;
         }
 
-        db.run(
-          `INSERT INTO fotos (cursoId, url) VALUES (?, ?)`,
-          [cursoId, `/uploads/cursos/${file.filename}`],
-          err => { if (err) console.error('Erro ao inserir foto:', err); }
+        try {
+          await pool.query(
+            `INSERT INTO fotos ("cursoId", url) VALUES ($1, $2)`,
+            [cursoId, `/uploads/cursos/${file.filename}`]
+          );
+        } catch (err) {
+          console.error('Erro ao inserir foto:', err);
+        }
+      }
+    }
+
+    for (let i = 1; i <= capacidade; i++) {
+      try {
+        await pool.query(
+          `INSERT INTO assentos (id, "cursoId", status) VALUES ($1, $2, $3)`,
+          [i, cursoId, 'livre']
         );
-      });
+      } catch (err) {
+        console.error('Erro ao inserir assento:', err);
+      }
     }
 
-    for (let i = 1; i <= 24; i++) {
-      db.run(
-        `INSERT INTO assentos (id, cursoId, status) VALUES (?, ?, ?)`,
-        [i, cursoId, 'livre'],
-        err => { if (err) console.error('Erro ao inserir assento:', err); }
-      );
-    }
-
-    res.status(201).json({ cursoId, nomeCurso, culinarista, categoria, duracao, data, hora, loja, valor  });
-  });
+    res.status(201).json({ cursoId, nomeCurso, tipo, culinarista, categoria, duracao, data, hora, loja, valor, capacidade });
+  } catch (err) {
+    console.error('Erro ao inserir curso:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.put('/:id', authMiddleware, uploadCursos.array('fotos', 5), (req, res) => {
+router.put('/:id', authenticate, requireCursosAccess, uploadCursos.array('fotos', 5), async (req, res) => {
   const id = req.params.id;
 
   // valor vazio/inválido não pode virar '' no banco (COALESCE só preserva o
@@ -118,112 +137,112 @@ router.put('/:id', authMiddleware, uploadCursos.array('fotos', 5), (req, res) =>
     return res.status(400).json({ error: 'Valor do curso inválido' });
   }
 
-  db.run(`
-    UPDATE cursos SET
-      nomeCurso    = COALESCE(?, nomeCurso),
-      culinarista  = COALESCE(?, culinarista),
-      categoria    = COALESCE(?, categoria),
-      duracao      = COALESCE(?, duracao),
-      data         = COALESCE(?, data),
-      hora         = COALESCE(?, hora),
-      loja         = COALESCE(?, loja),
-      valor        = COALESCE(?, valor),
-      ingredientes = ?
-    WHERE id = ?
-  `, [
-    req.body.nomeCurso,
-    req.body.culinarista,
-    req.body.categoria,
-    req.body.duracao,
-    req.body.data,
-    req.body.hora,
-    req.body.loja,
-    req.body.valor,
-    req.body.ingredientes ?? null,
-    id
-  ], function(err) {
-    if (err) {
-      console.error('Erro ao atualizar curso:', err);
-      return res.status(500).json({ error: err.message });
-    }
-    if (this.changes === 0) return res.status(404).json({ error: 'Curso não encontrado' });
+  try {
+    const result = await pool.query(`
+      UPDATE cursos SET
+        "nomeCurso"  = COALESCE($1, "nomeCurso"),
+        tipo         = COALESCE($2, tipo),
+        culinarista  = COALESCE($3, culinarista),
+        categoria    = COALESCE($4, categoria),
+        duracao      = COALESCE($5, duracao),
+        data         = COALESCE($6, data),
+        hora         = COALESCE($7, hora),
+        loja         = COALESCE($8, loja),
+        valor        = COALESCE($9, valor),
+        ingredientes = $10
+      WHERE id = $11
+    `, [
+      req.body.nomeCurso,
+      req.body.tipo,
+      req.body.culinarista,
+      req.body.categoria,
+      req.body.duracao,
+      req.body.data,
+      req.body.hora,
+      req.body.loja,
+      req.body.valor,
+      req.body.ingredientes ?? null,
+      id
+    ]);
+
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Curso não encontrado' });
 
     if (req.files && req.files.length > 0) {
       const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
-      req.files.forEach(file => {
+      for (const file of req.files) {
         if (!permitidos.includes(file.mimetype)) {
           console.warn(`Arquivo ignorado (tipo não permitido): ${file.originalname}`);
-          return;
+          continue;
         }
 
-        db.run(
-          `INSERT INTO fotos (cursoId, url) VALUES (?, ?)`,
-          [id, `/uploads/cursos/${file.filename}`],
-          err => { if (err) console.error('Erro ao inserir foto:', err); }
-        );
-      });
+        try {
+          await pool.query(
+            `INSERT INTO fotos ("cursoId", url) VALUES ($1, $2)`,
+            [id, `/uploads/cursos/${file.filename}`]
+          );
+        } catch (err) {
+          console.error('Erro ao inserir foto:', err);
+        }
+      }
     }
 
     res.json({ message: 'Atualizado' });
-  });
+  } catch (err) {
+    console.error('Erro ao atualizar curso:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.delete('/:id', authMiddleware, (req, res) => {
+router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
   const id = req.params.id;
 
-  db.get(`SELECT nomeCurso FROM cursos WHERE id = ?`, [id], (err, curso) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!curso) return res.status(404).json({ error: 'Curso não encontrado' });
+  try {
+    const { rows } = await pool.query(`SELECT "nomeCurso" FROM cursos WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ error: 'Curso não encontrado' });
+    const curso = rows[0];
 
-    // busca fotos
-    db.all(
-      `SELECT url FROM fotos WHERE cursoId = ?`,
-      [id],
-      (err, fotos) => {
+    const { rows: fotos } = await pool.query(`SELECT url FROM fotos WHERE "cursoId" = $1`, [id]);
+
+    // remove arquivos físicos
+    fotos.forEach(foto => {
+      const filePath = path.join(__dirname, '..', foto.url);
+
+      fs.unlink(filePath, err => {
         if (err) {
-          return res.status(500).json({ error: err.message });
+          console.error('Erro ao deletar arquivo:', filePath, err.message);
         }
+      });
+    });
 
-        // remove arquivos físicos
-        fotos.forEach(foto => {
-          const filePath = path.join(__dirname, '..', foto.url);
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
 
-          fs.unlink(filePath, err => {
-            if (err) {
-              console.error('Erro ao deletar arquivo:', filePath, err.message);
-            }
-          });
-        });
+      // todas as inscrições sobrevivem à exclusão do curso, seja qual for
+      // o status (não pode sumir com o histórico de quem já pagou,
+      // reembolsou, etc.) — guarda o nome do curso nelas antes, já que a
+      // linha em `cursos` vai deixar de existir
+      await client.query(
+        `UPDATE inscricoes SET "cursoRemovidoNome" = $1 WHERE "cursoId" = $2`,
+        [curso.nomeCurso, id]
+      );
+      await client.query(`DELETE FROM assentos WHERE "cursoId" = $1`, [id]);
+      await client.query(`DELETE FROM fotos WHERE "cursoId" = $1`, [id]);
+      await client.query(`DELETE FROM cursos WHERE id = $1`, [id]);
 
-        // remove do banco
-        db.serialize(() => {
-          // todas as inscrições sobrevivem à exclusão do curso, seja qual for
-          // o status (não pode sumir com o histórico de quem já pagou,
-          // reembolsou, etc.) — guarda o nome do curso nelas antes, já que a
-          // linha em `cursos` vai deixar de existir
-          db.run(
-            `UPDATE inscricoes SET cursoRemovidoNome = ? WHERE cursoId = ?`,
-            [curso.nomeCurso, id]
-          );
-          db.run(`DELETE FROM assentos WHERE cursoId = ?`, [id]);
-          db.run(`DELETE FROM fotos WHERE cursoId = ?`, [id]);
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
 
-          db.run(
-            `DELETE FROM cursos WHERE id = ?`,
-            [id],
-            function(err) {
-              if (err) {
-                return res.status(500).json({ error: err.message });
-              }
-
-              res.sendStatus(204);
-            }
-          );
-        });
-      }
-    );
-  });
+    res.sendStatus(204);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Handler de erro do Multer

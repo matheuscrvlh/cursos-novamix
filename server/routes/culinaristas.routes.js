@@ -3,15 +3,15 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
-const authMiddleware = require('../middleware/auth.middleware');
-const db = require('../db');
+const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
+const pool = require('../db');
 
 const uploadCulinaristas = createUpload('culinaristas');
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  db.all(`SELECT * FROM culinaristas`, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+router.get('/', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM culinaristas`);
 
     const culinaristas = rows.map(c => ({
       ...c,
@@ -20,10 +20,12 @@ router.get('/', (req, res) => {
     }));
 
     res.json(culinaristas);
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/', authMiddleware, uploadCulinaristas.single('foto'), (req, res) => {
+router.post('/', authenticate, requireCursosAccess, uploadCulinaristas.single('foto'), async (req, res) => {
   const { nomeCulinarista, cpf, lojas, cursos, instagram, industria, telefone } = req.body;
 
   if (!nomeCulinarista || !cpf) {
@@ -34,37 +36,38 @@ router.post('/', authMiddleware, uploadCulinaristas.single('foto'), (req, res) =
   const foto = req.file ? `/uploads/culinaristas/${req.file.filename}` : null;
   const dataCadastro = new Date().toISOString();
 
-  db.run(`
-    INSERT INTO culinaristas
-      (id, nomeCulinarista, cpf, industria, telefone, instagram, lojas, cursos, foto, dataCadastro)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
-    id,
-    nomeCulinarista,
-    cpf,
-    industria,
-    telefone,
-    instagram,
-    lojas ? lojas : JSON.stringify([]),
-    cursos ? cursos : JSON.stringify([]),
-    foto,
-    dataCadastro
-  ], function(err) {
-    if (err) {
-      console.error('Erro ao inserir culinarista:', err);
-      return res.status(500).json({ message: 'Erro ao criar culinarista' });
-    }
+  try {
+    await pool.query(`
+      INSERT INTO culinaristas
+        (id, "nomeCulinarista", cpf, industria, telefone, instagram, lojas, cursos, foto, "dataCadastro")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    `, [
+      id,
+      nomeCulinarista,
+      cpf,
+      industria,
+      telefone,
+      instagram,
+      lojas ? lojas : JSON.stringify([]),
+      cursos ? cursos : JSON.stringify([]),
+      foto,
+      dataCadastro
+    ]);
 
     res.status(201).json({ id, nomeCulinarista, cpf, industria, telefone, lojas, instagram, foto, dataCadastro });
-  });
+  } catch (err) {
+    console.error('Erro ao inserir culinarista:', err);
+    res.status(500).json({ message: 'Erro ao criar culinarista' });
+  }
 });
 
-router.put('/:id', authMiddleware, uploadCulinaristas.single('foto'), (req, res) => {
+router.put('/:id', authenticate, requireCursosAccess, uploadCulinaristas.single('foto'), async (req, res) => {
   const { id } = req.params;
 
-  db.get(`SELECT * FROM culinaristas WHERE id = ?`, [id], (err, culinarista) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!culinarista) return res.status(404).json({ message: 'Culinarista não encontrado' });
+  try {
+    const { rows } = await pool.query(`SELECT * FROM culinaristas WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ message: 'Culinarista não encontrado' });
+    const culinarista = rows[0];
 
     if (req.file && culinarista.foto) {
       const fotoPath = path.join(__dirname, '..', culinarista.foto);
@@ -75,17 +78,17 @@ router.put('/:id', authMiddleware, uploadCulinaristas.single('foto'), (req, res)
       ? `/uploads/culinaristas/${req.file.filename}`
       : culinarista.foto;
 
-    db.run(`
+    await pool.query(`
       UPDATE culinaristas SET
-        nomeCulinarista = COALESCE(?, nomeCulinarista),
-        cpf             = COALESCE(?, cpf),
-        instagram       = COALESCE(?, instagram),
-        telefone        = COALESCE(?, telefone),
-        industria       = COALESCE(?, industria),
-        lojas           = COALESCE(?, lojas),
-        cursos          = COALESCE(?, cursos),
-        foto            = ?
-      WHERE id = ?
+        "nomeCulinarista" = COALESCE($1, "nomeCulinarista"),
+        cpf               = COALESCE($2, cpf),
+        instagram         = COALESCE($3, instagram),
+        telefone          = COALESCE($4, telefone),
+        industria         = COALESCE($5, industria),
+        lojas             = COALESCE($6, lojas),
+        cursos            = COALESCE($7, cursos),
+        foto              = $8
+      WHERE id = $9
     `, [
       req.body.nomeCulinarista ?? null,
       req.body.cpf ?? null,
@@ -96,38 +99,34 @@ router.put('/:id', authMiddleware, uploadCulinaristas.single('foto'), (req, res)
       req.body.cursos ?? null,
       novaFoto,
       id
-    ], function(err) {
-      if (err) {
-        console.error('Erro ao atualizar culinarista:', err);
-        return res.status(500).json({ error: err.message });
-      }
+    ]);
 
-      res.json({ message: 'Atualizado' });
-    });
-  });
+    res.json({ message: 'Atualizado' });
+  } catch (err) {
+    console.error('Erro ao atualizar culinarista:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.delete('/:id', authMiddleware, (req, res) => {
+router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
   const { id } = req.params;
 
-  db.get(`SELECT * FROM culinaristas WHERE id = ?`, [id], (err, culinarista) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!culinarista) return res.status(404).json({ message: 'Culinarista não encontrado' });
+  try {
+    const { rows } = await pool.query(`SELECT * FROM culinaristas WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ message: 'Culinarista não encontrado' });
+    const culinarista = rows[0];
 
     if (culinarista.foto) {
       const fotoPath = path.join(__dirname, '..', culinarista.foto);
       if (fs.existsSync(fotoPath)) fs.unlinkSync(fotoPath);
     }
 
-    db.run(`DELETE FROM culinaristas WHERE id = ?`, [id], function(err) {
-      if (err) {
-        console.error('Erro ao deletar culinarista:', err);
-        return res.status(500).json({ error: err.message });
-      }
-
-      res.sendStatus(204);
-    });
-  });
+    await pool.query(`DELETE FROM culinaristas WHERE id = $1`, [id]);
+    res.sendStatus(204);
+  } catch (err) {
+    console.error('Erro ao deletar culinarista:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Handler de erro do Multer

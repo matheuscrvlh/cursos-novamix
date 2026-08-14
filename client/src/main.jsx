@@ -2,7 +2,6 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { DadosProvider } from './contexts/DadosContext.jsx'
-import './utils/authInterceptor.js'
 import './index.css'
 import App from './App.jsx'
 

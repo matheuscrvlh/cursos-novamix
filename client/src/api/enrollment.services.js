@@ -1,10 +1,5 @@
 const URL = '/api'
 
-function authHeader() {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 export async function postEnrollment(data) {
     try {
         const res = await fetch(`${URL}/inscricoes`, {
@@ -39,7 +34,7 @@ export async function getEnrollment(cursoId) {
     try {
         const res = await fetch((`${URL}/inscricoes/curso/${cursoId}`), {
             method: 'GET',
-            headers: { ...authHeader() }
+            credentials: 'include'
         });
 
         return res.json()
@@ -53,7 +48,7 @@ export async function getTotalEnrollment() {
     try {
         const res = await fetch((`${URL}/inscricoes`), {
             method: 'GET',
-            headers: { ...authHeader() }
+            credentials: 'include'
         });
 
         return res.json()
@@ -68,9 +63,9 @@ export async function putEnrollment(inscricaoId, data) {
         const res = await fetch((`${URL}/inscricoes/${inscricaoId}`), {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                ...authHeader()
+                'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify(data)
         });
 
@@ -121,18 +116,18 @@ export async function deleteEnrollment(inscricaoId) {
     try {
         const res = await fetch((`${URL}/inscricoes/${inscricaoId}`), {
             method: 'DELETE',
-            headers: { ...authHeader() }
+            credentials: 'include'
         });
 
         if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            return { ok: false, message: data.message || 'Erro ao excluir inscrição.' };
+            const data = await res.json().catch(() => ({}))
+            return { ok: false, message: data.message || 'Erro ao excluir inscrição.' }
         }
-        return { ok: true };
+        return { ok: true }
 
     } catch (err) {
         console.error('Erro ao deletar Inscricao:', err);
-        return { ok: false, message: 'Erro de conexão. Tente novamente.' };
+        return { ok: false, message: 'Erro de conexão. Tente novamente.' }
     }
 }
 
@@ -140,7 +135,7 @@ export async function verificarPagamentoMP(inscricaoId) {
     try {
         const res = await fetch(`${URL}/pagamentos/verificar/${inscricaoId}`, {
             method: 'POST',
-            headers: { ...authHeader() },
+            credentials: 'include',
         });
         return res.json();
     } catch (err) {
@@ -152,7 +147,7 @@ export async function reembolsarPagamentoMP(inscricaoId) {
     try {
         const res = await fetch(`${URL}/pagamentos/reembolsar/${inscricaoId}`, {
             method: 'POST',
-            headers: { ...authHeader() },
+            credentials: 'include',
         });
         const json = await res.json();
         return { ...json, ok: res.ok };

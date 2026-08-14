@@ -1,23 +1,15 @@
 import { Link } from 'react-router-dom'
-import { useNavigate } from 'react-router'
 import { useState } from 'react'
-import { Menu, X, LogOut } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 
 import LinkSideBar from '../../components/admin/LinkSideBar'
-import ConfirmModal from '../../components/admin/ModalConfirm'
 
 import { logoNm } from '../../assets/images/logos/'
 
-export default function SideBar() {
-    const [openModal, setOpenModal] = useState(false)
-    const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const navigate = useNavigate()
+const HUB_URL = 'https://hub.lojanovamix.com.br'
 
-    function handleLogout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('usuario');
-        navigate('/login');
-    }
+export default function SideBar() {
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
 
     function toggleMenu() {
         setIsMenuOpen(!isMenuOpen)
@@ -84,34 +76,17 @@ export default function SideBar() {
                     <LinkSideBar to='/marketingAdmin' onClick={closeMenu}>
                         Marketing
                     </LinkSideBar>
-                    <LinkSideBar to='/usuariosAdmin' onClick={closeMenu}>
-                        Usuários
-                    </LinkSideBar>
                 </nav>
 
-                <Link
-                    onClick={() => {
-                        setOpenModal(true)
-                        closeMenu()
-                    }}
-                    className='bg-red-light shadow-sm w-[80%] rounded-md p-2 text-white
-                        font-semibold cursor-pointer hover:bg-red-base ml-auto mr-auto mt-auto mb-[10%] text-center
+                <a
+                    href={HUB_URL}
+                    className='bg-gray-dark shadow-sm w-[80%] rounded-md p-2 text-white
+                        font-semibold cursor-pointer hover:bg-gray-text ml-auto mr-auto mt-auto mb-[10%] text-center
                     '
                 >
-                    Sair
-                </Link>
+                    ← Voltar ao Hub
+                </a>
             </aside>
-
-            <ConfirmModal
-                isOpen={openModal}
-                title='Confirmação de Logout'
-                message='Tem certeza que deseja sair?'
-                variant='warning'
-                confirmLabel='Sair'
-                icon={LogOut}
-                onConfirm={handleLogout}
-                onCancel={() => setOpenModal(false)}
-            />
-        </>  
+        </>
     )
 }

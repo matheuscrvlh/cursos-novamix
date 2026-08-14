@@ -3,65 +3,70 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
-const authMiddleware = require('../middleware/auth.middleware');
-const db = require('../db');
+const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
+const pool = require('../db');
 
 const uploadIndustria = createUpload('industrias');
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  db.all(`SELECT * FROM industrias`, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+router.get('/', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM industrias`);
     res.json(rows);
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.get('/:id', (req, res) => {
-  db.get(`SELECT * FROM industrias WHERE id = ?`, [req.params.id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ message: 'Indústria não encontrada' });
-    res.json(row);
-  });
+router.get('/:id', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM industrias WHERE id = $1`, [req.params.id]);
+    if (!rows.length) return res.status(404).json({ message: 'Indústria não encontrada' });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/', authMiddleware, uploadIndustria.single('foto'), (req, res) => {
+router.post('/', authenticate, requireCursosAccess, uploadIndustria.single('foto'), async (req, res) => {
   const { razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site } = req.body;
   const id = uuidv4();
   const foto = req.file ? `/uploads/industrias/${req.file.filename}` : null;
   const dataCadastro = new Date().toISOString();
 
-  db.run(`
-    INSERT INTO industrias
-      (id, razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site, foto, dataCadastro)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
-    id,
-    razaoSocial,
-    nome,
-    cnpj       || '',
-    telefone   || '',
-    email      || '',
-    endereco   || '',
-    instagram  || '',
-    site       || '',
-    foto,
-    dataCadastro
-  ], function(err) {
-    if (err) {
-      console.error('Erro ao inserir indústria:', err);
-      return res.status(500).json({ error: err.message });
-    }
+  try {
+    await pool.query(`
+      INSERT INTO industrias
+        (id, "razaoSocial", nome, cnpj, telefone, email, endereco, instagram, site, foto, "dataCadastro")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    `, [
+      id,
+      razaoSocial,
+      nome,
+      cnpj      || '',
+      telefone  || '',
+      email     || '',
+      endereco  || '',
+      instagram || '',
+      site      || '',
+      foto,
+      dataCadastro
+    ]);
 
     res.status(201).json({ id, razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site, foto, dataCadastro });
-  });
+  } catch (err) {
+    console.error('Erro ao inserir indústria:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.put('/:id', authMiddleware, uploadIndustria.single('foto'), (req, res) => {
+router.put('/:id', authenticate, requireCursosAccess, uploadIndustria.single('foto'), async (req, res) => {
   const { id } = req.params;
 
-  db.get(`SELECT * FROM industrias WHERE id = ?`, [id], (err, industria) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!industria) return res.status(404).json({ message: 'Indústria não encontrada' });
+  try {
+    const { rows } = await pool.query(`SELECT * FROM industrias WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ message: 'Indústria não encontrada' });
+    const industria = rows[0];
 
     if (req.file && industria.foto) {
       const oldPath = path.join(__dirname, '..', industria.foto);
@@ -72,18 +77,18 @@ router.put('/:id', authMiddleware, uploadIndustria.single('foto'), (req, res) =>
       ? `/uploads/industrias/${req.file.filename}`
       : industria.foto;
 
-    db.run(`
+    await pool.query(`
       UPDATE industrias SET
-        razaoSocial = COALESCE(?, razaoSocial),
-        nome        = COALESCE(?, nome),
-        cnpj        = COALESCE(?, cnpj),
-        telefone    = COALESCE(?, telefone),
-        email       = COALESCE(?, email),
-        endereco    = COALESCE(?, endereco),
-        instagram   = COALESCE(?, instagram),
-        site        = COALESCE(?, site),
-        foto        = ?
-      WHERE id = ?
+        "razaoSocial" = COALESCE($1, "razaoSocial"),
+        nome          = COALESCE($2, nome),
+        cnpj          = COALESCE($3, cnpj),
+        telefone      = COALESCE($4, telefone),
+        email         = COALESCE($5, email),
+        endereco      = COALESCE($6, endereco),
+        instagram     = COALESCE($7, instagram),
+        site          = COALESCE($8, site),
+        foto          = $9
+      WHERE id = $10
     `, [
       req.body.razaoSocial ?? null,
       req.body.nome        ?? null,
@@ -95,38 +100,34 @@ router.put('/:id', authMiddleware, uploadIndustria.single('foto'), (req, res) =>
       req.body.site        ?? null,
       novaFoto,
       id
-    ], function(err) {
-      if (err) {
-        console.error('Erro ao atualizar indústria:', err);
-        return res.status(500).json({ message: 'Erro ao atualizar indústria' });
-      }
+    ]);
 
-      res.json({ message: 'Atualizado' });
-    });
-  });
+    res.json({ message: 'Atualizado' });
+  } catch (err) {
+    console.error('Erro ao atualizar indústria:', err);
+    res.status(500).json({ message: 'Erro ao atualizar indústria' });
+  }
 });
 
-router.delete('/:id', authMiddleware, (req, res) => {
+router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
   const { id } = req.params;
 
-  db.get(`SELECT * FROM industrias WHERE id = ?`, [id], (err, industria) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!industria) return res.status(404).json({ message: 'Indústria não encontrada' });
+  try {
+    const { rows } = await pool.query(`SELECT * FROM industrias WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ message: 'Indústria não encontrada' });
+    const industria = rows[0];
 
     if (industria.foto) {
       const imgPath = path.join(__dirname, '..', industria.foto);
       if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
     }
 
-    db.run(`DELETE FROM industrias WHERE id = ?`, [id], function(err) {
-      if (err) {
-        console.error('Erro ao deletar indústria:', err);
-        return res.status(500).json({ message: 'Erro ao excluir indústria' });
-      }
-
-      res.sendStatus(204);
-    });
-  });
+    await pool.query(`DELETE FROM industrias WHERE id = $1`, [id]);
+    res.sendStatus(204);
+  } catch (err) {
+    console.error('Erro ao deletar indústria:', err);
+    res.status(500).json({ message: 'Erro ao excluir indústria' });
+  }
 });
 
 // Handler de erro do Multer

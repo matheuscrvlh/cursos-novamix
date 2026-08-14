@@ -1,36 +1,26 @@
-import { useEffect, useState } from 'react'
-import { Navigate, Outlet } from 'react-router-dom'
+import { useContext } from 'react'
+import { Outlet } from 'react-router-dom'
 
-function tokenExpirado(token) {
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]))
-        if (!payload.exp) return false
-        return Date.now() >= payload.exp * 1000
-    } catch {
-        return true
+import { AdminAuthContext, AdminAuthProvider } from '../contexts/AdminAuthContext'
+
+function RequireAuthContent() {
+    const { loading } = useContext(AdminAuthContext)
+
+    if (loading) {
+        return (
+            <div className='w-full min-h-screen flex items-center justify-center text-gray-dark'>
+                Carregando...
+            </div>
+        )
     }
+
+    return <Outlet />
 }
 
 export default function RequireAuth() {
-    const [autenticado, setAutenticado] = useState(() => {
-        const token = localStorage.getItem('token')
-        return !!token && !tokenExpirado(token)
-    })
-
-    // sem isso, uma sessão que expira enquanto o admin fica parado numa
-    // página só seria detectada na próxima navegação — até lá, editar/excluir
-    // falha silenciosamente com 401 sem nenhum aviso de sessão expirada
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const token = localStorage.getItem('token')
-            if (!token || tokenExpirado(token)) {
-                localStorage.removeItem('token')
-                localStorage.removeItem('usuario')
-                setAutenticado(false)
-            }
-        }, 30000)
-        return () => clearInterval(interval)
-    }, [])
-
-    return autenticado ? <Outlet /> : <Navigate to='/login' replace />
+    return (
+        <AdminAuthProvider>
+            <RequireAuthContent />
+        </AdminAuthProvider>
+    )
 }
