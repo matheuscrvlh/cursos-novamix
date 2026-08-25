@@ -1,0 +1,355 @@
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+const pool = require('../db');
+const { authenticateCliente } = require('../middleware/authCliente.middleware');
+const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
+const { loginLimiter } = require('../middleware/rateLimit.middleware');
+const { cpfValido } = require('../utils/cpf');
+const { enviarEmail, emailRedefinirSenha } = require('../utils/email');
+const logAudit = require('../utils/logAudit');
+
+const router = express.Router();
+
+const SETE_DIAS_MS = 7 * 24 * 60 * 60 * 1000;
+const COOKIE_OPTS = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+};
+
+function assinarToken(cliente) {
+    return jwt.sign(
+        { sub: cliente.id, nome: cliente.nome, email: cliente.email },
+        process.env.CLIENTE_JWT_SECRET,
+        { expiresIn: '7d' }
+    );
+}
+
+function emailValido(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || '');
+}
+
+// devolve só os campos seguros de expor (nunca senha_hash)
+function serializarCliente(c) {
+    return {
+        id: c.id,
+        nome: c.nome,
+        email: c.email,
+        cpf: c.cpf,
+        celular: c.celular,
+        criadoEm: c.criado_em,
+    };
+}
+
+router.post('/cadastro', loginLimiter, async (req, res) => {
+    const { nome, email, senha, cpf, celular } = req.body;
+
+    if (!nome?.trim() || !emailValido(email) || !senha || senha.length < 6) {
+        return res.status(400).json({ message: 'Nome, e-mail válido e senha (mínimo 6 caracteres) são obrigatórios.' });
+    }
+    const cpfDigits = (cpf || '').replace(/\D/g, '');
+    if (cpf && !cpfValido(cpfDigits)) {
+        return res.status(400).json({ message: 'CPF inválido.' });
+    }
+
+    try {
+        const { rows: existentes } = await pool.query(
+            `SELECT id FROM clientes WHERE email = $1 OR (cpf IS NOT NULL AND cpf = $2)`,
+            [email.toLowerCase(), cpf ? cpfDigits : null]
+        );
+        if (existentes.length) {
+            return res.status(409).json({ message: 'Já existe uma conta com esse e-mail ou CPF.' });
+        }
+
+        const id = uuidv4();
+        const senhaHash = await bcrypt.hash(senha, 10);
+
+        const { rows } = await pool.query(`
+            INSERT INTO clientes (id, nome, email, senha_hash, cpf, celular)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id, nome, email, cpf, celular, criado_em
+        `, [id, nome.trim(), email.toLowerCase(), senhaHash, cpf ? cpfDigits : null, celular || null]);
+
+        const cliente = rows[0];
+        res.cookie('cliente_token', assinarToken(cliente), { ...COOKIE_OPTS, maxAge: SETE_DIAS_MS });
+        res.status(201).json(serializarCliente(cliente));
+    } catch (err) {
+        // a checagem acima (SELECT) não é atômica com o INSERT — duas
+        // requisições simultâneas com o mesmo e-mail/CPF (duplo clique, duas
+        // abas) podem ambas passar pelo SELECT antes de qualquer INSERT
+        // acontecer; a constraint UNIQUE pega isso, só precisa virar a
+        // mensagem certa em vez de um 500 genérico
+        if (err.code === '23505') {
+            return res.status(409).json({ message: 'Já existe uma conta com esse e-mail ou CPF.' });
+        }
+        console.error('Erro ao cadastrar cliente:', err);
+        res.status(500).json({ message: 'Erro ao criar conta.' });
+    }
+});
+
+router.post('/login', loginLimiter, async (req, res) => {
+    const { email, senha } = req.body;
+    if (!email || !senha) {
+        return res.status(400).json({ message: 'E-mail e senha são obrigatórios.' });
+    }
+
+    try {
+        const { rows } = await pool.query(`SELECT * FROM clientes WHERE email = $1`, [email.toLowerCase()]);
+        const cliente = rows[0];
+
+        // mesma mensagem genérica pra "não existe" e "senha errada" — não dá
+        // pra um invasor descobrir se um e-mail está cadastrado por tentativa
+        if (!cliente || !(await bcrypt.compare(senha, cliente.senha_hash))) {
+            return res.status(401).json({ message: 'E-mail ou senha inválidos.' });
+        }
+        if (!cliente.status) {
+            return res.status(403).json({ message: 'Conta desativada. Entre em contato com o suporte.' });
+        }
+
+        await pool.query(`UPDATE clientes SET ultimo_login = now() WHERE id = $1`, [cliente.id]);
+
+        res.cookie('cliente_token', assinarToken(cliente), { ...COOKIE_OPTS, maxAge: SETE_DIAS_MS });
+        res.json(serializarCliente(cliente));
+    } catch (err) {
+        console.error('Erro ao logar cliente:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+router.post('/logout', (req, res) => {
+    res.clearCookie('cliente_token', COOKIE_OPTS);
+    res.json({ message: 'Sessão encerrada.' });
+});
+
+router.get('/me', authenticateCliente, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT * FROM clientes WHERE id = $1`, [req.cliente.sub]);
+        if (!rows.length) return res.status(404).json({ message: 'Conta não encontrada.' });
+        res.json(serializarCliente(rows[0]));
+    } catch (err) {
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+router.put('/me', authenticateCliente, async (req, res) => {
+    const { nome, celular } = req.body;
+    try {
+        const { rows } = await pool.query(`
+            UPDATE clientes SET
+                nome    = COALESCE($1, nome),
+                celular = COALESCE($2, celular)
+            WHERE id = $3
+            RETURNING id, nome, email, cpf, celular, criado_em
+        `, [nome?.trim() || null, celular ?? null, req.cliente.sub]);
+        // conta pode ter sido excluída pelo admin enquanto o token (7 dias)
+        // ainda era válido — sem essa checagem, serializarCliente(undefined) quebra
+        if (!rows.length) return res.status(401).json({ message: 'Conta não encontrada.' });
+        res.json(serializarCliente(rows[0]));
+    } catch (err) {
+        console.error('Erro ao atualizar cliente:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+// "Minha conta" — lista as inscrições feitas por essa conta (cliente_id),
+// com o nome do curso já resolvido (sobrevive à exclusão do curso via
+// curso_removido_nome, igual o admin já usa)
+router.get('/minhas-inscricoes', authenticateCliente, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`
+            SELECT
+                i.id,
+                i.assento,
+                i.status,
+                i.data_inscricao AS "dataInscricao",
+                COALESCE(c.nome_curso, i.curso_removido_nome) AS "nomeCurso",
+                to_char(c.data, 'YYYY-MM-DD') AS "dataCurso",
+                to_char(c.data, 'HH24:MI') AS "horaCurso",
+                c.id AS "cursoId"
+            FROM inscricoes i
+            LEFT JOIN cursos c ON c.id = i.curso_id
+            WHERE i.cliente_id = $1
+            ORDER BY i.data_inscricao DESC
+        `, [req.cliente.sub]);
+        res.json(rows);
+    } catch (err) {
+        console.error('Erro ao listar inscrições do cliente:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+// Fluxo de redefinição de senha em duas etapas.
+router.post('/esqueci-senha', loginLimiter, async (req, res) => {
+    const { email } = req.body;
+    if (!emailValido(email)) return res.status(400).json({ message: 'E-mail inválido.' });
+
+    try {
+        const { rows } = await pool.query(`SELECT id, nome FROM clientes WHERE email = $1`, [email.toLowerCase()]);
+
+        // mensagem igual exista ou não a conta — não dá pra vazar quais
+        // e-mails estão cadastrados
+        const respostaGenerica = { message: 'Se existir uma conta com esse e-mail, enviaremos as instruções de redefinição.' };
+
+        if (!rows.length) return res.json(respostaGenerica);
+
+        const token = uuidv4();
+        await pool.query(`
+            INSERT INTO clientes_tokens (id, cliente_id, token, tipo, expira_em)
+            VALUES ($1, $2, $3, 'redefinir_senha', now() + interval '1 hour')
+        `, [uuidv4(), rows[0].id, token]);
+
+        res.json(respostaGenerica);
+
+        const { subject, html } = emailRedefinirSenha({ nome: rows[0].nome, token });
+        enviarEmail({ to: email.toLowerCase(), subject, html });
+    } catch (err) {
+        console.error('Erro ao gerar token de redefinição de senha:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+router.post('/redefinir-senha', loginLimiter, async (req, res) => {
+    const { token, novaSenha } = req.body;
+    if (!token || !novaSenha || novaSenha.length < 6) {
+        return res.status(400).json({ message: 'Token e nova senha (mínimo 6 caracteres) são obrigatórios.' });
+    }
+
+    try {
+        const { rows } = await pool.query(`
+            SELECT * FROM clientes_tokens
+            WHERE token = $1 AND tipo = 'redefinir_senha' AND usado_em IS NULL AND expira_em > now()
+        `, [token]);
+        if (!rows.length) return res.status(400).json({ message: 'Token inválido ou expirado.' });
+
+        const senhaHash = await bcrypt.hash(novaSenha, 10);
+        await pool.query(`UPDATE clientes SET senha_hash = $1 WHERE id = $2`, [senhaHash, rows[0].cliente_id]);
+        await pool.query(`UPDATE clientes_tokens SET usado_em = now() WHERE id = $1`, [rows[0].id]);
+
+        res.json({ message: 'Senha redefinida com sucesso.' });
+    } catch (err) {
+        console.error('Erro ao redefinir senha:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+// --- painel admin ------------------------------------------------------
+
+router.get('/', authenticate, requireCursosAccess, async (req, res) => {
+    const { busca, status } = req.query;
+    const condicoes = [];
+    const valores = [];
+
+    if (busca) {
+        valores.push(`%${busca}%`);
+        condicoes.push(`(nome ILIKE $${valores.length} OR email ILIKE $${valores.length} OR cpf ILIKE $${valores.length})`);
+    }
+    if (status === 'ativos') condicoes.push('status = true');
+    if (status === 'inativos') condicoes.push('status = false');
+
+    const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
+
+    try {
+        const { rows } = await pool.query(`
+            SELECT c.id, c.nome, c.email, c.cpf, c.celular, c.status,
+                   c.criado_em AS "criadoEm", c.ultimo_login AS "ultimoLogin",
+                   (SELECT count(*) FROM inscricoes i WHERE i.cliente_id = c.id) AS "totalInscricoes"
+            FROM clientes c
+            ${where}
+            ORDER BY c.criado_em DESC
+        `, valores);
+        res.json(rows);
+    } catch (err) {
+        console.error('Erro ao listar clientes:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+router.get('/:id', authenticate, requireCursosAccess, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`
+            SELECT id, nome, email, cpf, celular, status, criado_em AS "criadoEm", ultimo_login AS "ultimoLogin"
+            FROM clientes WHERE id = $1
+        `, [req.params.id]);
+        if (!rows.length) return res.status(404).json({ message: 'Cliente não encontrado.' });
+
+        const { rows: inscricoes } = await pool.query(`
+            SELECT i.id, i.assento, i.status, i.data_inscricao AS "dataInscricao",
+                   COALESCE(c.nome_curso, i.curso_removido_nome) AS "nomeCurso",
+                   to_char(c.data,'DD/MM/YYYY') AS "dataCurso"
+            FROM inscricoes i
+            LEFT JOIN cursos c ON c.id = i.curso_id
+            WHERE i.cliente_id = $1
+            ORDER BY i.data_inscricao DESC
+        `, [req.params.id]);
+
+        res.json({ ...rows[0], inscricoes });
+    } catch (err) {
+        console.error('Erro ao buscar cliente:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+router.post('/:id/redefinir-senha', authenticate, requireCursosAccess, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT id, nome, email FROM clientes WHERE id = $1`, [req.params.id]);
+        if (!rows.length) return res.status(404).json({ message: 'Cliente não encontrado.' });
+        const cliente = rows[0];
+
+        const token = uuidv4();
+        await pool.query(`
+            INSERT INTO clientes_tokens (id, cliente_id, token, tipo, expira_em)
+            VALUES ($1, $2, $3, 'redefinir_senha', now() + interval '1 hour')
+        `, [uuidv4(), cliente.id, token]);
+
+        logAudit({ entityType: 'cliente', entityId: cliente.id, action: 'redefinir_senha', details: cliente.email, userHubId: req.user?.sub });
+
+        res.json({ message: 'E-mail de redefinição enviado.' });
+
+        const { subject, html } = emailRedefinirSenha({ nome: cliente.nome, token });
+        enviarEmail({ to: cliente.email, subject, html });
+    } catch (err) {
+        console.error('Erro ao redefinir senha (admin):', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+router.put('/:id/status', authenticate, requireCursosAdmin, async (req, res) => {
+    const { status } = req.body;
+    if (typeof status !== 'boolean') return res.status(400).json({ message: 'status (boolean) obrigatório.' });
+
+    try {
+        const { rows } = await pool.query(
+            `UPDATE clientes SET status = $1 WHERE id = $2 RETURNING id, nome, email`,
+            [status, req.params.id]
+        );
+        if (!rows.length) return res.status(404).json({ message: 'Cliente não encontrado.' });
+
+        logAudit({ entityType: 'cliente', entityId: rows[0].id, action: status ? 'ativar' : 'desativar', details: rows[0].email, userHubId: req.user?.sub });
+
+        res.json({ message: 'Atualizado.' });
+    } catch (err) {
+        console.error('Erro ao atualizar status do cliente:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`SELECT email FROM clientes WHERE id = $1`, [req.params.id]);
+        if (!rows.length) return res.status(404).json({ message: 'Cliente não encontrado.' });
+
+        await pool.query(`DELETE FROM clientes WHERE id = $1`, [req.params.id]);
+
+        logAudit({ entityType: 'cliente', entityId: req.params.id, action: 'excluir', details: rows[0].email, userHubId: req.user?.sub });
+
+        res.sendStatus(204);
+    } catch (err) {
+        console.error('Erro ao excluir cliente:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+module.exports = router;

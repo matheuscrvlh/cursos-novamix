@@ -7,6 +7,7 @@ const path = require('path');
 const db = require('./db');
 const { apiLimiter } = require('./middleware/rateLimit.middleware');
 const expirarReservasPendentes = require('./utils/expirarReservas');
+const enviarLembretesCurso = require('./utils/lembretesCurso');
 
 const cursosRoutes = require('./routes/cursos.routes');
 const assentosRoutes = require('./routes/assentos.routes');
@@ -16,6 +17,7 @@ const industriasRoutes = require('./routes/industrias.routes');
 const bannersRoutes = require('./routes/banners.routes');
 const pagamentosRoutes = require('./routes/pagamentos.routes');
 const authRoutes = require('./routes/auth.routes');
+const clientesRoutes = require('./routes/clientes.routes');
 const app = express();
 
 // falha cedo (com mensagem clara) em vez de deixar o processo subir e
@@ -25,6 +27,10 @@ const app = express();
 // produção deixava o CORS aberto pra qualquer origem
 if (!process.env.JWT_SECRET) {
   console.error('JWT_SECRET não configurado — defina no .env antes de subir o servidor');
+  process.exit(1);
+}
+if (!process.env.CLIENTE_JWT_SECRET) {
+  console.error('CLIENTE_JWT_SECRET não configurado — defina no .env antes de subir o servidor');
   process.exit(1);
 }
 if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
@@ -40,7 +46,7 @@ app.set('trust proxy', 1);
 
 // libera só o domínio do frontend em produção (FRONTEND_URL no .env, aceita
 // lista separada por vírgula); sem essa env var, libera geral (dev local)
-const allowedOrigins = (process.env.FRONTEND_URL || '')
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',')
   .map(o => o.trim())
   .filter(Boolean);
@@ -67,6 +73,7 @@ app.use('/api/industrias', industriasRoutes);
 app.use('/api/banners', bannersRoutes);
 app.use('/api/pagamentos', pagamentosRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/clientes', clientesRoutes);
 
 app.listen(3000, () => {
   console.log('Backend torando na porta 3000 -- teste deploy 31/07 🚀');
@@ -76,3 +83,7 @@ app.listen(3000, () => {
 // pagamento e o MP nunca mandou webhook de confirmação/rejeição)
 expirarReservasPendentes(db);
 setInterval(() => expirarReservasPendentes(db), 5 * 60 * 1000);
+
+// lembrete por e-mail ~24h antes do curso pra quem já pagou
+enviarLembretesCurso(db);
+setInterval(() => enviarLembretesCurso(db), 60 * 60 * 1000);

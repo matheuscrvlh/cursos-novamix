@@ -12,6 +12,7 @@ import AdminPage from '../../layouts/admin/AdminPage';
 import { getEnrollment, getTotalEnrollment, deleteEnrollment, verificarPagamentoMP, reembolsarPagamentoMP } from '../../api/enrollment.services';
 
 import { DadosContext } from '../../contexts/DadosContext';
+import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 import { formatDateBR, formatDateTimeBR } from '../../utils/formatDate';
 
@@ -46,6 +47,7 @@ const FILTROS_DATA = [
     { label: 'Hoje', value: 'hoje' },
     { label: 'Ontem', value: 'ontem' },
     { label: 'Essa semana', value: 'semana' },
+    { label: 'Este mês', value: 'mes' },
 ];
 
 // todas as comparações usam o horário local do navegador — dataInscricao vem
@@ -70,6 +72,12 @@ function inicioDaSemana() {
     return d;
 }
 
+function inicioDoMes() {
+    const d = inicioDoDia(new Date());
+    d.setDate(1);
+    return d;
+}
+
 function passaFiltroData(dataInscricaoISO, filtro, periodoInicio, periodoFim) {
     const dataInsc = new Date(dataInscricaoISO);
     if (Number.isNaN(dataInsc.getTime())) return true;
@@ -84,6 +92,9 @@ function passaFiltroData(dataInscricaoISO, filtro, periodoInicio, periodoFim) {
     }
     if (filtro === 'semana') {
         return dataInsc >= inicioDaSemana();
+    }
+    if (filtro === 'mes') {
+        return dataInsc >= inicioDoMes();
     }
     if (filtro === 'periodo') {
         if (periodoInicio && dataInsc < inicioDoDia(periodoInicio)) return false;
@@ -125,7 +136,7 @@ function podeReembolsar(curso) {
     return new Date() < limiteReembolso;
 }
 
-function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, onVerificarMP, onReembolsar, onExcluir }) {
+function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, isAdmin, onVerificarMP, onReembolsar, onExcluir }) {
     return (
         <>
             {inscricao.status === 'pendente' && (
@@ -139,7 +150,9 @@ function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, onVerif
                     </Button>
                 </Tooltip>
             )}
-            {inscricao.status === 'pago' && podeReembolsar(curso) && (
+            {/* reembolsar/excluir são restritos a admin (role do payload) —
+                esconder em vez de deixar o clique falhar com 403 do backend */}
+            {isAdmin && inscricao.status === 'pago' && podeReembolsar(curso) && (
                 <Tooltip label='Reembolsar'>
                     <Button
                         className='bg-gray-text p-2 hover:bg-gray-dark text-white'
@@ -150,11 +163,13 @@ function InscricaoAcoes({ inscricao, curso, verificandoMP, reembolsando, onVerif
                     </Button>
                 </Tooltip>
             )}
-            <Tooltip label='Excluir'>
-                <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={onExcluir}>
-                    <Trash size={16} />
-                </Button>
-            </Tooltip>
+            {isAdmin && (
+                <Tooltip label='Excluir'>
+                    <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={onExcluir}>
+                        <Trash size={16} />
+                    </Button>
+                </Tooltip>
+            )}
         </>
     )
 }
@@ -169,6 +184,7 @@ export default function RegistrationsAdmin() {
     const [cursoSelecionado, setCursoSelecionado] = useState(null)
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
+    const { isAdmin } = useContext(AdminAuthContext);
 
     const {
             cursos,
@@ -232,8 +248,18 @@ export default function RegistrationsAdmin() {
             || (i.nome || '').toLowerCase().includes(queryLower)
             || (queryDigits.length > 0 && (i.cpf || '').replace(/\D/g, '').includes(queryDigits));
 
+        // data da inscrição, status do pagamento e busca são propriedades da
+        // própria inscrição — continuam valendo mesmo se o curso foi excluído
+        const passaPagamento = filtroPagamentoInsc === 'todos' || i.status === filtroPagamentoInsc;
+        const passaData = passaFiltroData(i.dataInscricao, filtroDataInsc, periodoInicio, periodoFim);
+
         const curso = todosCursos.find(c => c.id === i.cursoId);
-        if (!curso) return passaBusca;
+        // curso excluído: não dá pra saber tipo/status/loja dele (não existe
+        // mais), então só filtra pelo que a própria inscrição sabe sobre si —
+        // antes isso pulava TODOS os filtros (inclusive data), fazendo
+        // inscrições de cursos apagados aparecerem sempre, independente do
+        // filtro de período selecionado
+        if (!curso) return passaPagamento && passaData && passaBusca;
 
         const passaTipo = filtroTipoInsc === 'normais' ? curso.tipo === 'normal'
                         : filtroTipoInsc === 'infantis' ? curso.tipo === 'infantil'
@@ -242,8 +268,6 @@ export default function RegistrationsAdmin() {
                           : filtroStatusInsc === 'concluidos' ? curso.data < hoje
                           : true;
         const passaLoja = filtroLojaInsc === 'todas' || curso.loja === filtroLojaInsc;
-        const passaPagamento = filtroPagamentoInsc === 'todos' || i.status === filtroPagamentoInsc;
-        const passaData = passaFiltroData(i.dataInscricao, filtroDataInsc, periodoInicio, periodoFim);
         return passaTipo && passaStatus && passaLoja && passaPagamento && passaData && passaBusca;
     });
 
@@ -513,6 +537,7 @@ export default function RegistrationsAdmin() {
                                         curso={curso}
                                         verificandoMP={verificandoMP === i.id}
                                         reembolsando={reembolsando === i.id}
+                                        isAdmin={isAdmin}
                                         onVerificarMP={() => handleVerificarMP(i.id)}
                                         onReembolsar={() => confirmarReembolso(i)}
                                         onExcluir={() => confirmarExclusao(i)}
@@ -647,6 +672,7 @@ export default function RegistrationsAdmin() {
                                         curso={cursoModal}
                                         verificandoMP={verificandoMP === inscricao.id}
                                         reembolsando={reembolsando === inscricao.id}
+                                        isAdmin={isAdmin}
                                         onVerificarMP={() => handleVerificarMP(inscricao.id)}
                                         onReembolsar={() => confirmarReembolso(inscricao)}
                                         onExcluir={() => confirmarExclusao(inscricao)}
@@ -694,6 +720,7 @@ export default function RegistrationsAdmin() {
                                             curso={cursoModal}
                                             verificandoMP={verificandoMP === inscricao.id}
                                             reembolsando={reembolsando === inscricao.id}
+                                            isAdmin={isAdmin}
                                             onVerificarMP={() => handleVerificarMP(inscricao.id)}
                                             onReembolsar={() => confirmarReembolso(inscricao)}
                                             onExcluir={() => confirmarExclusao(inscricao)}

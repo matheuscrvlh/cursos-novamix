@@ -11,6 +11,7 @@ import FilterPills from '../../components/admin/FilterPills';
 import AdminPage from '../../layouts/admin/AdminPage';
 
 import { DadosContext } from '../../contexts/DadosContext';
+import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 import { formatDateBR } from '../../utils/formatDate';
 
@@ -41,7 +42,7 @@ const CURSO_VAZIO = {
     data: '',
     hora: '',
     loja: '',
-    culinarista: '',
+    culinaristaId: '',
     valor: '',
     duracao: '',
     categoria: '',
@@ -76,6 +77,7 @@ export default function ChildrensAdmin() {
     const [previewImagem, setPreviewImagem] = useState(null);
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
+    const { isAdmin } = useContext(AdminAuthContext);
 
     const [filtroStatus, setFiltroStatus] = useState('todos');
     const [filtroLoja, setFiltroLoja] = useState('todas');
@@ -193,13 +195,13 @@ export default function ChildrensAdmin() {
 
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
-                        <select value={form.culinarista}
-                            onChange={e => setForm({ ...form, culinarista: e.target.value })}
+                        <select value={form.culinaristaId}
+                            onChange={e => setForm({ ...form, culinaristaId: e.target.value })}
                             className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
                         >
                             <option value=''>Selecione a culinarista</option>
                             {culinaristas?.map(c => (
-                                <option key={c.id} value={c.nomeCulinarista}>
+                                <option key={c.id} value={c.id}>
                                     {c.nomeCulinarista}
                                 </option>
                             ))}
@@ -304,6 +306,7 @@ export default function ChildrensAdmin() {
                                         : <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-blue-base/20 text-blue-base'>{c.loja}</span>
                                     }
                                     <div className='flex gap-2 mt-2'>
+                                        {isAdmin && (
                                         <Tooltip label='Excluir'>
                                             <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => ask({
                                 title: 'Excluir curso infantil',
@@ -315,6 +318,7 @@ export default function ChildrensAdmin() {
                                                 <Trash size={16} />
                                             </Button>
                                         </Tooltip>
+                                        )}
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEdit(c.id)}>
                                                 <Edit size={16} />
@@ -338,6 +342,7 @@ export default function ChildrensAdmin() {
                                         : <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-blue-base/20 text-blue-base'>{c.loja}</span>
                                     }
                                     <div className='flex gap-2'>
+                                        {isAdmin && (
                                         <Tooltip label='Excluir'>
                                             <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => ask({
                                 title: 'Excluir curso infantil',
@@ -349,6 +354,7 @@ export default function ChildrensAdmin() {
                                                 <Trash size={16} />
                                             </Button>
                                         </Tooltip>
+                                        )}
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEdit(c.id)}>
                                                 <Edit size={16} />
@@ -436,12 +442,12 @@ export default function ChildrensAdmin() {
                         <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
                         <select
                             className='p-2 border border-gray-base rounded-md text-gray-text bg-white'
-                            value={cursoEditar.culinarista || ''}
-                            onChange={e => setCursoEditar({ ...cursoEditar, culinarista: e.target.value })}
+                            value={cursoEditar.culinaristaId || ''}
+                            onChange={e => setCursoEditar({ ...cursoEditar, culinaristaId: e.target.value })}
                         >
                             <option value=''>Selecione a culinarista</option>
                             {culinaristas?.map(c => (
-                                <option key={c.id} value={c.nomeCulinarista}>{c.nomeCulinarista}</option>
+                                <option key={c.id} value={c.id}>{c.nomeCulinarista}</option>
                             ))}
                         </select>
                     </div>

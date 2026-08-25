@@ -10,6 +10,7 @@ import ConfirmModal from '../../components/admin/ModalConfirm';
 import AdminPage from '../../layouts/admin/AdminPage';
 
 import { DadosContext } from '../../contexts/DadosContext';
+import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 import { formatDateTimeBR } from '../../utils/formatDate';
 
@@ -40,6 +41,7 @@ export default function CulinarianAdmin() {
     const [previewImagemCulinarista, setPreviewImagemCulinarista] = useState();
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
+    const { isAdmin } = useContext(AdminAuthContext);
 
     function handleSubmitCulinarian() {
         if (!formCulinarian.nomeCulinarista || !formCulinarian.cpf) {
@@ -347,6 +349,7 @@ export default function CulinarianAdmin() {
                                     <p className='text-sm text-gray-text/70'>Loja: {c.lojas.length > 1 ? 'Prado e Teresopolis' : c.lojas}</p>
                                     <p className='text-sm text-gray-text/70'>Cadastro: {formatDateTimeBR(c.dataCadastro)}</p>
                                     <div className='flex gap-2 mt-2'>
+                                        {isAdmin && (
                                         <Tooltip label='Excluir'>
                                             <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => ask({
                                 title: 'Excluir culinarista',
@@ -358,6 +361,7 @@ export default function CulinarianAdmin() {
                                                 <Trash size={16} />
                                             </Button>
                                         </Tooltip>
+                                        )}
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditCulinarian(c.id)}>
                                                 <Edit size={16} />
@@ -385,6 +389,7 @@ export default function CulinarianAdmin() {
                                     <p>{c.lojas.length > 1 ? 'Prado e Teresopolis' : c.lojas}</p>
                                     <p>{formatDateTimeBR(c.dataCadastro)}</p>
                                     <div className='flex gap-2'>
+                                        {isAdmin && (
                                         <Tooltip label='Excluir'>
                                             <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => ask({
                                 title: 'Excluir culinarista',
@@ -396,6 +401,7 @@ export default function CulinarianAdmin() {
                                                 <Trash size={16} />
                                             </Button>
                                         </Tooltip>
+                                        )}
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditCulinarian(c.id)}>
                                                 <Edit size={16} />

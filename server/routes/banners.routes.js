@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const pool = require('../db');
+const logAudit = require('../utils/logAudit');
 
 const uploadBanners = createUpload('banners');
 const router = express.Router();
@@ -43,10 +44,10 @@ router.post('/', authenticate, requireCursosAccess, uploadFields, async (req, re
 
   try {
     await pool.query(
-      `INSERT INTO banners (id, posicao, imagem, imagem_mobile, link, ordem, ativo) VALUES ($1, $2, $3, $4, $5, $6, 1)`,
+      `INSERT INTO banners (id, posicao, imagem, imagem_mobile, link, ordem, ativo) VALUES ($1, $2, $3, $4, $5, $6, true)`,
       [id, posicao, imagem, imagemMobile, link || null, Number(ordem) || 0]
     );
-    res.status(201).json({ id, posicao, imagem, imagem_mobile: imagemMobile, link: link || null, ordem: Number(ordem) || 0, ativo: 1 });
+    res.status(201).json({ id, posicao, imagem, imagem_mobile: imagemMobile, link: link || null, ordem: Number(ordem) || 0, ativo: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -65,7 +66,7 @@ router.put('/:id', authenticate, requireCursosAccess, async (req, res) => {
       [
         link  !== undefined ? link  : null,
         ordem !== undefined ? Number(ordem) : null,
-        ativo !== undefined ? Number(ativo) : null,
+        ativo !== undefined ? (Number(ativo) === 1 || ativo === true || ativo === 'true') : null,
         req.params.id,
       ]
     );
@@ -86,6 +87,9 @@ router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
     if (row.imagem_mobile) fs.unlink(path.join(__dirname, '..', row.imagem_mobile), () => {});
 
     await pool.query(`DELETE FROM banners WHERE id = $1`, [req.params.id]);
+
+    logAudit({ entityType: 'banner', entityId: req.params.id, action: 'excluir', userHubId: req.user?.sub });
+
     res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: err.message });

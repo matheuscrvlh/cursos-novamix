@@ -10,6 +10,7 @@ import ConfirmModal from '../../components/admin/ModalConfirm';
 import AdminPage from '../../layouts/admin/AdminPage';
 
 import { DadosContext } from '../../contexts/DadosContext';
+import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 
 const INDUSTRIA_VAZIA = {
@@ -37,6 +38,7 @@ export default function IndustriesAdmin() {
     const [step, setStep] = useState('close');
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
+    const { isAdmin } = useContext(AdminAuthContext);
 
     function handleSubmitIndustria() {
         if (!formIndustria.nome || !formIndustria.razaoSocial) {
@@ -211,6 +213,7 @@ export default function IndustriesAdmin() {
                                     {i.cnpj && <p className='text-sm text-gray-text/70'>CNPJ: {i.cnpj}</p>}
                                     {i.telefone && <p className='text-sm text-gray-text/70'>Tel: {i.telefone}</p>}
                                     <div className='flex gap-2 mt-2'>
+                                        {isAdmin && (
                                         <Tooltip label='Excluir'>
                                             <Button className='bg-red-base text-white p-2 hover:bg-red-light' onClick={() => ask({
                                 title: 'Excluir indústria',
@@ -222,6 +225,7 @@ export default function IndustriesAdmin() {
                                                 <Trash size={16} />
                                             </Button>
                                         </Tooltip>
+                                        )}
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base text-white p-2 hover:bg-orange-light' onClick={() => handleEditIndustria(i.id)}>
                                                 <Edit size={16} />
@@ -238,6 +242,7 @@ export default function IndustriesAdmin() {
                                     <p>{i.cnpj || '-'}</p>
                                     <p>{i.telefone || '-'}</p>
                                     <div className='flex gap-2'>
+                                        {isAdmin && (
                                         <Tooltip label='Excluir'>
                                             <Button className='bg-red-base text-white p-2 hover:bg-red-light' onClick={() => ask({
                                 title: 'Excluir indústria',
@@ -249,6 +254,7 @@ export default function IndustriesAdmin() {
                                                 <Trash size={16} />
                                             </Button>
                                         </Tooltip>
+                                        )}
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base text-white p-2 hover:bg-orange-light' onClick={() => handleEditIndustria(i.id)}>
                                                 <Edit size={16} />

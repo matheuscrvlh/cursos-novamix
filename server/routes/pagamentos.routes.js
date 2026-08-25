@@ -5,6 +5,28 @@ const { MercadoPagoConfig, Payment, PaymentRefund } = require('mercadopago');
 const pool = require('../db');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const { paymentLimiter } = require('../middleware/rateLimit.middleware');
+const logAudit = require('../utils/logAudit');
+const { cpfValido } = require('../utils/cpf');
+const { enviarEmail, emailPagamentoConfirmado, emailReembolsoProcessado } = require('../utils/email');
+
+// best-effort — nunca deve propagar erro pra quem chama (confirmação de
+// pagamento não pode falhar por causa de um e-mail)
+async function enviarEmailPagamentoConfirmado(inscricaoId) {
+  try {
+    const { rows } = await pool.query(`
+      SELECT i.nome, i.email, c.nome_curso AS "nomeCurso",
+             to_char(c.data,'DD/MM/YYYY') AS "dataCurso", to_char(c.data,'HH24:MI') AS "horaCurso"
+      FROM inscricoes i LEFT JOIN cursos c ON c.id = i.curso_id
+      WHERE i.id = $1
+    `, [inscricaoId]);
+    if (!rows.length) return;
+    const { email, ...dados } = rows[0];
+    const { subject, html } = emailPagamentoConfirmado(dados);
+    await enviarEmail({ to: email, subject, html });
+  } catch (err) {
+    console.error('Erro ao enviar e-mail de pagamento confirmado:', err);
+  }
+}
 
 const router = express.Router();
 
@@ -18,22 +40,31 @@ function getMpClient() {
   });
 }
 
+// link do comprovante que o MP disponibiliza — Pix tem ticket_url no ponto de
+// interação, boleto/outros têm external_resource_url; nem todo pagamento tem
+// um (ex: cartão aprovado na hora não tem link de comprovante formal)
+function extrairComprovanteUrl(paymentData) {
+  return paymentData?.point_of_interaction?.transaction_data?.ticket_url
+    || paymentData?.transaction_details?.external_resource_url
+    || null;
+}
+
 // Registra/atualiza uma tentativa de pagamento em cursos.pagamentos.
-// mp_payment_id é a chave de dedup: webhook, verificação manual e a resposta
+// mp_pagamento_id é a chave de dedup: webhook, verificação manual e a resposta
 // síncrona do Brick podem todos tentar registrar a MESMA tentativa — isso
 // deve atualizar a linha existente, nunca duplicar. `executor` pode ser o
 // pool ou um client de transação, pra caber tanto em updates isolados quanto
 // dentro de uma transação maior (ex: confirmarPagamentoOuReembolsarConflito).
-async function upsertPagamento(executor, { inscricaoId, mpPaymentId, metodoPagamento, status }) {
-  const agora = new Date().toISOString();
+async function upsertPagamento(executor, { inscricaoId, mpPaymentId, metodoPagamento, status, comprovanteUrl }) {
   await executor.query(
-    `INSERT INTO pagamentos (id, "inscricaoId", "metodoPagamento", mp_payment_id, status, "criadoEm", "atualizadoEm")
-     VALUES ($1, $2, $3, $4, $5, $6, $6)
-     ON CONFLICT (mp_payment_id) DO UPDATE SET
+    `INSERT INTO pagamentos (id, inscricao_id, metodo_pagamento, mp_pagamento_id, status, comprovante_url, criado_em, atualizado_em)
+     VALUES ($1, $2, $3, $4, $5, $6, now(), now())
+     ON CONFLICT (mp_pagamento_id) DO UPDATE SET
        status = EXCLUDED.status,
-       "metodoPagamento" = COALESCE(EXCLUDED."metodoPagamento", pagamentos."metodoPagamento"),
-       "atualizadoEm" = EXCLUDED."atualizadoEm"`,
-    [uuidv4(), inscricaoId, metodoPagamento || null, mpPaymentId, status, agora]
+       metodo_pagamento = COALESCE(EXCLUDED.metodo_pagamento, pagamentos.metodo_pagamento),
+       comprovante_url = COALESCE(EXCLUDED.comprovante_url, pagamentos.comprovante_url),
+       atualizado_em = now()`,
+    [uuidv4(), inscricaoId, metodoPagamento || null, mpPaymentId, status, comprovanteUrl || null]
   );
 }
 
@@ -49,31 +80,10 @@ function statusPagamentoFromMp(mpStatus) {
 
 async function buscarUltimoPaymentId(inscricaoId) {
   const { rows } = await pool.query(
-    `SELECT mp_payment_id FROM pagamentos WHERE "inscricaoId" = $1 ORDER BY "criadoEm" DESC LIMIT 1`,
+    `SELECT mp_pagamento_id FROM pagamentos WHERE inscricao_id = $1 ORDER BY criado_em DESC LIMIT 1`,
     [inscricaoId]
   );
-  return rows[0]?.mp_payment_id ?? null;
-}
-
-// Valida CPF de verdade (dígitos verificadores), não só formato —
-// o Mercado Pago rejeita CPFs com formato válido mas checksum errado.
-function cpfValido(cpf) {
-  const digits = (cpf || '').replace(/\D/g, '');
-  if (digits.length !== 11 || /^(\d)\1{10}$/.test(digits)) return false;
-
-  const calcDV = base => {
-    let sum = 0;
-    let weight = base.length + 1;
-    for (const d of base) sum += Number(d) * weight--;
-    const resto = sum % 11;
-    return resto < 2 ? 0 : 11 - resto;
-  };
-
-  const base9 = digits.slice(0, 9).split('');
-  const dv1 = calcDV(base9);
-  const dv2 = calcDV([...base9, dv1]);
-
-  return dv1 === Number(digits[9]) && dv2 === Number(digits[10]);
+  return rows[0]?.mp_pagamento_id ?? null;
 }
 
 // Traduz códigos de erro/status_detail do Mercado Pago para mensagens que fazem sentido pro cliente
@@ -117,69 +127,49 @@ function mensagemAmigavelReembolso(err) {
     || 'Erro ao reembolsar no Mercado Pago';
 }
 
-// Confirma o pagamento como 'pago' e reocupa o assento — a menos que, nesse
-// meio-tempo (reserva expirada + webhook/verificação atrasada), o assento já
-// tenha sido vendido pra outra inscrição. Nesse caso, em vez de duplicar a
-// vaga, estorna automaticamente esse pagamento no Mercado Pago e marca a
+// Confirma o pagamento como 'pago' — a menos que, nesse meio-tempo (reserva
+// expirada + webhook/verificação atrasada), o assento já tenha sido vendido
+// pra outra inscrição. O índice único parcial (curso_id, assento) garante
+// isso sozinho: o UPDATE só falha (23505) se outra inscrição ativa já
+// reivindicou o mesmo assento — nesse caso, em vez de duplicar a vaga,
+// estorna automaticamente esse pagamento no Mercado Pago e marca a
 // inscrição como 'reembolsado' — quem pagou não fica no prejuízo, só sem vaga.
-async function confirmarPagamentoOuReembolsarConflito({ inscricaoId, cursoId, assento, paymentId }) {
-  const client = await pool.connect();
+async function confirmarPagamentoOuReembolsarConflito({ inscricaoId, paymentId }) {
   try {
-    await client.query('BEGIN');
-
-    // checagem de conflito e confirmação precisam ser um único UPDATE atômico:
-    // antes, o SELECT de conflito rodava separado do UPDATE, então duas chamadas
-    // concorrentes (webhook + verificação manual + resposta síncrona do Brick,
-    // todas podem disparar essa função pro mesmo assento) podiam passar pelo
-    // SELECT ao mesmo tempo, ambas concluírem "sem conflito" e ambas confirmarem
-    // 'pago' pro mesmo assento — daí pra frente qualquer liberação/expiração de
-    // uma delas mexia na mesma linha de `assentos` e desfazia o status da outra.
-    // A transação garante que a confirmação do pagamento e a reocupação do
-    // assento acontecem juntas (ou nenhuma das duas, se o processo cair no meio).
-    const confirmacao = await client.query(
-      `UPDATE inscricoes SET status = 'pago'
-       WHERE id = $1 AND status != 'pago'
-         AND NOT EXISTS (
-           SELECT 1 FROM inscricoes i2
-           WHERE i2."cursoId" = $2 AND i2.assento = $3 AND i2.id != $4
-             AND i2.status IN ('pendente', 'pago', 'reembolsando')
-         )`,
-      [inscricaoId, cursoId, assento, inscricaoId]
+    const confirmacao = await pool.query(
+      `UPDATE inscricoes SET status = 'pago' WHERE id = $1 AND status != 'pago'`,
+      [inscricaoId]
     );
 
     if (confirmacao.rowCount === 0) {
-      await client.query('ROLLBACK');
-
-      // não confirmou: já estava 'pago' (chamada concorrente ganhou primeiro,
-      // nada a fazer) ou existe conflito real de assento (precisa reembolsar)
+      // não confirmou porque já estava 'pago' (chamada concorrente ganhou primeiro)
       const { rows } = await pool.query(`SELECT status FROM inscricoes WHERE id = $1`, [inscricaoId]);
       if (rows[0]?.status === 'pago') return { ok: true };
+      return { ok: false };
+    }
 
+    await upsertPagamento(pool, { inscricaoId, mpPaymentId: paymentId, status: 'pago' });
+    // só dispara aqui (não no atalho "já estava pago" acima) — senão uma
+    // segunda chamada concorrente (webhook + verificação manual, por exemplo)
+    // mandaria o e-mail de confirmação duas vezes
+    enviarEmailPagamentoConfirmado(inscricaoId);
+    return { ok: true };
+  } catch (err) {
+    if (err.code === '23505') {
+      // conflito real de assento — outra inscrição ativa já está nesse lugar
       try {
         const paymentRefund = new PaymentRefund(getMpClient());
         await paymentRefund.total({ payment_id: paymentId });
         await pool.query(`UPDATE inscricoes SET status = 'reembolsado' WHERE id = $1`, [inscricaoId]);
         await upsertPagamento(pool, { inscricaoId, mpPaymentId: paymentId, status: 'reembolsado' });
-        console.warn(`[conflito de assento] Inscrição ${inscricaoId} paga porém assento ${assento} do curso ${cursoId} já ocupado por outra inscrição — reembolsada automaticamente`);
+        console.warn(`[conflito de assento] Inscrição ${inscricaoId} paga porém assento já ocupado por outra inscrição — reembolsada automaticamente`);
       } catch (refundErr) {
         console.error(`[conflito de assento] Falha ao reembolsar automaticamente a inscrição ${inscricaoId} — requer ação manual:`, refundErr);
       }
       return { ok: false, conflito: true };
     }
-
-    await upsertPagamento(client, { inscricaoId, mpPaymentId: paymentId, status: 'pago' });
-    await client.query(
-      `UPDATE assentos SET status = 'reservado' WHERE "cursoId" = $1 AND id = $2`,
-      [cursoId, assento]
-    );
-    await client.query('COMMIT');
-    return { ok: true };
-  } catch (err) {
-    await client.query('ROLLBACK');
     console.error('Erro ao confirmar pagamento:', err);
     return { ok: false };
-  } finally {
-    client.release();
   }
 }
 
@@ -257,12 +247,7 @@ router.post('/verificar/:inscricaoId', authenticate, requireCursosAccess, async 
       if (inscricao.status === 'pago') {
         novoStatus = 'pago';
       } else {
-        const resultado = await confirmarPagamentoOuReembolsarConflito({
-          inscricaoId,
-          cursoId: inscricao.cursoId,
-          assento: inscricao.assento,
-          paymentId: mpPaymentId,
-        });
+        const resultado = await confirmarPagamentoOuReembolsarConflito({ inscricaoId, paymentId: mpPaymentId });
         novoStatus = resultado.conflito ? 'reembolsado' : 'pago';
       }
     } else if (mpStatus === 'rejected' || mpStatus === 'cancelled') {
@@ -270,27 +255,13 @@ router.post('/verificar/:inscricaoId', authenticate, requireCursosAccess, async 
       // só reverte/libera se ainda estiver 'pendente' — sem essa trava, um
       // payment_id antigo/reconsultado podia sobrescrever uma inscrição que
       // já tinha sido confirmada como 'pago' por outra via (webhook, etc.)
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-        const result = await client.query(
-          `UPDATE inscricoes SET status = $1 WHERE id = $2 AND status = 'pendente'`,
-          [statusRevertido, inscricaoId]
-        );
-        if (result.rowCount > 0) {
-          novoStatus = statusRevertido;
-          await client.query(
-            `UPDATE assentos SET status = 'livre' WHERE "cursoId" = $1 AND id = $2`,
-            [inscricao.cursoId, inscricao.assento]
-          );
-          await upsertPagamento(client, { inscricaoId, mpPaymentId, status: statusRevertido });
-        }
-        await client.query('COMMIT');
-      } catch (err) {
-        await client.query('ROLLBACK');
-        throw err;
-      } finally {
-        client.release();
+      const result = await pool.query(
+        `UPDATE inscricoes SET status = $1 WHERE id = $2 AND status = 'pendente'`,
+        [statusRevertido, inscricaoId]
+      );
+      if (result.rowCount > 0) {
+        novoStatus = statusRevertido;
+        await upsertPagamento(pool, { inscricaoId, mpPaymentId, status: statusRevertido });
       }
     }
 
@@ -335,31 +306,31 @@ router.post('/reembolsar/:inscricaoId', authenticate, requireCursosAdmin, async 
       const paymentRefund = new PaymentRefund(getMpClient());
       await paymentRefund.total({ payment_id: mpPaymentId });
 
-      // só libera a vaga e marca como reembolsada depois do MP confirmar o reembolso
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-        await client.query(`UPDATE inscricoes SET status = 'reembolsado' WHERE id = $1`, [inscricaoId]);
-        await client.query(
-          `UPDATE assentos SET status = 'livre' WHERE "cursoId" = $1 AND id = $2`,
-          [inscricao.cursoId, inscricao.assento]
-        );
-        await upsertPagamento(client, { inscricaoId, mpPaymentId, status: 'reembolsado' });
-        await client.query('COMMIT');
-      } catch (err) {
-        await client.query('ROLLBACK');
-        throw err;
-      } finally {
-        client.release();
-      }
+      // só marca como reembolsada depois do MP confirmar o reembolso
+      await pool.query(
+        `UPDATE inscricoes SET status = 'reembolsado', reembolsado_por = $1 WHERE id = $2`,
+        [req.user?.sub ?? null, inscricaoId]
+      );
+      await upsertPagamento(pool, { inscricaoId, mpPaymentId, status: 'reembolsado' });
 
-      res.json({ status: 'reembolsado', reembolsado: true });
+      logAudit({ entityType: 'inscricao', entityId: inscricaoId, action: 'reembolsar', details: inscricao.nome, userHubId: req.user?.sub });
     } catch (err) {
       console.error('Erro ao reembolsar pagamento no MP:', err);
       // MP não confirmou o reembolso — volta pro estado anterior
       await pool.query(`UPDATE inscricoes SET status = 'pago' WHERE id = $1`, [inscricaoId]);
-      res.status(500).json({ message: mensagemAmigavelReembolso(err) });
+      return res.status(500).json({ message: mensagemAmigavelReembolso(err) });
     }
+
+    res.json({ status: 'reembolsado', reembolsado: true });
+
+    // e-mail é best-effort, dispara depois de já ter respondido — uma falha
+    // aqui não pode reverter um reembolso que o MP já confirmou de verdade
+    pool.query(`SELECT nome_curso AS "nomeCurso" FROM cursos WHERE id = $1`, [inscricao.curso_id])
+      .then(({ rows: cursoRows }) => {
+        const { subject, html } = emailReembolsoProcessado({ nome: inscricao.nome, nomeCurso: cursoRows[0]?.nomeCurso || inscricao.curso_removido_nome });
+        return enviarEmail({ to: inscricao.email, subject, html });
+      })
+      .catch(err => console.error('Erro ao enviar e-mail de reembolso:', err));
   } catch (err) {
     res.status(500).json({ message: 'Erro interno' });
   }
@@ -388,46 +359,22 @@ router.post('/webhook', async (req, res) => {
 
     if (status === 'approved') {
       const { rows } = await pool.query(
-        `SELECT "cursoId", assento, status AS "statusAtual" FROM inscricoes WHERE id = $1`,
+        `SELECT status AS "statusAtual" FROM inscricoes WHERE id = $1`,
         [inscricaoId]
       );
       const inscricao = rows[0];
       if (!inscricao || inscricao.statusAtual === 'pago') return;
-      await confirmarPagamentoOuReembolsarConflito({
-        inscricaoId,
-        cursoId: inscricao.cursoId,
-        assento: inscricao.assento,
-        paymentId,
-      });
+      await confirmarPagamentoOuReembolsarConflito({ inscricaoId, paymentId });
     } else if (status === 'rejected' || status === 'cancelled') {
       // 'rejected' = recusado pela operadora/banco, 'cancelled' = cancelado
       // (ex: Pix expirado) — status diferentes pro admin não confundir
       const novoStatus = status === 'rejected' ? 'recusado' : 'cancelado';
-      const { rows } = await pool.query(
-        `SELECT * FROM inscricoes WHERE id = $1 AND status = 'pendente'`,
-        [inscricaoId]
+      const result = await pool.query(
+        `UPDATE inscricoes SET status = $1 WHERE id = $2 AND status = 'pendente'`,
+        [novoStatus, inscricaoId]
       );
-      const inscricao = rows[0];
-      if (!inscricao) return;
-
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-        await client.query(
-          `UPDATE assentos SET status = 'livre' WHERE "cursoId" = $1 AND id = $2`,
-          [inscricao.cursoId, inscricao.assento]
-        );
-        await client.query(
-          `UPDATE inscricoes SET status = $1 WHERE id = $2`,
-          [novoStatus, inscricaoId]
-        );
-        await upsertPagamento(client, { inscricaoId, mpPaymentId: paymentId, status: novoStatus });
-        await client.query('COMMIT');
-      } catch (err) {
-        await client.query('ROLLBACK');
-        console.error('Erro ao marcar', novoStatus, ':', err);
-      } finally {
-        client.release();
+      if (result.rowCount > 0) {
+        await upsertPagamento(pool, { inscricaoId, mpPaymentId: paymentId, status: novoStatus });
       }
     } else if (status === 'pending' || status === 'in_process') {
       const { rows } = await pool.query(
@@ -454,9 +401,9 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
 
   try {
     const { rows } = await pool.query(
-      `SELECT i.*, c."nomeCurso", c.valor AS "cursoValor"
+      `SELECT i.*, c.nome_curso AS "nomeCurso", c.valor AS "cursoValor"
        FROM inscricoes i
-       LEFT JOIN cursos c ON c.id = i."cursoId"
+       LEFT JOIN cursos c ON c.id = i.curso_id
        WHERE i.id = $1`,
       [inscricaoId]
     );
@@ -478,7 +425,7 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
     // caía no fallback e cobrava R$1,00 do cliente silenciosamente
     const valor = parseFloat(inscricao.cursoValor);
     if (!(valor > 0)) {
-      console.error(`Valor inválido pro curso ${inscricao.cursoId} (cursoValor="${inscricao.cursoValor}") — pagamento da inscrição ${inscricaoId} bloqueado`);
+      console.error(`Valor inválido pro curso ${inscricao.curso_id} (cursoValor="${inscricao.cursoValor}") — pagamento da inscrição ${inscricaoId} bloqueado`);
       return res.status(500).json({ message: 'Não foi possível determinar o valor do curso. Contate o suporte.' });
     }
 
@@ -518,46 +465,26 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
         mpPaymentId: paymentId,
         metodoPagamento,
         status: statusPagamentoFromMp(status),
+        comprovanteUrl: extrairComprovanteUrl(paymentData),
       });
 
       if (status === 'approved') {
-        const resultado = await confirmarPagamentoOuReembolsarConflito({
-          inscricaoId,
-          cursoId: inscricao.cursoId,
-          assento: inscricao.assento,
-          paymentId,
-        });
+        const resultado = await confirmarPagamentoOuReembolsarConflito({ inscricaoId, paymentId });
         conflitoAssento = !!resultado.conflito;
       } else if (status === 'rejected' || status === 'cancelled') {
         // 'rejected' = recusado pela operadora/banco (cartão), 'cancelled' =
         // pagamento cancelado (ex: Pix expirado) — status diferentes pro
         // admin não confundir recusa de cartão com cancelamento
-        const novoStatus = status === 'rejected' ? 'recusado' : 'cancelado';
-        // só reverte/libera se ainda estiver 'pendente' — entre o carregamento
-        // da inscrição e a resposta do payment.create (chamada de rede que pode
+        // só reverte se ainda estiver 'pendente' — entre o carregamento da
+        // inscrição e a resposta do payment.create (chamada de rede que pode
         // demorar), outra tentativa concorrente para a mesma inscrição pode já
         // ter sido aprovada; sem essa trava isso sobrescreveria um pagamento
-        // já confirmado de volta pra 'recusado'/'cancelado' e liberaria o assento
-        const client = await pool.connect();
-        try {
-          await client.query('BEGIN');
-          const result = await client.query(
-            `UPDATE inscricoes SET status = $1 WHERE id = $2 AND status = 'pendente'`,
-            [novoStatus, inscricaoId]
-          );
-          if (result.rowCount > 0) {
-            await client.query(
-              `UPDATE assentos SET status = 'livre' WHERE "cursoId" = $1 AND id = $2`,
-              [inscricao.cursoId, inscricao.assento]
-            );
-          }
-          await client.query('COMMIT');
-        } catch (err) {
-          await client.query('ROLLBACK');
-          console.error('Erro ao marcar', novoStatus, ':', err);
-        } finally {
-          client.release();
-        }
+        // já confirmado de volta pra 'recusado'/'cancelado'
+        const novoStatus = status === 'rejected' ? 'recusado' : 'cancelado';
+        await pool.query(
+          `UPDATE inscricoes SET status = $1 WHERE id = $2 AND status = 'pendente'`,
+          [novoStatus, inscricaoId]
+        );
       }
 
       const transactionData = paymentData.point_of_interaction?.transaction_data;

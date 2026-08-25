@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
 import { Trash, ArrowUp, ArrowDown, Plus, Link, Image, ExternalLink } from 'lucide-react'
 
 import AdminPage from '../../layouts/admin/AdminPage'
 import ConfirmModal from '../../components/admin/ModalConfirm'
 import useConfirmAction from '../../hooks/useConfirmAction'
+import { AdminAuthContext } from '../../contexts/AdminAuthContext'
 import { getBanners, postBanner, putBanner, deleteBanner } from '../../api/banners.services'
 
 function UploadArea({ label, hint, aspectClass, preview, inputRef, onChange }) {
@@ -120,7 +121,7 @@ function BannerForm({ posicao, onAdded }) {
     )
 }
 
-function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast }) {
+function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast, isAdmin }) {
     const [link, setLink]         = useState(banner.link || '')
     const [editingLink, setEditingLink] = useState(false)
     const [saving, setSaving]     = useState(false)
@@ -212,12 +213,14 @@ function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast })
                 </button>
             </div>
 
+            {isAdmin && (
             <button
                 onClick={onDelete}
                 className='w-8 h-8 flex items-center justify-center rounded-lg bg-red-base/10 hover:bg-red-base text-red-base hover:text-white transition cursor-pointer shrink-0'
             >
                 <Trash size={15} />
             </button>
+            )}
         </div>
     )
 }
@@ -226,6 +229,7 @@ function BannerSection({ posicao, title, description }) {
     const [banners, setBanners] = useState([])
     const [loading, setLoading] = useState(true)
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction()
+    const { isAdmin } = useContext(AdminAuthContext)
 
     useEffect(() => {
         getBanners(posicao)
@@ -298,6 +302,7 @@ function BannerSection({ posicao, title, description }) {
                             banner={b}
                             isFirst={i === 0}
                             isLast={i === banners.length - 1}
+                            isAdmin={isAdmin}
                             onDelete={() => confirmarExclusao(b.id)}
                             onMoveUp={() => move(i, -1)}
                             onMoveDown={() => move(i, 1)}

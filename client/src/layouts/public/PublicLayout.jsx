@@ -1,13 +1,14 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useContext, useState, useEffect } from 'react'
 
-import { MapPin, Building2, MessageCircle, Menu, X } from 'lucide-react'
+import { MapPin, Building2, MessageCircle, Menu, X, User } from 'lucide-react'
 
 import { whatsapp } from '../../assets/images/icons'
 import { logoNm } from '../../assets/images/logos'
 
 import { getBanners } from '../../api/banners.services'
 import useBodyScrollLock from '../../hooks/useBodyScrollLock'
+import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
 
 const navLinks = [
   { label: 'Home', to: '/' },
@@ -19,6 +20,7 @@ const navLinks = [
 
 export default function PublicLayout({ children, bannerHome }) {
   const navigate = useNavigate();
+  const { cliente } = useContext(ClienteAuthContext)
   const [heroBanners, setHeroBanners] = useState([])
   const [heroIndex, setHeroIndex]     = useState(0)
   const [isMenuOpen, setIsMenuOpen]   = useState(false)
@@ -87,6 +89,14 @@ export default function PublicLayout({ children, bannerHome }) {
               <span className="text-xs sm:text-sm">Atendimento</span>
             </a>
 
+            <Link
+              to={cliente ? '/minha-conta' : '/entrar'}
+              className="hidden sm:flex items-center gap-2 bg-white/15 hover:bg-white/25 transition px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap"
+            >
+              <User size={18} />
+              <span className="text-xs sm:text-sm">{cliente ? 'Minha conta' : 'Entrar'}</span>
+            </Link>
+
             <button
               onClick={() => setIsMenuOpen(true)}
               className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition"
@@ -140,6 +150,19 @@ export default function PublicLayout({ children, bannerHome }) {
               {link.label}
             </NavLink>
           ))}
+          <NavLink
+            to={cliente ? '/minha-conta' : '/entrar'}
+            onClick={() => setIsMenuOpen(false)}
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition ${
+                isActive
+                  ? 'bg-orange-base text-white'
+                  : 'text-gray-dark hover:bg-gray'
+              }`
+            }
+          >
+            <User size={16} /> {cliente ? 'Minha conta' : 'Entrar'}
+          </NavLink>
         </nav>
 
         <a

@@ -5,13 +5,21 @@ const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const pool = require('../db');
+const logAudit = require('../utils/logAudit');
 
 const uploadIndustria = createUpload('industrias');
 const router = express.Router();
 
+const SELECT_INDUSTRIA = `
+  SELECT
+    id, razao_social AS "razaoSocial", nome, cnpj, telefone, email,
+    endereco, instagram, site, foto, criado_em AS "dataCadastro"
+  FROM industrias
+`;
+
 router.get('/', async (req, res) => {
   try {
-    const { rows } = await pool.query(`SELECT * FROM industrias`);
+    const { rows } = await pool.query(SELECT_INDUSTRIA);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -20,7 +28,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const { rows } = await pool.query(`SELECT * FROM industrias WHERE id = $1`, [req.params.id]);
+    const { rows } = await pool.query(`${SELECT_INDUSTRIA} WHERE id = $1`, [req.params.id]);
     if (!rows.length) return res.status(404).json({ message: 'Indústria não encontrada' });
     res.json(rows[0]);
   } catch (err) {
@@ -32,13 +40,16 @@ router.post('/', authenticate, requireCursosAccess, uploadIndustria.single('foto
   const { razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site } = req.body;
   const id = uuidv4();
   const foto = req.file ? `/uploads/industrias/${req.file.filename}` : null;
-  const dataCadastro = new Date().toISOString();
+
+  if (!nome) {
+    return res.status(400).json({ message: 'Nome é obrigatório' });
+  }
 
   try {
     await pool.query(`
       INSERT INTO industrias
-        (id, "razaoSocial", nome, cnpj, telefone, email, endereco, instagram, site, foto, "dataCadastro")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        (id, razao_social, nome, cnpj, telefone, email, endereco, instagram, site, foto)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     `, [
       id,
       razaoSocial,
@@ -50,10 +61,9 @@ router.post('/', authenticate, requireCursosAccess, uploadIndustria.single('foto
       instagram || '',
       site      || '',
       foto,
-      dataCadastro
     ]);
 
-    res.status(201).json({ id, razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site, foto, dataCadastro });
+    res.status(201).json({ id, razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site, foto });
   } catch (err) {
     console.error('Erro ao inserir indústria:', err);
     res.status(500).json({ error: err.message });
@@ -79,7 +89,7 @@ router.put('/:id', authenticate, requireCursosAccess, uploadIndustria.single('fo
 
     await pool.query(`
       UPDATE industrias SET
-        "razaoSocial" = COALESCE($1, "razaoSocial"),
+        razao_social = COALESCE($1, razao_social),
         nome          = COALESCE($2, nome),
         cnpj          = COALESCE($3, cnpj),
         telefone      = COALESCE($4, telefone),
@@ -123,6 +133,9 @@ router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
     }
 
     await pool.query(`DELETE FROM industrias WHERE id = $1`, [id]);
+
+    logAudit({ entityType: 'industria', entityId: id, action: 'excluir', details: industria.nome, userHubId: req.user?.sub });
+
     res.sendStatus(204);
   } catch (err) {
     console.error('Erro ao deletar indústria:', err);

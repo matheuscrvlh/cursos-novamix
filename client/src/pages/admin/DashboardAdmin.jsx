@@ -5,6 +5,8 @@ import CardDash from '../../components/admin/CardDash'
 import CourseCard from '../../components/public/CourseCard'
 import CulinarianCard from '../../components/admin/CulinarianCard';
 import AdminPage from '../../layouts/admin/AdminPage';
+import RevenueAreaChart from '../../components/admin/charts/RevenueAreaChart';
+import StatusDonutChart from '../../components/admin/charts/StatusDonutChart';
 
 import { getSeats, getTotalEnrollment } from '../../api/enrollment.services';
 import { getCourses } from '../../api/courses.services';
@@ -13,12 +15,46 @@ import { getChildren } from '../../api/children.services';
 import { DadosContext } from '../../contexts/DadosContext';
 import { formatDateBR } from '../../utils/formatDate';
 
+const NOMES_MES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+const CORES_STATUS = {
+    pago: '#7BAD7F',
+    pendente: '#FFE700',
+    cancelado: '#1E8581',
+    recusado: '#F72B2A',
+    reembolsado: '#DF0406',
+};
+
+// últimos 6 meses (incluindo o atual), faturamento = soma do valor do curso
+// pra cada inscrição paga cujo dataInscricao caiu naquele mês
+function calcularFaturamentoMensal(inscricoesPagas, cursosPorId) {
+    const meses = [];
+    const hoje = new Date();
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+        meses.push({ ano: d.getFullYear(), mes: d.getMonth(), label: NOMES_MES[d.getMonth()], value: 0 });
+    }
+
+    for (const insc of inscricoesPagas) {
+        const data = new Date(insc.dataInscricao);
+        if (Number.isNaN(data.getTime())) continue;
+        const bucket = meses.find(m => m.ano === data.getFullYear() && m.mes === data.getMonth());
+        if (!bucket) continue;
+        const curso = cursosPorId[insc.cursoId];
+        if (!curso) continue;
+        bucket.value += Number(curso.valor) || 0;
+    }
+
+    return meses;
+}
+
 export default function DashboardAdmin() {
 
     const [vagasPorCurso, setVagasPorCurso] = useState({});
 
     const [inscricoes, setInscricoes] = useState([]);
     const [loadingInscricoes, setLoadingInscricoes] = useState(true)
+    const [faturamentoMensal, setFaturamentoMensal] = useState([]);
 
     const [filtroCursos, setFiltroCursos] = useState([]);
 
@@ -92,6 +128,14 @@ export default function DashboardAdmin() {
                     recusadas: contarStatus('recusado'),
                     reembolsadas: contarStatus('reembolsado'),
                 })
+
+                // faturamento considera TODAS as inscrições pagas (não só de
+                // cursos ainda ativos) — é sobre o que já vendeu
+                const cursosPorId = Object.fromEntries(
+                    [...dataCursos, ...dataCursosInfantis].map(c => [c.id, c])
+                );
+                const inscricoesPagas = dataInscricoes.filter(i => i.status === 'pago');
+                setFaturamentoMensal(calcularFaturamentoMensal(inscricoesPagas, cursosPorId));
 
             } catch(err) {
                 console.log('Nao foi possivel pegar as inscricoes', err);
@@ -233,6 +277,30 @@ export default function DashboardAdmin() {
                         }
                     </div>
 
+                </div>
+            </div>
+
+            <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+                <div className='bg-white rounded-xl shadow-sm p-5 lg:col-span-2'>
+                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider mb-4'>Faturamento — últimos 6 meses</p>
+                    {loadingInscricoes
+                        ? <p className='text-sm text-gray-text/40 py-16 text-center'>Carregando...</p>
+                        : <RevenueAreaChart data={faturamentoMensal} />
+                    }
+                </div>
+
+                <div className='bg-white rounded-xl shadow-sm p-5'>
+                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider mb-4'>Inscrições por status</p>
+                    {loadingInscricoes
+                        ? <p className='text-sm text-gray-text/40 py-16 text-center'>Carregando...</p>
+                        : <StatusDonutChart data={[
+                            { label: 'Pagas', value: inscricoes.pagas || 0, color: CORES_STATUS.pago },
+                            { label: 'Pendentes', value: inscricoes.pendentes || 0, color: CORES_STATUS.pendente },
+                            { label: 'Canceladas', value: inscricoes.canceladas || 0, color: CORES_STATUS.cancelado },
+                            { label: 'Recusadas', value: inscricoes.recusadas || 0, color: CORES_STATUS.recusado },
+                            { label: 'Reembolsadas', value: inscricoes.reembolsadas || 0, color: CORES_STATUS.reembolsado },
+                        ]} />
+                    }
                 </div>
             </div>
 

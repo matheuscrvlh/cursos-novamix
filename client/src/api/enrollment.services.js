@@ -7,6 +7,10 @@ export async function postEnrollment(data) {
             headers: {
                 'Content-Type': 'application/json'
             },
+            // sem isso, o cookie de sessão do cliente (cliente_token) nunca
+            // vai pro backend — a inscrição fica sem cliente_id mesmo com o
+            // cliente logado, e ela nunca aparece em "Minha conta"
+            credentials: 'include',
             body: JSON.stringify(data)
         })
 
@@ -23,10 +27,17 @@ export async function getSeats(cursoId) {
             method: 'GET'
         });
 
-        return res.json()
+        // sem essa checagem, uma resposta não-OK (404, 429, 500 — corpo não é
+        // um array de assentos) faz res.json() devolver algo que quebra o
+        // .filter() de quem chamou; devolver [] aqui é seguro pro caller
+        if (!res.ok) return []
+
+        const data = await res.json()
+        return Array.isArray(data) ? data : []
 
     } catch (err) {
         console.error('Erro ao buscar Assentos:', err);
+        return []
     }
 }
 

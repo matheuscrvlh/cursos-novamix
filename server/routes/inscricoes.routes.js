@@ -1,12 +1,19 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
+const { authenticateClienteOpcional } = require('../middleware/authCliente.middleware');
 const { paymentLimiter } = require('../middleware/rateLimit.middleware');
 const pool = require('../db');
+const logAudit = require('../utils/logAudit');
+const { enviarEmail, emailInscricaoRecebida } = require('../utils/email');
 
 const router = express.Router();
 
-router.post('/', paymentLimiter, async (req, res) => {
+// Reservar um assento não precisa mais de trava manual em duas etapas —
+// cursos.inscricoes tem um índice único parcial em (curso_id, assento) pra
+// status ativos (pendente/pago/reembolsando); o próprio Postgres rejeita
+// (23505) se o assento já estiver reivindicado por outra inscrição ativa.
+router.post('/', paymentLimiter, authenticateClienteOpcional, async (req, res) => {
   const { cursoId, nome, cpf, celular, email, assento } = req.body;
 
   if (!cursoId || !nome || !cpf || !celular || !email || assento === undefined) {
@@ -14,52 +21,41 @@ router.post('/', paymentLimiter, async (req, res) => {
   }
 
   const assentoId = Number(assento);
-  const client = await pool.connect();
+  const id = uuidv4();
 
   try {
-    await client.query('BEGIN');
-
-    const { rows: cadeiras } = await client.query(
-      `SELECT * FROM assentos WHERE "cursoId" = $1 AND id = $2`,
-      [cursoId, assentoId]
+    const { rows: cursoRows } = await pool.query(
+      `SELECT capacidade, nome_curso AS "nomeCurso", to_char(data,'DD/MM/YYYY') AS "dataCurso", to_char(data,'HH24:MI') AS "horaCurso" FROM cursos WHERE id = $1`,
+      [cursoId]
     );
-    if (!cadeiras.length) {
-      await client.query('ROLLBACK');
+    if (!cursoRows.length) return res.status(404).json({ message: 'Curso não encontrado' });
+    if (!(assentoId >= 1 && assentoId <= cursoRows[0].capacidade)) {
       return res.status(404).json({ message: 'Assento não encontrado' });
     }
 
-    // reservar assento de forma atômica: o WHERE status = 'livre' garante que,
-    // sob concorrência, só uma requisição consegue mudar o status (rowCount === 1).
-    // Checar e depois dar UPDATE em passos separados permitia duas pessoas reservarem
-    // o mesmo assento ao mesmo tempo. A transação garante que, se o INSERT da
-    // inscrição falhar depois, a reserva do assento é desfeita junto (ROLLBACK).
-    const reserva = await client.query(
-      `UPDATE assentos SET status = 'reservado' WHERE "cursoId" = $1 AND id = $2 AND status = 'livre'`,
-      [cursoId, assentoId]
-    );
-    if (reserva.rowCount === 0) {
-      await client.query('ROLLBACK');
+    // cliente_id vem do cookie de sessão do cliente, se ele estiver logado
+    // (authenticateClienteOpcional não bloqueia requisição sem login — guest
+    // checkout continua funcionando, cliente_id só fica NULL nesse caso)
+    await pool.query(`
+      INSERT INTO inscricoes (id, curso_id, cliente_id, nome, cpf, celular, email, assento, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pendente')
+    `, [id, cursoId, req.cliente?.sub ?? null, nome, cpf, celular, email, assentoId]);
+
+    res.status(201).json({
+      id, cursoId, nome, cpf, celular, email,
+      assento: assentoId, status: 'pendente', dataInscricao: new Date().toISOString(),
+    });
+
+    // e-mail é best-effort, dispara depois de já ter respondido — não pode
+    // atrasar/derrubar a inscrição em si
+    const { subject, html } = emailInscricaoRecebida({ nome, ...cursoRows[0] });
+    enviarEmail({ to: email, subject, html });
+  } catch (err) {
+    if (err.code === '23505') {
       return res.status(400).json({ message: 'Assento indisponível' });
     }
-
-    const id = uuidv4();
-    const dataInscricao = new Date().toISOString();
-
-    await client.query(`
-      INSERT INTO inscricoes
-        (id, "cursoId", nome, cpf, celular, email, assento, status, "dataInscricao")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    `, [id, cursoId, nome, cpf, celular, email, assentoId, 'pendente', dataInscricao]);
-
-    await client.query('COMMIT');
-
-    res.status(201).json({ id, cursoId, nome, cpf, celular, email, assento: assentoId, status: 'pendente', dataInscricao });
-  } catch (err) {
-    await client.query('ROLLBACK');
     console.error('Erro ao inserir inscrição:', err);
     res.status(500).json({ message: 'Erro interno no servidor' });
-  } finally {
-    client.release();
   }
 });
 
@@ -74,65 +70,37 @@ router.put('/:id/assento', async (req, res) => {
     return res.status(400).json({ message: 'Assento obrigatório' });
   }
 
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
-
-    const { rows } = await client.query(`SELECT * FROM inscricoes WHERE id = $1`, [id]);
-    if (!rows.length) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ message: 'Inscrição não encontrada' });
-    }
+    const { rows } = await pool.query(`SELECT * FROM inscricoes WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ message: 'Inscrição não encontrada' });
     const inscricao = rows[0];
     if (inscricao.status !== 'pendente') {
-      await client.query('ROLLBACK');
       return res.status(400).json({ message: 'Não é possível trocar de assento dessa inscrição.' });
     }
 
     const novoAssentoId = Number(assento);
     if (novoAssentoId === inscricao.assento) {
-      await client.query('ROLLBACK');
       return res.json({ message: 'Atualizado' });
     }
 
-    const { rows: novoAssentoRows } = await client.query(
-      `SELECT * FROM assentos WHERE "cursoId" = $1 AND id = $2`,
-      [inscricao.cursoId, novoAssentoId]
-    );
-    if (!novoAssentoRows.length) {
-      await client.query('ROLLBACK');
+    const { rows: cursoRows } = await pool.query(`SELECT capacidade FROM cursos WHERE id = $1`, [inscricao.curso_id]);
+    if (!cursoRows.length || !(novoAssentoId >= 1 && novoAssentoId <= cursoRows[0].capacidade)) {
       return res.status(404).json({ message: 'Novo assento não encontrado' });
     }
 
-    // reserva atômica do novo assento — evita que duas pessoas troquem para o
-    // mesmo assento ao mesmo tempo (ver comentário equivalente no POST '/')
-    const reserva = await client.query(
-      `UPDATE assentos SET status = 'reservado' WHERE "cursoId" = $1 AND id = $2 AND status = 'livre'`,
-      [inscricao.cursoId, novoAssentoId]
-    );
-    if (reserva.rowCount === 0) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({ message: 'Esse assento já foi ocupado por outra pessoa.' });
+    try {
+      await pool.query(`UPDATE inscricoes SET assento = $1 WHERE id = $2`, [novoAssentoId, id]);
+    } catch (err) {
+      if (err.code === '23505') {
+        return res.status(400).json({ message: 'Esse assento já foi ocupado por outra pessoa.' });
+      }
+      throw err;
     }
 
-    await client.query(
-      `UPDATE assentos SET status = 'livre' WHERE "cursoId" = $1 AND id = $2`,
-      [inscricao.cursoId, inscricao.assento]
-    );
-
-    await client.query(
-      `UPDATE inscricoes SET assento = $1 WHERE id = $2`,
-      [novoAssentoId, id]
-    );
-
-    await client.query('COMMIT');
     res.json({ message: 'Atualizado' });
   } catch (err) {
-    await client.query('ROLLBACK');
     console.error('Erro ao atualizar assento da inscrição:', err);
     res.status(500).json({ message: 'Erro interno no servidor' });
-  } finally {
-    client.release();
   }
 });
 
@@ -142,17 +110,10 @@ router.put('/:id/assento', async (req, res) => {
 // vez de deixá-lo preso até o cron de expiração (30min) rodar.
 router.post('/:id/cancelar', async (req, res) => {
   const { id } = req.params;
-  const client = await pool.connect();
 
   try {
-    await client.query('BEGIN');
-
-    const { rows } = await client.query(`SELECT * FROM inscricoes WHERE id = $1`, [id]);
-    if (!rows.length) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ message: 'Inscrição não encontrada' });
-    }
-    const inscricao = rows[0];
+    const { rows } = await pool.query(`SELECT id FROM inscricoes WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ message: 'Inscrição não encontrada' });
 
     // só cancela se ainda estiver 'pendente' e sem nenhuma tentativa de
     // pagamento registrada — existir uma linha em pagamentos significa que já
@@ -160,50 +121,50 @@ router.post('/:id/cancelar', async (req, res) => {
     // (aprovado/recusado) pode chegar a qualquer momento; cancelar aqui
     // correria o risco de liberar o assento bem na hora em que o pagamento é
     // aprovado, deixando a inscrição "paga" com assento livre
-    const { rows: tentativas } = await client.query(
-      `SELECT 1 FROM pagamentos WHERE "inscricaoId" = $1 LIMIT 1`,
+    const { rows: tentativas } = await pool.query(
+      `SELECT 1 FROM pagamentos WHERE inscricao_id = $1 LIMIT 1`,
       [id]
     );
     if (tentativas.length > 0) {
-      await client.query('ROLLBACK');
       return res.status(400).json({ message: 'Inscrição não pode ser cancelada' });
     }
 
-    // trava atômica: só cancela se ainda estiver 'pendente'
-    const cancelamento = await client.query(
+    // trava atômica: só cancela se ainda estiver 'pendente' — deixar de ser
+    // 'pendente'/'pago'/'reembolsando' já libera o assento sozinho (o índice
+    // único parcial só cobre esses três status)
+    const cancelamento = await pool.query(
       `UPDATE inscricoes SET status = 'cancelado' WHERE id = $1 AND status = 'pendente'`,
       [id]
     );
     if (cancelamento.rowCount === 0) {
-      await client.query('ROLLBACK');
       return res.status(400).json({ message: 'Inscrição não pode ser cancelada' });
     }
 
-    await client.query(
-      `UPDATE assentos SET status = 'livre' WHERE "cursoId" = $1 AND id = $2`,
-      [inscricao.cursoId, inscricao.assento]
-    );
-
-    await client.query('COMMIT');
     res.json({ message: 'Inscrição cancelada' });
   } catch (err) {
-    await client.query('ROLLBACK');
     console.error('Erro ao cancelar inscrição:', err);
     res.status(500).json({ message: 'Erro interno no servidor' });
-  } finally {
-    client.release();
   }
 });
 
 // traz junto o método de pagamento da tentativa mais recente (tabela
 // pagamentos) — usado só pra exibição no admin (ex: "Pix"/"Cartão")
 const SELECT_COM_METODO_PAGAMENTO = `
-  SELECT i.*, p."metodoPagamento"
+  SELECT
+    i.id,
+    i.curso_id AS "cursoId",
+    i.cliente_id AS "clienteId",
+    i.nome, i.cpf, i.celular, i.email, i.assento, i.status,
+    i.data_inscricao AS "dataInscricao",
+    i.curso_removido_nome AS "cursoRemovidoNome",
+    i.reembolsado_por AS "reembolsadoPor",
+    i.curso_excluido_por AS "cursoExcluidoPor",
+    p.metodo_pagamento AS "metodoPagamento"
   FROM inscricoes i
   LEFT JOIN LATERAL (
-    SELECT "metodoPagamento" FROM pagamentos
-    WHERE "inscricaoId" = i.id
-    ORDER BY "criadoEm" DESC
+    SELECT metodo_pagamento FROM pagamentos
+    WHERE inscricao_id = i.id
+    ORDER BY criado_em DESC
     LIMIT 1
   ) p ON true
 `;
@@ -211,7 +172,7 @@ const SELECT_COM_METODO_PAGAMENTO = `
 router.get('/curso/:cursoId', authenticate, requireCursosAccess, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `${SELECT_COM_METODO_PAGAMENTO} WHERE i."cursoId" = $1 ORDER BY i."dataInscricao" ASC`,
+      `${SELECT_COM_METODO_PAGAMENTO} WHERE i.curso_id = $1 ORDER BY i.data_inscricao ASC`,
       [req.params.cursoId]
     );
     res.json(rows);
@@ -223,7 +184,7 @@ router.get('/curso/:cursoId', authenticate, requireCursosAccess, async (req, res
 
 router.get('/', authenticate, requireCursosAccess, async (req, res) => {
   try {
-    const { rows } = await pool.query(`${SELECT_COM_METODO_PAGAMENTO} ORDER BY i."dataInscricao" ASC`);
+    const { rows } = await pool.query(`${SELECT_COM_METODO_PAGAMENTO} ORDER BY i.data_inscricao ASC`);
     res.json(rows);
   } catch (err) {
     console.error('Erro ao obter inscrições:', err);
@@ -235,133 +196,73 @@ router.put('/:id', authenticate, requireCursosAccess, async (req, res) => {
   const { id } = req.params;
   const { nome, cpf, celular, email, assento, status } = req.body;
 
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
+    const { rows } = await pool.query(`SELECT id, curso_id FROM inscricoes WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ message: 'Inscrição não encontrada' });
 
-    const { rows } = await client.query(`SELECT * FROM inscricoes WHERE id = $1`, [id]);
-    if (!rows.length) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ message: 'Inscrição não encontrada' });
-    }
-    const inscricao = rows[0];
-
-    // qualquer status terminal (não só 'cancelado') precisa liberar o assento —
-    // senão editar manualmente pra 'recusado'/'reembolsado' por aqui deixava
-    // o assento preso como 'reservado' pra sempre, mesmo sem inscrição ativa
-    const ESTADOS_TERMINAIS = ['cancelado', 'recusado', 'reembolsado'];
-    const trocarAssento = assento !== undefined && Number(assento) !== inscricao.assento;
-    const cancelando = status !== undefined && ESTADOS_TERMINAIS.includes(status) && !ESTADOS_TERMINAIS.includes(inscricao.status);
-    const reativando = status !== undefined && !ESTADOS_TERMINAIS.includes(status) && ESTADOS_TERMINAIS.includes(inscricao.status);
-
-    if (trocarAssento) {
-      const novoAssentoId = Number(assento);
-
-      // reserva atômica do novo assento (ver comentário equivalente no POST '/')
-      const reserva = await client.query(
-        `UPDATE assentos SET status = 'reservado' WHERE "cursoId" = $1 AND id = $2 AND status = 'livre'`,
-        [inscricao.cursoId, novoAssentoId]
-      );
-      if (reserva.rowCount === 0) {
-        await client.query('ROLLBACK');
-        return res.status(400).json({ message: 'Novo assento indisponível' });
-      }
-
-      await client.query(
-        `UPDATE assentos SET status = 'livre' WHERE "cursoId" = $1 AND id = $2`,
-        [inscricao.cursoId, inscricao.assento]
-      );
-    } else if (reativando) {
-      // volta de 'cancelado' pra outro status: a vaga foi liberada quando cancelou,
-      // então precisa conferir se ninguém mais pegou antes de reservar de novo —
-      // reserva atômica (ver comentário equivalente no POST '/')
-      const reserva = await client.query(
-        `UPDATE assentos SET status = 'reservado' WHERE "cursoId" = $1 AND id = $2 AND status = 'livre'`,
-        [inscricao.cursoId, inscricao.assento]
-      );
-      if (reserva.rowCount === 0) {
-        await client.query('ROLLBACK');
-        return res.status(400).json({ message: 'Não é possível reativar: essa vaga já foi ocupada por outra pessoa.' });
+    // sem assentos como tabela própria, nada mais garante que um assento
+    // fique dentro da capacidade do curso além dessa checagem — sem ela, um
+    // admin podia salvar um assento fora do mapa (nunca aparece como
+    // reservado, já que o mapa só gera 1..capacidade)
+    if (assento !== undefined) {
+      const { rows: cursoRows } = await pool.query(`SELECT capacidade FROM cursos WHERE id = $1`, [rows[0].curso_id]);
+      const assentoNum = Number(assento);
+      if (!cursoRows.length || !(assentoNum >= 1 && assentoNum <= cursoRows[0].capacidade)) {
+        return res.status(400).json({ message: 'Assento fora da capacidade do curso' });
       }
     }
 
-    await client.query(`
-      UPDATE inscricoes SET
-        nome    = COALESCE($1, nome),
-        cpf     = COALESCE($2, cpf),
-        celular = COALESCE($3, celular),
-        email   = COALESCE($4, email),
-        assento = COALESCE($5, assento),
-        status  = COALESCE($6, status)
-      WHERE id = $7
-    `, [
-      nome ?? null,
-      cpf ?? null,
-      celular ?? null,
-      email ?? null,
-      trocarAssento ? Number(assento) : null,
-      status ?? null,
-      id
-    ]);
-
-    if (cancelando) {
-      const assentoParaLiberar = trocarAssento ? Number(assento) : inscricao.assento;
-      await client.query(
-        `UPDATE assentos SET status = 'livre' WHERE "cursoId" = $1 AND id = $2`,
-        [inscricao.cursoId, assentoParaLiberar]
-      );
+    try {
+      await pool.query(`
+        UPDATE inscricoes SET
+          nome    = COALESCE($1, nome),
+          cpf     = COALESCE($2, cpf),
+          celular = COALESCE($3, celular),
+          email   = COALESCE($4, email),
+          assento = COALESCE($5, assento),
+          status  = COALESCE($6, status)
+        WHERE id = $7
+      `, [
+        nome ?? null,
+        cpf ?? null,
+        celular ?? null,
+        email ?? null,
+        assento !== undefined ? Number(assento) : null,
+        status ?? null,
+        id
+      ]);
+    } catch (err) {
+      // índice único parcial (curso_id, assento) barrado: ou trocou pra um
+      // assento já ocupado, ou reativou um status ativo e nesse meio-tempo
+      // outra inscrição já pegou esse assento
+      if (err.code === '23505') {
+        return res.status(400).json({ message: 'Assento indisponível — já ocupado por outra inscrição.' });
+      }
+      throw err;
     }
 
-    await client.query('COMMIT');
     res.json({ message: 'Atualizado' });
   } catch (err) {
-    await client.query('ROLLBACK');
     console.error('Erro ao atualizar inscrição:', err);
     res.status(500).json({ message: 'Erro interno no servidor' });
-  } finally {
-    client.release();
   }
 });
 
 router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
   const { id } = req.params;
-  const client = await pool.connect();
 
   try {
-    await client.query('BEGIN');
+    const { rows } = await pool.query(`SELECT nome FROM inscricoes WHERE id = $1`, [id]);
+    if (!rows.length) return res.status(404).json({ message: 'Inscrição não encontrada' });
 
-    const { rows } = await client.query(`SELECT * FROM inscricoes WHERE id = $1`, [id]);
-    if (!rows.length) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ message: 'Inscrição não encontrada' });
-    }
-    const inscricao = rows[0];
+    await pool.query(`DELETE FROM inscricoes WHERE id = $1`, [id]);
 
-    // só libera se não existir OUTRA inscrição ativa pro mesmo assento — sem
-    // essa checagem, excluir uma das duas inscrições de um assento duplicado
-    // (pra "resolver" o conflito manualmente) liberava o assento por baixo da
-    // inscrição paga que sobrou, fazendo o cliente que pagou sumir do mapa
-    await client.query(
-      `UPDATE assentos SET status = 'livre'
-       WHERE "cursoId" = $1 AND id = $2
-         AND NOT EXISTS (
-           SELECT 1 FROM inscricoes i2
-           WHERE i2."cursoId" = $3 AND i2.assento = $4 AND i2.id != $5
-             AND i2.status IN ('pendente', 'pago', 'reembolsando')
-         )`,
-      [inscricao.cursoId, inscricao.assento, inscricao.cursoId, inscricao.assento, id]
-    );
+    logAudit({ entityType: 'inscricao', entityId: id, action: 'excluir', details: rows[0].nome, userHubId: req.user?.sub });
 
-    await client.query(`DELETE FROM inscricoes WHERE id = $1`, [id]);
-
-    await client.query('COMMIT');
     res.json({ message: 'Inscrição e assento removido' });
   } catch (err) {
-    await client.query('ROLLBACK');
     console.error('Erro ao deletar inscrição:', err);
     res.status(500).json({ message: 'Erro interno no servidor' });
-  } finally {
-    client.release();
   }
 });
 

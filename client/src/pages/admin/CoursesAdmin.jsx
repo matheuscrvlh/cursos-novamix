@@ -11,6 +11,7 @@ import FilterPills from '../../components/admin/FilterPills';
 import AdminPage from '../../layouts/admin/AdminPage';
 
 import { DadosContext } from '../../contexts/DadosContext';
+import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 import { formatDateBR } from '../../utils/formatDate';
 
@@ -45,7 +46,7 @@ const FORM_VAZIO = {
     data: '',
     hora: '',
     loja: '',
-    culinarista: '',
+    culinaristaId: '',
     valor: '',
     duracao: '',
     categoria: '',
@@ -60,7 +61,7 @@ const EDITAR_VAZIO = {
     data: '',
     hora: '',
     loja: '',
-    culinarista: '',
+    culinaristaId: '',
     valor: '',
     duracao: '',
     categoria: '',
@@ -100,6 +101,7 @@ export default function CoursesAdmin() {
     const [filtroLoja, setFiltroLoja]     = useState('todas');
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
+    const { isAdmin } = useContext(AdminAuthContext);
 
     const [submitted, setSubmitted]         = useState(false);
     const [submittedEdit, setSubmittedEdit] = useState(false);
@@ -137,7 +139,7 @@ export default function CoursesAdmin() {
         formData.append('data',        form.data);
         formData.append('hora',        form.hora);
         formData.append('loja',        form.loja);
-        formData.append('culinarista', form.culinarista);
+        formData.append('culinaristaId', form.culinaristaId);
         formData.append('valor',       valorParaSalvar(form.valor));
         formData.append('duracao',     form.duracao.trim());
         formData.append('categoria',   form.categoria.trim());
@@ -162,7 +164,7 @@ export default function CoursesAdmin() {
             data:        c.data,
             hora:        c.hora,
             loja:        c.loja,
-            culinarista: c.culinarista,
+            culinaristaId: c.culinaristaId || '',
             valor:       formatValorDisplay(c.valor),
             duracao:     c.duracao,
             categoria:   c.categoria,
@@ -189,7 +191,7 @@ export default function CoursesAdmin() {
         formData.append('data',        cursoEditar.data);
         formData.append('hora',        cursoEditar.hora);
         formData.append('loja',        cursoEditar.loja);
-        formData.append('culinarista', cursoEditar.culinarista);
+        formData.append('culinaristaId', cursoEditar.culinaristaId);
         formData.append('valor',       valorParaSalvar(cursoEditar.valor));
         formData.append('duracao',     cursoEditar.duracao.trim());
         formData.append('categoria',   cursoEditar.categoria.trim());
@@ -311,15 +313,15 @@ export default function CoursesAdmin() {
                     <div className='flex flex-col gap-1.5'>
                         <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
                         <select
-                            value={form.culinarista}
-                            onChange={e => setForm({ ...form, culinarista: e.target.value })}
+                            value={form.culinaristaId}
+                            onChange={e => setForm({ ...form, culinaristaId: e.target.value })}
                             className={selectClass(false)}
                         >
                             <option value=''>Selecione a culinarista</option>
                             {culinaristas === null
                                 ? null
                                 : culinaristas.map(c =>
-                                    <option key={c.id} value={c.nomeCulinarista}>{c.nomeCulinarista}</option>
+                                    <option key={c.id} value={c.id}>{c.nomeCulinarista}</option>
                                 )
                             }
                         </select>
@@ -420,6 +422,7 @@ export default function CoursesAdmin() {
                                         : <span className='text-xs font-semibold mt-1 inline-block px-2 py-0.5 rounded-full bg-blue-base/20 text-blue-base'>{curso.loja}</span>
                                     }
                                     <div className='flex gap-2 mt-2'>
+                                        {isAdmin && (
                                         <Tooltip label='Excluir'>
                                             <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => ask({
                                 title: 'Excluir curso',
@@ -431,6 +434,7 @@ export default function CoursesAdmin() {
                                                 <Trash size={16} />
                                             </Button>
                                         </Tooltip>
+                                        )}
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditCourse(curso.id)}>
                                                 <Edit size={16} />
@@ -454,6 +458,7 @@ export default function CoursesAdmin() {
                                         : <span className='text-xs font-semibold px-2 py-1 rounded-full w-fit bg-blue-base/20 text-blue-base'>{curso.loja}</span>
                                     }
                                     <div className='flex gap-2'>
+                                        {isAdmin && (
                                         <Tooltip label='Excluir'>
                                             <Button className='bg-red-base p-2 hover:bg-red-light text-white' onClick={() => ask({
                                 title: 'Excluir curso',
@@ -465,6 +470,7 @@ export default function CoursesAdmin() {
                                                 <Trash size={16} />
                                             </Button>
                                         </Tooltip>
+                                        )}
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEditCourse(curso.id)}>
                                                 <Edit size={16} />
@@ -564,13 +570,13 @@ export default function CoursesAdmin() {
                         <label className='text-xs font-semibold text-gray-text uppercase tracking-wider'>Culinarista</label>
                         <select
                             className={selectClass(false)}
-                            value={cursoEditar.culinarista}
-                            onChange={e => setCursoEditar({ ...cursoEditar, culinarista: e.target.value })}
+                            value={cursoEditar.culinaristaId}
+                            onChange={e => setCursoEditar({ ...cursoEditar, culinaristaId: e.target.value })}
                         >
                             {culinaristas === null
                                 ? <option>Nenhuma encontrada</option>
                                 : culinaristas.map(c =>
-                                    <option key={c.id} value={c.nomeCulinarista}>{c.nomeCulinarista}</option>
+                                    <option key={c.id} value={c.id}>{c.nomeCulinarista}</option>
                                 )
                             }
                         </select>
