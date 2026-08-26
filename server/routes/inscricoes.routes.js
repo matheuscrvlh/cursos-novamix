@@ -172,7 +172,7 @@ const SELECT_COM_METODO_PAGAMENTO = `
 router.get('/curso/:cursoId', authenticate, requireCursosAccess, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `${SELECT_COM_METODO_PAGAMENTO} WHERE i.curso_id = $1 ORDER BY i.data_inscricao ASC`,
+      `${SELECT_COM_METODO_PAGAMENTO} WHERE i.curso_id = $1 ORDER BY i.data_inscricao DESC`,
       [req.params.cursoId]
     );
     res.json(rows);
@@ -182,9 +182,67 @@ router.get('/curso/:cursoId', authenticate, requireCursosAccess, async (req, res
   }
 });
 
+// lista geral do admin — cresce pra sempre (uma linha por inscrição feita
+// desde o início), então os filtros que o front já usa (tipo, status,
+// loja, pagamento, período, busca) viram WHERE aqui em vez de vir tudo e
+// filtrar em JS. JOIN com cursos/branchs só serve pra filtrar (tipo/status/
+// loja) — o front já resolve os dados de exibição do curso via DadosContext.
 router.get('/', authenticate, requireCursosAccess, async (req, res) => {
   try {
-    const { rows } = await pool.query(`${SELECT_COM_METODO_PAGAMENTO} ORDER BY i.data_inscricao ASC`);
+    const { tipo, status, loja, pagamento, dataInicio, dataFim, busca } = req.query;
+    const condicoes = [];
+    const valores = [];
+
+    // curso excluído (i.curso_id não bate com nenhuma linha de cursos, virou
+    // NULL via ON DELETE SET NULL): não dá pra saber tipo/loja dele, então
+    // essas duas condições sempre deixam passar nesse caso — só "ativos"
+    // exclui (curso apagado nunca está "por acontecer")
+    if (tipo === 'normais' || tipo === 'infantis') {
+      valores.push(tipo === 'normais' ? 'normal' : 'infantil');
+      condicoes.push(`(c.id IS NULL OR c.tipo = $${valores.length})`);
+    }
+    if (status === 'ativos') {
+      condicoes.push(`(c.id IS NOT NULL AND c.data > now())`);
+    } else if (status === 'concluidos') {
+      condicoes.push(`(c.id IS NULL OR c.data <= now())`);
+    }
+    if (loja && loja !== 'todas') {
+      valores.push(loja);
+      condicoes.push(`(c.id IS NULL OR REPLACE(b.name, 'Novamix ', '') = $${valores.length})`);
+    }
+    if (pagamento && pagamento !== 'todos') {
+      valores.push(pagamento);
+      condicoes.push(`i.status = $${valores.length}`);
+    }
+    if (dataInicio) {
+      valores.push(dataInicio);
+      condicoes.push(`i.data_inscricao >= $${valores.length}`);
+    }
+    if (dataFim) {
+      valores.push(dataFim);
+      condicoes.push(`i.data_inscricao < $${valores.length}`);
+    }
+    if (busca && busca.trim()) {
+      valores.push(`%${busca.trim()}%`);
+      const idxNome = valores.length;
+      const buscaDigits = busca.replace(/\D/g, '');
+      if (buscaDigits) {
+        valores.push(`%${buscaDigits}%`);
+        condicoes.push(`(i.nome ILIKE $${idxNome} OR regexp_replace(i.cpf, '\\D', '', 'g') LIKE $${valores.length})`);
+      } else {
+        condicoes.push(`i.nome ILIKE $${idxNome}`);
+      }
+    }
+
+    const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
+
+    const { rows } = await pool.query(`
+      ${SELECT_COM_METODO_PAGAMENTO}
+      LEFT JOIN cursos c ON c.id = i.curso_id
+      LEFT JOIN public.branchs b ON b.id = c.filial_id
+      ${where}
+      ORDER BY i.data_inscricao DESC
+    `, valores);
     res.json(rows);
   } catch (err) {
     console.error('Erro ao obter inscrições:', err);

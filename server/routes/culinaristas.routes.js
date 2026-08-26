@@ -67,9 +67,14 @@ const SELECT_CULINARISTA = `
   LEFT JOIN industrias i ON i.id = c.industria_id
 `;
 
+// lista é pequena (uma linha por culinarista cadastrada) e o front busca uma
+// vez só e cacheia — busca por nome existe aqui pra ficar no mesmo padrão dos
+// outros GETs que filtram no SQL, não porque o dataset precise disso hoje
 router.get('/', async (req, res) => {
   try {
-    const { rows } = await pool.query(SELECT_CULINARISTA);
+    const { busca } = req.query;
+    const where = busca ? `WHERE c.nome_culinarista ILIKE $1` : '';
+    const { rows } = await pool.query(`${SELECT_CULINARISTA} ${where}`, busca ? [`%${busca}%`] : []);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });

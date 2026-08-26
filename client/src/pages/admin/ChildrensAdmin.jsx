@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Trash, Edit, Inbox } from 'lucide-react';
+import { Trash, Edit, Inbox, Loader2 } from 'lucide-react';
 
 import Input from '../../components/Input'
 import CardDash from '../../components/admin/CardDash'
@@ -13,7 +13,7 @@ import AdminPage from '../../layouts/admin/AdminPage';
 import { DadosContext } from '../../contexts/DadosContext';
 import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
-import { formatDateBR } from '../../utils/formatDate';
+import { formatDateBR, cursoEncerrado } from '../../utils/formatDate';
 
 function maskValor(value) {
     const digits = value.replace(/\D/g, '');
@@ -65,6 +65,7 @@ export default function ChildrensAdmin() {
 
     const {
         cursosInfantis = [],
+        loadingChildren,
         addCursoInfantil,
         removeCursoInfantil,
         editCursoInfantil,
@@ -82,10 +83,9 @@ export default function ChildrensAdmin() {
     const [filtroStatus, setFiltroStatus] = useState('todos');
     const [filtroLoja, setFiltroLoja] = useState('todas');
 
-    const hoje = new Date().toISOString().split('T')[0];
     const cursosFiltrados = cursosInfantis.filter(c => {
-        const passaStatus = filtroStatus === 'ativos' ? c.data >= hoje
-                          : filtroStatus === 'concluidos' ? c.data < hoje
+        const passaStatus = filtroStatus === 'ativos' ? !cursoEncerrado(c)
+                          : filtroStatus === 'concluidos' ? cursoEncerrado(c)
                           : true;
         const passaLoja = filtroLoja === 'todas' || c.loja === filtroLoja;
         return passaStatus && passaLoja;
@@ -106,6 +106,17 @@ export default function ChildrensAdmin() {
 
         addCursoInfantil(formData);
         setForm(CURSO_VAZIO);
+        setStep('close');
+    }
+
+    function abrirAddCurso() {
+        setForm(CURSO_VAZIO);
+        setStep('add');
+    }
+
+    function fecharAddCurso() {
+        setForm(CURSO_VAZIO);
+        setStep('close');
     }
 
     function handleEdit(id) {
@@ -152,8 +163,16 @@ export default function ChildrensAdmin() {
     return (
         <AdminPage title='Cursos Infantis'>
 
-            <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                <p className='font-bold text-gray-text mb-6'>CADASTRE UM CURSO INFANTIL</p>
+            <Modal
+                isOpen={step === 'add'}
+                onClose={fecharAddCurso}
+                width='90%'
+                maxWidth='700px'
+            >
+                <div className='mb-6'>
+                    <h2 className='text-xl font-bold text-gray-text'>Adicionar Curso Infantil</h2>
+                    <hr className='border-gray-base/30 w-full mt-3'/>
+                </div>
 
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
 
@@ -262,14 +281,17 @@ export default function ChildrensAdmin() {
                     </div>
 
                 </div>
-            </CardDash>
+            </Modal>
 
             <CardDash className='bg-white p-10 rounded-md shadow-sm'>
                 <div className='flex flex-col gap-3 mb-4'>
                     <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3'>
                         <p className='font-bold text-xl text-gray-text'>CURSOS INFANTIS</p>
-                        <FilterPills value={filtroStatus} onChange={setFiltroStatus} options={FILTROS_STATUS} />
+                        <Button onClick={abrirAddCurso} className='bg-orange-base hover:bg-orange-light text-white w-fit'>
+                            + Adicionar Curso Infantil
+                        </Button>
                     </div>
+                    <FilterPills value={filtroStatus} onChange={setFiltroStatus} options={FILTROS_STATUS} />
                     <FilterPills value={filtroLoja} onChange={setFiltroLoja} options={FILTROS_LOJA} />
                 </div>
                 <hr className='border-gray-base/30 w-full mb-4'/>
@@ -287,7 +309,12 @@ export default function ChildrensAdmin() {
                         <p>Ações</p>
                     </div>
 
-                    {cursosFiltrados.length === 0 ? (
+                    {loadingChildren ? (
+                        <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
+                            <Loader2 size={28} className='animate-spin text-orange-base' />
+                            <p className='text-sm'>Carregando...</p>
+                        </div>
+                    ) : cursosFiltrados.length === 0 ? (
                         <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
                             <Inbox size={36} />
                             <p className='text-sm'>Nenhum curso infantil encontrado</p>
@@ -297,7 +324,7 @@ export default function ChildrensAdmin() {
                             <div key={i}>
                                 <div className='md:hidden p-3 text-gray-text'>
                                     <div className='flex items-center gap-2'>
-                                        <span className={`w-2 h-2 rounded-full shrink-0 ${c.data >= hoje ? 'bg-green-base' : 'bg-gray-base/40'}`} />
+                                        <span className={`w-2 h-2 rounded-full shrink-0 ${!cursoEncerrado(c) ? 'bg-green-base' : 'bg-gray-base/40'}`} />
                                         <p className='font-semibold'>{c.nomeCurso}</p>
                                     </div>
                                     <p className='text-sm text-gray-text/70 mt-0.5'>{c.culinarista} · {formatDateBR(c.data)} · {c.hora}</p>
@@ -333,7 +360,7 @@ export default function ChildrensAdmin() {
                                     <p className='font-medium truncate pr-2'>{c.nomeCurso}</p>
                                     <p className='truncate'>{c.culinarista}</p>
                                     <div className='flex items-center gap-1.5'>
-                                        <span className={`w-2 h-2 rounded-full shrink-0 ${c.data >= hoje ? 'bg-green-base' : 'bg-gray-base/40'}`} />
+                                        <span className={`w-2 h-2 rounded-full shrink-0 ${!cursoEncerrado(c) ? 'bg-green-base' : 'bg-gray-base/40'}`} />
                                         <p>{formatDateBR(c.data)}</p>
                                     </div>
                                     <p>{c.hora}</p>

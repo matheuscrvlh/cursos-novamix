@@ -9,7 +9,7 @@ import Button from '../../components/Button'
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
 import { bannerHome } from '../../assets/images/banner'
 
-const FORM_VAZIO = { nome: '', email: '', senha: '', cpf: '', celular: '' }
+const FORM_VAZIO = { nome: '', email: '', senha: '', cpf: '', celular: '', loja: '' }
 
 export default function Cadastro() {
     const { cadastrar } = useContext(ClienteAuthContext)
@@ -49,8 +49,19 @@ export default function Cadastro() {
                     <Input placeholder='Nome completo' value={form.nome} onChange={e => setForm({ ...form, nome: e.target.value })} required />
                     <Input type='email' placeholder='E-mail' value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
                     <Input type='password' placeholder='Senha (mínimo 6 caracteres)' value={form.senha} onChange={e => setForm({ ...form, senha: e.target.value })} required />
-                    <Input placeholder='CPF' value={form.cpf} onChange={e => setForm({ ...form, cpf: e.target.value })} />
-                    <Input placeholder='Celular' value={form.celular} onChange={e => setForm({ ...form, celular: e.target.value })} />
+                    <Input placeholder='CPF' value={form.cpf} onChange={e => setForm({ ...form, cpf: e.target.value })} required />
+                    <Input placeholder='Celular' value={form.celular} onChange={e => setForm({ ...form, celular: e.target.value })} required />
+
+                    <select
+                        value={form.loja}
+                        onChange={e => setForm({ ...form, loja: e.target.value })}
+                        className='p-2.5 border border-gray-base rounded-md text-gray-text bg-white'
+                        required
+                    >
+                        <option value=''>Loja de preferência</option>
+                        <option value='Prado'>Prado</option>
+                        <option value='Teresopolis'>Teresópolis</option>
+                    </select>
 
                     {erro && <p className='text-red-base text-sm'>{erro}</p>}
 

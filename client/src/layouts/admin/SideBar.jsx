@@ -83,8 +83,8 @@ export default function SideBar() {
 
                 <a
                     href={HUB_URL}
-                    className='bg-gray-dark shadow-sm w-[80%] rounded-md p-2 text-white
-                        font-semibold cursor-pointer hover:bg-gray-text ml-auto mr-auto mt-auto mb-[10%] text-center
+                    className='bg-red-base shadow-sm w-[80%] rounded-md p-2 text-white
+                        font-semibold cursor-pointer hover:bg-red-light ml-auto mr-auto mt-auto mb-[10%] text-center
                     '
                 >
                     ← Voltar ao Hub

@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useContext } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Calendar, Clock, User, MapPin, Tag, ArrowLeft, XCircle, Loader2, Printer } from 'lucide-react'
 
 import PublicLayout from '../../layouts/public/PublicLayout'
+import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
 import { Head } from '../../components/Head'
 import Button from '../../components/Button'
-import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm'
+import ModalLoginRequired from '../../components/public/enrollment/ModalLoginRequired'
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats'
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess'
 import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnrollmentPayment'
@@ -13,6 +14,7 @@ import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnro
 import { getCourseById } from '../../api/courses.services'
 import { postEnrollment, putSeatChange, getSeats, cancelEnrollment } from '../../api/enrollment.services'
 import { formatarPreco } from '../../utils/formatCurrency'
+import { cursoEncerrado } from '../../utils/formatDate'
 
 function formatDate(dateStr) {
     if (!dateStr) return ''
@@ -22,6 +24,7 @@ function formatDate(dateStr) {
 
 export default function CoursePage() {
     const { id } = useParams()
+    const { cliente } = useContext(ClienteAuthContext)
 
     const [curso, setCurso]               = useState(null)
     const [loading, setLoading]           = useState(true)
@@ -168,6 +171,23 @@ export default function CoursePage() {
         setForm({ cursoId: id, nome: '', cpf: '', celular: '', email: '', assento: '' })
     }
 
+    // sem conta, não dá pra saber os dados de quem tá se inscrevendo — manda
+    // pro login/cadastro em vez de pedir os dados manualmente aqui
+    function abrirInscricao() {
+        if (!cliente) {
+            setStep('loginRequired')
+            return
+        }
+        setForm(prev => ({
+            ...prev,
+            nome: cliente.nome || '',
+            cpf: cliente.cpf || '',
+            celular: cliente.celular || '',
+            email: cliente.email || '',
+        }))
+        setStep('assento')
+    }
+
     // Abre uma aba só com a lista de ingredientes e já chama o print — o
     // cliente não precisa imprimir a página inteira do curso
     function imprimirIngredientes() {
@@ -244,6 +264,7 @@ export default function CoursePage() {
 
     const fotos = Array.isArray(curso.fotos) ? curso.fotos : []
     const imagemAtual = fotos[fotoIdx] || null
+    const encerrado = cursoEncerrado(curso)
 
     return (
         <PublicLayout>
@@ -392,10 +413,10 @@ export default function CoursePage() {
 
                 <Button
                     className='w-full bg-orange-base hover:bg-orange-light text-white font-semibold text-base py-3 cursor-pointer transition'
-                    onClick={() => setStep('form')}
-                    disabled={vagasLivres === 0}
+                    onClick={abrirInscricao}
+                    disabled={encerrado || vagasLivres === 0}
                 >
-                    {vagasLivres === 0 ? 'Vagas esgotadas' : 'Garantir minha vaga'}
+                    {encerrado ? 'Curso encerrado' : vagasLivres === 0 ? 'Vagas esgotadas' : 'Garantir minha vaga'}
                 </Button>
 
                 <p className='text-center text-xs text-gray-text/50 mt-3'>
@@ -433,12 +454,9 @@ export default function CoursePage() {
                 </div>
             )}
 
-            <ModalEnrollmentForm
-                isOpen={step === 'form'}
-                onClick={() => setStep('assento')}
+            <ModalLoginRequired
+                isOpen={step === 'loginRequired'}
                 onClose={closeModal}
-                enrollment={form}
-                setEnrollment={setForm}
             />
 
             <ModalEnrollmentSeats

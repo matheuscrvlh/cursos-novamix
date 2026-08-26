@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Trash, Users, Inbox, RefreshCw, Undo2, Search } from 'lucide-react';
+import { Trash, Users, Inbox, RefreshCw, Undo2, Search, Loader2 } from 'lucide-react';
 
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button';
@@ -14,7 +14,8 @@ import { getEnrollment, getTotalEnrollment, deleteEnrollment, verificarPagamento
 import { DadosContext } from '../../contexts/DadosContext';
 import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
-import { formatDateBR, formatDateTimeBR } from '../../utils/formatDate';
+import { formatDateBR, formatDateTimeBR, cursoEncerrado } from '../../utils/formatDate';
+import { formatarPreco } from '../../utils/formatCurrency';
 
 const FILTROS_TIPO = [
     { label: 'Todos', value: 'todos' },
@@ -78,34 +79,34 @@ function inicioDoMes() {
     return d;
 }
 
-function passaFiltroData(dataInscricaoISO, filtro, periodoInicio, periodoFim) {
-    const dataInsc = new Date(dataInscricaoISO);
-    if (Number.isNaN(dataInsc.getTime())) return true;
-
+// vira dataInicio/dataFim (ISO) pra mandar como query param pro backend em
+// vez de filtrar em JS — a lógica de "o que cada opção rápida significa" é a
+// mesma de antes, só que devolve os limites em vez de já comparar
+function calcularPeriodoData(filtro, periodoInicio, periodoFim) {
     if (filtro === 'hoje') {
-        return dataInsc >= inicioDoDia(new Date());
+        return { inicio: inicioDoDia(new Date()) };
     }
     if (filtro === 'ontem') {
         const inicioOntem = inicioDoDia(new Date());
         inicioOntem.setDate(inicioOntem.getDate() - 1);
-        return dataInsc >= inicioOntem && dataInsc < inicioDoDia(new Date());
+        return { inicio: inicioOntem, fim: inicioDoDia(new Date()) };
     }
     if (filtro === 'semana') {
-        return dataInsc >= inicioDaSemana();
+        return { inicio: inicioDaSemana() };
     }
     if (filtro === 'mes') {
-        return dataInsc >= inicioDoMes();
+        return { inicio: inicioDoMes() };
     }
     if (filtro === 'periodo') {
-        if (periodoInicio && dataInsc < inicioDoDia(periodoInicio)) return false;
+        const inicio = periodoInicio ? inicioDoDia(periodoInicio) : undefined;
+        let fim;
         if (periodoFim) {
-            const fim = inicioDoDia(periodoFim);
+            fim = inicioDoDia(periodoFim);
             fim.setDate(fim.getDate() + 1); // inclui o dia final inteiro
-            if (dataInsc >= fim) return false;
         }
-        return true;
+        return { inicio, fim };
     }
-    return true;
+    return {};
 }
 
 function statusBadgeClass(status) {
@@ -123,6 +124,14 @@ function metodoPagamentoLabel(metodo) {
     if (metodo === 'pix')    return 'Pix';
     if (metodo === 'cartao') return 'Cartão';
     return '—';
+}
+
+// método + valor do curso na mesma célula (ex: "Pix · R$ 150,00") — sem
+// curso (excluído) não tem como saber o valor, mostra só o método
+function pagamentoLabel(metodo, valorCurso) {
+    const metodoTexto = metodoPagamentoLabel(metodo);
+    if (valorCurso === undefined || valorCurso === null) return metodoTexto;
+    return `${metodoTexto} · R$ ${formatarPreco(valorCurso)}`;
 }
 
 // Reembolso só faz sentido enquanto o curso ainda não rolou e com pelo menos
@@ -182,6 +191,7 @@ export default function RegistrationsAdmin() {
 
     const [step, setStep] = useState('close')
     const [cursoSelecionado, setCursoSelecionado] = useState(null)
+    const [buscaModal, setBuscaModal] = useState('')
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
     const { isAdmin } = useContext(AdminAuthContext);
@@ -215,11 +225,6 @@ export default function RegistrationsAdmin() {
     const [filtroStatus, setFiltroStatus] = useState('ativos');
     const [filtroLoja, setFiltroLoja] = useState('todas');
 
-    // usa componentes locais (não toISOString, que é UTC) — perto da meia-noite
-    // isso pode acusar o dia errado dependendo do fuso do navegador
-    const agora = new Date();
-    const hoje = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
-
     function selecionarPeriodo(campo, valor) {
         if (campo === 'inicio') setPeriodoInicio(valor); else setPeriodoFim(valor);
         setFiltroDataInsc('periodo');
@@ -238,45 +243,20 @@ export default function RegistrationsAdmin() {
 
     const cursoModal = todosCursos.find(c => c.id === cursoSelecionado);
 
-    const inscricoesFiltradas = inscricoesTotais.filter(i => {
-        // busca por nome (texto) ou CPF (dígitos) — só compara dígitos de CPF
-        // quando a busca de fato tiver algum dígito, senão "123".includes('')
-        // seria sempre verdadeiro e a busca por nome deixaria de filtrar nada
-        const queryDigits = buscaCliente.replace(/\D/g, '');
-        const queryLower = buscaCliente.trim().toLowerCase();
-        const passaBusca = !queryLower
+    const inscricoesModalFiltradas = inscricoes.filter(i => {
+        const queryDigits = buscaModal.replace(/\D/g, '');
+        const queryLower = buscaModal.trim().toLowerCase();
+        return !queryLower
             || (i.nome || '').toLowerCase().includes(queryLower)
             || (queryDigits.length > 0 && (i.cpf || '').replace(/\D/g, '').includes(queryDigits));
-
-        // data da inscrição, status do pagamento e busca são propriedades da
-        // própria inscrição — continuam valendo mesmo se o curso foi excluído
-        const passaPagamento = filtroPagamentoInsc === 'todos' || i.status === filtroPagamentoInsc;
-        const passaData = passaFiltroData(i.dataInscricao, filtroDataInsc, periodoInicio, periodoFim);
-
-        const curso = todosCursos.find(c => c.id === i.cursoId);
-        // curso excluído: não dá pra saber tipo/status/loja dele (não existe
-        // mais), então só filtra pelo que a própria inscrição sabe sobre si —
-        // antes isso pulava TODOS os filtros (inclusive data), fazendo
-        // inscrições de cursos apagados aparecerem sempre, independente do
-        // filtro de período selecionado
-        if (!curso) return passaPagamento && passaData && passaBusca;
-
-        const passaTipo = filtroTipoInsc === 'normais' ? curso.tipo === 'normal'
-                        : filtroTipoInsc === 'infantis' ? curso.tipo === 'infantil'
-                        : true;
-        const passaStatus = filtroStatusInsc === 'ativos' ? curso.data >= hoje
-                          : filtroStatusInsc === 'concluidos' ? curso.data < hoje
-                          : true;
-        const passaLoja = filtroLojaInsc === 'todas' || curso.loja === filtroLojaInsc;
-        return passaTipo && passaStatus && passaLoja && passaPagamento && passaData && passaBusca;
     });
 
     const cursosExibidos = todosCursos.filter(c => {
         const passaTipo = filtroTipo === 'normais' ? c.tipo === 'normal'
                         : filtroTipo === 'infantis' ? c.tipo === 'infantil'
                         : true;
-        const passaStatus = filtroStatus === 'ativos' ? c.data >= hoje
-                          : filtroStatus === 'concluidos' ? c.data < hoje
+        const passaStatus = filtroStatus === 'ativos' ? !cursoEncerrado(c)
+                          : filtroStatus === 'concluidos' ? cursoEncerrado(c)
                           : true;
         const passaLoja = filtroLoja === 'todas' || c.loja === filtroLoja;
         return passaTipo && passaStatus && passaLoja;
@@ -356,6 +336,7 @@ export default function RegistrationsAdmin() {
         try {
             setStep('inscricoes');
             setCursoSelecionado(cursoId);
+            setBuscaModal('');
 
             const inscricoes = await getEnrollment(cursoId);
             setInscricoes(inscricoes);
@@ -368,6 +349,7 @@ export default function RegistrationsAdmin() {
     function closeModal() {
         setInscricoes([]);
         setCursoSelecionado(null);
+        setBuscaModal('');
         setStep('close');
     }
 
@@ -392,12 +374,34 @@ export default function RegistrationsAdmin() {
         })
     }
 
+    // filtros de tipo/status/loja/pagamento/data/busca viram query params pro
+    // backend (WHERE no SQL) em vez de vir a tabela inteira e filtrar aqui —
+    // inscricoes só cresce (nunca é podada), então buscar tudo sempre não
+    // escala. Busca por nome/CPF tem debounce pra não disparar uma
+    // requisição a cada tecla digitada.
     useEffect(() => {
-        getTotalEnrollment()
-            .then(inscricoes => setInscricoesTotais(inscricoes))
-            .catch(err => console.log('Erro ao buscar todas inscricoes', err))
-            .finally(() => setLoadingInscricoesTotais(false))
-    }, []);
+        const { inicio, fim } = calcularPeriodoData(filtroDataInsc, periodoInicio, periodoFim);
+
+        const buscarInscricoes = () => {
+            setLoadingInscricoesTotais(true);
+            getTotalEnrollment({
+                tipo: filtroTipoInsc,
+                status: filtroStatusInsc,
+                loja: filtroLojaInsc,
+                pagamento: filtroPagamentoInsc,
+                dataInicio: inicio?.toISOString(),
+                dataFim: fim?.toISOString(),
+                busca: buscaCliente,
+            })
+                .then(setInscricoesTotais)
+                .catch(err => console.log('Erro ao buscar todas inscricoes', err))
+                .finally(() => setLoadingInscricoesTotais(false));
+        };
+
+        const atraso = buscaCliente ? 300 : 0;
+        const timer = setTimeout(buscarInscricoes, atraso);
+        return () => clearTimeout(timer);
+    }, [filtroTipoInsc, filtroStatusInsc, filtroLojaInsc, filtroPagamentoInsc, filtroDataInsc, periodoInicio, periodoFim, buscaCliente]);
 
     return (
         <AdminPage title='Inscrições'>
@@ -464,10 +468,10 @@ export default function RegistrationsAdmin() {
                     </div>
 
                     {loadingInscricoesTotais ? (
-                        <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Carregando...</p></div>
-                    ) : inscricoesFiltradas.length === 0 ? (
+                        <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Loader2 size={28} className='animate-spin text-orange-base' /><p className='text-sm'>Carregando...</p></div>
+                    ) : inscricoesTotais.length === 0 ? (
                         <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Nenhuma inscrição encontrada</p></div>
-                    ) : inscricoesFiltradas.map(i => {
+                    ) : inscricoesTotais.map(i => {
                         const curso = todosCursos.find(c => c.id === i.cursoId);
                         return (
                         <div key={i.id}>
@@ -487,7 +491,7 @@ export default function RegistrationsAdmin() {
                                 <p className='font-medium text-sm text-gray-text'>{i.nome}</p>
                                 <div className='flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-text/60 mt-1'>
                                     <span>Assento: {i.assento}</span>
-                                    <span>{metodoPagamentoLabel(i.metodoPagamento)}</span>
+                                    <span>{pagamentoLabel(i.metodoPagamento, curso?.valor)}</span>
                                     {curso?.data && <span>{formatDateBR(curso.data)}</span>}
                                     <span>Inscrito em {formatDateTimeBR(i.dataInscricao)}</span>
                                 </div>
@@ -529,7 +533,7 @@ export default function RegistrationsAdmin() {
                                 <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${statusBadgeClass(i.status)}`}>
                                     {i.status}
                                 </span>
-                                <p>{metodoPagamentoLabel(i.metodoPagamento)}</p>
+                                <p>{pagamentoLabel(i.metodoPagamento, curso?.valor)}</p>
                                 <p className='text-xs'>{formatDateTimeBR(i.dataInscricao)}</p>
                                 <div className='flex gap-2'>
                                     <InscricaoAcoes
@@ -578,7 +582,7 @@ export default function RegistrationsAdmin() {
                     </div>
 
                     {loadingCourses || loadingChildren ? (
-                        <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Carregando...</p></div>
+                        <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Loader2 size={28} className='animate-spin text-orange-base' /><p className='text-sm'>Carregando...</p></div>
                     ) : cursosExibidos.length === 0 ? (
                         <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Nenhum curso encontrado</p></div>
                     ) : (
@@ -648,10 +652,22 @@ export default function RegistrationsAdmin() {
             >
                 <p className='md:hidden text-xl font-bold mb-2 text-gray-text'>INSCRIÇÕES</p>
                 <hr className='md:hidden border-gray-base/30 w-full mb-3'/>
+
+                <div className='relative w-full md:max-w-xs mb-4'>
+                    <Search size={15} className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-text/40' />
+                    <input
+                        type='text'
+                        placeholder='Buscar por nome ou CPF'
+                        value={buscaModal}
+                        onChange={e => setBuscaModal(e.target.value)}
+                        className='w-full text-sm border border-gray-base/30 rounded-md pl-9 pr-3 py-2 text-gray-text outline-none focus:border-orange-base'
+                    />
+                </div>
+
                 <div className='flex md:hidden flex-col gap-2 max-h-[65dvh] overflow-y-auto'>
-                    {inscricoes.length === 0
+                    {inscricoesModalFiltradas.length === 0
                         ? <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Nenhuma inscrição encontrada</p></div>
-                        : inscricoes.map(inscricao => (
+                        : inscricoesModalFiltradas.map(inscricao => (
                             <div key={inscricao.id} className='bg-gray rounded-lg p-3'>
                                 <div className='flex items-start justify-between gap-2 mb-2'>
                                     <p className='font-semibold text-gray-text text-sm'>{inscricao.nome}</p>
@@ -663,7 +679,7 @@ export default function RegistrationsAdmin() {
                                     <span><span className='font-medium text-gray-text'>Assento </span>{inscricao.assento}</span>
                                     <span><span className='font-medium text-gray-text'>CPF </span>{inscricao.cpf}</span>
                                     <span><span className='font-medium text-gray-text'>Celular </span>{inscricao.celular}</span>
-                                    <span><span className='font-medium text-gray-text'>Pagamento </span>{metodoPagamentoLabel(inscricao.metodoPagamento)}</span>
+                                    <span><span className='font-medium text-gray-text'>Pagamento </span>{pagamentoLabel(inscricao.metodoPagamento, cursoModal?.valor)}</span>
                                     <span className='col-span-2'><span className='font-medium text-gray-text'>Inscrição </span>{formatDateTimeBR(inscricao.dataInscricao)}</span>
                                 </div>
                                 <div className='flex gap-2'>
@@ -698,9 +714,9 @@ export default function RegistrationsAdmin() {
                         <p>FUNÇÕES</p>
                     </div>
 
-                    {inscricoes.length === 0
+                    {inscricoesModalFiltradas.length === 0
                         ? <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Nenhuma inscrição encontrada</p></div>
-                        : inscricoes.map(inscricao => (
+                        : inscricoesModalFiltradas.map(inscricao => (
                             <div key={inscricao.id}>
                                 <div className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2
                                                 px-3 py-3 items-center text-gray-text text-sm
@@ -709,7 +725,7 @@ export default function RegistrationsAdmin() {
                                     <p className='truncate'>{inscricao.nome}</p>
                                     <p>{inscricao.cpf}</p>
                                     <p>{inscricao.celular}</p>
-                                    <p>{metodoPagamentoLabel(inscricao.metodoPagamento)}</p>
+                                    <p>{pagamentoLabel(inscricao.metodoPagamento, cursoModal?.valor)}</p>
                                     <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${statusBadgeClass(inscricao.status)}`}>
                                         {inscricao.status}
                                     </span>

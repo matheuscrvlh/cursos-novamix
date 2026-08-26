@@ -3,14 +3,14 @@ import { useContext, useState, useEffect, useRef } from 'react';
 import { Menu, Loader2, XCircle } from 'lucide-react'
 
 import { DadosContext } from '../../contexts/DadosContext';
+import { ClienteAuthContext } from '../../contexts/ClienteAuthContext';
 
 import { postEnrollment, putSeatChange, getSeats, cancelEnrollment } from '../../api/enrollment.services';
 
 import { useThemeColor } from '../../hooks/useThemeColor';
 
-import ModalBranch from '../../components/public/ModalBranch';
 import ModalFilters from '../../components/public/ModalFilters';
-import ModalEnrollmentForm from '../../components/public/enrollment/ModalEnrollmentForm';
+import ModalLoginRequired from '../../components/public/enrollment/ModalLoginRequired';
 import ModalEnrollmentSeats from '../../components/public/enrollment/ModalEnrollmentSeats';
 import ModalEnrollmentSucess from '../../components/public/enrollment/ModalEnrollmentSucess';
 import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnrollmentPayment';
@@ -20,7 +20,7 @@ import AllCoursesSections from '../../sections/courses/AllCoursesSections';
 import PublicLayout from '../../layouts/public/PublicLayout'
 
 import { Head } from '../../components/Head'
-import { getLojaStorage } from '../../utils/lojaStorage'
+import { cursoEncerrado } from '../../utils/formatDate'
 
 import { bannerHome } from '../../assets/images/banner/'
 
@@ -31,6 +31,7 @@ export default function Courses() {
         loadingCourses,
         culinaristas,
     } = useContext(DadosContext);
+    const { cliente } = useContext(ClienteAuthContext);
 
     const [form, setForm] = useState({
         cursoId: '',
@@ -182,16 +183,8 @@ export default function Courses() {
     }, [cursos, refreshVagas]);
 
     useEffect(() => {
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-
         const cursosFiltrados = cursos
-            .filter(c => {
-                if (!c.data) return false;
-                const [ano, mes, dia] = c.data.split('-');
-                const dataCurso = new Date(ano, mes - 1, dia);
-                return dataCurso >= hoje;
-            })
+            .filter(c => !cursoEncerrado(c))
             .sort((a, b) => new Date(a.data) - new Date(b.data));
 
         setCursosAtuais(cursosFiltrados);
@@ -215,13 +208,24 @@ export default function Courses() {
         })
     }
 
+    // sem conta, não dá pra saber os dados de quem tá se inscrevendo — manda
+    // pro login/cadastro em vez de pedir os dados manualmente aqui
     const openForm = (cursoId) => {
-        setForm(prev => ({ ...prev, cursoId }))
-        setStep('form')
+        if (!cliente) {
+            setStep('loginRequired')
+            return
+        }
+        setForm(prev => ({
+            ...prev,
+            cursoId,
+            nome: cliente.nome || '',
+            cpf: cliente.cpf || '',
+            celular: cliente.celular || '',
+            email: cliente.email || '',
+        }))
         setCursoSelecionado(cursoId)
+        setStep('assento')
     }
-
-    const openAssento = () => setStep('assento')
 
     // Fecha o modal e, se havia uma inscrição pendente em aberto (cliente
     // desistiu no meio do pagamento), cancela ela e libera o assento na hora
@@ -238,14 +242,12 @@ export default function Courses() {
         setRefreshVagas(prev => prev + 1);
     }
 
+    // loja de preferência vem da conta (perguntada no cadastro) — só define
+    // o filtro inicial, o cliente pode trocar normalmente pelos filtros
     useEffect(() => {
-        const lojaGuardada = getLojaStorage()
-        if (lojaGuardada) {
-            setFilters(prev => ({ ...prev, loja: lojaGuardada }))
-        } else {
-            setStep('filterBranch')
-        }
-    }, [])
+        if (!cliente?.loja) return
+        setFilters(prev => ({ ...prev, loja: cliente.loja }))
+    }, [cliente])
 
     useThemeColor('#FF8D0A');
 
@@ -281,21 +283,9 @@ export default function Courses() {
                     clear={() => { clearFilters(); setShowModalFilters(false); }}
                 />
 
-                <ModalBranch
-                    isOpen={step === 'filterBranch'}
+                <ModalLoginRequired
+                    isOpen={step === 'loginRequired'}
                     onClose={() => closeModal()}
-                    filtersCourses={filters}
-                    setFiltersCourses={setFilters}
-                    filtersChildrensCourses={filters}
-                    setFiltersChildrensCourses={setFilters}
-                />
-
-                <ModalEnrollmentForm
-                    isOpen={step === 'form'}
-                    onClick={() => openAssento()}
-                    onClose={() => closeModal()}
-                    enrollment={form}
-                    setEnrollment={setForm}
                 />
 
                 <ModalEnrollmentSeats

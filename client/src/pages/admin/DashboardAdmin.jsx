@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from 'react';
-import { BookOpen, CalendarCheck, CheckCircle2, CreditCard, AlertCircle } from 'lucide-react';
+import { BookOpen, CalendarCheck, CheckCircle2, CreditCard, AlertCircle, Loader2 } from 'lucide-react';
 
 import CardDash from '../../components/admin/CardDash'
 import CourseCard from '../../components/public/CourseCard'
@@ -13,7 +13,7 @@ import { getCourses } from '../../api/courses.services';
 import { getChildren } from '../../api/children.services';
 
 import { DadosContext } from '../../contexts/DadosContext';
-import { formatDateBR } from '../../utils/formatDate';
+import { formatDateBR, cursoEncerrado } from '../../utils/formatDate';
 
 const NOMES_MES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
@@ -64,12 +64,11 @@ export default function DashboardAdmin() {
         loadingCourses,
     } = useContext(DadosContext);
 
-    // formato ISO (YYYY-MM-DD), igual ao que vem do banco em c.data — comparável
-    // direto com < / >=, e usado tanto pras estatísticas quanto pra filtrar os
-    // cards de curso abaixo, que devem mostrar só os ainda não concluídos
+    // formato ISO (YYYY-MM-DD) — usado só pro card "Hoje" (contagem por data);
+    // ativo/concluído usa cursoEncerrado (data + hora) em vez de comparar só a data
     const now = new Date();
     const hoje = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const cursosAtivos = cursos.filter(c => c.data >= hoje);
+    const cursosAtivos = cursos.filter(c => !cursoEncerrado(c));
 
     useEffect(() => {
         if (!cursos.length) return;
@@ -103,8 +102,8 @@ export default function DashboardAdmin() {
                 const cursosHojeFiltrados = dataCursos.filter(c => c.data === hoje);
                 const contagemCursosHoje = cursosHojeFiltrados.length
 
-                const cursosAtivosFiltrados = dataCursos.filter(c => c.data >= hoje);
-                const cursosConcluidos = dataCursos.filter(c => c.data < hoje).length;
+                const cursosAtivosFiltrados = dataCursos.filter(c => !cursoEncerrado(c));
+                const cursosConcluidos = dataCursos.filter(c => cursoEncerrado(c)).length;
                 const cursosAtivos = cursosAtivosFiltrados.length;
 
                 setFiltroCursos({ cursosHoje: contagemCursosHoje, cursosConcluidos, cursosAtivos })
@@ -114,7 +113,7 @@ export default function DashboardAdmin() {
                 // não aconteceram — só essas entram no resumo de inscrições
                 const idCursosAtivos = [
                     ...cursosAtivosFiltrados.map(c => c.id),
-                    ...dataCursosInfantis.filter(c => c.data >= hoje).map(c => c.id),
+                    ...dataCursosInfantis.filter(c => !cursoEncerrado(c)).map(c => c.id),
                 ];
 
                 const inscricoesAtivas = dataInscricoes.filter(i => idCursosAtivos.includes(i.cursoId));
@@ -284,7 +283,7 @@ export default function DashboardAdmin() {
                 <div className='bg-white rounded-xl shadow-sm p-5 lg:col-span-2'>
                     <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider mb-4'>Faturamento — últimos 6 meses</p>
                     {loadingInscricoes
-                        ? <p className='text-sm text-gray-text/40 py-16 text-center'>Carregando...</p>
+                        ? <div className='flex flex-col items-center gap-2 py-16 text-gray-text/40'><Loader2 size={28} className='animate-spin text-orange-base' /><p className='text-sm'>Carregando...</p></div>
                         : <RevenueAreaChart data={faturamentoMensal} />
                     }
                 </div>
@@ -292,7 +291,7 @@ export default function DashboardAdmin() {
                 <div className='bg-white rounded-xl shadow-sm p-5'>
                     <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider mb-4'>Inscrições por status</p>
                     {loadingInscricoes
-                        ? <p className='text-sm text-gray-text/40 py-16 text-center'>Carregando...</p>
+                        ? <div className='flex flex-col items-center gap-2 py-16 text-gray-text/40'><Loader2 size={28} className='animate-spin text-orange-base' /><p className='text-sm'>Carregando...</p></div>
                         : <StatusDonutChart data={[
                             { label: 'Pagas', value: inscricoes.pagas || 0, color: CORES_STATUS.pago },
                             { label: 'Pendentes', value: inscricoes.pendentes || 0, color: CORES_STATUS.pendente },

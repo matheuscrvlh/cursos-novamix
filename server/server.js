@@ -26,15 +26,15 @@ const app = express();
 // (jwt.sign lançando exceção não capturada), e FRONTEND_URL ausente em
 // produção deixava o CORS aberto pra qualquer origem
 if (!process.env.JWT_SECRET) {
-  console.error('JWT_SECRET não configurado — defina no .env antes de subir o servidor');
+  console.error('JWT_SECRET não configurado. Defina no .env antes de subir o servidor');
   process.exit(1);
 }
 if (!process.env.CLIENTE_JWT_SECRET) {
-  console.error('CLIENTE_JWT_SECRET não configurado — defina no .env antes de subir o servidor');
+  console.error('CLIENTE_JWT_SECRET não configurado. Defina no .env antes de subir o servidor');
   process.exit(1);
 }
 if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
-  console.error('FRONTEND_URL não configurado em produção — defina no .env (CORS ficaria aberto pra qualquer origem)');
+  console.error('FRONTEND_URL não configurado em produção. Defina no .env (CORS ficaria aberto pra qualquer origem)');
   process.exit(1);
 }
 
@@ -76,7 +76,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/clientes', clientesRoutes);
 
 app.listen(3000, () => {
-  console.log('Backend torando na porta 3000 -- teste deploy 31/07 🚀');
+  console.log('Backend torando na porta 3000');
 });
 
 // libera assentos de inscrições pendentes esquecidas (cliente abandonou o

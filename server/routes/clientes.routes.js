@@ -32,6 +32,17 @@ function emailValido(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || '');
 }
 
+// loja (texto "Prado"/"Teresopolis", mesmo contrato que cursos/culinaristas já
+// usam) resolve pro filial_id de public.branchs (nome real é "Novamix Prado" etc.)
+async function resolverFilialId(loja) {
+    if (!loja) return null;
+    const { rows } = await pool.query(
+        `SELECT id FROM public.branchs WHERE name ILIKE '%' || $1 || '%' LIMIT 1`,
+        [loja]
+    );
+    return rows[0]?.id ?? null;
+}
+
 // devolve só os campos seguros de expor (nunca senha_hash)
 function serializarCliente(c) {
     return {
@@ -40,12 +51,13 @@ function serializarCliente(c) {
         email: c.email,
         cpf: c.cpf,
         celular: c.celular,
+        loja: c.loja ?? null,
         criadoEm: c.criado_em,
     };
 }
 
 router.post('/cadastro', loginLimiter, async (req, res) => {
-    const { nome, email, senha, cpf, celular } = req.body;
+    const { nome, email, senha, cpf, celular, loja } = req.body;
 
     if (!nome?.trim() || !emailValido(email) || !senha || senha.length < 6) {
         return res.status(400).json({ message: 'Nome, e-mail válido e senha (mínimo 6 caracteres) são obrigatórios.' });
@@ -66,12 +78,20 @@ router.post('/cadastro', loginLimiter, async (req, res) => {
 
         const id = uuidv4();
         const senhaHash = await bcrypt.hash(senha, 10);
+        const filialId = await resolverFilialId(loja);
 
+        // CTE porque RETURNING sozinho não faz JOIN — precisa do nome da loja
+        // (não só o id) pra devolver no mesmo formato "Prado"/"Teresopolis"
+        // que o resto do frontend já usa como filtro
         const { rows } = await pool.query(`
-            INSERT INTO clientes (id, nome, email, senha_hash, cpf, celular)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING id, nome, email, cpf, celular, criado_em
-        `, [id, nome.trim(), email.toLowerCase(), senhaHash, cpf ? cpfDigits : null, celular || null]);
+            WITH novo AS (
+                INSERT INTO clientes (id, nome, email, senha_hash, cpf, celular, filial_id)
+                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING id, nome, email, cpf, celular, criado_em, filial_id
+            )
+            SELECT novo.*, REPLACE(b.name, 'Novamix ', '') AS loja
+            FROM novo LEFT JOIN public.branchs b ON b.id = novo.filial_id
+        `, [id, nome.trim(), email.toLowerCase(), senhaHash, cpf ? cpfDigits : null, celular || null, filialId]);
 
         const cliente = rows[0];
         res.cookie('cliente_token', assinarToken(cliente), { ...COOKIE_OPTS, maxAge: SETE_DIAS_MS });
@@ -97,7 +117,11 @@ router.post('/login', loginLimiter, async (req, res) => {
     }
 
     try {
-        const { rows } = await pool.query(`SELECT * FROM clientes WHERE email = $1`, [email.toLowerCase()]);
+        const { rows } = await pool.query(`
+            SELECT c.*, REPLACE(b.name, 'Novamix ', '') AS loja
+            FROM clientes c LEFT JOIN public.branchs b ON b.id = c.filial_id
+            WHERE c.email = $1
+        `, [email.toLowerCase()]);
         const cliente = rows[0];
 
         // mesma mensagem genérica pra "não existe" e "senha errada" — não dá
@@ -126,7 +150,11 @@ router.post('/logout', (req, res) => {
 
 router.get('/me', authenticateCliente, async (req, res) => {
     try {
-        const { rows } = await pool.query(`SELECT * FROM clientes WHERE id = $1`, [req.cliente.sub]);
+        const { rows } = await pool.query(`
+            SELECT c.*, REPLACE(b.name, 'Novamix ', '') AS loja
+            FROM clientes c LEFT JOIN public.branchs b ON b.id = c.filial_id
+            WHERE c.id = $1
+        `, [req.cliente.sub]);
         if (!rows.length) return res.status(404).json({ message: 'Conta não encontrada.' });
         res.json(serializarCliente(rows[0]));
     } catch (err) {
@@ -135,21 +163,61 @@ router.get('/me', authenticateCliente, async (req, res) => {
 });
 
 router.put('/me', authenticateCliente, async (req, res) => {
-    const { nome, celular } = req.body;
+    const { nome, celular, loja } = req.body;
     try {
+        // loja informada: sempre atualiza (mesmo que resolverFilialId não
+        // encontre nada, vira null); não informada: mantém a atual — mesmo
+        // padrão de CASE WHEN que cursos.routes.js já usa pra campo opcional
+        const lojaInformada = loja !== undefined;
+        const filialId = lojaInformada ? await resolverFilialId(loja) : null;
+
         const { rows } = await pool.query(`
-            UPDATE clientes SET
-                nome    = COALESCE($1, nome),
-                celular = COALESCE($2, celular)
-            WHERE id = $3
-            RETURNING id, nome, email, cpf, celular, criado_em
-        `, [nome?.trim() || null, celular ?? null, req.cliente.sub]);
+            WITH atualizado AS (
+                UPDATE clientes SET
+                    nome      = COALESCE($1, nome),
+                    celular   = COALESCE($2, celular),
+                    filial_id = CASE WHEN $4 THEN $5 ELSE filial_id END
+                WHERE id = $3
+                RETURNING id, nome, email, cpf, celular, criado_em, filial_id
+            )
+            SELECT atualizado.*, REPLACE(b.name, 'Novamix ', '') AS loja
+            FROM atualizado LEFT JOIN public.branchs b ON b.id = atualizado.filial_id
+        `, [nome?.trim() || null, celular ?? null, req.cliente.sub, lojaInformada, filialId]);
         // conta pode ter sido excluída pelo admin enquanto o token (7 dias)
         // ainda era válido — sem essa checagem, serializarCliente(undefined) quebra
         if (!rows.length) return res.status(401).json({ message: 'Conta não encontrada.' });
         res.json(serializarCliente(rows[0]));
     } catch (err) {
         console.error('Erro ao atualizar cliente:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+// Troca de senha com o cliente já logado — exige a senha atual mesmo assim
+// (sessão de 7 dias pode estar aberta num dispositivo compartilhado; sem essa
+// checagem, quem tiver acesso ao navegador trocaria a senha sem saber a
+// antiga e tomaria a conta). loginLimiter reaproveitado aqui pelo mesmo
+// motivo do login: limita tentativas de adivinhar a senha atual.
+router.post('/alterar-senha', authenticateCliente, loginLimiter, async (req, res) => {
+    const { senhaAtual, novaSenha } = req.body;
+    if (!senhaAtual || !novaSenha || novaSenha.length < 6) {
+        return res.status(400).json({ message: 'Senha atual e nova senha (mínimo 6 caracteres) são obrigatórias.' });
+    }
+
+    try {
+        const { rows } = await pool.query(`SELECT senha_hash FROM clientes WHERE id = $1`, [req.cliente.sub]);
+        if (!rows.length) return res.status(404).json({ message: 'Conta não encontrada.' });
+
+        if (!(await bcrypt.compare(senhaAtual, rows[0].senha_hash))) {
+            return res.status(401).json({ message: 'Senha atual incorreta.' });
+        }
+
+        const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+        await pool.query(`UPDATE clientes SET senha_hash = $1 WHERE id = $2`, [novaSenhaHash, req.cliente.sub]);
+
+        res.json({ message: 'Senha alterada com sucesso.' });
+    } catch (err) {
+        console.error('Erro ao alterar senha:', err);
         res.status(500).json({ message: 'Erro interno.' });
     }
 });

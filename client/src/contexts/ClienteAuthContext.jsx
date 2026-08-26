@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from 'react'
 
-import { getClienteLogado, loginCliente, logoutCliente, cadastrarCliente } from '../api/clientes.services'
+import { getClienteLogado, loginCliente, logoutCliente, cadastrarCliente, editarClienteLogado } from '../api/clientes.services'
 
 export const ClienteAuthContext = createContext()
 
@@ -31,8 +31,14 @@ export function ClienteAuthProvider({ children }) {
         setCliente(null)
     }
 
+    async function atualizarPerfil(dados) {
+        const res = await editarClienteLogado(dados)
+        if (res.ok) setCliente(res)
+        return res
+    }
+
     return (
-        <ClienteAuthContext.Provider value={{ cliente, loading, login, cadastrar, logout }}>
+        <ClienteAuthContext.Provider value={{ cliente, loading, login, cadastrar, logout, atualizarPerfil }}>
             {children}
         </ClienteAuthContext.Provider>
     )

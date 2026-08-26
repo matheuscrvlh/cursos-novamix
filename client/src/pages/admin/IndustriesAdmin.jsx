@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Trash, Edit, Inbox } from 'lucide-react';
+import { Trash, Edit, Inbox, Search, Loader2 } from 'lucide-react';
 
 import Input from '../../components/Input'
 import CardDash from '../../components/admin/CardDash'
@@ -28,6 +28,7 @@ const INDUSTRIA_VAZIA = {
 export default function IndustriesAdmin() {
     const {
         industrias,
+        loadingIndustries,
         addIndustry,
         removeIndustry,
         editIndustry
@@ -36,6 +37,11 @@ export default function IndustriesAdmin() {
     const [formIndustria, setFormIndustria] = useState(INDUSTRIA_VAZIA);
     const [industriaEditar, setIndustriaEditar] = useState({});
     const [step, setStep] = useState('close');
+    const [busca, setBusca] = useState('');
+
+    const industriasFiltradas = industrias.filter(i =>
+        i.nome.toLowerCase().includes(busca.trim().toLowerCase())
+    );
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
     const { isAdmin } = useContext(AdminAuthContext);
@@ -54,6 +60,17 @@ export default function IndustriesAdmin() {
 
         addIndustry(formData);
         setFormIndustria(INDUSTRIA_VAZIA);
+        setStep('close');
+    }
+
+    function abrirAddIndustria() {
+        setFormIndustria(INDUSTRIA_VAZIA);
+        setStep('add');
+    }
+
+    function fecharAddIndustria() {
+        setFormIndustria(INDUSTRIA_VAZIA);
+        setStep('close');
     }
 
     function handleEditIndustria(id) {
@@ -91,8 +108,16 @@ export default function IndustriesAdmin() {
     return (
         <AdminPage title='Indústrias'>
 
-            <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                <p className='font-bold text-gray-text mb-6'>CADASTRE UMA INDÚSTRIA</p>
+            <Modal
+                isOpen={step === 'add'}
+                onClose={fecharAddIndustria}
+                width='90%'
+                maxWidth='700px'
+            >
+                <div className='mb-6'>
+                    <h2 className='text-xl font-bold text-gray-text'>Adicionar Indústria</h2>
+                    <hr className='border-gray-base/30 w-full mt-3'/>
+                </div>
 
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
 
@@ -182,16 +207,34 @@ export default function IndustriesAdmin() {
                     </div>
 
                 </div>
-            </CardDash>
+            </Modal>
 
             <CardDash className='bg-white p-10 rounded-md shadow-sm'>
-                <p className='font-bold text-gray-text mb-4'>INDÚSTRIAS</p>
+                <div className='flex flex-col gap-3 mb-4'>
+                    <div className='flex items-center justify-between'>
+                        <p className='font-bold text-gray-text'>INDÚSTRIAS</p>
+                        <Button onClick={abrirAddIndustria} className='bg-orange-base hover:bg-orange-light text-white w-fit'>
+                            + Adicionar Indústria
+                        </Button>
+                    </div>
+                    <div className='relative w-full md:max-w-xs'>
+                        <Search size={15} className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-text/40' />
+                        <input
+                            type='text'
+                            placeholder='Buscar por nome'
+                            value={busca}
+                            onChange={e => setBusca(e.target.value)}
+                            className='w-full text-sm border border-gray-base/30 rounded-md pl-9 pr-3 py-2 text-gray-text outline-none focus:border-orange-base'
+                        />
+                    </div>
+                </div>
 
                 <div className='max-h-100 overflow-y-auto'>
 
-                    <div className='hidden md:grid grid-cols-[1fr_1fr_0.8fr_0.8fr_auto] gap-2
+                    <div className='hidden md:grid grid-cols-[auto_1fr_1fr_0.8fr_0.8fr_auto] gap-2
                                     text-xs font-semibold text-gray-text uppercase tracking-wider
                                     bg-gray px-3 py-2 rounded-md mb-1 sticky top-0 z-10'>
+                        <p></p>
                         <p>Nome Fantasia</p>
                         <p>Razão Social</p>
                         <p>CNPJ</p>
@@ -199,16 +242,27 @@ export default function IndustriesAdmin() {
                         <p>Ações</p>
                     </div>
 
-                    {industrias.length === 0 ? (
+                    {loadingIndustries ? (
+                        <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
+                            <Loader2 size={28} className='animate-spin text-orange-base' />
+                            <p className='text-sm'>Carregando...</p>
+                        </div>
+                    ) : industriasFiltradas.length === 0 ? (
                         <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
                             <Inbox size={36} />
-                            <p className='text-sm'>Nenhuma indústria cadastrada</p>
+                            <p className='text-sm'>Nenhuma indústria encontrada</p>
                         </div>
                     ) : (
-                        industrias.map(i => (
+                        industriasFiltradas.map(i => (
                             <div key={i.id}>
                                 <div className='md:hidden p-3 text-gray-text'>
-                                    <p className='font-semibold'>{i.nome}</p>
+                                    <div className='flex items-center gap-2'>
+                                        {i.foto
+                                            ? <img src={i.foto} className='w-8 h-8 rounded-full object-cover shrink-0' />
+                                            : <div className='w-8 h-8 rounded-full bg-gray-base/20 shrink-0' />
+                                        }
+                                        <p className='font-semibold'>{i.nome}</p>
+                                    </div>
                                     <p className='text-sm text-gray-text/70'>{i.razaoSocial}</p>
                                     {i.cnpj && <p className='text-sm text-gray-text/70'>CNPJ: {i.cnpj}</p>}
                                     {i.telefone && <p className='text-sm text-gray-text/70'>Tel: {i.telefone}</p>}
@@ -234,9 +288,13 @@ export default function IndustriesAdmin() {
                                     </div>
                                 </div>
 
-                                <div className='hidden md:grid grid-cols-[1fr_1fr_0.8fr_0.8fr_auto] gap-2
+                                <div className='hidden md:grid grid-cols-[auto_1fr_1fr_0.8fr_0.8fr_auto] gap-2
                                                 px-3 py-3 items-center text-gray-text text-sm
                                                 hover:bg-gray/60 transition-colors rounded-md'>
+                                    {i.foto
+                                        ? <img src={i.foto} className='w-7 h-7 rounded-full object-cover shrink-0' />
+                                        : <div className='w-7 h-7 rounded-full bg-gray-base/20 shrink-0' />
+                                    }
                                     <p className='font-medium truncate'>{i.nome}</p>
                                     <p className='truncate'>{i.razaoSocial}</p>
                                     <p>{i.cnpj || '-'}</p>

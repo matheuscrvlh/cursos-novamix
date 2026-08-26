@@ -53,15 +53,50 @@ const SELECT_CURSO = `
 `;
 const GROUP_BY_CURSO = 'GROUP BY c.id, cu.id, b.id';
 
+// suporta os mesmos filtros que o front já aplicava em JS depois de buscar
+// tudo (loja, culinarista, status ativo/encerrado, período) — hoje o
+// DadosContext ainda busca sem filtro nenhum (dataset pequeno, cabe cachear
+// uma vez só), mas a rota aceita pra quem quiser uma consulta mais específica
 router.get('/', async (req, res) => {
   try {
-    const { tipo } = req.query;
+    const { tipo, loja, culinarista, status, dataInicio, dataFim } = req.query;
+    const condicoes = [];
+    const valores = [];
+
+    if (tipo) {
+      valores.push(tipo);
+      condicoes.push(`c.tipo = $${valores.length}`);
+    }
+    if (loja) {
+      valores.push(loja);
+      condicoes.push(`REPLACE(b.name, 'Novamix ', '') = $${valores.length}`);
+    }
+    if (culinarista) {
+      valores.push(culinarista);
+      condicoes.push(`cu.nome_culinarista = $${valores.length}`);
+    }
+    if (status === 'ativos') {
+      condicoes.push(`c.data > now()`);
+    } else if (status === 'concluidos') {
+      condicoes.push(`c.data <= now()`);
+    }
+    if (dataInicio) {
+      valores.push(dataInicio);
+      condicoes.push(`c.data >= $${valores.length}`);
+    }
+    if (dataFim) {
+      valores.push(dataFim);
+      condicoes.push(`c.data < $${valores.length}`);
+    }
+
+    const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
+
     const { rows } = await pool.query(`
       ${SELECT_CURSO}
-      ${tipo ? 'WHERE c.tipo = $1' : ''}
+      ${where}
       ${GROUP_BY_CURSO}
       ORDER BY c.data ASC
-    `, tipo ? [tipo] : []);
+    `, valores);
 
     const cursos = rows.map(c => ({
       ...c,

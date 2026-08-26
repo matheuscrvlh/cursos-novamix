@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { useContext, useState, useEffect } from 'react'
 
 import { MapPin, Building2, MessageCircle, Menu, X, User } from 'lucide-react'
@@ -18,20 +18,20 @@ const navLinks = [
   { label: 'Indústrias', to: '/industrias' },
 ]
 
-export default function PublicLayout({ children, bannerHome }) {
-  const navigate = useNavigate();
+export default function PublicLayout({ children, bannerHome, showBanner = true }) {
   const { cliente } = useContext(ClienteAuthContext)
   const [heroBanners, setHeroBanners] = useState([])
   const [heroIndex, setHeroIndex]     = useState(0)
   const [isMenuOpen, setIsMenuOpen]   = useState(false)
 
   useEffect(() => {
+    if (!showBanner) return
     getBanners('hero').then(data => {
       if (Array.isArray(data) && data.length > 0) {
         setHeroBanners(data.filter(b => b.ativo))
       }
     })
-  }, [])
+  }, [showBanner])
 
   useEffect(() => {
     if (heroBanners.length <= 1) return
@@ -179,7 +179,7 @@ export default function PublicLayout({ children, bannerHome }) {
       <section className="flex-grow w-full">
 
         {/* HERO BANNER — desktop 1920×480 · mobile 425×495 */}
-        {heroBanners.length > 0 ? (
+        {showBanner && (heroBanners.length > 0 ? (
           <div className='relative w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-4/1'>
             {heroBanners.map((b, i) => {
               const visible = i === heroIndex
@@ -217,7 +217,7 @@ export default function PublicLayout({ children, bannerHome }) {
               <img src={bannerHome} alt='' className='w-full h-full object-cover object-center' />
             </div>
           </a>
-        )}
+        ))}
 
         {children}
       </section>
@@ -317,13 +317,6 @@ export default function PublicLayout({ children, bannerHome }) {
             >
               RodSchuab
             </a>
-            <span className="mx-1 text-white/20">·</span>
-            <button
-              onClick={() => navigate('/dashboardAdmin')}
-              className="text-white/30 hover:text-white/60 transition text-xs cursor-pointer"
-            >
-              admin
-            </button>
           </div>
         </div>
 

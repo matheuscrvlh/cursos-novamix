@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useContext } from 'react'
-import { Trash, ArrowUp, ArrowDown, Plus, Link, Image, ExternalLink } from 'lucide-react'
+import { Trash, ArrowUp, ArrowDown, Plus, Link, Image, ExternalLink, Loader2 } from 'lucide-react'
 
 import AdminPage from '../../layouts/admin/AdminPage'
+import Modal from '../../components/public/Modal'
 import ConfirmModal from '../../components/admin/ModalConfirm'
 import useConfirmAction from '../../hooks/useConfirmAction'
 import { AdminAuthContext } from '../../contexts/AdminAuthContext'
@@ -76,9 +77,7 @@ function BannerForm({ posicao, onAdded }) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className='border border-dashed border-gray-base/30 rounded-xl p-5 flex flex-col gap-4 bg-gray/40'>
-            <p className='text-sm font-semibold text-gray-text/60 uppercase tracking-wider'>Adicionar banner</p>
-
+        <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
             <div className='grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-start'>
                 <UploadArea
                     label='Desktop'
@@ -228,6 +227,7 @@ function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast, i
 function BannerSection({ posicao, title, description }) {
     const [banners, setBanners] = useState([])
     const [loading, setLoading] = useState(true)
+    const [mostrarForm, setMostrarForm] = useState(false)
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction()
     const { isAdmin } = useContext(AdminAuthContext)
 
@@ -239,6 +239,7 @@ function BannerSection({ posicao, title, description }) {
 
     function handleAdded(novo) {
         setBanners(prev => [...prev, { ...novo, ordem: prev.length }])
+        setMostrarForm(false)
     }
 
     async function handleDelete(id) {
@@ -283,16 +284,27 @@ function BannerSection({ posicao, title, description }) {
 
     return (
         <div className='bg-white rounded-xl shadow-sm p-5 md:p-8 flex flex-col gap-6'>
-            <div>
-                <h2 className='font-bold text-gray-text text-lg'>{title}</h2>
-                <p className='text-sm text-gray-text/50 mt-0.5'>{description}</p>
+            <div className='flex items-center justify-between gap-3'>
+                <div>
+                    <h2 className='font-bold text-gray-text text-lg'>{title}</h2>
+                    <p className='text-sm text-gray-text/50 mt-0.5'>{description}</p>
+                </div>
+                <button
+                    onClick={() => setMostrarForm(true)}
+                    className='flex items-center gap-1.5 shrink-0 bg-orange-base hover:bg-orange-light text-white text-sm font-semibold px-3 py-2 rounded-lg transition cursor-pointer'
+                >
+                    <Plus size={15} /> Adicionar banner
+                </button>
             </div>
 
             <hr className='border-gray-base/20' />
 
             <div className='flex flex-col gap-3'>
                 {loading ? (
-                    <p className='text-sm text-gray-text/40 text-center py-6'>Carregando...</p>
+                    <div className='flex flex-col items-center gap-2 py-6 text-gray-text/40'>
+                        <Loader2 size={24} className='animate-spin text-orange-base' />
+                        <p className='text-sm'>Carregando...</p>
+                    </div>
                 ) : banners.length === 0 ? (
                     <p className='text-sm text-gray-text/40 text-center py-6 italic'>Nenhum banner cadastrado</p>
                 ) : (
@@ -311,7 +323,16 @@ function BannerSection({ posicao, title, description }) {
                 )}
             </div>
 
-            <BannerForm posicao={posicao} onAdded={handleAdded} />
+            <Modal
+                width='90%'
+                maxWidth='500px'
+                height='auto'
+                isOpen={mostrarForm}
+                onClose={() => setMostrarForm(false)}
+            >
+                <h2 className='text-xl font-bold text-gray-text mb-4'>Adicionar banner</h2>
+                <BannerForm posicao={posicao} onAdded={handleAdded} />
+            </Modal>
 
             <ConfirmModal
                 isOpen={!!confirm}

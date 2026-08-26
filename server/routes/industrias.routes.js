@@ -17,9 +17,14 @@ const SELECT_INDUSTRIA = `
   FROM industrias
 `;
 
+// lista é pequena (uma linha por indústria cadastrada) e o front busca uma
+// vez só e cacheia — busca por nome existe aqui pra ficar no mesmo padrão dos
+// outros GETs que filtram no SQL, não porque o dataset precise disso hoje
 router.get('/', async (req, res) => {
   try {
-    const { rows } = await pool.query(SELECT_INDUSTRIA);
+    const { busca } = req.query;
+    const where = busca ? `WHERE nome ILIKE $1` : '';
+    const { rows } = await pool.query(`${SELECT_INDUSTRIA} ${where}`, busca ? [`%${busca}%`] : []);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });

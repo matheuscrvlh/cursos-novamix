@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Trash, Edit, Users, Plus, X, Inbox } from 'lucide-react';
+import { Trash, Edit, Users, Plus, X, Inbox, Search, Loader2 } from 'lucide-react';
 
 import Input from '../../components/Input'
 import CardDash from '../../components/admin/CardDash'
@@ -29,16 +29,31 @@ const CULINARIAN_VAZIO = {
 export default function CulinarianAdmin() {
     const {
             culinaristas,
+            loadingCulinarian,
             addCulinarian,
             removeCulinarian,
             editCulinarian,
-            industrias
+            industrias,
+            cursos,
+            cursosInfantis
         } = useContext(DadosContext);
 
     const [formCulinarian, setFormCulinarian] = useState(CULINARIAN_VAZIO);
     const [culinarianEditar, setCulinarianEditar] = useState(CULINARIAN_VAZIO);
     const [step, setStep] = useState('close')
     const [previewImagemCulinarista, setPreviewImagemCulinarista] = useState();
+    const [busca, setBusca] = useState('');
+
+    const culinaristasFiltradas = culinaristas.filter(c =>
+        c.nomeCulinarista.toLowerCase().includes(busca.trim().toLowerCase())
+    );
+
+    // "cursos que executa" no cadastro é só uma lista de texto livre digitada
+    // pelo admin — pra saber quantos cursos de verdade essa culinarista deu,
+    // conta direto nas tabelas de cursos/infantis pelo culinaristaId
+    const cursosMinistrados = culinarianEditar.id
+        ? [...cursos, ...cursosInfantis].filter(c => c.culinaristaId === culinarianEditar.id).length
+        : 0;
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
     const { isAdmin } = useContext(AdminAuthContext);
@@ -65,6 +80,17 @@ export default function CulinarianAdmin() {
 
         addCulinarian(formData);
         setFormCulinarian(CULINARIAN_VAZIO);
+        setStep('close');
+    }
+
+    function abrirAddCulinarian() {
+        setFormCulinarian(CULINARIAN_VAZIO);
+        setStep('addCulinarian');
+    }
+
+    function fecharAddCulinarian() {
+        setFormCulinarian(CULINARIAN_VAZIO);
+        setStep('close');
     }
 
     function handleEditCulinarian(culinaristaId) {
@@ -158,8 +184,17 @@ export default function CulinarianAdmin() {
 
     return (
         <AdminPage title='Culinaristas'>
-            <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                <p className='font-bold text-gray-text mb-6'>CADASTRE UMA CULINARISTA</p>
+            <Modal
+                width='90%'
+                maxWidth='800px'
+                height='auto'
+                isOpen={step === 'addCulinarian'}
+                onClose={fecharAddCulinarian}
+            >
+                <div className='mb-6'>
+                    <h2 className='text-xl font-bold text-gray-text'>Adicionar Culinarista</h2>
+                    <hr className='border-gray-base/30 w-full mt-3'/>
+                </div>
                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
 
                     <div className='flex flex-col gap-1.5'>
@@ -313,9 +348,26 @@ export default function CulinarianAdmin() {
                     </div>
 
                 </div>
-            </CardDash>
+            </Modal>
             <CardDash className='bg-white h-full w-full rounded-md p-10 shadow-sm'>
-                <p className='font-bold text-gray-text mb-4'>CULINARISTAS</p>
+                <div className='flex flex-col gap-3 mb-4'>
+                    <div className='flex items-center justify-between'>
+                        <p className='font-bold text-gray-text'>CULINARISTAS</p>
+                        <Button onClick={abrirAddCulinarian} className='bg-orange-base hover:bg-orange-light text-white w-fit'>
+                            + Adicionar Culinarista
+                        </Button>
+                    </div>
+                    <div className='relative w-full md:max-w-xs'>
+                        <Search size={15} className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-text/40' />
+                        <input
+                            type='text'
+                            placeholder='Buscar por nome'
+                            value={busca}
+                            onChange={e => setBusca(e.target.value)}
+                            className='w-full text-sm border border-gray-base/30 rounded-md pl-9 pr-3 py-2 text-gray-text outline-none focus:border-orange-base'
+                        />
+                    </div>
+                </div>
 
                 <div className='max-h-100 overflow-y-auto'>
 
@@ -329,13 +381,18 @@ export default function CulinarianAdmin() {
                         <p>FUNÇOES</p>
                     </div>
 
-                    {culinaristas.length === 0 ? (
+                    {loadingCulinarian ? (
+                        <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
+                            <Loader2 size={28} className='animate-spin text-orange-base' />
+                            <p className='text-sm'>Carregando...</p>
+                        </div>
+                    ) : culinaristasFiltradas.length === 0 ? (
                         <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'>
                             <Inbox size={36} />
-                            <p className='text-sm'>Nenhuma culinarista cadastrada</p>
+                            <p className='text-sm'>Nenhuma culinarista encontrada</p>
                         </div>
                     ) : (
-                        culinaristas.map(c => (
+                        culinaristasFiltradas.map(c => (
                             <div key={c.id}>
                                 <div className='p-3 text-gray-text md:hidden'>
                                     <div className='flex items-center gap-2'>
@@ -619,6 +676,7 @@ export default function CulinarianAdmin() {
                         <p><span className='font-semibold'>Telefone:</span> {culinarianEditar.telefone}</p>
                         <p><span className='font-semibold'>Instagram:</span> {culinarianEditar.instagram}</p>
                         <p><span className='font-semibold'>Lojas:</span> {culinarianEditar.lojas?.join(', ')}</p>
+                        <p><span className='font-semibold'>Cursos ministrados:</span> {cursosMinistrados}</p>
                     </div>
                 </div>
 

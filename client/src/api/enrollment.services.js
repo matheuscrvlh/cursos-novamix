@@ -55,17 +55,29 @@ export async function getEnrollment(cursoId) {
     }
 }
 
-export async function getTotalEnrollment() {
+export async function getTotalEnrollment(filtros = {}) {
     try {
-        const res = await fetch((`${URL}/inscricoes`), {
+        const params = new URLSearchParams();
+        Object.entries(filtros).forEach(([chave, valor]) => {
+            if (valor !== undefined && valor !== null && valor !== '') params.set(chave, valor);
+        });
+
+        const res = await fetch((`${URL}/inscricoes?${params.toString()}`), {
             method: 'GET',
             credentials: 'include'
         });
 
-        return res.json()
+        // sem essa checagem, uma resposta não-OK (401, 429, 500 — corpo não é
+        // JSON de inscrições) faz res.json() estourar SyntaxError e quebra o
+        // .filter() de quem chamou; devolver [] aqui é seguro pro caller
+        if (!res.ok) return []
+
+        const data = await res.json()
+        return Array.isArray(data) ? data : []
 
     } catch (err) {
         console.error('Erro ao buscar Inscricoes Totais:', err);
+        return []
     }
 }
 

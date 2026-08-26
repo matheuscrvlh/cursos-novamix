@@ -62,6 +62,10 @@ export async function editarClienteLogado(dados) {
     }
 }
 
+export function alterarSenhaLogado(senhaAtual, novaSenha) {
+    return post('/alterar-senha', { senhaAtual, novaSenha })
+}
+
 export async function getMinhasInscricoes() {
     try {
         const res = await fetch(`${URL}/minhas-inscricoes`, { credentials: 'include' })

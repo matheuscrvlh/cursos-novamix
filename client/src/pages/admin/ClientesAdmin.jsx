@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { Inbox, Search, KeyRound, Ban, CheckCircle2, Trash, Eye } from 'lucide-react'
+import { Inbox, Search, KeyRound, Ban, CheckCircle2, Trash, Eye, Loader2 } from 'lucide-react'
 
 import CardDash from '../../components/admin/CardDash'
 import Button from '../../components/Button'
@@ -125,7 +125,7 @@ export default function ClientesAdmin() {
                     </div>
 
                     {carregando ? (
-                        <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Carregando...</p></div>
+                        <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Loader2 size={28} className='animate-spin text-orange-base' /><p className='text-sm'>Carregando...</p></div>
                     ) : clientes.length === 0 ? (
                         <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Inbox size={36} /><p className='text-sm'>Nenhum cliente encontrado</p></div>
                     ) : clientes.map(c => (
@@ -234,7 +234,7 @@ export default function ClientesAdmin() {
                 onClose={() => setClienteSelecionado(null)}
             >
                 {carregandoDetalhe ? (
-                    <p className='text-sm text-gray-text/50 py-10 text-center'>Carregando...</p>
+                    <div className='flex flex-col items-center gap-2 py-10 text-gray-text/40'><Loader2 size={28} className='animate-spin text-orange-base' /><p className='text-sm'>Carregando...</p></div>
                 ) : clienteSelecionado && (
                     <div className='flex flex-col gap-4'>
                         <div>

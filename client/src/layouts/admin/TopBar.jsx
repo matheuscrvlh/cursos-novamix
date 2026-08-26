@@ -11,7 +11,7 @@ export default function TopBar({ title }) {
     const dataFormatada = hoje.charAt(0).toUpperCase() + hoje.slice(1)
 
     return (
-        <header className='w-full bg-gray border-b border-gray-base/15 px-6 pt-10 pb-5 md:px-10'>
+        <header className='w-full bg-gray pt-10 pb-5'>
             <div className='flex flex-col gap-1 md:flex-row md:items-end md:justify-between'>
                 <h1 className='text-orange-base font-bold text-2xl md:text-3xl leading-tight'>
                     {title}

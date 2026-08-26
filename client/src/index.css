@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+/* Reserva o espaço da barra de rolagem sempre, mesmo quando ela não tá visível
+   — sem isso, cada troca de tela no admin (páginas com alturas diferentes)
+   faz a barra aparecer/sumir e o layout inteiro (que usa vw pra largura)
+   "tremer" alguns pixels de largura. */
+html {
+    scrollbar-gutter: stable;
+}
+
 @theme {
     --color-*: initial;
     --color-white: #ffffff;
