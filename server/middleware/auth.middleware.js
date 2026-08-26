@@ -34,18 +34,21 @@ function requireCursosAccess(req, res, next) {
     next();
 }
 
-// Exige role === 'admin' no payload (público.users.role no hub-novamix) —
-// usado nas ações administrativas sensíveis (excluir curso/inscrição/
-// culinarista/indústria/banner, reembolsar). Qualquer usuário com acesso ao
-// módulo 'cursos' já pode fazer o resto (ver requireCursosAccess); isso aqui
-// é a exceção, não o nível "normal" de escrita.
+// Exige access === 'admin' na permissão do módulo 'cursos' (não o role
+// global do hub-novamix) — usado nas ações administrativas sensíveis
+// (excluir curso/inscrição/culinarista/indústria/banner, reembolsar).
+// Qualquer usuário com acesso ao módulo 'cursos' já pode fazer o resto (ver
+// requireCursosAccess); isso aqui é a exceção, não o nível "normal" de
+// escrita. Checar req.user.role travava usuários que são admin só do módulo
+// cursos (e não admin do hub como um todo), e liberava admins do hub sem
+// permissão de admin nesse módulo especificamente.
 function requireCursosAdmin(req, res, next) {
     const permissao = req.user?.permissions?.find(p => p.module === MODULO);
 
     if (!permissao) {
         return res.status(403).json({ error: 'Módulo não liberado para esse usuário.' });
     }
-    if (req.user?.role !== 'admin') {
+    if (permissao.access !== 'admin') {
         return res.status(403).json({ error: 'Ação restrita a administradores.' });
     }
 

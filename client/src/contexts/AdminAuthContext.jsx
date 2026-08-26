@@ -10,9 +10,10 @@ export const AdminAuthContext = createContext();
 // hub — não existe mais tela de login própria neste projeto.
 export function AdminAuthProvider({ children }) {
     const [access, setAccess] = useState(null);
-    // isAdmin vem do role do usuário no hub (public.users.role), não do nível
-    // de acesso ao módulo — qualquer usuário com o módulo liberado já pode
-    // fazer tudo, isAdmin só libera as ações restritas (excluir, reembolsar)
+    // isAdmin vem do access da permissão do módulo 'cursos' (slug 'cursos',
+    // access 'admin'), não do role global do usuário no hub — qualquer
+    // usuário com o módulo liberado já pode fazer tudo, isAdmin só libera as
+    // ações restritas (excluir, reembolsar)
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
 
