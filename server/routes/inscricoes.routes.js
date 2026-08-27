@@ -6,6 +6,7 @@ const { paymentLimiter } = require('../middleware/rateLimit.middleware');
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
 const { enviarEmail, emailInscricaoRecebida } = require('../utils/email');
+const { encryptCpf, decryptCpf } = require('../utils/cpfCrypto');
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ router.post('/', paymentLimiter, authenticateClienteOpcional, async (req, res) =
     await pool.query(`
       INSERT INTO inscricoes (id, curso_id, cliente_id, nome, cpf, celular, email, assento, status)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pendente')
-    `, [id, cursoId, req.cliente?.sub ?? null, nome, cpf, celular, email, assentoId]);
+    `, [id, cursoId, req.cliente?.sub ?? null, nome, encryptCpf(cpf), celular, email, assentoId]);
 
     res.status(201).json({
       id, cursoId, nome, cpf, celular, email,
@@ -175,7 +176,8 @@ router.get('/curso/:cursoId', authenticate, requireCursosAccess, async (req, res
       `${SELECT_COM_METODO_PAGAMENTO} WHERE i.curso_id = $1 ORDER BY i.data_inscricao DESC`,
       [req.params.cursoId]
     );
-    res.json(rows);
+    // cpf vem cifrado do banco (ver utils/cpfCrypto.js) — decifra na borda de saída
+    res.json(rows.map(r => ({ ...r, cpf: decryptCpf(r.cpf) })));
   } catch (err) {
     console.error('Erro ao obter inscrições:', err);
     res.status(500).json({ message: 'Erro interno do servidor' });
@@ -222,17 +224,10 @@ router.get('/', authenticate, requireCursosAccess, async (req, res) => {
       valores.push(dataFim);
       condicoes.push(`i.data_inscricao < $${valores.length}`);
     }
-    if (busca && busca.trim()) {
-      valores.push(`%${busca.trim()}%`);
-      const idxNome = valores.length;
-      const buscaDigits = busca.replace(/\D/g, '');
-      if (buscaDigits) {
-        valores.push(`%${buscaDigits}%`);
-        condicoes.push(`(i.nome ILIKE $${idxNome} OR regexp_replace(i.cpf, '\\D', '', 'g') LIKE $${valores.length})`);
-      } else {
-        condicoes.push(`i.nome ILIKE $${idxNome}`);
-      }
-    }
+    // busca por nome/cpf não dá mais pra fazer com ILIKE/regexp_replace no
+    // SQL — cpf é cifrado em repouso (ver utils/cpfCrypto.js) e o texto
+    // cifrado não preserva substring do original. É aplicada em memória
+    // depois de decifrar, mais abaixo.
 
     const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
 
@@ -243,7 +238,19 @@ router.get('/', authenticate, requireCursosAccess, async (req, res) => {
       ${where}
       ORDER BY i.data_inscricao DESC
     `, valores);
-    res.json(rows);
+
+    let inscricoes = rows.map(r => ({ ...r, cpf: decryptCpf(r.cpf) }));
+
+    if (busca && busca.trim()) {
+      const termo = busca.trim().toLowerCase();
+      const buscaDigits = busca.replace(/\D/g, '');
+      inscricoes = inscricoes.filter(i =>
+        i.nome?.toLowerCase().includes(termo) ||
+        (buscaDigits && (i.cpf || '').replace(/\D/g, '').includes(buscaDigits))
+      );
+    }
+
+    res.json(inscricoes);
   } catch (err) {
     console.error('Erro ao obter inscrições:', err);
     res.status(500).json({ message: 'Erro interno do servidor' });
@@ -282,7 +289,7 @@ router.put('/:id', authenticate, requireCursosAccess, async (req, res) => {
         WHERE id = $7
       `, [
         nome ?? null,
-        cpf ?? null,
+        cpf ? encryptCpf(cpf) : null,
         celular ?? null,
         email ?? null,
         assento !== undefined ? Number(assento) : null,

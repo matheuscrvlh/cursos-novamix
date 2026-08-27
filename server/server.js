@@ -37,6 +37,10 @@ if (process.env.NODE_ENV === 'production' && !process.env.FRONTEND_URL) {
   console.error('FRONTEND_URL não configurado em produção. Defina no .env (CORS ficaria aberto pra qualquer origem)');
   process.exit(1);
 }
+if (!process.env.CPF_ENCRYPTION_KEY) {
+  console.error('CPF_ENCRYPTION_KEY não configurado. Defina no .env antes de subir o servidor (CPF de clientes/inscrições/culinaristas é cifrado em repouso — ver utils/cpfCrypto.js)');
+  process.exit(1);
+}
 
 // atrás de 1 proxy reverso (nginx do host, que manda /api direto pro
 // container backend em 127.0.0.1:3001 — não passa pelo nginx do frontend)

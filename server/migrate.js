@@ -13,14 +13,17 @@ async function migrate() {
   console.log('✓ schema cursos');
 
   // conta do cliente final (quem se inscreve em curso) — sem relação com
-  // public.users (login de admin via SSO do hub-novamix)
+  // public.users (login de admin via SSO do hub-novamix). cpf é TEXT (não
+  // VARCHAR curto) porque guarda o valor cifrado (AES-256-GCM determinístico,
+  // ver utils/cpfCrypto.js), não o CPF em texto puro — o UNIQUE continua
+  // funcionando porque o mesmo CPF sempre cifra pro mesmo texto.
   await pool.query(`
     CREATE TABLE IF NOT EXISTS cursos.clientes (
       id            UUID PRIMARY KEY,
       nome          VARCHAR(255) NOT NULL,
       email         VARCHAR(255) NOT NULL UNIQUE,
       senha_hash    VARCHAR(255) NOT NULL,
-      cpf           VARCHAR(14) UNIQUE,
+      cpf           TEXT UNIQUE,
       celular       VARCHAR(20),
       status        BOOLEAN DEFAULT true,
       criado_em     TIMESTAMPTZ DEFAULT now(),
@@ -63,7 +66,7 @@ async function migrate() {
     CREATE TABLE IF NOT EXISTS cursos.culinaristas (
       id                UUID PRIMARY KEY,
       nome_culinarista  VARCHAR(255) NOT NULL,
-      cpf               VARCHAR(14),
+      cpf               TEXT,
       industria_id      UUID,
       telefone          VARCHAR(20),
       instagram         VARCHAR(100),
@@ -122,7 +125,7 @@ async function migrate() {
       curso_id            UUID,
       cliente_id          UUID,
       nome                VARCHAR(255) NOT NULL,
-      cpf                 VARCHAR(14) NOT NULL,
+      cpf                 TEXT NOT NULL,
       celular             VARCHAR(20) NOT NULL,
       email               VARCHAR(255) NOT NULL,
       assento             INTEGER NOT NULL,

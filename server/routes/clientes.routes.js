@@ -7,6 +7,7 @@ const { authenticateCliente } = require('../middleware/authCliente.middleware');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const { loginLimiter } = require('../middleware/rateLimit.middleware');
 const { cpfValido } = require('../utils/cpf');
+const { encryptCpf, decryptCpf } = require('../utils/cpfCrypto');
 const { enviarEmail, emailRedefinirSenha } = require('../utils/email');
 const logAudit = require('../utils/logAudit');
 
@@ -43,13 +44,14 @@ async function resolverFilialId(loja) {
     return rows[0]?.id ?? null;
 }
 
-// devolve só os campos seguros de expor (nunca senha_hash)
+// devolve só os campos seguros de expor (nunca senha_hash). cpf vem cifrado
+// do banco (ver utils/cpfCrypto.js) — decifra aqui, só na borda de saída.
 function serializarCliente(c) {
     return {
         id: c.id,
         nome: c.nome,
         email: c.email,
-        cpf: c.cpf,
+        cpf: decryptCpf(c.cpf),
         celular: c.celular,
         loja: c.loja ?? null,
         criadoEm: c.criado_em,
@@ -68,9 +70,14 @@ router.post('/cadastro', loginLimiter, async (req, res) => {
     }
 
     try {
+        // cifra antes de comparar/gravar — a cifra é determinística (mesmo
+        // CPF sempre gera o mesmo texto cifrado), então a comparação por
+        // igualdade aqui e o UNIQUE no banco continuam funcionando iguais
+        const cpfCifrado = cpf ? encryptCpf(cpfDigits) : null;
+
         const { rows: existentes } = await pool.query(
             `SELECT id FROM clientes WHERE email = $1 OR (cpf IS NOT NULL AND cpf = $2)`,
-            [email.toLowerCase(), cpf ? cpfDigits : null]
+            [email.toLowerCase(), cpfCifrado]
         );
         if (existentes.length) {
             return res.status(409).json({ message: 'Já existe uma conta com esse e-mail ou CPF.' });
@@ -91,7 +98,7 @@ router.post('/cadastro', loginLimiter, async (req, res) => {
             )
             SELECT novo.*, REPLACE(b.name, 'Novamix ', '') AS loja
             FROM novo LEFT JOIN public.branchs b ON b.id = novo.filial_id
-        `, [id, nome.trim(), email.toLowerCase(), senhaHash, cpf ? cpfDigits : null, celular || null, filialId]);
+        `, [id, nome.trim(), email.toLowerCase(), senhaHash, cpfCifrado, celular || null, filialId]);
 
         const cliente = rows[0];
         res.cookie('cliente_token', assinarToken(cliente), { ...COOKIE_OPTS, maxAge: SETE_DIAS_MS });
@@ -310,10 +317,10 @@ router.get('/', authenticate, requireCursosAccess, async (req, res) => {
     const condicoes = [];
     const valores = [];
 
-    if (busca) {
-        valores.push(`%${busca}%`);
-        condicoes.push(`(nome ILIKE $${valores.length} OR email ILIKE $${valores.length} OR cpf ILIKE $${valores.length})`);
-    }
+    // busca por nome/e-mail/cpf não dá mais pra fazer com ILIKE direto no
+    // SQL — cpf é cifrado em repouso, e o texto cifrado não preserva
+    // substring do original (ver utils/cpfCrypto.js). Só os filtros de
+    // status continuam no SQL; busca é aplicada em memória depois de decifrar.
     if (status === 'ativos') condicoes.push('status = true');
     if (status === 'inativos') condicoes.push('status = false');
 
@@ -328,7 +335,19 @@ router.get('/', authenticate, requireCursosAccess, async (req, res) => {
             ${where}
             ORDER BY c.criado_em DESC
         `, valores);
-        res.json(rows);
+
+        let clientes = rows.map(c => ({ ...c, cpf: decryptCpf(c.cpf) }));
+
+        if (busca && busca.trim()) {
+            const termo = busca.trim().toLowerCase();
+            clientes = clientes.filter(c =>
+                c.nome?.toLowerCase().includes(termo) ||
+                c.email?.toLowerCase().includes(termo) ||
+                c.cpf?.includes(termo)
+            );
+        }
+
+        res.json(clientes);
     } catch (err) {
         console.error('Erro ao listar clientes:', err);
         res.status(500).json({ message: 'Erro interno.' });
@@ -353,7 +372,7 @@ router.get('/:id', authenticate, requireCursosAccess, async (req, res) => {
             ORDER BY i.data_inscricao DESC
         `, [req.params.id]);
 
-        res.json({ ...rows[0], inscricoes });
+        res.json({ ...rows[0], cpf: decryptCpf(rows[0].cpf), inscricoes });
     } catch (err) {
         console.error('Erro ao buscar cliente:', err);
         res.status(500).json({ message: 'Erro interno.' });

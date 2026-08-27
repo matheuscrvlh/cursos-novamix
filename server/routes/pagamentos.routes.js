@@ -7,6 +7,7 @@ const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../mi
 const { paymentLimiter } = require('../middleware/rateLimit.middleware');
 const logAudit = require('../utils/logAudit');
 const { cpfValido } = require('../utils/cpf');
+const { decryptCpf } = require('../utils/cpfCrypto');
 const { enviarEmail, emailPagamentoConfirmado, emailReembolsoProcessado } = require('../utils/email');
 
 // best-effort — nunca deve propagar erro pra quem chama (confirmação de
@@ -415,8 +416,9 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
     }
 
     // CPF vem da inscrição (já coletado no cadastro), não do Brick — o Brick de Pix
-    // só pede e-mail, sem campo de CPF.
-    const cpfDigits = (inscricao.cpf || '').replace(/\D/g, '');
+    // só pede e-mail, sem campo de CPF. inscricao.cpf vem cifrado do banco
+    // (ver utils/cpfCrypto.js) — o Mercado Pago exige o número em texto puro.
+    const cpfDigits = (decryptCpf(inscricao.cpf) || '').replace(/\D/g, '');
     if (!cpfValido(cpfDigits)) {
       return res.status(400).json({ message: 'O CPF cadastrado na inscrição é inválido. Corrija o CPF e tente novamente.' });
     }

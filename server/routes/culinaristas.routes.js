@@ -6,6 +6,7 @@ const createUpload = require('../config/createUpload');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
+const { encryptCpf, decryptCpf } = require('../utils/cpfCrypto');
 
 const uploadCulinaristas = createUpload('culinaristas');
 const router = express.Router();
@@ -75,7 +76,8 @@ router.get('/', async (req, res) => {
     const { busca } = req.query;
     const where = busca ? `WHERE c.nome_culinarista ILIKE $1` : '';
     const { rows } = await pool.query(`${SELECT_CULINARISTA} ${where}`, busca ? [`%${busca}%`] : []);
-    res.json(rows);
+    // cpf vem cifrado do banco (ver utils/cpfCrypto.js) — decifra na borda de saída
+    res.json(rows.map(r => ({ ...r, cpf: decryptCpf(r.cpf) })));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -105,7 +107,7 @@ router.post('/', authenticate, requireCursosAccess, uploadCulinaristas.single('f
     `, [
       id,
       nomeCulinarista,
-      cpf,
+      encryptCpf(cpf),
       industriaId,
       telefone,
       instagram,
@@ -164,7 +166,7 @@ router.put('/:id', authenticate, requireCursosAccess, uploadCulinaristas.single(
       WHERE id = $9
     `, [
       req.body.nomeCulinarista ?? null,
-      req.body.cpf ?? null,
+      req.body.cpf ? encryptCpf(req.body.cpf) : null,
       req.body.instagram ?? null,
       req.body.telefone ?? null,
       industriaInformada,
