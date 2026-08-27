@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { Trash, Edit, Inbox, Printer, Loader2 } from 'lucide-react';
+import { Trash, Edit, Inbox, Users, Printer, Loader2 } from 'lucide-react';
 
 import Input from '../../components/Input'
 import CardDash from '../../components/admin/CardDash'
@@ -14,6 +14,7 @@ import { DadosContext } from '../../contexts/DadosContext';
 import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 import { formatDateBR, cursoEncerrado } from '../../utils/formatDate';
+import { formatarCpf } from '../../utils/formatCpf';
 import { getEnrollment } from '../../api/enrollment.services';
 
 function maskValor(value) {
@@ -100,7 +101,7 @@ export default function CoursesAdmin() {
     const [previewImagemCurso, setPreviewImagemCurso] = useState(null);
     const [filtroStatus, setFiltroStatus] = useState('ativos');
     const [filtroLoja, setFiltroLoja]     = useState('todas');
-    const [imprimindo, setImprimindo]     = useState(null);
+    const [carregandoLista, setCarregandoLista]     = useState(null);
     const [verAssentos, setVerAssentos]   = useState(null);
 
     const { confirm, ask, handleConfirm, handleCancel } = useConfirmAction();
@@ -241,7 +242,7 @@ export default function CoursesAdmin() {
     // pagas (quem só reservou e não pagou não vai aparecer) e ordenada por
     // assento, não por ordem de inscrição
     async function abrirListaAssentos(curso) {
-        setImprimindo(curso.id);
+        setCarregandoLista(curso.id);
         try {
             const inscricoes = await getEnrollment(curso.id);
             const confirmadas = inscricoes
@@ -252,8 +253,62 @@ export default function CoursesAdmin() {
             console.error('Erro ao buscar lista de assentos:', err);
             alert('Erro ao buscar lista de assentos.');
         } finally {
-            setImprimindo(null);
+            setCarregandoLista(null);
         }
+    }
+
+    // Abre uma aba só com a lista (assento/nome/CPF) já pronta pra impressão
+    // — mesmo padrão do "imprimir ingredientes" do lado cliente (CoursePage)
+    function imprimirListaAssentos() {
+        if (!verAssentos) return;
+        const escapeHtml = texto => String(texto).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+
+        const { curso, lista } = verAssentos;
+        const nomeCurso = escapeHtml(curso.nomeCurso || '');
+        const janela = window.open('', '_blank');
+        if (!janela) return;
+
+        janela.document.write(`
+            <html>
+                <head>
+                    <title>Lista de inscritos — ${nomeCurso}</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 32px; color: #1f2937; }
+                        h1 { font-size: 20px; margin-bottom: 4px; }
+                        p.subtitulo { color: #6b7280; font-size: 13px; margin-top: 0; margin-bottom: 24px; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { text-align: left; padding: 8px 10px; font-size: 14px; border-bottom: 1px solid #e5e7eb; }
+                        th { text-transform: uppercase; font-size: 11px; color: #6b7280; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${nomeCurso}</h1>
+                    <p class="subtitulo">
+                        ${escapeHtml(formatDateBR(curso.data))} às ${escapeHtml(curso.hora || '')}
+                        · ${lista.length} inscrição(ões) confirmada(s)
+                    </p>
+                    <table>
+                        <thead>
+                            <tr><th>Assento</th><th>Nome</th><th>CPF</th></tr>
+                        </thead>
+                        <tbody>
+                            ${lista.map(i => `
+                                <tr>
+                                    <td>${escapeHtml(i.assento)}</td>
+                                    <td>${escapeHtml(i.nome)}</td>
+                                    <td>${escapeHtml(formatarCpf(i.cpf))}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </body>
+            </html>
+        `);
+        janela.document.close();
+        janela.focus();
+        janela.print();
     }
 
     function fieldClass(erro) {
@@ -480,9 +535,9 @@ export default function CoursesAdmin() {
                                             </Button>
                                         </Tooltip>
                                         )}
-                                        <Tooltip label='Ver lista de assentos'>
-                                            <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => abrirListaAssentos(curso)} disabled={imprimindo === curso.id}>
-                                                {imprimindo === curso.id ? <Loader2 size={16} className='animate-spin' /> : <Printer size={16} />}
+                                        <Tooltip label='Ver inscritos'>
+                                            <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => abrirListaAssentos(curso)} disabled={carregandoLista === curso.id}>
+                                                {carregandoLista === curso.id ? <Loader2 size={16} className='animate-spin' /> : <Users size={16} />}
                                             </Button>
                                         </Tooltip>
                                         <Tooltip label='Editar'>
@@ -521,9 +576,9 @@ export default function CoursesAdmin() {
                                             </Button>
                                         </Tooltip>
                                         )}
-                                        <Tooltip label='Ver lista de assentos'>
-                                            <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => abrirListaAssentos(curso)} disabled={imprimindo === curso.id}>
-                                                {imprimindo === curso.id ? <Loader2 size={16} className='animate-spin' /> : <Printer size={16} />}
+                                        <Tooltip label='Ver inscritos'>
+                                            <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => abrirListaAssentos(curso)} disabled={carregandoLista === curso.id}>
+                                                {carregandoLista === curso.id ? <Loader2 size={16} className='animate-spin' /> : <Users size={16} />}
                                             </Button>
                                         </Tooltip>
                                         <Tooltip label='Editar'>
@@ -711,7 +766,18 @@ export default function CoursesAdmin() {
                 {verAssentos && (
                     <>
                         <div className='mb-4'>
-                            <h2 className='text-xl font-bold text-gray-text'>{verAssentos.curso.nomeCurso}</h2>
+                            <div className='flex items-start justify-between gap-3'>
+                                <h2 className='text-xl font-bold text-gray-text'>{verAssentos.curso.nomeCurso}</h2>
+                                <Tooltip label='Imprimir lista'>
+                                    <Button
+                                        className='bg-gray-base p-2 hover:bg-gray-dark text-white shrink-0'
+                                        onClick={imprimirListaAssentos}
+                                        disabled={verAssentos.lista.length === 0}
+                                    >
+                                        <Printer size={16} />
+                                    </Button>
+                                </Tooltip>
+                            </div>
                             <p className='text-sm text-gray-text/60'>
                                 {formatDateBR(verAssentos.curso.data)} às {verAssentos.curso.hora} · {verAssentos.lista.length} inscrição(ões) confirmada(s)
                             </p>
@@ -738,7 +804,7 @@ export default function CoursesAdmin() {
                                             <div className='grid grid-cols-[0.6fr_1.5fr_1fr] gap-2 px-3 py-2.5 items-center text-gray-text text-sm'>
                                                 <p className='font-semibold'>{i.assento}</p>
                                                 <p className='truncate'>{i.nome}</p>
-                                                <p>{i.cpf}</p>
+                                                <p>{formatarCpf(i.cpf)}</p>
                                             </div>
                                             <hr className='border-gray-base/20'/>
                                         </div>

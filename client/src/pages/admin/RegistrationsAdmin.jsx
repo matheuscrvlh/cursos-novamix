@@ -14,7 +14,8 @@ import { getEnrollment, getTotalEnrollment, deleteEnrollment, verificarPagamento
 import { DadosContext } from '../../contexts/DadosContext';
 import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
-import { formatDateBR, formatDateTimeBR, cursoEncerrado } from '../../utils/formatDate';
+import { formatDateBR, formatDateTimeBR, cursoEncerrado, calcularPeriodoData } from '../../utils/formatDate';
+import { statusInscricaoClass } from '../../utils/statusInscricao';
 import { formatarPreco } from '../../utils/formatCurrency';
 
 const FILTROS_TIPO = [
@@ -50,73 +51,6 @@ const FILTROS_DATA = [
     { label: 'Essa semana', value: 'semana' },
     { label: 'Este mês', value: 'mes' },
 ];
-
-// todas as comparações usam o horário local do navegador — dataInscricao vem
-// em ISO UTC (new Date().toISOString() no backend), e o construtor Date já
-// converte pra hora local sozinho, então não precisa de nenhum ajuste manual
-function inicioDoDia(data) {
-    // "YYYY-MM-DD" (valor de <input type="date">) precisa ser montado como
-    // data local manualmente — new Date("YYYY-MM-DD") interpreta como UTC
-    // meia-noite, o que em fusos negativos (Brasil) vira o dia anterior local
-    if (typeof data === 'string') {
-        const [ano, mes, dia] = data.split('-').map(Number);
-        return new Date(ano, mes - 1, dia, 0, 0, 0, 0);
-    }
-    const d = new Date(data);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
-function inicioDaSemana() {
-    const d = inicioDoDia(new Date());
-    d.setDate(d.getDate() - d.getDay()); // volta até domingo
-    return d;
-}
-
-function inicioDoMes() {
-    const d = inicioDoDia(new Date());
-    d.setDate(1);
-    return d;
-}
-
-// vira dataInicio/dataFim (ISO) pra mandar como query param pro backend em
-// vez de filtrar em JS — a lógica de "o que cada opção rápida significa" é a
-// mesma de antes, só que devolve os limites em vez de já comparar
-function calcularPeriodoData(filtro, periodoInicio, periodoFim) {
-    if (filtro === 'hoje') {
-        return { inicio: inicioDoDia(new Date()) };
-    }
-    if (filtro === 'ontem') {
-        const inicioOntem = inicioDoDia(new Date());
-        inicioOntem.setDate(inicioOntem.getDate() - 1);
-        return { inicio: inicioOntem, fim: inicioDoDia(new Date()) };
-    }
-    if (filtro === 'semana') {
-        return { inicio: inicioDaSemana() };
-    }
-    if (filtro === 'mes') {
-        return { inicio: inicioDoMes() };
-    }
-    if (filtro === 'periodo') {
-        const inicio = periodoInicio ? inicioDoDia(periodoInicio) : undefined;
-        let fim;
-        if (periodoFim) {
-            fim = inicioDoDia(periodoFim);
-            fim.setDate(fim.getDate() + 1); // inclui o dia final inteiro
-        }
-        return { inicio, fim };
-    }
-    return {};
-}
-
-function statusBadgeClass(status) {
-    if (status === 'pago')        return 'bg-green-base';
-    if (status === 'pendente')    return 'bg-yellow-500';
-    if (status === 'cancelado')   return 'bg-gray-base';
-    if (status === 'recusado')    return 'bg-red-light';
-    if (status === 'reembolsado') return 'bg-red-base';
-    return 'bg-orange-base';
-}
 
 // metodoPagamento só é preenchido depois que o cliente escolhe Pix ou cartão
 // no Brick — antes disso (inscrição recém-criada) ainda não existe
@@ -496,7 +430,7 @@ export default function RegistrationsAdmin() {
                                     <span>Inscrito em {formatDateTimeBR(i.dataInscricao)}</span>
                                 </div>
                                 <div className='flex items-center justify-between mt-2'>
-                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full text-white ${statusBadgeClass(i.status)}`}>
+                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusInscricaoClass(i.status)}`}>
                                         {i.status}
                                     </span>
                                     <div className='flex gap-2'>
@@ -530,7 +464,7 @@ export default function RegistrationsAdmin() {
                                 <p>{curso?.data ? formatDateBR(curso.data) : '-'}</p>
                                 <p className='truncate'>{i.nome}</p>
                                 <p>{i.assento}</p>
-                                <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${statusBadgeClass(i.status)}`}>
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit ${statusInscricaoClass(i.status)}`}>
                                     {i.status}
                                 </span>
                                 <p>{pagamentoLabel(i.metodoPagamento, curso?.valor)}</p>
@@ -671,7 +605,7 @@ export default function RegistrationsAdmin() {
                             <div key={inscricao.id} className='bg-gray rounded-lg p-3'>
                                 <div className='flex items-start justify-between gap-2 mb-2'>
                                     <p className='font-semibold text-gray-text text-sm'>{inscricao.nome}</p>
-                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 text-white ${statusBadgeClass(inscricao.status)}`}>
+                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${statusInscricaoClass(inscricao.status)}`}>
                                         {inscricao.status}
                                     </span>
                                 </div>
@@ -726,7 +660,7 @@ export default function RegistrationsAdmin() {
                                     <p>{inscricao.cpf}</p>
                                     <p>{inscricao.celular}</p>
                                     <p>{pagamentoLabel(inscricao.metodoPagamento, cursoModal?.valor)}</p>
-                                    <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit text-white ${statusBadgeClass(inscricao.status)}`}>
+                                    <span className={`text-xs font-semibold px-2 py-1 rounded-full w-fit ${statusInscricaoClass(inscricao.status)}`}>
                                         {inscricao.status}
                                     </span>
                                     <p>{formatDateTimeBR(inscricao.dataInscricao)}</p>

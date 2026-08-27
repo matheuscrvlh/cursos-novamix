@@ -1,14 +1,16 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 
 import LinkSideBar from '../../components/admin/LinkSideBar'
 
+import { AdminAuthContext } from '../../contexts/AdminAuthContext'
 import { logoNm } from '../../assets/images/logos/'
 
 const HUB_URL = 'https://hub.lojanovamix.com.br'
 
 export default function SideBar() {
+    const { isAdmin } = useContext(AdminAuthContext)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
 
     function toggleMenu() {
@@ -79,6 +81,11 @@ export default function SideBar() {
                     <LinkSideBar to='/marketingAdmin' onClick={closeMenu}>
                         Marketing
                     </LinkSideBar>
+                    {isAdmin && (
+                        <LinkSideBar to='/logsAdmin' onClick={closeMenu}>
+                            Logs
+                        </LinkSideBar>
+                    )}
                 </nav>
 
                 <a

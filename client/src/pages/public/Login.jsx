@@ -7,7 +7,6 @@ import Input from '../../components/Input'
 import Button from '../../components/Button'
 
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
-import { bannerHome } from '../../assets/images/banner'
 
 export default function Login() {
     const { login } = useContext(ClienteAuthContext)
@@ -32,7 +31,7 @@ export default function Login() {
     }
 
     return (
-        <PublicLayout bannerHome={bannerHome}>
+        <PublicLayout showBanner={false}>
             <Head title='Entrar | Novamix Cursos' />
             <section className='max-w-100 mx-auto px-5 py-16'>
                 <h1 className='text-2xl font-bold text-gray-dark mb-1'>Entrar</h1>

@@ -36,6 +36,17 @@ export function redefinirSenha(token, novaSenha) {
     return post('/redefinir-senha', { token, novaSenha })
 }
 
+export async function validarTokenRedefinicao(token) {
+    try {
+        const res = await fetch(`${URL}/redefinir-senha/${encodeURIComponent(token)}`)
+        const data = await res.json().catch(() => ({}))
+        return { ...data, ok: res.ok }
+    } catch (err) {
+        console.error('Erro ao validar token de redefinição:', err)
+        return { ok: false, valido: false, message: 'Erro de conexão. Tente novamente.' }
+    }
+}
+
 export async function getClienteLogado() {
     try {
         const res = await fetch(`${URL}/me`, { credentials: 'include' })
@@ -79,10 +90,12 @@ export async function getMinhasInscricoes() {
 
 // --- admin ---
 
-export async function getClientesAdmin({ busca, status } = {}) {
+export async function getClientesAdmin({ busca, status, criadoInicio, criadoFim } = {}) {
     const params = new URLSearchParams()
     if (busca) params.set('busca', busca)
     if (status && status !== 'todos') params.set('status', status)
+    if (criadoInicio) params.set('criadoInicio', criadoInicio)
+    if (criadoFim) params.set('criadoFim', criadoFim)
 
     try {
         const res = await fetch(`${URL}?${params.toString()}`, { credentials: 'include' })
@@ -91,6 +104,17 @@ export async function getClientesAdmin({ busca, status } = {}) {
     } catch (err) {
         console.error('Erro ao listar clientes:', err)
         return []
+    }
+}
+
+export async function getClientesStats() {
+    try {
+        const res = await fetch(`${URL}/estatisticas`, { credentials: 'include' })
+        if (!res.ok) return null
+        return res.json()
+    } catch (err) {
+        console.error('Erro ao buscar estatísticas de clientes:', err)
+        return null
     }
 }
 

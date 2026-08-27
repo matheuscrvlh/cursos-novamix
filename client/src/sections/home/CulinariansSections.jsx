@@ -32,10 +32,10 @@ export default function CulinariansSections({
     return (
         <section className='w-full mt-20 mb-20'>
 
-            {/* ========== BANNER — padrão 1920×480 (4:1) =========== */}
+            {/* ========== BANNER — padrão 1920×650 desktop · 425×495 mobile =========== */}
             <div className='md:w-[99dvw]'>
                 {homeBanners.length > 0 ? (
-                    <div className='relative w-full overflow-hidden aspect-425/495 md:aspect-4/1'>
+                    <div className='relative w-full overflow-hidden aspect-425/495 md:aspect-1920/650'>
                         {homeBanners.map((b, i) => {
                             const visible = i === homeIndex
                             const wrapStyle = {
@@ -65,7 +65,7 @@ export default function CulinariansSections({
                         )}
                     </div>
                 ) : (
-                    <div className='w-full overflow-hidden aspect-425/495 md:aspect-4/1'>
+                    <div className='w-full overflow-hidden aspect-425/495 md:aspect-1920/650'>
                         <img src={bannerCulinarista} className='w-full h-full object-cover' alt='' />
                     </div>
                 )}

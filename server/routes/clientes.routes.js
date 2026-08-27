@@ -286,6 +286,23 @@ router.post('/esqueci-senha', loginLimiter, async (req, res) => {
     }
 });
 
+// Checa se o token ainda é válido sem consumi-lo — a tela de redefinição usa
+// isso pra já mostrar o erro ao abrir o link (token repetido/expirado), sem
+// esperar o cliente digitar a senha nova e só então descobrir pelo POST.
+router.get('/redefinir-senha/:token', loginLimiter, async (req, res) => {
+    try {
+        const { rows } = await pool.query(`
+            SELECT 1 FROM clientes_tokens
+            WHERE token = $1 AND tipo = 'redefinir_senha' AND usado_em IS NULL AND expira_em > now()
+        `, [req.params.token]);
+        if (!rows.length) return res.status(400).json({ valido: false, message: 'Token inválido ou expirado.' });
+        res.json({ valido: true });
+    } catch (err) {
+        console.error('Erro ao validar token de redefinição de senha:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
 router.post('/redefinir-senha', loginLimiter, async (req, res) => {
     const { token, novaSenha } = req.body;
     if (!token || !novaSenha || novaSenha.length < 6) {
@@ -313,16 +330,26 @@ router.post('/redefinir-senha', loginLimiter, async (req, res) => {
 // --- painel admin ------------------------------------------------------
 
 router.get('/', authenticate, requireCursosAccess, async (req, res) => {
-    const { busca, status } = req.query;
+    const { busca, status, criadoInicio, criadoFim } = req.query;
     const condicoes = [];
     const valores = [];
 
     // busca por nome/e-mail/cpf não dá mais pra fazer com ILIKE direto no
     // SQL — cpf é cifrado em repouso, e o texto cifrado não preserva
     // substring do original (ver utils/cpfCrypto.js). Só os filtros de
-    // status continuam no SQL; busca é aplicada em memória depois de decifrar.
+    // status/cadastro continuam no SQL; busca é aplicada em memória depois
+    // de decifrar. Sem esses filtros a lista tende só a crescer (clientes
+    // nunca são podados), então trazer tudo sempre não escala.
     if (status === 'ativos') condicoes.push('status = true');
     if (status === 'inativos') condicoes.push('status = false');
+    if (criadoInicio) {
+        valores.push(criadoInicio);
+        condicoes.push(`c.criado_em >= $${valores.length}`);
+    }
+    if (criadoFim) {
+        valores.push(criadoFim);
+        condicoes.push(`c.criado_em < $${valores.length}`);
+    }
 
     const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
 
@@ -330,7 +357,7 @@ router.get('/', authenticate, requireCursosAccess, async (req, res) => {
         const { rows } = await pool.query(`
             SELECT c.id, c.nome, c.email, c.cpf, c.celular, c.status,
                    c.criado_em AS "criadoEm", c.ultimo_login AS "ultimoLogin",
-                   (SELECT count(*) FROM inscricoes i WHERE i.cliente_id = c.id) AS "totalInscricoes"
+                   (SELECT count(*) FROM inscricoes i WHERE i.cliente_id = c.id AND i.status = 'pago') AS "totalInscricoes"
             FROM clientes c
             ${where}
             ORDER BY c.criado_em DESC
@@ -350,6 +377,59 @@ router.get('/', authenticate, requireCursosAccess, async (req, res) => {
         res.json(clientes);
     } catch (err) {
         console.error('Erro ao listar clientes:', err);
+        res.status(500).json({ message: 'Erro interno.' });
+    }
+});
+
+// Contadores pro dashboard — agregado em uma query só (em vez da lista de
+// clientes inteira, que só cresce e não escala) pra mostrar um resumo sem
+// puxar linha por linha.
+router.get('/estatisticas', authenticate, requireCursosAccess, async (req, res) => {
+    try {
+        const [{ rows }, { rows: top }] = await Promise.all([
+            pool.query(`
+                SELECT
+                    count(*) AS total,
+                    count(*) FILTER (WHERE status = true) AS ativos,
+                    count(*) FILTER (WHERE criado_em >= date_trunc('day', now())) AS hoje,
+                    count(*) FILTER (WHERE criado_em >= date_trunc('week', now())) AS semana,
+                    count(*) FILTER (WHERE criado_em >= date_trunc('month', now())) AS mes
+                FROM clientes
+            `),
+            // ranking por valor gasto (soma do valor do curso em cada
+            // inscrição paga, mesma lógica do gráfico de faturamento) — só
+            // entra quem tem pelo menos 1 inscrição paga; LEFT JOIN em cursos
+            // pra não sumir da contagem se o curso já foi excluído
+            pool.query(`
+                SELECT
+                    c.id, c.nome, c.email,
+                    count(i.id) AS "totalInscricoes",
+                    COALESCE(sum(cu.valor), 0) AS "totalGasto"
+                FROM clientes c
+                JOIN inscricoes i ON i.cliente_id = c.id AND i.status = 'pago'
+                LEFT JOIN cursos cu ON cu.id = i.curso_id
+                GROUP BY c.id, c.nome, c.email
+                ORDER BY "totalGasto" DESC, "totalInscricoes" DESC
+                LIMIT 10
+            `),
+        ]);
+        const r = rows[0];
+        res.json({
+            total: Number(r.total),
+            ativos: Number(r.ativos),
+            hoje: Number(r.hoje),
+            semana: Number(r.semana),
+            mes: Number(r.mes),
+            top: top.map(t => ({
+                id: t.id,
+                nome: t.nome,
+                email: t.email,
+                totalInscricoes: Number(t.totalInscricoes),
+                totalGasto: Number(t.totalGasto),
+            })),
+        });
+    } catch (err) {
+        console.error('Erro ao buscar estatísticas de clientes:', err);
         res.status(500).json({ message: 'Erro interno.' });
     }
 });

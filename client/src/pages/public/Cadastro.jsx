@@ -11,6 +11,26 @@ import { bannerHome } from '../../assets/images/banner'
 
 const FORM_VAZIO = { nome: '', email: '', senha: '', cpf: '', celular: '', loja: '' }
 
+// Formata o CPF enquanto o cliente digita: 000.000.000-00
+function maskCpf(value) {
+    return value
+        .replace(/\D/g, '')
+        .slice(0, 11)
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+}
+
+// Formata só a parte local do celular (sem o DDI, que fica fixo ao lado):
+// detecta 8 ou 9 dígitos pra encaixar o hífen no lugar certo enquanto digita
+function maskCelular(value) {
+    const digits = value.replace(/\D/g, '').slice(0, 11)
+    if (digits.length <= 2) return digits.replace(/^(\d*)/, '($1')
+    if (digits.length <= 6) return digits.replace(/^(\d{2})(\d*)/, '($1) $2')
+    if (digits.length <= 10) return digits.replace(/^(\d{2})(\d{4})(\d*)/, '($1) $2-$3')
+    return digits.replace(/^(\d{2})(\d{5})(\d*)/, '($1) $2-$3')
+}
+
 export default function Cadastro() {
     const { cadastrar } = useContext(ClienteAuthContext)
     const navigate = useNavigate()
@@ -29,7 +49,7 @@ export default function Cadastro() {
         }
 
         setEnviando(true)
-        const res = await cadastrar(form)
+        const res = await cadastrar({ ...form, celular: `+55 ${form.celular}`.trim() })
         setEnviando(false)
         if (!res.ok) {
             setErro(res.message || 'Erro ao cadastrar.')
@@ -49,8 +69,19 @@ export default function Cadastro() {
                     <Input placeholder='Nome completo' value={form.nome} onChange={e => setForm({ ...form, nome: e.target.value })} required />
                     <Input type='email' placeholder='E-mail' value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
                     <Input type='password' placeholder='Senha (mínimo 6 caracteres)' value={form.senha} onChange={e => setForm({ ...form, senha: e.target.value })} required />
-                    <Input placeholder='CPF' value={form.cpf} onChange={e => setForm({ ...form, cpf: e.target.value })} required />
-                    <Input placeholder='Celular' value={form.celular} onChange={e => setForm({ ...form, celular: e.target.value })} required />
+                    <Input placeholder='CPF' value={form.cpf} onChange={e => setForm({ ...form, cpf: maskCpf(e.target.value) })} required />
+                    <div className='flex gap-2'>
+                        <div className='flex items-center justify-center px-3 border border-gray-base rounded-md text-gray-text bg-gray shrink-0 select-none'>
+                            +55
+                        </div>
+                        <Input
+                            placeholder='Celular'
+                            value={form.celular}
+                            onChange={e => setForm({ ...form, celular: maskCelular(e.target.value) })}
+                            className='flex-1'
+                            required
+                        />
+                    </div>
 
                     <select
                         value={form.loja}

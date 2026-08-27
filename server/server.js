@@ -18,6 +18,7 @@ const bannersRoutes = require('./routes/banners.routes');
 const pagamentosRoutes = require('./routes/pagamentos.routes');
 const authRoutes = require('./routes/auth.routes');
 const clientesRoutes = require('./routes/clientes.routes');
+const logsRoutes = require('./routes/logs.routes');
 const app = express();
 
 // falha cedo (com mensagem clara) em vez de deixar o processo subir e
@@ -78,6 +79,7 @@ app.use('/api/banners', bannersRoutes);
 app.use('/api/pagamentos', pagamentosRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/clientes', clientesRoutes);
+app.use('/api/logs', logsRoutes);
 
 app.listen(3000, () => {
   console.log('Backend torando na porta 3000');

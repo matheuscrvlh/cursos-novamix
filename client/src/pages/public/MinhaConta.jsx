@@ -11,6 +11,7 @@ import Button from '../../components/Button'
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
 import { getMinhasInscricoes, alterarSenhaLogado } from '../../api/clientes.services'
 import { formatDateTimeBR } from '../../utils/formatDate'
+import { statusInscricaoClass } from '../../utils/statusInscricao'
 
 function statusLabel(status) {
     if (status === 'pago') return 'Pago'
@@ -20,13 +21,6 @@ function statusLabel(status) {
     if (status === 'reembolsado') return 'Reembolsado'
     if (status === 'reembolsando') return 'Reembolso em andamento'
     return status
-}
-
-function statusClass(status) {
-    if (status === 'pago') return 'bg-green-base'
-    if (status === 'pendente') return 'bg-yellow-500'
-    if (status === 'reembolsado') return 'bg-red-base'
-    return 'bg-gray-base'
 }
 
 const FORM_VAZIO = { nome: '', celular: '', loja: '' }
@@ -128,12 +122,12 @@ export default function MinhaConta() {
         <PublicLayout showBanner={false}>
             <Head title='Minha conta | Novamix Cursos' />
             <section className='max-w-180 mx-auto px-5 py-16'>
-                <div className='flex items-center justify-between mb-8'>
+                <div className='flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between'>
                     <div>
                         <h1 className='text-2xl font-bold text-gray-dark'>Olá, {cliente.nome.split(' ')[0]}</h1>
                         <p className='text-sm text-gray-text/70'>{cliente.email}</p>
                     </div>
-                    <div className='flex items-center gap-4'>
+                    <div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
                         <button
                             onClick={abrirEdicao}
                             className='flex items-center gap-1.5 text-sm text-gray-text/70 hover:text-orange-base transition cursor-pointer'
@@ -174,7 +168,7 @@ export default function MinhaConta() {
                                         {i.dataCurso && `${i.dataCurso} · `}Assento {i.assento} · Inscrito em {formatDateTimeBR(i.dataInscricao)}
                                     </p>
                                 </div>
-                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full text-white shrink-0 ${statusClass(i.status)}`}>
+                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${statusInscricaoClass(i.status)}`}>
                                     {statusLabel(i.status)}
                                 </span>
                             </div>

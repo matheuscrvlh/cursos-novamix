@@ -23,7 +23,7 @@ export default function ModalFilters({
             onClick={onClose}
         >
             <div
-                className='bg-white shadow-xl rounded-xl w-[90%] max-w-115 max-h-[90vh] overflow-y-auto'
+                className='bg-white shadow-xl rounded-xl w-[90%] max-w-115 max-h-[90vh] overflow-y-auto overflow-x-hidden'
                 onClick={e => e.stopPropagation()}
             >
                 <div className='flex items-center justify-between p-5 pb-4 border-b border-gray-base/20'>
@@ -41,21 +41,21 @@ export default function ModalFilters({
 
                 <div className='flex flex-col gap-4 p-5'>
 
-                    <div className='flex flex-col gap-1.5'>
+                    <div className='flex flex-col gap-1.5 min-w-0'>
                         <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Data Inicial</label>
                         <Input
                             type='date'
-                            className='w-full cursor-pointer'
+                            className='w-full max-w-full cursor-pointer'
                             value={filtersCourses.dataInicial}
                             onChange={e => setFiltersCourses({ ...filtersCourses, dataInicial: e.target.value })}
                         />
                     </div>
 
-                    <div className='flex flex-col gap-1.5'>
+                    <div className='flex flex-col gap-1.5 min-w-0'>
                         <label className='text-xs font-semibold text-gray-text/70 uppercase tracking-wider'>Data Final</label>
                         <Input
                             type='date'
-                            className='w-full cursor-pointer'
+                            className='w-full max-w-full cursor-pointer'
                             value={filtersCourses.dataFinal}
                             onChange={e => setFiltersCourses({ ...filtersCourses, dataFinal: e.target.value })}
                         />

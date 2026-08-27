@@ -12,7 +12,7 @@ export default function Input({
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className={`p-2 border border-gray-base rounded-md text-gray-text ${className || ''}`}
+            className={`p-2 border border-gray-base rounded-md text-gray-text max-w-full ${className || ''}`}
             {...props}
         />
     )

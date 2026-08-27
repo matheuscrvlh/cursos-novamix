@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from 'react';
-import { BookOpen, CalendarCheck, CheckCircle2, CreditCard, AlertCircle, Loader2 } from 'lucide-react';
+import { BookOpen, CalendarCheck, CheckCircle2, CreditCard, AlertCircle, Loader2, Users, UserCheck, UserPlus } from 'lucide-react';
 
 import CardDash from '../../components/admin/CardDash'
 import CourseCard from '../../components/public/CourseCard'
@@ -11,9 +11,11 @@ import StatusDonutChart from '../../components/admin/charts/StatusDonutChart';
 import { getSeats, getTotalEnrollment } from '../../api/enrollment.services';
 import { getCourses } from '../../api/courses.services';
 import { getChildren } from '../../api/children.services';
+import { getClientesStats } from '../../api/clientes.services';
 
 import { DadosContext } from '../../contexts/DadosContext';
 import { formatDateBR, cursoEncerrado } from '../../utils/formatDate';
+import { formatarPreco } from '../../utils/formatCurrency';
 
 const NOMES_MES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
@@ -55,6 +57,9 @@ export default function DashboardAdmin() {
     const [inscricoes, setInscricoes] = useState([]);
     const [loadingInscricoes, setLoadingInscricoes] = useState(true)
     const [faturamentoMensal, setFaturamentoMensal] = useState([]);
+
+    const [clientesStats, setClientesStats] = useState(null);
+    const [loadingClientes, setLoadingClientes] = useState(true);
 
     const [filtroCursos, setFiltroCursos] = useState([]);
 
@@ -145,6 +150,14 @@ export default function DashboardAdmin() {
         buscarDadosDashboard()
     }, [hoje])
 
+    useEffect(() => {
+        setLoadingClientes(true);
+        getClientesStats()
+            .then(setClientesStats)
+            .catch(err => console.log('Nao foi possivel pegar as estatisticas de clientes', err))
+            .finally(() => setLoadingClientes(false));
+    }, [])
+
     return (
         <AdminPage title='Dashboard'>
 
@@ -227,13 +240,13 @@ export default function DashboardAdmin() {
                     <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
                         <div className='flex items-center justify-between'>
                             <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Pendentes</p>
-                            <div className='w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center'>
-                                <AlertCircle size={15} className='text-yellow-500' />
+                            <div className='w-8 h-8 rounded-full bg-orange-light/10 flex items-center justify-center'>
+                                <AlertCircle size={15} className='text-orange-light' />
                             </div>
                         </div>
                         {loadingInscricoes
                             ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
-                            : <p className='text-4xl font-bold text-yellow-500'>{inscricoes.pendentes || 0}</p>
+                            : <p className='text-4xl font-bold text-orange-light'>{inscricoes.pendentes || 0}</p>
                         }
                     </div>
 
@@ -276,6 +289,97 @@ export default function DashboardAdmin() {
                         }
                     </div>
 
+                </div>
+            </div>
+
+            <div className='flex flex-col gap-3 -mt-4'>
+                <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Clientes</p>
+                <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
+
+                    <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                        <div className='flex items-center justify-between'>
+                            <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Total</p>
+                            <div className='w-8 h-8 rounded-full bg-gray-base/10 flex items-center justify-center'>
+                                <Users size={15} className='text-gray-base' />
+                            </div>
+                        </div>
+                        {loadingClientes
+                            ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                            : <p className='text-4xl font-bold text-gray-text'>{clientesStats?.total || 0}</p>
+                        }
+                    </div>
+
+                    <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                        <div className='flex items-center justify-between'>
+                            <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Ativos</p>
+                            <div className='w-8 h-8 rounded-full bg-green-base/10 flex items-center justify-center'>
+                                <UserCheck size={15} className='text-green-base' />
+                            </div>
+                        </div>
+                        {loadingClientes
+                            ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                            : <p className='text-4xl font-bold text-green-base'>{clientesStats?.ativos || 0}</p>
+                        }
+                    </div>
+
+                    <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                        <div className='flex items-center justify-between'>
+                            <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Cadastrados hoje</p>
+                            <div className='w-8 h-8 rounded-full bg-blue-base/10 flex items-center justify-center'>
+                                <UserPlus size={15} className='text-blue-base' />
+                            </div>
+                        </div>
+                        {loadingClientes
+                            ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                            : <p className='text-4xl font-bold text-blue-base'>{clientesStats?.hoje || 0}</p>
+                        }
+                    </div>
+
+                    <div className='bg-white rounded-xl shadow-sm p-5 flex flex-col gap-3'>
+                        <div className='flex items-center justify-between'>
+                            <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider'>Cadastrados este mês</p>
+                            <div className='w-8 h-8 rounded-full bg-orange-base/10 flex items-center justify-center'>
+                                <CalendarCheck size={15} className='text-orange-base' />
+                            </div>
+                        </div>
+                        {loadingClientes
+                            ? <p className='text-2xl font-bold text-gray-text/40'>...</p>
+                            : <p className='text-4xl font-bold text-orange-base'>{clientesStats?.mes || 0}</p>
+                        }
+                    </div>
+
+                </div>
+
+                <div className='bg-white rounded-xl shadow-sm p-5'>
+                    <p className='text-xs font-semibold text-gray-text/60 uppercase tracking-wider mb-4'>Top 10 clientes</p>
+                    {loadingClientes ? (
+                        <div className='flex flex-col items-center gap-2 py-16 text-gray-text/40'>
+                            <Loader2 size={28} className='animate-spin text-orange-base' />
+                            <p className='text-sm'>Carregando...</p>
+                        </div>
+                    ) : !clientesStats?.top?.length ? (
+                        <p className='text-gray-text/60 text-sm py-8 text-center'>Nenhum cliente com inscrição paga ainda</p>
+                    ) : (
+                        <div className='flex flex-col max-h-70 overflow-y-auto pr-1'>
+                            {clientesStats.top.map((c, i) => (
+                                <div key={c.id} className='flex items-center justify-between gap-3 py-2.5 border-b border-gray-base/10 last:border-0'>
+                                    <div className='flex items-center gap-3 min-w-0'>
+                                        <span className='w-6 h-6 shrink-0 rounded-full bg-orange-base/10 text-orange-base text-xs font-bold flex items-center justify-center'>
+                                            {i + 1}
+                                        </span>
+                                        <div className='min-w-0'>
+                                            <p className='text-sm font-medium text-gray-text truncate'>{c.nome}</p>
+                                            <p className='text-xs text-gray-text/50 truncate'>{c.email}</p>
+                                        </div>
+                                    </div>
+                                    <div className='text-right shrink-0'>
+                                        <p className='text-sm font-bold text-green-base'>R$ {formatarPreco(c.totalGasto)}</p>
+                                        <p className='text-xs text-gray-text/50'>{c.totalInscricoes} inscrição(ões)</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

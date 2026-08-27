@@ -347,13 +347,16 @@ export default function Home() {
 
                 <CategoriesSections />
 
-                <ChildrensCoursesSections
-                    cursosInfantisFiltrados={cursosInfantisFiltrados}
-                    loadingChildren={loadingChildren}
-                    loadingVagasPorCursoInfantis={loadingVagasPorCursoInfantis}
-                    vagasPorCursoInfantil={vagasPorCursoInfantil}
-                    openForm={openForm}
-                />
+                {cursosInfantisFiltrados.length === 0
+                    ? ''
+                    : <ChildrensCoursesSections
+                        cursosInfantisFiltrados={cursosInfantisFiltrados}
+                        loadingChildren={loadingChildren}
+                        loadingVagasPorCursoInfantis={loadingVagasPorCursoInfantis}
+                        vagasPorCursoInfantil={vagasPorCursoInfantil}
+                        openForm={openForm}
+                    />
+                }
 
                 <CulinariansSections
                     culinaristas={culinaristas}

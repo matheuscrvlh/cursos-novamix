@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext } from "react"
 
 import PublicLayout from "../../layouts/public/PublicLayout"
 
@@ -10,22 +10,19 @@ import { DadosContext } from "../../contexts/DadosContext"
 
 import { bannerHome } from '../../assets/images/banner'
 
-export default function Culinarians() {
+export default function Industries() {
 
     const {
-        industrias
+        industrias,
+        loadingIndustries
     } = useContext(DadosContext)
-
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth'})
-    }, [])
 
     return (
         <PublicLayout bannerHome={bannerHome}>
-            <Head title='Loja Novamix | Cursos' />
+            <Head title='Indústrias | Novamix Cursos' />
             <section className='bg-gray mb-20'>
 
-                <AllIndustries industrias={industrias}/>
+                <AllIndustries industrias={industrias} loadingIndustries={loadingIndustries} />
 
             </section>
         </PublicLayout>

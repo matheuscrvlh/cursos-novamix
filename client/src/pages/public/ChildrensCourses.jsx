@@ -20,7 +20,7 @@ import AllChildrensCoursesSections from '../../sections/childrens/AllChildrensCo
 import PublicLayout from '../../layouts/public/PublicLayout'
 
 import { Head } from '../../components/Head'
-import { cursoEncerrado } from '../../utils/formatDate'
+import { cursoEncerrado, filtroDataPadrao } from '../../utils/formatDate'
 
 import { bannerHome } from '../../assets/images/banner/'
 
@@ -42,8 +42,7 @@ export default function ChildrensCourses() {
     });
 
     const [filters, setFilters] = useState({
-        dataInicial: '',
-        dataFinal: '',
+        ...filtroDataPadrao(),
         loja: '',
         culinarista: ''
     });
@@ -200,8 +199,7 @@ export default function ChildrensCourses() {
 
     function clearFilters() {
         setFilters({
-            dataInicial: '',
-            dataFinal: '',
+            ...filtroDataPadrao(),
             loja: '',
             culinarista: ''
         })
@@ -249,10 +247,6 @@ export default function ChildrensCourses() {
     }, [cliente])
 
     useThemeColor('#FF8D0A');
-
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth'})
-    }, [])
 
     return (
         <PublicLayout bannerHome={bannerHome}>

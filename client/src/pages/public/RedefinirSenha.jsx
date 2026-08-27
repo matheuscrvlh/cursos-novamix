@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import PublicLayout from '../../layouts/public/PublicLayout'
@@ -6,7 +6,7 @@ import { Head } from '../../components/Head'
 import Input from '../../components/Input'
 import Button from '../../components/Button'
 
-import { redefinirSenha } from '../../api/clientes.services'
+import { redefinirSenha, validarTokenRedefinicao } from '../../api/clientes.services'
 import { bannerHome } from '../../assets/images/banner'
 
 export default function RedefinirSenha() {
@@ -14,9 +14,22 @@ export default function RedefinirSenha() {
     const token = searchParams.get('token') || ''
     const navigate = useNavigate()
 
+    const [validandoToken, setValidandoToken] = useState(!!token)
+    const [tokenValido, setTokenValido] = useState(false)
+    const [erroToken, setErroToken] = useState('')
+
     const [novaSenha, setNovaSenha] = useState('')
     const [erro, setErro] = useState('')
     const [enviando, setEnviando] = useState(false)
+
+    useEffect(() => {
+        if (!token) return
+        validarTokenRedefinicao(token).then(res => {
+            setTokenValido(!!res.valido)
+            if (!res.valido) setErroToken(res.message || 'Token inválido ou expirado.')
+            setValidandoToken(false)
+        })
+    }, [token])
 
     async function handleSubmit(e) {
         e.preventDefault()
@@ -37,13 +50,24 @@ export default function RedefinirSenha() {
         navigate('/entrar')
     }
 
-    if (!token) {
+    if (!token || (!validandoToken && !tokenValido)) {
         return (
             <PublicLayout bannerHome={bannerHome}>
                 <Head title='Redefinir senha | Novamix Cursos' />
                 <section className='max-w-100 mx-auto px-5 py-16 text-center'>
-                    <p className='text-gray-dark'>Link inválido.</p>
+                    <p className='text-gray-dark'>{token ? erroToken : 'Link inválido.'}</p>
                     <Link to='/esqueci-senha' className='text-orange-base font-semibold hover:underline'>Pedir novo link</Link>
+                </section>
+            </PublicLayout>
+        )
+    }
+
+    if (validandoToken) {
+        return (
+            <PublicLayout bannerHome={bannerHome}>
+                <Head title='Redefinir senha | Novamix Cursos' />
+                <section className='max-w-100 mx-auto px-5 py-16 text-center'>
+                    <p className='text-gray-text/70 text-sm'>Verificando link...</p>
                 </section>
             </PublicLayout>
         )

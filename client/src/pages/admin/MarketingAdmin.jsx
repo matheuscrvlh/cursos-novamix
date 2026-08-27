@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useContext } from 'react'
-import { Trash, ArrowUp, ArrowDown, Plus, Link, Image, ExternalLink, Loader2 } from 'lucide-react'
+import { Trash, ArrowUp, ArrowDown, Plus, Link, Image, ExternalLink, Download, Loader2 } from 'lucide-react'
 
 import AdminPage from '../../layouts/admin/AdminPage'
 import Modal from '../../components/public/Modal'
@@ -81,8 +81,8 @@ function BannerForm({ posicao, onAdded }) {
             <div className='grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-start'>
                 <UploadArea
                     label='Desktop'
-                    hint='1920 × 480 px'
-                    aspectClass='aspect-4/1 min-h-16'
+                    hint='1920 × 650 px'
+                    aspectClass='aspect-1920/650 min-h-16'
                     preview={previewDesktop}
                     inputRef={inputDesktopRef}
                     onChange={e => handleFile(e, 'desktop')}
@@ -210,6 +210,31 @@ function BannerItem({ banner, onDelete, onMoveUp, onMoveDown, isFirst, isLast, i
                 >
                     <ArrowDown size={14} className='text-gray-text' />
                 </button>
+            </div>
+
+            <div className='flex flex-col gap-1 shrink-0'>
+                <a
+                    href={banner.imagem}
+                    download
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    title='Baixar imagem desktop'
+                    className='w-7 h-7 flex items-center justify-center rounded-md hover:bg-gray transition cursor-pointer'
+                >
+                    <Download size={14} className='text-gray-text' />
+                </a>
+                {banner.imagem_mobile && (
+                    <a
+                        href={banner.imagem_mobile}
+                        download
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        title='Baixar imagem mobile'
+                        className='w-7 h-7 flex items-center justify-center rounded-md hover:bg-gray transition cursor-pointer'
+                    >
+                        <Download size={14} className='text-blue-base' />
+                    </a>
+                )}
             </div>
 
             {isAdmin && (

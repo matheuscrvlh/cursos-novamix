@@ -150,6 +150,9 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
               {link.label}
             </NavLink>
           ))}
+        </nav>
+
+        <div className="mt-auto flex flex-col gap-3 px-4 mb-5">
           <NavLink
             to={cliente ? '/minha-conta' : '/entrar'}
             onClick={() => setIsMenuOpen(false)}
@@ -163,24 +166,24 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
           >
             <User size={16} /> {cliente ? 'Minha conta' : 'Entrar'}
           </NavLink>
-        </nav>
 
-        <a
-          href="https://api.whatsapp.com/send?phone=5522998336225"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-auto mx-4 mb-5 flex items-center justify-center gap-2 bg-orange-base hover:bg-orange-light transition text-white py-3 rounded-lg font-semibold text-sm"
-        >
-          <img src={whatsapp} alt="WhatsApp" className="h-5" />
-          Atendimento
-        </a>
+          <a
+            href="https://api.whatsapp.com/send?phone=5522998336225"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 bg-orange-base hover:bg-orange-light transition text-white py-3 rounded-lg font-semibold text-sm"
+          >
+            <img src={whatsapp} alt="WhatsApp" className="h-5" />
+            Atendimento
+          </a>
+        </div>
       </aside>
 
       <section className="flex-grow w-full">
 
-        {/* HERO BANNER — desktop 1920×480 · mobile 425×495 */}
+        {/* HERO BANNER — desktop 1920×650 · mobile 425×495 */}
         {showBanner && (heroBanners.length > 0 ? (
-          <div className='relative w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-4/1'>
+          <div className='relative w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-1920/650'>
             {heroBanners.map((b, i) => {
               const visible = i === heroIndex
               const wrapStyle = {
@@ -213,7 +216,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
           </div>
         ) : (
           <a href='#cursos' className='block w-full'>
-            <div className='w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-4/1'>
+            <div className='w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-1920/650'>
               <img src={bannerHome} alt='' className='w-full h-full object-cover object-center' />
             </div>
           </a>

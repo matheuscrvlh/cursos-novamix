@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 
+import ScrollToTop from './components/ScrollToTop'
+
 import Home from './pages/public/Home'
 import Courses from './pages/public/Courses'
 import ChildrensCourses from './pages/public/ChildrensCourses'
@@ -21,9 +23,12 @@ import IndustriesAdmin from './pages/admin/IndustriesAdmin'
 import ChildrensAdmin from './pages/admin/ChildrensAdmin'
 import MarketingAdmin from './pages/admin/MarketingAdmin'
 import ClientesAdmin from './pages/admin/ClientesAdmin'
+import LogsAdmin from './pages/admin/LogsAdmin'
 
 export default function App() {
   return (
+    <>
+    <ScrollToTop />
     <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/cursos' element={<Courses />} />
@@ -46,7 +51,9 @@ export default function App() {
           <Route path='/infantisAdmin' element={<ChildrensAdmin />} />
           <Route path='/marketingAdmin' element={<MarketingAdmin />} />
           <Route path='/clientesAdmin' element={<ClientesAdmin />} />
+          <Route path='/logsAdmin' element={<LogsAdmin />} />
         </Route>
     </Routes>
+    </>
   )
 }

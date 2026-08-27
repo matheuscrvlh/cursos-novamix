@@ -19,7 +19,8 @@ import {
 
 import { AdminAuthContext } from '../../contexts/AdminAuthContext'
 import useConfirmAction from '../../hooks/useConfirmAction'
-import { formatDateTimeBR } from '../../utils/formatDate'
+import { formatDateTimeBR, calcularPeriodoData } from '../../utils/formatDate'
+import { statusInscricaoClass } from '../../utils/statusInscricao'
 
 const FILTROS_STATUS = [
     { label: 'Todos', value: 'todos' },
@@ -27,9 +28,20 @@ const FILTROS_STATUS = [
     { label: 'Inativos', value: 'inativos' },
 ]
 
+const FILTROS_CADASTRO = [
+    { label: 'Todos', value: 'todos' },
+    { label: 'Hoje', value: 'hoje' },
+    { label: 'Ontem', value: 'ontem' },
+    { label: 'Essa semana', value: 'semana' },
+    { label: 'Este mês', value: 'mes' },
+]
+
 function statusLabel(status) {
     if (status === 'pago') return 'Pago'
     if (status === 'pendente') return 'Pendente'
+    if (status === 'cancelado') return 'Cancelado'
+    if (status === 'recusado') return 'Recusado'
+    if (status === 'reembolsando') return 'Reembolso em andamento'
     if (status === 'reembolsado') return 'Reembolsado'
     return status
 }
@@ -41,7 +53,8 @@ export default function ClientesAdmin() {
     const [clientes, setClientes] = useState([])
     const [carregando, setCarregando] = useState(true)
     const [busca, setBusca] = useState('')
-    const [filtroStatus, setFiltroStatus] = useState('todos')
+    const [filtroStatus, setFiltroStatus] = useState('ativos')
+    const [filtroCadastro, setFiltroCadastro] = useState('hoje')
 
     const [clienteSelecionado, setClienteSelecionado] = useState(null)
     const [carregandoDetalhe, setCarregandoDetalhe] = useState(false)
@@ -55,7 +68,13 @@ export default function ClientesAdmin() {
 
     async function carregar() {
         setCarregando(true)
-        const data = await getClientesAdmin({ busca, status: filtroStatus })
+        const { inicio, fim } = calcularPeriodoData(filtroCadastro)
+        const data = await getClientesAdmin({
+            busca,
+            status: filtroStatus,
+            criadoInicio: inicio?.toISOString(),
+            criadoFim: fim?.toISOString(),
+        })
         setClientes(data)
         setCarregando(false)
     }
@@ -64,7 +83,7 @@ export default function ClientesAdmin() {
         const t = setTimeout(carregar, 300)
         return () => clearTimeout(t)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [busca, filtroStatus])
+    }, [busca, filtroStatus, filtroCadastro])
 
     async function abrirDetalhe(id) {
         setCarregandoDetalhe(true)
@@ -108,6 +127,7 @@ export default function ClientesAdmin() {
                         />
                     </div>
                     <FilterPills value={filtroStatus} onChange={setFiltroStatus} options={FILTROS_STATUS} activeClass='bg-green-base text-white' />
+                    <FilterPills value={filtroCadastro} onChange={setFiltroCadastro} options={FILTROS_CADASTRO} activeClass='bg-blue-base text-white' />
                 </div>
                 <hr className='border-gray-base/30 w-full mb-4' />
 
@@ -118,7 +138,7 @@ export default function ClientesAdmin() {
                         <p>NOME</p>
                         <p>E-MAIL</p>
                         <p>CPF</p>
-                        <p>INSCRIÇÕES</p>
+                        <p>INSCR. PAGAS</p>
                         <p>STATUS</p>
                         <p>CADASTRO</p>
                         <p>FUNÇÕES</p>
@@ -139,7 +159,7 @@ export default function ClientesAdmin() {
                                 </div>
                                 <p className='text-xs text-gray-text/60'>{c.email}</p>
                                 <div className='flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-text/60 mt-1'>
-                                    <span>{c.totalInscricoes} inscrição(ões)</span>
+                                    <span>{c.totalInscricoes} inscrição(ões) paga(s)</span>
                                     <span>Cadastro: {formatDateTimeBR(c.criadoEm)}</span>
                                 </div>
                                 <div className='flex gap-2 mt-2'>
@@ -258,7 +278,7 @@ export default function ClientesAdmin() {
                                         <p className='text-sm font-medium text-gray-text'>{i.nomeCurso}</p>
                                         <p className='text-xs text-gray-text/60'>{i.dataCurso} · Assento {i.assento}</p>
                                     </div>
-                                    <span className='text-xs font-semibold text-gray-text/70'>{statusLabel(i.status)}</span>
+                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ${statusInscricaoClass(i.status)}`}>{statusLabel(i.status)}</span>
                                 </div>
                             ))}
                         </div>
