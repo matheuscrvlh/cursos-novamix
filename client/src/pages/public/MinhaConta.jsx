@@ -120,7 +120,7 @@ export default function MinhaConta() {
 
     return (
         <PublicLayout showBanner={false}>
-            <Head title='Minha conta | Novamix Cursos' />
+            <Head />
             <section className='max-w-180 mx-auto px-5 py-16'>
                 <div className='flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between'>
                     <div>

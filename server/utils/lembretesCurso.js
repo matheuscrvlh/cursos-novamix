@@ -26,16 +26,24 @@ async function enviarLembretesCurso(pool) {
   }
 
   for (const inscricao of inscricoes) {
-    // marca ANTES de enviar — evita reenviar se o processo cair no meio do
-    // loop (melhor perder um lembrete raro do que mandar duplicado)
-    const marcado = await pool.query(
-      `UPDATE cursos.inscricoes SET lembrete_enviado_em = now() WHERE id = $1 AND lembrete_enviado_em IS NULL`,
-      [inscricao.id]
-    );
-    if (marcado.rowCount === 0) continue;
+    try {
+      // marca ANTES de enviar — evita reenviar se o processo cair no meio do
+      // loop (melhor perder um lembrete raro do que mandar duplicado)
+      const marcado = await pool.query(
+        `UPDATE cursos.inscricoes SET lembrete_enviado_em = now() WHERE id = $1 AND lembrete_enviado_em IS NULL`,
+        [inscricao.id]
+      );
+      if (marcado.rowCount === 0) continue;
 
-    const { subject, html } = emailLembreteCurso(inscricao);
-    await enviarEmail({ to: inscricao.email, subject, html });
+      const { subject, html } = emailLembreteCurso(inscricao);
+      await enviarEmail({ to: inscricao.email, subject, html });
+    } catch (err) {
+      // sem isso, um erro no meio do loop (ex: soneca de conexão do pool)
+      // vira uma promise rejeitada sem handler — como essa função roda via
+      // setInterval sem .catch, isso derrubava o processo inteiro (Node
+      // mata o processo em unhandledRejection)
+      console.error(`Erro ao enviar lembrete pra inscrição ${inscricao.id}:`, err);
+    }
   }
 
   if (inscricoes.length > 0) {

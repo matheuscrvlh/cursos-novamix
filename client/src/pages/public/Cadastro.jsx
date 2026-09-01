@@ -60,7 +60,7 @@ export default function Cadastro() {
 
     return (
         <PublicLayout bannerHome={bannerHome}>
-            <Head title='Criar conta | Novamix Cursos' />
+            <Head />
             <section className='max-w-100 mx-auto px-5 py-16'>
                 <h1 className='text-2xl font-bold text-gray-dark mb-1'>Criar conta</h1>
                 <p className='text-sm text-gray-text/70 mb-6'>Cadastre-se pra se inscrever nos cursos.</p>

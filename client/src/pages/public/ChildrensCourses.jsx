@@ -250,7 +250,7 @@ export default function ChildrensCourses() {
 
     return (
         <PublicLayout bannerHome={bannerHome}>
-            <Head title='Loja Novamix | Cursos Infantis' />
+            <Head />
             <section className='bg-gray mb-20'>
 
                 <AllChildrensCoursesSections

@@ -24,7 +24,7 @@ export default function EsqueciSenha() {
 
     return (
         <PublicLayout bannerHome={bannerHome}>
-            <Head title='Esqueci minha senha | Novamix Cursos' />
+            <Head />
             <section className='max-w-100 mx-auto px-5 py-16'>
                 <h1 className='text-2xl font-bold text-gray-dark mb-1'>Esqueci minha senha</h1>
                 <p className='text-sm text-gray-text/70 mb-6'>Informe seu e-mail pra receber o link de redefinição.</p>

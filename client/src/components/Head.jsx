@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 
-export function Head({ title }) {
+export function Head() {
     useEffect(() => {
-        document.title = title
-    }, [title]);
+        document.title = 'Cursos Novamix'
+    }, []);
 
     return null;
 }

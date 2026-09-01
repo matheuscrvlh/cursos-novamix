@@ -32,7 +32,7 @@ export default function Login() {
 
     return (
         <PublicLayout showBanner={false}>
-            <Head title='Entrar | Novamix Cursos' />
+            <Head />
             <section className='max-w-100 mx-auto px-5 py-16'>
                 <h1 className='text-2xl font-bold text-gray-dark mb-1'>Entrar</h1>
                 <p className='text-sm text-gray-text/70 mb-6'>Acesse sua conta pra ver suas inscrições.</p>

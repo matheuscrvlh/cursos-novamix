@@ -81,6 +81,17 @@ app.use('/api/auth', authRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/logs', logsRoutes);
 
+// rede de segurança: loga qualquer erro que escape dos try/catch (ex: um
+// setInterval/promise sem .catch) em vez de deixar o Node matar o processo
+// silenciosamente — sem isso, o container reinicia sozinho (restart:
+// unless-stopped) e o log da causa real some no meio do resto
+process.on('unhandledRejection', err => {
+  console.error('unhandledRejection não tratado:', err);
+});
+process.on('uncaughtException', err => {
+  console.error('uncaughtException não tratado:', err);
+});
+
 app.listen(3000, () => {
   console.log('Backend torando na porta 3000');
 });
