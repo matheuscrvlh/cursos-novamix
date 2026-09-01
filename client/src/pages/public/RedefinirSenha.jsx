@@ -53,7 +53,7 @@ export default function RedefinirSenha() {
     if (!token || (!validandoToken && !tokenValido)) {
         return (
             <PublicLayout bannerHome={bannerHome}>
-                <Head />
+                <Head title='Redefinir senha' />
                 <section className='max-w-100 mx-auto px-5 py-16 text-center'>
                     <p className='text-gray-dark'>{token ? erroToken : 'Link inválido.'}</p>
                     <Link to='/esqueci-senha' className='text-orange-base font-semibold hover:underline'>Pedir novo link</Link>
@@ -65,7 +65,7 @@ export default function RedefinirSenha() {
     if (validandoToken) {
         return (
             <PublicLayout bannerHome={bannerHome}>
-                <Head />
+                <Head title='Redefinir senha' />
                 <section className='max-w-100 mx-auto px-5 py-16 text-center'>
                     <p className='text-gray-text/70 text-sm'>Verificando link...</p>
                 </section>
@@ -75,7 +75,7 @@ export default function RedefinirSenha() {
 
     return (
         <PublicLayout bannerHome={bannerHome}>
-            <Head />
+            <Head title='Redefinir senha' />
             <section className='max-w-100 mx-auto px-5 py-16'>
                 <h1 className='text-2xl font-bold text-gray-dark mb-1'>Redefinir senha</h1>
                 <p className='text-sm text-gray-text/70 mb-6'>Escolha sua nova senha.</p>

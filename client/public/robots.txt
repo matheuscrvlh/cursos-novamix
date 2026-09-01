@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /dashboardAdmin
+Disallow: /cursosAdmin
+Disallow: /inscricoesAdmin
+Disallow: /culinaristasAdmin
+Disallow: /industriasAdmin
+Disallow: /infantisAdmin
+Disallow: /marketingAdmin
+Disallow: /clientesAdmin
+Disallow: /logsAdmin
+Disallow: /minha-conta
+
+Sitemap: https://cursos.lojanovamix.com.br/sitemap.xml

@@ -268,7 +268,10 @@ export default function CoursePage() {
 
     return (
         <PublicLayout>
-            <Head />
+            <Head
+                title={curso.nomeCurso}
+                description={`Curso ${curso.nomeCurso}${curso.culinarista ? ` com ${curso.culinarista}` : ''}${curso.loja ? ` na loja ${curso.loja}` : ''}.`}
+            />
 
             <div className='max-w-4xl mx-auto px-4 py-8 md:px-8'>
 

@@ -250,7 +250,7 @@ export default function ChildrensCourses() {
 
     return (
         <PublicLayout bannerHome={bannerHome}>
-            <Head />
+            <Head title='Cursos Infantis' />
             <section className='bg-gray mb-20'>
 
                 <AllChildrensCoursesSections
