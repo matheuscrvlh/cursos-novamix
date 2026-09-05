@@ -18,13 +18,30 @@ const apiLimiter = rateLimit({
   skip: req => req.originalUrl.startsWith('/api/pagamentos/webhook') || isLoopback(req.ip),
 });
 
-// login do admin — protege contra brute-force de senha
+// login/senha de cliente — protege contra brute-force de senha ou token de
+// redefinição. Mantido restrito mesmo compartilhando IP (loja com wifi único,
+// CGNAT de operadora): o risco aqui é alguém adivinhando credencial alheia,
+// não múltiplos clientes legítimos usando a rota ao mesmo tempo.
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 10,
+  limit: 30,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Muitas tentativas de login. Tente novamente em alguns minutos.' },
+});
+
+// cadastro de cliente — separado do loginLimiter porque aqui não tem
+// credencial alheia pra "adivinhar" (cada tentativa cria uma conta nova ou
+// falha por e-mail/CPF já usado), então o limite pode ser bem mais folgado.
+// Isso importa principalmente pro caso comum de vários clientes diferentes
+// se cadastrando atrás do mesmo IP (wifi da loja, CGNAT de operadora) — com
+// o limite de login (10/15min) isso esgotava rápido e travava todo mundo.
+const cadastroLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Muitas tentativas de cadastro. Tente novamente em alguns minutos.' },
 });
 
 // criação de inscrição / processamento de pagamento — rotas públicas que
@@ -37,4 +54,4 @@ const paymentLimiter = rateLimit({
   message: { message: 'Muitas requisições. Tente novamente em alguns minutos.' },
 });
 
-module.exports = { apiLimiter, loginLimiter, paymentLimiter };
+module.exports = { apiLimiter, loginLimiter, cadastroLimiter, paymentLimiter };

@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const pool = require('../db');
 const { authenticateCliente } = require('../middleware/authCliente.middleware');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
-const { loginLimiter } = require('../middleware/rateLimit.middleware');
+const { loginLimiter, cadastroLimiter } = require('../middleware/rateLimit.middleware');
 const { cpfValido } = require('../utils/cpf');
 const { encryptCpf, decryptCpf } = require('../utils/cpfCrypto');
 const { enviarEmail, emailRedefinirSenha } = require('../utils/email');
@@ -58,7 +58,7 @@ function serializarCliente(c) {
     };
 }
 
-router.post('/cadastro', loginLimiter, async (req, res) => {
+router.post('/cadastro', cadastroLimiter, async (req, res) => {
     const { nome, email, senha, cpf, celular, loja } = req.body;
 
     if (!nome?.trim() || !emailValido(email) || !senha || senha.length < 6) {
