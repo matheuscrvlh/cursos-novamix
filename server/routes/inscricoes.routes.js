@@ -5,8 +5,9 @@ const { authenticateClienteOpcional } = require('../middleware/authCliente.middl
 const { paymentLimiter } = require('../middleware/rateLimit.middleware');
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
-const { enviarEmail, emailInscricaoRecebida } = require('../utils/email');
+const { enviarEmail, emailValido, emailInscricaoRecebida } = require('../utils/email');
 const { encryptCpf, decryptCpf } = require('../utils/cpfCrypto');
+const { cpfValido } = require('../utils/cpf');
 
 const router = express.Router();
 
@@ -19,6 +20,22 @@ router.post('/', paymentLimiter, authenticateClienteOpcional, async (req, res) =
 
   if (!cursoId || !nome || !cpf || !celular || !email || assento === undefined) {
     return res.status(400).json({ message: 'Dados incompletos' });
+  }
+
+  // rota pública que dispara e-mail — tipo, tamanho e formato são conferidos
+  // aqui, antes de chegar no banco ou no nodemailer (um array no lugar do
+  // e-mail, por exemplo, virava vários destinatários)
+  if ([cursoId, nome, cpf, celular, email].some(v => typeof v !== 'string')) {
+    return res.status(400).json({ message: 'Dados inválidos' });
+  }
+  if (nome.length > 255 || celular.length > 20) {
+    return res.status(400).json({ message: 'Nome ou celular muito longo' });
+  }
+  if (!emailValido(email)) {
+    return res.status(400).json({ message: 'E-mail inválido' });
+  }
+  if (!cpfValido(cpf)) {
+    return res.status(400).json({ message: 'CPF inválido' });
   }
 
   const assentoId = Number(assento);

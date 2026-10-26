@@ -8,7 +8,7 @@ const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../mi
 const { loginLimiter, cadastroLimiter } = require('../middleware/rateLimit.middleware');
 const { cpfValido } = require('../utils/cpf');
 const { encryptCpf, decryptCpf } = require('../utils/cpfCrypto');
-const { enviarEmail, emailRedefinirSenha } = require('../utils/email');
+const { enviarEmail, emailValido, emailRedefinirSenha } = require('../utils/email');
 const logAudit = require('../utils/logAudit');
 
 const router = express.Router();
@@ -27,10 +27,6 @@ function assinarToken(cliente) {
         process.env.CLIENTE_JWT_SECRET,
         { expiresIn: '7d' }
     );
-}
-
-function emailValido(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || '');
 }
 
 // loja (texto "Prado"/"Teresopolis", mesmo contrato que cursos/culinaristas já
