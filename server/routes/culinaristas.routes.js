@@ -71,15 +71,49 @@ const SELECT_CULINARISTA = `
 // lista é pequena (uma linha por culinarista cadastrada) e o front busca uma
 // vez só e cacheia — busca por nome existe aqui pra ficar no mesmo padrão dos
 // outros GETs que filtram no SQL, não porque o dataset precise disso hoje
+async function buscarCulinaristas(busca) {
+  const where = busca ? `WHERE c.nome_culinarista ILIKE $1` : '';
+  const { rows } = await pool.query(`${SELECT_CULINARISTA} ${where}`, busca ? [`%${busca}%`] : []);
+  return rows;
+}
+
+// só os campos que o site público exibe, listados um a um (nunca a linha
+// inteira) — CPF e telefone são dado pessoal (LGPD) e só saem pela rota
+// /admin abaixo, que exige login do hub
+function serializarPublico(c) {
+  return {
+    id: c.id,
+    nomeCulinarista: c.nomeCulinarista,
+    industriaId: c.industriaId,
+    industria: c.industria,
+    instagram: c.instagram,
+    cursos: c.cursos,
+    foto: c.foto,
+    dataCadastro: c.dataCadastro,
+    lojas: c.lojas,
+  };
+}
+
+// ROTA PÚBLICA
 router.get('/', async (req, res) => {
   try {
-    const { busca } = req.query;
-    const where = busca ? `WHERE c.nome_culinarista ILIKE $1` : '';
-    const { rows } = await pool.query(`${SELECT_CULINARISTA} ${where}`, busca ? [`%${busca}%`] : []);
+    const rows = await buscarCulinaristas(req.query.busca);
+    res.json(rows.map(serializarPublico));
+  } catch (err) {
+    console.error('Erro ao listar culinaristas:', err);
+    res.status(500).json({ message: 'Erro ao listar culinaristas' });
+  }
+});
+
+// mesma lista com os dados pessoais, pro painel admin
+router.get('/admin', authenticate, requireCursosAccess, async (req, res) => {
+  try {
+    const rows = await buscarCulinaristas(req.query.busca);
     // cpf vem cifrado do banco (ver utils/cpfCrypto.js) — decifra na borda de saída
     res.json(rows.map(r => ({ ...r, cpf: decryptCpf(r.cpf) })));
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Erro ao listar culinaristas (admin):', err);
+    res.status(500).json({ message: 'Erro ao listar culinaristas' });
   }
 });
 

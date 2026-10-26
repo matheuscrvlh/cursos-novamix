@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useRef, useState } from 'react';
 
 import {
     postCourse,
@@ -10,6 +10,7 @@ import {
 import {
     postCulinarian,
     getCulinarians,
+    getCulinariansAdmin,
     putCulinarian,
     deleteCulinarian,
 } from '../api/culinarians.services';
@@ -50,9 +51,28 @@ export function DadosProvider({ children }) {
         setCursosInfantis(todos.filter(c => c.tipo === 'infantil'));
     }
 
+    // a lista pública de culinaristas não traz CPF/telefone (dado pessoal).
+    // Dentro do painel admin, RequireAuth chama ativarModoAdmin() e a lista
+    // passa a vir de /culinaristas/admin, com os campos completos
+    const modoAdminRef = useRef(false);
+
     async function refreshCulinarians() {
-        const data = await getCulinarians();
+        const modoAdmin = modoAdminRef.current;
+        const data = modoAdmin ? await getCulinariansAdmin() : await getCulinarians();
+        // abrindo direto uma página do painel, a busca pública inicial e a
+        // busca admin saem quase juntas — se a pública terminar por último,
+        // ela sobrescreveria a lista completa com a versão sem CPF/telefone
+        if (modoAdmin !== modoAdminRef.current) return;
         setCulinaristas(Array.isArray(data) ? data : []);
+    }
+
+    function ativarModoAdmin() {
+        if (modoAdminRef.current) return;
+        modoAdminRef.current = true;
+        setLoadingCulinarian(true);
+        refreshCulinarians()
+            .catch(err => console.error('Erro ao buscar Culinaristas', err))
+            .finally(() => setLoadingCulinarian(false));
     }
 
     async function refreshIndustries() {
@@ -71,7 +91,10 @@ export function DadosProvider({ children }) {
                 refreshCourses()
                     .catch(err => console.error('Erro ao buscar cursos', err))
                     .finally(() => { setLoadingCourses(false); setLoadingChildren(false); }),
-                refreshCulinarians().catch(err => console.error('Erro ao buscar Culinaristas', err)).finally(() => setLoadingCulinarian(false)),
+                // se o modo admin ligou no meio dessa busca, quem encerra o
+                // loading é ativarModoAdmin (senão a tela do painel piscaria
+                // "nenhuma culinarista" antes da lista completa chegar)
+                refreshCulinarians().catch(err => console.error('Erro ao buscar Culinaristas', err)).finally(() => { if (!modoAdminRef.current) setLoadingCulinarian(false) }),
                 refreshIndustries().catch(err => console.error('Erro ao buscar Industrias', err)).finally(() => setLoadingIndustries(false)),
             ]);
         }
@@ -237,6 +260,8 @@ export function DadosProvider({ children }) {
                 removeCulinarian,
                 removeIndustry,
                 removeCursoInfantil,
+
+                ativarModoAdmin,
             }}
         >
             {children}

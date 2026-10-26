@@ -1,10 +1,18 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { AdminAuthContext, AdminAuthProvider } from '../contexts/AdminAuthContext'
+import { DadosContext } from '../contexts/DadosContext'
 
 function RequireAuthContent() {
-    const { loading } = useContext(AdminAuthContext)
+    const { access, loading } = useContext(AdminAuthContext)
+    const { ativarModoAdmin } = useContext(DadosContext)
+
+    // sessão do hub confirmada: troca a lista de culinaristas pela versão
+    // com CPF/telefone (ver DadosContext) — chamar de novo não faz nada
+    useEffect(() => {
+        if (!loading && access) ativarModoAdmin()
+    }, [loading, access, ativarModoAdmin])
 
     if (loading) {
         return (

@@ -32,6 +32,24 @@ export async function getCulinarians() {
     }
 }
 
+// versão do painel admin — traz CPF e telefone, por isso exige login do hub
+// (a rota pública /culinaristas não devolve esses campos)
+export async function getCulinariansAdmin() {
+    try {
+        const res = await fetch((`${URL}/culinaristas/admin`), {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        if (!res.ok) return []
+        return res.json()
+
+    } catch (err) {
+        console.error('Erro ao buscar Culinaristas (admin):', err);
+        return []
+    }
+}
+
 export async function putCulinarian(culinarianId, formData) {
     try {
         const res = await fetch((`${URL}/culinaristas/${culinarianId}`), {
