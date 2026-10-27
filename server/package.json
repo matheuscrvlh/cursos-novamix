@@ -10,7 +10,7 @@
     "jsonwebtoken": "^9.0.3",
     "mercadopago": "^3.1.0",
     "multer": "^2.0.2",
-    "nodemailer": "^9.0.5",
+    "nodemailer": "^10.2.1",
     "pg": "^8.13.1",
     "uuid": "^13.0.0"
   }
