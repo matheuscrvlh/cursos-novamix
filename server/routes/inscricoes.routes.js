@@ -276,12 +276,25 @@ router.get('/', authenticate, requireCursosAccess, async (req, res) => {
   }
 });
 
+// status que dá pra definir na mão — 'reembolsando' fica de fora: é a trava
+// interna do fluxo de reembolso (pagamentos.routes.js), e setar na mão
+// deixaria a inscrição presa nesse estado
+const STATUS_EDITAVEIS = ['pendente', 'pago', 'recusado', 'cancelado', 'reembolsado'];
+
 router.put('/:id', authenticate, requireCursosAccess, async (req, res) => {
   const { id } = req.params;
   const { nome, cpf, celular, email, assento, status } = req.body;
 
+  if (status !== undefined && !STATUS_EDITAVEIS.includes(status)) {
+    return res.status(400).json({ message: `Status inválido. Use: ${STATUS_EDITAVEIS.join(', ')}` });
+  }
+  const cpfDigits = cpf ? String(cpf).replace(/\D/g, '') : null;
+  if (cpfDigits && !cpfValido(cpfDigits)) {
+    return res.status(400).json({ message: 'CPF inválido' });
+  }
+
   try {
-    const { rows } = await pool.query(`SELECT id, curso_id FROM inscricoes WHERE id = $1`, [id]);
+    const { rows } = await pool.query(`SELECT id, curso_id, nome, status FROM inscricoes WHERE id = $1`, [id]);
     if (!rows.length) return res.status(404).json({ message: 'Inscrição não encontrada' });
 
     // sem assentos como tabela própria, nada mais garante que um assento
@@ -308,7 +321,7 @@ router.put('/:id', authenticate, requireCursosAccess, async (req, res) => {
         WHERE id = $7
       `, [
         nome ?? null,
-        cpf ? encryptCpf(cpf) : null,
+        cpfDigits ? encryptCpf(cpfDigits) : null,
         celular ?? null,
         email ?? null,
         assento !== undefined ? Number(assento) : null,
@@ -323,6 +336,18 @@ router.put('/:id', authenticate, requireCursosAccess, async (req, res) => {
         return res.status(400).json({ message: 'Assento indisponível — já ocupado por outra inscrição.' });
       }
       throw err;
+    }
+
+    // status na mão mexe com dinheiro (ex: marcar como pago sem pagamento)
+    // — fica registrado quem mudou e de onde pra onde
+    if (status && status !== rows[0].status) {
+      logAudit({
+        entityType: 'inscricao',
+        entityId: id,
+        action: 'alterar_status',
+        details: `${rows[0].nome}: ${rows[0].status} → ${status}`,
+        userHubId: req.user?.sub,
+      });
     }
 
     res.json({ message: 'Atualizado' });

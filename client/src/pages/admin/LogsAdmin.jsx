@@ -41,12 +41,13 @@ const LABELS_ACAO = {
     desativar: 'Desativar',
     reembolsar: 'Reembolsar',
     redefinir_senha: 'Redefinir senha',
+    alterar_status: 'Alterar status',
 }
 
 function acaoClass(acao) {
     if (acao === 'criar' || acao === 'ativar') return 'bg-green-base text-white'
     if (acao === 'excluir') return 'bg-red-base text-white'
-    if (acao === 'reembolsar') return 'bg-red-light text-white'
+    if (acao === 'reembolsar' || acao === 'alterar_status') return 'bg-red-light text-white'
     if (acao === 'desativar') return 'bg-gray-base text-white'
     if (acao === 'editar' || acao === 'redefinir_senha') return 'bg-blue-base text-white'
     return 'bg-gray-base text-white'
