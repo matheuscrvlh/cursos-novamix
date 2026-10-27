@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { Pool } = require('pg');
 
 if (!process.env.DATABASE_URL) {
@@ -5,12 +7,23 @@ if (!process.env.DATABASE_URL) {
     process.exit(1);
 }
 
+// Supabase exige SSL, e o certificado dele é assinado por uma CA que o Node
+// não conhece. Com DATABASE_CA_CERT apontando pro certificado dessa CA
+// (baixado no painel do Supabase), a conexão confere que do outro lado está
+// mesmo o Supabase. Sem ele, a conexão continua cifrada mas sem conferir o
+// certificado — alguém no meio do caminho poderia se passar pelo banco.
+function configSsl() {
+    const caminho = process.env.DATABASE_CA_CERT;
+    if (!caminho) {
+        console.warn('[db] DATABASE_CA_CERT não configurado — conexão com o banco SEM conferir o certificado (ver .env.example)');
+        return { rejectUnauthorized: false };
+    }
+    return { ca: fs.readFileSync(path.resolve(__dirname, caminho), 'utf8'), rejectUnauthorized: true };
+}
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    // Supabase exige SSL; o certificado é assinado por uma CA que o Node não
-    // reconhece por padrão, então desativamos a validação da cadeia (mesma
-    // abordagem recomendada pela própria Supabase pra conexões via pooler)
-    ssl: { rejectUnauthorized: false },
+    ssl: configSsl(),
     // Todas as tabelas do projeto vivem no schema `cursos`, não no `public`
     // padrão — sem isso, toda query nas rotas (que usa nomes sem prefixo, tipo
     // `FROM inscricoes`) cairia no schema errado. Setado via parâmetro de
