@@ -1,4 +1,4 @@
-const rateLimit = require('express-rate-limit');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 
 // tráfego de produção sempre chega via nginx (trust proxy 1, ver server.js)
 // — uma requisição com IP de loopback só acontece testando local, nunca é
@@ -58,4 +58,24 @@ const paymentLimiter = rateLimit({
   message: { message: 'Muitas requisições. Tente novamente em alguns minutos.' },
 });
 
-module.exports = { apiLimiter, loginLimiter, cadastroLimiter, paymentLimiter };
+// reserva de assento, por IP *em cada curso* (o paymentLimiter acima é por IP
+// no geral). Cada inscrição pendente segura o assento por 30min (ver
+// utils/expirarReservas.js), então só com o limite geral um único IP
+// conseguia segurar ~60 assentos ao mesmo tempo — mais que a lotação de um
+// curso (20 a 24). 8 por curso cobre uma família comprando junto e quem fecha
+// e reabre o modal algumas vezes, e obriga quem quiser lotar um curso de
+// mentira a usar vários IPs. Limitar por CPF não serviria: CPF válido se gera
+// à vontade, e bloquear por CPF deixaria alguém travar a reserva de outra
+// pessoa só digitando o CPF dela.
+const RESERVAS_POR_CURSO = 8;
+const reservaLimiter = rateLimit({
+  windowMs: 30 * 60 * 1000,
+  limit: RESERVAS_POR_CURSO,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: req => `${ipKeyGenerator(req.ip)}:${req.body?.cursoId}`,
+  skip: req => isLoopbackDev(req.ip),
+  message: { message: 'Muitas reservas para este curso a partir da sua conexão. Tente novamente em alguns minutos.' },
+});
+
+module.exports = { apiLimiter, loginLimiter, cadastroLimiter, paymentLimiter, reservaLimiter };

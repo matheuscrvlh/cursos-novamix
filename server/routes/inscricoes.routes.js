@@ -2,7 +2,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const { authenticateClienteOpcional } = require('../middleware/authCliente.middleware');
-const { paymentLimiter } = require('../middleware/rateLimit.middleware');
+const { paymentLimiter, reservaLimiter } = require('../middleware/rateLimit.middleware');
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
 const { enviarEmail, emailValido, emailInscricaoRecebida } = require('../utils/email');
@@ -15,7 +15,7 @@ const router = express.Router();
 // cursos.inscricoes tem um índice único parcial em (curso_id, assento) pra
 // status ativos (pendente/pago/reembolsando); o próprio Postgres rejeita
 // (23505) se o assento já estiver reivindicado por outra inscrição ativa.
-router.post('/', paymentLimiter, authenticateClienteOpcional, async (req, res) => {
+router.post('/', paymentLimiter, reservaLimiter, authenticateClienteOpcional, async (req, res) => {
   const { cursoId, nome, cpf, celular, email, assento } = req.body;
 
   if (!cursoId || !nome || !cpf || !celular || !email || assento === undefined) {
@@ -53,11 +53,13 @@ router.post('/', paymentLimiter, authenticateClienteOpcional, async (req, res) =
 
     // cliente_id vem do cookie de sessão do cliente, se ele estiver logado
     // (authenticateClienteOpcional não bloqueia requisição sem login — guest
-    // checkout continua funcionando, cliente_id só fica NULL nesse caso)
+    // checkout continua funcionando, cliente_id só fica NULL nesse caso).
+    // CPF vai só com dígitos: a cifra é determinística, então "123.456.789-09"
+    // e "12345678909" virariam valores diferentes no banco
     await pool.query(`
       INSERT INTO inscricoes (id, curso_id, cliente_id, nome, cpf, celular, email, assento, status)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pendente')
-    `, [id, cursoId, req.cliente?.sub ?? null, nome, encryptCpf(cpf), celular, email, assentoId]);
+    `, [id, cursoId, req.cliente?.sub ?? null, nome, encryptCpf(cpf.replace(/\D/g, '')), celular, email, assentoId]);
 
     res.status(201).json({
       id, cursoId, nome, cpf, celular, email,
