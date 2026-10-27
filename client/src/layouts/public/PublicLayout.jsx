@@ -9,6 +9,7 @@ import { logoNm } from '../../assets/images/logos'
 import { getBanners } from '../../api/banners.services'
 import useBodyScrollLock from '../../hooks/useBodyScrollLock'
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
+import BannerCarousel from '../../components/public/BannerCarousel'
 
 const navLinks = [
   { label: 'Home', to: '/' },
@@ -18,11 +19,16 @@ const navLinks = [
   { label: 'Indústrias', to: '/industrias' },
 ]
 
-export default function PublicLayout({ children, bannerHome, showBanner = true }) {
+const WHATSAPP = 'https://api.whatsapp.com/send?phone=5522998336225'
+
+// bottomBar: a página tem uma barra fixa embaixo no celular (ex: botão de
+// inscrição na página do curso) — o rodapé ganha um respiro pra ela não
+// cobrir o final dele
+export default function PublicLayout({ children, bannerHome, showBanner = true, bottomBar = false }) {
   const { cliente } = useContext(ClienteAuthContext)
   const [heroBanners, setHeroBanners] = useState([])
-  const [heroIndex, setHeroIndex]     = useState(0)
   const [isMenuOpen, setIsMenuOpen]   = useState(false)
+  const [rolou, setRolou]             = useState(false)
 
   useEffect(() => {
     if (!showBanner) return
@@ -33,29 +39,31 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
     })
   }, [showBanner])
 
+  // o header só ganha sombra depois que a página rola — no topo ele fica
+  // "colado" no banner, sem separação
   useEffect(() => {
-    if (heroBanners.length <= 1) return
-    const t = setInterval(() => setHeroIndex(i => (i + 1) % heroBanners.length), 5000)
-    return () => clearInterval(t)
-  }, [heroBanners.length])
+    const onScroll = () => setRolou(window.scrollY > 8)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useBodyScrollLock(isMenuOpen)
 
   return (
-    <main className="min-h-screen w-full flex flex-col bg-gray"
+    <main className="min-h-screen w-full flex flex-col bg-cream text-chocolate"
     >
-      <header className="w-full bg-orange-base text-white shadow-md sticky top-0 z-50">
-        <div className="max-w-350 mx-auto px-5 py-3 flex items-center justify-between gap-4">
+      <header className={`w-full bg-orange-base text-white sticky top-0 z-50 transition-shadow duration-700 ${rolou ? 'shadow-[0_10px_30px_-12px_rgba(58,42,33,0.45)]' : ''}`}>
+        <div className="max-w-7xl mx-auto px-5 md:px-8 py-3.5 flex items-center justify-between gap-4">
 
-          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+          <Link to="/" className="group flex items-center gap-3 shrink-0">
             <img
               src={logoNm}
               alt="Novamix Cursos"
-              className="w-9 h-9 rounded-lg object-cover shadow-sm"
+              className="w-10 h-10 rounded-full object-cover ring-1 ring-white/40 ring-offset-2 ring-offset-orange-base transition-transform duration-700 ease-luxo group-hover:rotate-[8deg]"
             />
-            <span className="font-bold text-sm sm:text-base leading-tight">
-              Novamix<br />
-              <span className="font-normal text-white/80 text-xs">Cursos</span>
+            <span className="leading-none">
+              <span className="block font-serif text-[22px] font-semibold">Novamix</span>
+              <span className="block text-[9px] font-medium uppercase tracking-[0.35em] text-white/75 mt-0.5">Cursos</span>
             </span>
           </Link>
 
@@ -65,11 +73,14 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
                 key={link.to}
                 to={link.to}
                 end={link.to === '/'}
+                // sublinhado fino que desliza da esquerda no hover e fica
+                // fixo no link da página atual
                 className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                  `relative px-3 py-2 text-[11.5px] font-medium uppercase tracking-[0.16em] transition-colors duration-500
+                  after:absolute after:left-3 after:right-3 after:bottom-0.5 after:h-px after:bg-white after:origin-left after:transition-transform after:duration-500 after:ease-luxo ${
                     isActive
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
+                      ? 'text-white after:scale-x-100'
+                      : 'text-white/75 hover:text-white after:scale-x-0 hover:after:scale-x-100'
                   }`
                 }
               >
@@ -80,29 +91,29 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
 
           <div className="flex items-center gap-2 shrink-0">
             <a
-              href="https://api.whatsapp.com/send?phone=5522998336225"
+              href={WHATSAPP}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 bg-white/15 hover:bg-white/25 transition px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap"
+              className="flex items-center gap-2 border border-white/35 hover:bg-white hover:text-orange-base transition-colors duration-500 px-3.5 py-2 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] whitespace-nowrap"
             >
-              <img src={whatsapp} alt="WhatsApp" className="h-5" />
-              <span className="text-xs sm:text-sm">Atendimento</span>
+              <img src={whatsapp} alt="" className="h-4" />
+              <span>Atendimento</span>
             </a>
 
             <Link
               to={cliente ? '/minha-conta' : '/entrar'}
-              className="hidden sm:flex items-center gap-2 bg-white/15 hover:bg-white/25 transition px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap"
+              className="hidden sm:flex items-center gap-2 border border-white/35 hover:bg-white hover:text-orange-base transition-colors duration-500 px-3.5 py-2 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] whitespace-nowrap"
             >
-              <User size={18} />
-              <span className="text-xs sm:text-sm">{cliente ? 'Minha conta' : 'Entrar'}</span>
+              <User size={15} strokeWidth={1.5} />
+              <span>{cliente ? 'Minha conta' : 'Entrar'}</span>
             </Link>
 
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition"
+              className="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-white/35 hover:bg-white/15 transition"
               aria-label="Abrir menu"
             >
-              <Menu size={20} />
+              <Menu size={18} strokeWidth={1.5} />
             </button>
           </div>
 
@@ -110,29 +121,32 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
       </header>
 
       <div
-        className={`md:hidden fixed inset-0 bg-black z-60 transition-opacity duration-300 ${
+        className={`md:hidden fixed inset-0 bg-chocolate z-60 transition-opacity duration-500 ${
           isMenuOpen ? 'opacity-50 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsMenuOpen(false)}
       />
 
       <aside
-        className={`md:hidden fixed top-0 right-0 h-dvh w-70 max-w-[80dvw] bg-white shadow-2xl z-60 flex flex-col
-          transform transition-transform duration-300 ease-in-out
+        className={`md:hidden fixed top-0 right-0 h-dvh w-72 max-w-[82dvw] bg-cream shadow-2xl z-60 flex flex-col
+          transform transition-transform duration-500 ease-luxo
           ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-base/20">
-          <img src={logoNm} alt="Novamix Cursos" className="w-9 h-9 rounded-lg object-cover shadow-sm" />
+        <div className="flex items-center justify-between px-6 py-5 border-b border-chocolate/10">
+          <span className="leading-none">
+            <span className="block font-serif text-2xl font-semibold text-chocolate">Novamix</span>
+            <span className="block text-[9px] font-medium uppercase tracking-[0.35em] text-gold mt-1">Cursos</span>
+          </span>
           <button
             onClick={() => setIsMenuOpen(false)}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray transition-colors cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-full border border-chocolate/15 hover:bg-cream-dark transition-colors cursor-pointer"
             aria-label="Fechar menu"
           >
-            <X size={18} className="text-gray-dark" />
+            <X size={16} strokeWidth={1.5} className="text-chocolate" />
           </button>
         </div>
 
-        <nav className="flex flex-col gap-1 p-4">
+        <nav className="flex flex-col px-6 py-4">
           {navLinks.map(link => (
             <NavLink
               key={link.to}
@@ -140,10 +154,8 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
               end={link.to === '/'}
               onClick={() => setIsMenuOpen(false)}
               className={({ isActive }) =>
-                `px-4 py-3 rounded-lg text-sm font-semibold transition ${
-                  isActive
-                    ? 'bg-orange-base text-white'
-                    : 'text-gray-dark hover:bg-gray'
+                `py-3.5 border-b border-chocolate/[0.07] font-serif text-[22px] transition-colors duration-500 ${
+                  isActive ? 'text-orange-base italic' : 'text-chocolate hover:text-orange-base'
                 }`
               }
             >
@@ -152,68 +164,33 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
           ))}
         </nav>
 
-        <div className="mt-auto flex flex-col gap-3 px-4 mb-5">
+        <div className="mt-auto flex flex-col gap-3 px-6 mb-6">
           <NavLink
             to={cliente ? '/minha-conta' : '/entrar'}
             onClick={() => setIsMenuOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold transition ${
-                isActive
-                  ? 'bg-orange-base text-white'
-                  : 'text-gray-dark hover:bg-gray'
-              }`
-            }
+            className="flex items-center justify-center gap-2 py-3.5 rounded-full border border-chocolate/20 text-chocolate text-[11px] font-medium uppercase tracking-[0.2em] hover:bg-chocolate hover:text-cream transition-colors duration-500"
           >
-            <User size={16} /> {cliente ? 'Minha conta' : 'Entrar'}
+            <User size={15} strokeWidth={1.5} /> {cliente ? 'Minha conta' : 'Entrar'}
           </NavLink>
 
           <a
-            href="https://api.whatsapp.com/send?phone=5522998336225"
+            href={WHATSAPP}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-orange-base hover:bg-orange-light transition text-white py-3 rounded-lg font-semibold text-sm"
+            className="flex items-center justify-center gap-2 bg-orange-base hover:bg-chocolate transition-colors duration-500 text-white py-3.5 rounded-full text-[11px] font-medium uppercase tracking-[0.2em]"
           >
-            <img src={whatsapp} alt="WhatsApp" className="h-5" />
+            <img src={whatsapp} alt="" className="h-4" />
             Atendimento
           </a>
         </div>
       </aside>
 
-      <section className="flex-grow w-full">
+      {/* cada página monta o próprio layout, então o fade roda a cada troca de rota */}
+      <section className="grow w-full animate-pagina">
 
         {/* HERO BANNER — desktop 1920×650 · mobile 425×495 */}
         {showBanner && (heroBanners.length > 0 ? (
-          <div className='relative w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-1920/650'>
-            {heroBanners.map((b, i) => {
-              const visible = i === heroIndex
-              const wrapStyle = {
-                position: 'absolute', inset: 0,
-                opacity: visible ? 1 : 0,
-                transition: 'opacity 0.7s',
-                pointerEvents: visible ? 'auto' : 'none',
-              }
-              const imgs = (
-                <>
-                  <img src={b.imagem} className='absolute inset-0 w-full h-full object-cover hidden md:block' alt='' />
-                  <img src={b.imagem_mobile ?? b.imagem} className='absolute inset-0 w-full h-full object-cover md:hidden' alt='' />
-                </>
-              )
-              return b.link
-                ? <a key={b.id} href={b.link} target='_blank' rel='noopener noreferrer' style={wrapStyle}>{imgs}</a>
-                : <div key={b.id} style={wrapStyle}>{imgs}</div>
-            })}
-            {heroBanners.length > 1 && (
-              <div className='absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10'>
-                {heroBanners.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setHeroIndex(i)}
-                    className={`h-2 rounded-full transition-all cursor-pointer ${i === heroIndex ? 'w-4 bg-white' : 'w-2 bg-white/50'}`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
+          <BannerCarousel banners={heroBanners} />
         ) : (
           <a href='#cursos' className='block w-full'>
             <div className='w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-1920/650'>
@@ -225,41 +202,38 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
         {children}
       </section>
 
-      <footer className="w-full mt-auto bg-orange-base text-white">
+      <footer className={`w-full mt-auto bg-orange-base text-white ${bottomBar ? 'pb-20 lg:pb-0' : ''}`}>
 
-        <div className="max-w-350 mx-auto px-6 py-12 md:px-16">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+        <div className="max-w-7xl mx-auto px-5 md:px-8 pt-16 pb-12">
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-[1.3fr_1fr_1fr]">
 
-            <div className="flex flex-col gap-4">
-              <p className="font-bold text-xl tracking-tight">Novamix Cursos</p>
-              <p className="text-white/70 text-sm leading-relaxed">
+            <div className="flex flex-col gap-5">
+              <p className="leading-none">
+                <span className="block font-serif text-[34px] font-semibold">Novamix</span>
+                <span className="block text-[10px] font-medium uppercase tracking-[0.35em] text-white/70 mt-1">Cursos</span>
+              </p>
+              <p className="font-serif italic text-xl text-white/85 leading-snug max-w-xs">
                 Venha desenvolver suas habilidades culinárias com os melhores profissionais.
               </p>
               <a
-                href="https://api.whatsapp.com/send?phone=5522998336225"
+                href={WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-white/15 hover:bg-white/25 transition px-4 py-2.5 rounded-lg w-fit text-sm font-semibold"
+                className="flex items-center gap-2 border border-white/40 hover:bg-white hover:text-orange-base transition-colors duration-500 px-5 py-3 rounded-full w-fit text-[11px] font-medium uppercase tracking-[0.18em]"
               >
-                <img src={whatsapp} alt="WhatsApp" className="h-5" />
+                <img src={whatsapp} alt="" className="h-4" />
                 Fale conosco
               </a>
             </div>
 
             <div>
-              <p className="font-semibold text-xs uppercase tracking-widest text-white/50 mb-4">Navegação</p>
-              <div className="flex flex-col gap-2.5">
-                {[
-                  { label: 'Home', to: '/' },
-                  { label: 'Cursos', to: '/cursos' },
-                  { label: 'Cursos Infantis', to: '/cursosInfantis' },
-                  { label: 'Culinaristas', to: '/culinaristas' },
-                  { label: 'Indústrias', to: '/industrias' },
-                ].map(link => (
+              <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-white/60 mb-5">Navegação</p>
+              <div className="flex flex-col gap-3">
+                {navLinks.map(link => (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className="text-white/75 hover:text-white transition text-sm w-fit"
+                    className="font-serif text-lg text-white/85 hover:text-white hover:translate-x-1 transition duration-500 ease-luxo w-fit"
                   >
                     {link.label}
                   </Link>
@@ -268,20 +242,20 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
             </div>
 
             <div>
-              <p className="font-semibold text-xs uppercase tracking-widest text-white/50 mb-4">Onde estamos</p>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-start gap-2.5 text-sm text-white/75">
-                  <MapPin size={15} className="shrink-0 mt-0.5 text-white/50" />
+              <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-white/60 mb-5">Onde estamos</p>
+              <div className="flex flex-col gap-3.5 font-light">
+                <div className="flex items-start gap-2.5 text-sm text-white/85">
+                  <MapPin size={15} strokeWidth={1.5} className="shrink-0 mt-0.5 text-white/60" />
                   <span>Avenida Governador Roberto Silveira, 1700 – Prado – Nova Friburgo/RJ</span>
                 </div>
-                <div className="flex items-center gap-2.5 text-sm text-white/75">
-                  <Building2 size={15} className="shrink-0 text-white/50" />
+                <div className="flex items-center gap-2.5 text-sm text-white/85">
+                  <Building2 size={15} strokeWidth={1.5} className="shrink-0 text-white/60" />
                   <span>CNPJ: 19.303.867/0001-44</span>
                 </div>
-                <div className="flex items-center gap-2.5 text-sm text-white/75">
-                  <MessageCircle size={15} className="shrink-0 text-white/50" />
+                <div className="flex items-center gap-2.5 text-sm text-white/85">
+                  <MessageCircle size={15} strokeWidth={1.5} className="shrink-0 text-white/60" />
                   <a
-                    href="https://api.whatsapp.com/send?phone=5522998336225"
+                    href={WHATSAPP}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-white transition"
@@ -295,20 +269,22 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
           </div>
         </div>
 
-        <div className="border-t border-white/15" />
+        <div className="max-w-7xl mx-auto px-5 md:px-8">
+          <div className="border-t border-white/20" />
+        </div>
 
-        <div className="max-w-350 mx-auto px-6 py-5 md:px-16 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-1">
-            <p className="text-white/55 text-xs">
-              © 2025 Novamix Food Service Comércio de Alimentos Ltda. Todos os direitos reservados.
+        <div className="max-w-7xl mx-auto px-5 md:px-8 py-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-1 font-light">
+            <p className="text-white/65 text-xs">
+              © {new Date().getFullYear()} Novamix Food Service Comércio de Alimentos Ltda. Todos os direitos reservados.
             </p>
-            <p className="text-white/35 text-xs">
+            <p className="text-white/45 text-xs">
               Imagens meramente ilustrativas. Preços e disponibilidade podem variar.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-white/60 mt-2 md:mt-0">
+          <div className="flex items-center gap-2 text-xs font-light text-white/65 mt-2 md:mt-0">
             <span>Desenvolvido por</span>
-            <a href="https://mthcode.com.br" target="_blank" rel="noreferrer" className="text-white font-bold hover:text-white/80 transition">
+            <a href="https://mthcode.com.br" target="_blank" rel="noreferrer" className="text-white font-medium tracking-wider hover:text-white/80 transition">
               MTHCODE
             </a>
             <span>&</span>
@@ -316,7 +292,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true }
               href="https://www.linkedin.com/in/rodrigo-schuab-628798249"
               target="_blank"
               rel="noreferrer"
-              className="text-white font-bold hover:text-white/80 transition"
+              className="text-white font-medium tracking-wider hover:text-white/80 transition"
             >
               RodSchuab
             </a>
