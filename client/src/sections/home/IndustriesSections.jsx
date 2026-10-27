@@ -1,36 +1,46 @@
 import { Building2 } from 'lucide-react';
 
+import Reveal from '../../components/public/Reveal';
+import SectionHeader, { SectionAction } from '../../components/public/SectionHeader';
+
 export default function IndustriesSections({ industrias }) {
     return (
-        <section className='md:w-[80vw] md:mx-auto mt-20 mb-10 px-6 md:px-0'>
+        <section className='max-w-7xl mx-auto px-5 md:px-8 mt-24 md:mt-32'>
 
-            <p className='text-lg font-bold text-gray-dark md:text-3xl mb-8'>
-                INDÚSTRIAS PARCEIRAS
-            </p>
+            <SectionHeader
+                eyebrow='Marcas que apoiam'
+                titulo='Indústrias'
+                destaque='parceiras'
+            />
 
-            <div className='flex flex-wrap justify-center gap-5'>
+            {/* logos em tons de cinza, ganhando cor no hover — deixa a parede de
+                marcas uniforme e discreta, sem uma cor brigando com a outra */}
+            <Reveal className='grid grid-cols-3 gap-x-3 gap-y-6 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'>
                 {industrias.slice(0, 16).map((industria, i) => (
-                    <div key={i} className='flex flex-col items-center gap-2 w-24 md:w-28'>
+                    <div key={i} className='group flex flex-col items-center gap-2.5'>
 
-                        <div className='w-18 h-18 md:w-20 md:h-20 rounded-xl overflow-hidden bg-white shadow-sm flex items-center justify-center border border-gray-base/10'>
+                        <div className='w-full aspect-square max-w-24 rounded-xl overflow-hidden bg-white ring-1 ring-chocolate/[0.07] flex items-center justify-center transition-shadow duration-700 group-hover:shadow-[0_16px_30px_-18px_rgba(58,42,33,0.45)]'>
                             {industria.foto ? (
                                 <img
                                     src={industria.foto}
                                     alt={industria.nome}
-                                    className='w-full h-full object-cover'
+                                    loading='lazy'
+                                    className='w-full h-full object-cover grayscale opacity-75 transition duration-700 group-hover:grayscale-0 group-hover:opacity-100'
                                 />
                             ) : (
-                                <Building2 size={28} className='text-gray-base/40' />
+                                <Building2 size={26} strokeWidth={1.25} className='text-gold/60' />
                             )}
                         </div>
 
-                        <p className='text-xs font-semibold text-gray-dark text-center leading-tight line-clamp-2 w-full'>
+                        <p className='text-[10px] font-medium uppercase tracking-[0.14em] text-cocoa text-center leading-tight line-clamp-2 w-full'>
                             {industria.nome}
                         </p>
 
                     </div>
                 ))}
-            </div>
+            </Reveal>
+
+            <SectionAction link='/industrias'>Conhecer as marcas</SectionAction>
 
         </section>
     );

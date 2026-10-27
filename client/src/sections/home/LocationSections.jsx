@@ -1,83 +1,85 @@
 import { useState } from 'react'
 
-import { MapPin, Clock } from 'lucide-react'
+import { MapPin, Clock, Navigation } from 'lucide-react'
+
+import Reveal from '../../components/public/Reveal'
+import SectionHeader from '../../components/public/SectionHeader'
+import { LOJAS, linkComoChegar } from '../../utils/lojas'
 
 export default function LocationSections() {
 
-    const LOCATIONS = {
-        friburgo: {
-            iframe: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3692.8119903550783!2d-42.52638522395205!3d-22.24721111463339!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x97f53afe6cd153%3A0x1a71499c558657e1!2sNovaMix%20Food%20Service!5e0!3m2!1spt-BR!2sbr!4v1775067360332!5m2!1spt-BR!2sbr',
-            adress: 'Av. Gov. Roberto Silveira, 1700 - Duas Pedras, Nova Friburgo - RJ',
-            time: 'De Seg a Sab, das 8:30 às 19h',
-        },
-        teresopolis: {
-            iframe: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3688.439377782724!2d-42.97246841431132!3d-22.412482567792775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x984dd8feadadd3%3A0x999ed84beae4d97b!2sNovamix%20Food%20Service!5e0!3m2!1spt-BR!2sbr!4v1775069806369!5m2!1spt-BR!2sbr',
-            adress: 'R. Duque de Caxias, 170 - Várzea, Teresópolis - RJ',
-            time: 'De Seg a Sab, das 8:30 às 19h',
-        },
-    }
-
-    const [active, setActive] = useState('friburgo')
-    const location = LOCATIONS[active]
+    const [active, setActive] = useState('Prado')
+    const location = LOJAS[active]
 
     return (
-        <section className='w-[90vw] mx-auto mt-16 pb-12 md:mt-30'>
-            <div className='flex flex-col md:flex-row md:items-start md:gap-10'>
+        <section className='max-w-7xl mx-auto px-5 md:px-8 mt-24 md:mt-32'>
 
-                <div className='flex flex-col gap-5 md:w-[38%]'>
+            <SectionHeader
+                eyebrow='Onde estamos'
+                titulo='Visite nossas'
+                destaque='lojas'
+                descricao='Os cursos acontecem nas lojas Novamix de Nova Friburgo e Teresópolis.'
+            />
 
-                    <h2 className='text-3xl sm:text-4xl md:text-6xl font-bold text-gray-dark leading-tight'>
-                        CONFIRA<br />
-                        <span className='text-orange-base'>NOSSA</span><br />
-                        LOCALIZAÇÃO
-                    </h2>
+            <Reveal className='grid bg-white rounded-xl ring-1 ring-chocolate/[0.07] overflow-hidden md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]'>
 
-                    <div className='flex gap-2 bg-gray rounded-xl p-1'>
-                        {[
-                            { key: 'friburgo',    label: 'Friburgo' },
-                            { key: 'teresopolis', label: 'Teresópolis' },
-                        ].map(tab => (
+                <div className='flex flex-col gap-8 p-6 md:p-10'>
+
+                    <div className='flex gap-6 border-b border-chocolate/10'>
+                        {Object.entries(LOJAS).map(([key, loja]) => (
                             <button
-                                key={tab.key}
-                                onClick={() => setActive(tab.key)}
-                                className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
-                                    active === tab.key
-                                        ? 'bg-orange-base text-white shadow-sm'
-                                        : 'text-gray-text/60 hover:text-gray-text'
+                                key={key}
+                                onClick={() => setActive(key)}
+                                className={`relative pb-3 font-serif text-2xl transition-colors duration-500 cursor-pointer
+                                    after:absolute after:left-0 after:right-0 after:-bottom-px after:h-px after:bg-orange-base after:origin-left after:transition-transform after:duration-500 after:ease-luxo ${
+                                    active === key
+                                        ? 'text-chocolate italic after:scale-x-100'
+                                        : 'text-cocoa/60 hover:text-chocolate after:scale-x-0'
                                 }`}
                             >
-                                {tab.label}
+                                {loja.cidade}
                             </button>
                         ))}
                     </div>
 
-                    <div className='flex flex-col gap-3'>
-                        <div className='flex items-start gap-2.5'>
-                            <MapPin size={16} className='text-orange-base shrink-0 mt-0.5' />
+                    <div className='flex flex-col gap-5'>
+                        <div className='flex items-start gap-3.5'>
+                            <MapPin size={18} strokeWidth={1.5} className='text-gold shrink-0 mt-0.5' />
                             <div>
-                                <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-0.5'>Endereço</p>
-                                <p className='text-sm text-gray-dark'>{location.adress}</p>
+                                <p className='text-[10px] font-medium text-cocoa/70 uppercase tracking-[0.25em] mb-1'>Endereço</p>
+                                <p className='text-[15px] font-light text-chocolate'>{location.endereco}</p>
                             </div>
                         </div>
-                        <div className='flex items-start gap-2.5'>
-                            <Clock size={16} className='text-orange-base shrink-0 mt-0.5' />
+                        <div className='flex items-start gap-3.5'>
+                            <Clock size={18} strokeWidth={1.5} className='text-gold shrink-0 mt-0.5' />
                             <div>
-                                <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-0.5'>Horário</p>
-                                <p className='text-sm text-gray-dark'>{location.time}</p>
+                                <p className='text-[10px] font-medium text-cocoa/70 uppercase tracking-[0.25em] mb-1'>Horário</p>
+                                <p className='text-[15px] font-light text-chocolate'>{location.horario}</p>
                             </div>
                         </div>
                     </div>
+
+                    <a
+                        href={linkComoChegar(active)}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='group md:mt-auto flex items-center justify-center gap-3 w-full py-3.5 rounded-full border border-chocolate/20 text-chocolate text-[11px] font-medium uppercase tracking-[0.22em] hover:bg-chocolate hover:text-cream hover:border-chocolate transition-colors duration-500'
+                    >
+                        <Navigation size={14} strokeWidth={1.5} />
+                        Como chegar
+                    </a>
                 </div>
 
                 <iframe
                     key={active}
-                    src={location.iframe}
-                    className='w-full h-60 sm:h-80 mt-6 rounded-xl md:flex-1 md:h-96 md:mt-0'
+                    src={location.mapa}
+                    title={`Mapa da loja Novamix ${location.cidade}`}
+                    className='w-full h-72 sm:h-80 md:h-full md:min-h-110 border-0 grayscale-[35%] sepia-[12%]'
                     allowFullScreen
                     loading='lazy'
                 />
 
-            </div>
+            </Reveal>
         </section>
     )
 }

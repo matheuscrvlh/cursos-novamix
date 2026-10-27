@@ -1,19 +1,27 @@
-import { Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 
 import { bannerCulinarista } from "../../assets/images/banner"
 
-import Button from '../../components/Button'
 import CulinarianCard from '../../components/public/CulinarianCard'
+import BannerCarousel from '../../components/public/BannerCarousel'
+import Reveal from '../../components/public/Reveal'
+import SectionHeader, { SectionAction } from '../../components/public/SectionHeader'
 
 import { getBanners } from '../../api/banners.services'
+
+// a lista inteira já vem do DadosContext — o "ver mais" só revela os
+// próximos na própria home, sem mandar a pessoa pra outra página
+const INICIAIS = 4
+const POR_CLIQUE = 8
 
 export default function CulinariansSections({
     culinaristas,
     loadingCulinarian
 }) {
     const [homeBanners, setHomeBanners] = useState([])
-    const [homeIndex, setHomeIndex]     = useState(0)
+    const [visiveis, setVisiveis]       = useState(INICIAIS)
+    const listaRef = useRef(null)
 
     useEffect(() => {
         getBanners('home').then(data => {
@@ -23,90 +31,68 @@ export default function CulinariansSections({
         })
     }, [])
 
-    useEffect(() => {
-        if (homeBanners.length <= 1) return
-        const t = setInterval(() => setHomeIndex(i => (i + 1) % homeBanners.length), 5000)
-        return () => clearInterval(t)
-    }, [homeBanners.length])
+    const restantes = culinaristas.length - visiveis
+
+    function verMenos() {
+        setVisiveis(INICIAIS)
+        listaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
 
     return (
-        <section className='w-full mt-20 mb-20'>
+        <section className='w-full mt-24 md:mt-32'>
 
             {/* ========== BANNER — padrão 1920×650 desktop · 425×495 mobile =========== */}
-            <div className='md:w-[99dvw]'>
-                {homeBanners.length > 0 ? (
-                    <div className='relative w-full overflow-hidden aspect-425/495 md:aspect-1920/650'>
-                        {homeBanners.map((b, i) => {
-                            const visible = i === homeIndex
-                            const wrapStyle = {
-                                position: 'absolute', inset: 0,
-                                opacity: visible ? 1 : 0,
-                                transition: 'opacity 0.7s',
-                                pointerEvents: visible ? 'auto' : 'none',
-                            }
-                            const imgs = (
-                                <>
-                                    <img src={b.imagem} className='absolute inset-0 w-full h-full object-cover hidden md:block' alt='' />
-                                    <img src={b.imagem_mobile ?? b.imagem} className='absolute inset-0 w-full h-full object-cover md:hidden' alt='' />
-                                </>
-                            )
-                            return b.link
-                                ? <a key={b.id} href={b.link} target='_blank' rel='noopener noreferrer' style={wrapStyle}>{imgs}</a>
-                                : <div key={b.id} style={wrapStyle}>{imgs}</div>
-                        })}
-                        {homeBanners.length > 1 && (
-                            <div className='absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10'>
-                                {homeBanners.map((_, i) => (
-                                    <button key={i} onClick={() => setHomeIndex(i)}
-                                        className={`h-2 rounded-full transition-all cursor-pointer ${i === homeIndex ? 'w-4 bg-white' : 'w-2 bg-white/50'}`}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ) : (
-                    <div className='w-full overflow-hidden aspect-425/495 md:aspect-1920/650'>
-                        <img src={bannerCulinarista} className='w-full h-full object-cover' alt='' />
-                    </div>
-                )}
-            </div>
+            {homeBanners.length > 0 ? (
+                <BannerCarousel banners={homeBanners} />
+            ) : (
+                <div className='w-full overflow-hidden aspect-425/495 md:aspect-1920/650'>
+                    <img src={bannerCulinarista} className='w-full h-full object-cover' alt='' />
+                </div>
+            )}
 
-            <div className='mt-10 md:mt-20 md:w-[80vw] md:mx-auto'>
-                <p className='
-                    text-lg pl-10 font-bold text-gray-dark mb-5
-                    md:text-3xl md:pl-0 md:px-2
-                '>
-                    CULINARISTAS PARCEIROS
-                </p>
-                <div className='flex overflow-x-auto gap-10 px-10 pb-5 md:grid md:grid-cols-4 md:overflow-x-hidden md:gap-5 md:px-1'>
+            {/* scroll-mt: o "ver menos" rola até aqui sem a lista ficar escondida atrás do header fixo */}
+            <div ref={listaRef} className='max-w-7xl mx-auto px-5 md:px-8 mt-20 md:mt-28 scroll-mt-24'>
+                <SectionHeader
+                    eyebrow='Quem ensina'
+                    titulo='Culinaristas'
+                    destaque='parceiros'
+                    descricao='Profissionais que dão os cursos nas nossas lojas.'
+                />
+
+                <div className='grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6'>
                     {loadingCulinarian
-                        ? (
-                            <div className='flex flex-col items-center justify-center w-full text-center mt-25 mb-25'>
-                                <p className='text-xl font-semibold'>Carregando...</p>
-                            </div>
-                        )
-                        : culinaristas.slice(0, 4).map(c => (
-                            <CulinarianCard
-                                key={c.id}
-                                id={c.id}
-                                foto={c.foto}
-                                nomeCulinarista={c.nomeCulinarista}
-                                lojas={c.lojas}
-                                className='min-w-52 max-w-xs md:min-w-0 md:max-w-none'
-                            />
+                        ? [0, 1, 2, 3].map(i => (
+                            <div key={i} className='h-72 rounded-xl bg-white ring-1 ring-chocolate/[0.06] animate-pulse' />
                         ))
+                        : culinaristas.slice(0, visiveis).map((c, i) => {
+                            const card = (
+                                <CulinarianCard
+                                    id={c.id}
+                                    foto={c.foto}
+                                    nomeCulinarista={c.nomeCulinarista}
+                                    lojas={c.lojas}
+                                />
+                            )
+                            // os 4 primeiros surgem ao rolar até a seção; os que
+                            // o "ver mais" abre já estão na tela, então surgem na hora
+                            return i < INICIAIS
+                                ? <Reveal key={c.id} delay={i * 120}>{card}</Reveal>
+                                : <div key={c.id} className='animate-surgir' style={{ animationDelay: `${((i - INICIAIS) % POR_CLIQUE) * 70}ms` }}>{card}</div>
+                        })
                     }
                 </div>
-            </div>
 
-            <div className='
-                flex w-full justify-center mt-5 md:mt-10
-            '>
-                <Link to={'/culinaristas'}>
-                    <Button className='bg-orange-base text-white hover:bg-orange-light text-sm px-5 py-1.5 sm:px-6 sm:py-2 cursor-pointer transition'>
-                        Ver mais
-                    </Button>
-                </Link>
+                {!loadingCulinarian && culinaristas.length > INICIAIS && (
+                    restantes > 0 ? (
+                        <SectionAction onClick={() => setVisiveis(v => v + POR_CLIQUE)} icone={<ChevronDown size={14} />}>
+                            Ver mais culinaristas <span className='opacity-50'>({restantes})</span>
+                        </SectionAction>
+                    ) : (
+                        <SectionAction onClick={verMenos} icone={<ChevronUp size={14} />}>
+                            Ver menos
+                        </SectionAction>
+                    )
+                )}
             </div>
 
         </section>

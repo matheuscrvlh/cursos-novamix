@@ -4,7 +4,7 @@ import { Loader2, XCircle } from 'lucide-react';
 import { DadosContext } from '../../contexts/DadosContext';
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext';
 
-import { postEnrollment, putSeatChange, getSeats, cancelEnrollment } from '../../api/enrollment.services';
+import { postEnrollment, putSeatChange, getSeats, getVagasPorCurso, cancelEnrollment } from '../../api/enrollment.services';
 
 import { useThemeColor } from '../../hooks/useThemeColor';
 
@@ -15,7 +15,6 @@ import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnro
 
 import CoursesSections from '../../sections/home/CoursesSections';
 import CategoriesSections from '../../sections/home/CategoriesSections';
-import ChildrensCoursesSections from '../../sections/home/ChildrensCoursesSections';
 import CulinariansSections from '../../sections/home/CulinariansSections';
 import IndustriesSections from '../../sections/home/IndustriesSections';
 import LocationSections from '../../sections/home/LocationSections';
@@ -175,8 +174,11 @@ export default function Home() {
         cursosInfantis.find(c => c.id === cursoSelecionado)
     )?.valor
 
+    // refaz a busca de assentos toda vez que a tela de seleção abre (igual
+    // Cursos/Cursos Infantis) — sem isso, quem tenta de novo depois de um
+    // erro vê a lista antiga e pode escolher um assento que já foi ocupado
     useEffect(() => {
-        if (!cursoSelecionado) {
+        if (!cursoSelecionado || step !== 'assento') {
             return
         }
 
@@ -184,41 +186,29 @@ export default function Home() {
             .then(setAssentos)
             .catch(console.error)
 
-    }, [cursoSelecionado])
+    }, [cursoSelecionado, step])
+
+    // vagas só dos cursos que aparecem na home (os 4 primeiros de cada seção)
+    // — ver getVagasPorCurso
+    const idsCursosExibidos = cursosFiltrados.slice(0, 4).map(c => c.id).join(',')
 
     useEffect(() => {
-        if (!cursos.length) return;
+        if (!idsCursosExibidos) return;
 
         async function loadVagas() {
             setLoadingVagasPorCurso(true);
 
             try {
-                const resultado = {};
-
-                await Promise.all(
-                    cursos.map(async (curso) => {
-                        const assentos = await getSeats(curso.id);
-
-                        resultado[curso.id] = {
-                            livres: assentos.filter(v => v.status === 'livre').length,
-                            reservadas: assentos.filter(v => v.status === 'reservado').length
-                        };
-                    })
-                );
-
-                setVagasPorCurso(resultado);
-
+                setVagasPorCurso(await getVagasPorCurso(idsCursosExibidos.split(',')));
             } catch (err) {
                 console.log(err);
-
             } finally {
                 setLoadingVagasPorCurso(false);
             }
         }
 
         loadVagas();
-
-    }, [cursos, refreshVagas]);
+    }, [idsCursosExibidos, refreshVagas]);
 
     useEffect(() => {
         const cursosFiltrados = cursos
@@ -237,37 +227,25 @@ export default function Home() {
             setCursosFiltrados(filtrados)
     }, [filtersCourses, cursosAtuais])
 
+    const idsInfantisExibidos = cursosInfantisFiltrados.slice(0, 4).map(c => c.id).join(',')
+
     useEffect(() => {
-        if (!cursosInfantis.length) return;
+        if (!idsInfantisExibidos) return;
 
         async function loadVagas() {
-            setLoadingVagasPorCursoInfantis(true)
+            setLoadingVagasPorCursoInfantis(true);
 
             try {
-                const resultado = {};
-
-                await Promise.all(
-                    cursosInfantis.map(async (curso) => {
-                        const assentos = await getSeats(curso.id);
-                        resultado[curso.id] = {
-                            livres: assentos.filter(v => v.status === 'livre').length,
-                            reservadas: assentos.filter(v => v.status === 'reservado').length
-                        };
-                    })
-                );
-
-                setVagasPorCursoInfantil(resultado);
-
+                setVagasPorCursoInfantil(await getVagasPorCurso(idsInfantisExibidos.split(',')));
             } catch (err) {
                 console.log(err);
-
             } finally {
-                setLoadingVagasPorCursoInfantis(false)
+                setLoadingVagasPorCursoInfantis(false);
             }
         }
 
         loadVagas();
-    }, [cursosInfantis, refreshVagasInfantis]);
+    }, [idsInfantisExibidos, refreshVagasInfantis]);
 
     useEffect(() => {
         const cursosFiltrados = cursosInfantis
@@ -335,9 +313,15 @@ export default function Home() {
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head />
-            <section className='bg-gray mb-20'>
+            <section className='mb-24 md:mb-32'>
 
                 <CoursesSections
+                    eyebrow='Agenda'
+                    titulo='Próximos'
+                    destaque='cursos'
+                    descricao='Aulas presenciais com culinaristas parceiros nas lojas Novamix.'
+                    link='/cursos'
+                    className='pt-20 md:pt-28'
                     cursosFiltrados={cursosFiltrados}
                     loadingCourses={loadingCourses}
                     loadingVagasPorCurso={loadingVagasPorCurso}
@@ -349,11 +333,15 @@ export default function Home() {
 
                 {cursosInfantisFiltrados.length === 0
                     ? ''
-                    : <ChildrensCoursesSections
-                        cursosInfantisFiltrados={cursosInfantisFiltrados}
-                        loadingChildren={loadingChildren}
-                        loadingVagasPorCursoInfantis={loadingVagasPorCursoInfantis}
-                        vagasPorCursoInfantil={vagasPorCursoInfantil}
+                    : <CoursesSections
+                        eyebrow='Para os pequenos'
+                        titulo='Cursos'
+                        destaque='infantis'
+                        link='/cursosInfantis'
+                        cursosFiltrados={cursosInfantisFiltrados}
+                        loadingCourses={loadingChildren}
+                        loadingVagasPorCurso={loadingVagasPorCursoInfantis}
+                        vagasPorCurso={vagasPorCursoInfantil}
                         openForm={openForm}
                     />
                 }
@@ -409,28 +397,28 @@ export default function Home() {
                 />
 
                 {loadingPagamento && (
-                    <div className='flex items-center justify-center fixed inset-0 bg-black/70 z-50'>
-                        <div className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl'>
+                    <div className='flex items-center justify-center fixed inset-0 bg-chocolate/55 backdrop-blur-sm z-50 animate-pagina'>
+                        <div className='bg-white rounded-2xl p-10 flex flex-col items-center gap-5 shadow-2xl animate-surgir'>
                             <Loader2 size={40} className='text-orange-base animate-spin' />
-                            <p className='text-gray-dark font-semibold'>Preparando pagamento...</p>
+                            <p className='font-serif italic text-2xl text-chocolate'>Preparando pagamento...</p>
                         </div>
                     </div>
                 )}
 
                 {erroPagamento && (
                     <div
-                        className='flex items-center justify-center fixed inset-0 bg-black/70 z-50 p-4'
+                        className='flex items-center justify-center fixed inset-0 bg-chocolate/55 backdrop-blur-sm z-50 p-4 animate-pagina'
                         onClick={() => setErroPagamento(null)}
                     >
                         <div
-                            className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 max-w-sm w-full shadow-xl'
+                            className='bg-white rounded-2xl p-10 flex flex-col items-center gap-5 max-w-sm w-full shadow-2xl animate-surgir'
                             onClick={e => e.stopPropagation()}
                         >
-                            <XCircle size={48} className='text-red-500' />
-                            <p className='text-gray-dark font-semibold text-center'>{erroPagamento}</p>
+                            <XCircle size={48} className='text-red-base' />
+                            <p className='text-chocolate text-center'>{erroPagamento}</p>
                             <button
-                                className='bg-orange-base text-white hover:bg-orange-light w-full py-2.5 rounded-lg font-semibold'
-                                onClick={() => { setErroPagamento(null); setStep(inscricaoAtiva ? 'assento' : 'form') }}
+                                className='bg-orange-base text-white hover:bg-chocolate w-full py-3.5 rounded-full text-[11px] font-medium uppercase tracking-[0.2em] transition-colors duration-500 cursor-pointer'
+                                onClick={() => { setErroPagamento(null); setStep('assento') }}
                             >
                                 Tentar novamente
                             </button>

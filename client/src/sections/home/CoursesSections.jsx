@@ -1,97 +1,80 @@
-import { Link } from 'react-router-dom'
-
-import Button from "../../components/Button";
 import CourseCard from "../../components/public/CourseCard";
+import Reveal from "../../components/public/Reveal";
+import SectionHeader, { SectionAction } from "../../components/public/SectionHeader";
 
+// usada pros cursos normais e pros infantis na home — mostra os 4 próximos
 export default function CoursesSections({
+    eyebrow,
+    titulo,
+    destaque,
+    descricao,
+    link,
     cursosFiltrados,
     loadingCourses,
     loadingVagasPorCurso,
     vagasPorCurso,
     openForm,
+    className = '',
 }) {
-
-    function layoutData(data) {
-        const [ano, mes, dia] = data.split('-');
-        return `${dia}/${mes}/${ano}`;
-    }
-
     return (
-    <section className='pt-15 md:w-[80vw] md:mx-auto'>
+        <section className={`max-w-7xl mx-auto px-5 md:px-8 ${className}`}>
 
-            <div className='flex justify-between items-baseline pb-5 w-[80%] mx-auto md:w-[80vw]'>
-                <p className='text-lg font-bold text-gray-dark md:text-3xl md:px-2'>
-                    NOSSOS CURSOS
-                </p>
-            </div>
+            <SectionHeader eyebrow={eyebrow} titulo={titulo} destaque={destaque} descricao={descricao} />
 
-            <div className='
-                    bg-gray flex justify-center w-full pb-7 md:pb-10
-            '>
-                {loadingCourses 
-                    ? (
-                        <div className='
-                                flex flex-col items-center justify-center w-full text-center mt-25 mb-25
-                        '>
-                            <p className='text-xl font-semibold'>Carregando...</p>
-                        </div>
-                        )
-                    : cursosFiltrados.length === 0
-                    ?  (<div className='
-                                flex flex-col items-center justify-center w-full text-center mt-25 mb-25
-                        '>
-                            <p className='text-xl font-semibold'>Nenhum curso encontrado.</p>
-                            <p>Favor tente com outros filtros.</p>
-                        </div>
-                    ) : (
-                        <div className='
-                                bg-gray flex overflow-x-auto gap-10 justify-items-center
-                                px-10 pb-3
-                                sm:grid-cols-2 sm:overflow-x-hidden sm:px-2 sm:pb-4
-                                lg:grid-cols-3
-                                xl:grid-cols-4
-                        '
-                        >
-                            {cursosFiltrados.slice(0, 4).map(curso => {
-                                const vagas = vagasPorCurso[curso.id] || { livres: 0, reservadas: 0 };
+            {loadingCourses ? (
+                <div className='flex gap-4 overflow-hidden sm:grid sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4'>
+                    {[0, 1, 2, 3].map(i => (
+                        <div key={i} className={`w-[80%] shrink-0 sm:w-auto h-112 rounded-xl bg-white ring-1 ring-chocolate/[0.06] animate-pulse ${i === 3 ? 'lg:max-xl:hidden' : ''}`} />
+                    ))}
+                </div>
+            ) : cursosFiltrados.length === 0 ? (
+                <div className='flex flex-col items-center justify-center text-center py-16 px-6 rounded-xl bg-white ring-1 ring-chocolate/[0.06]'>
+                    <p className='font-serif text-2xl text-chocolate'>Nenhum curso com inscrição aberta no momento.</p>
+                    <p className='text-sm font-light text-cocoa mt-2'>Novas turmas são divulgadas toda semana, volte em breve.</p>
+                </div>
+            ) : (
+                // celular: carrossel com scroll lateral (o card seguinte aparece
+                // pela metade, indicando que dá pra arrastar) · sm+: grade.
+                // O 4º card some só no lg, onde a grade tem 3 colunas
+                <div className='
+                    flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-px-5 -mx-5 px-5 pb-2 [scrollbar-width:none]
+                    sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0
+                    lg:grid-cols-3 xl:grid-cols-4
+                '>
+                    {cursosFiltrados.slice(0, 4).map((curso, i) => {
+                        const vagas = vagasPorCurso[curso.id];
 
-                                return (
-                                    <CourseCard
-                                        key={curso.id}
-                                        id={curso.id}
-                                        curso={curso.nomeCurso}
-                                        data={layoutData(curso.data)}
-                                        horario={curso.hora}
-                                        loja={curso.loja}
-                                        culinarista={curso.culinarista}
-                                        duracao={curso.duracao}
-                                        categoria={curso.categoria}
-                                        loadingVagasPorCurso={loadingVagasPorCurso}
-                                        vagasLivres={vagas.livres}
-                                        vagasReservadas={vagas.livres + vagas.reservadas}
-                                        valor={curso.valor}
-                                        onClick={() => openForm(curso.id)}
-                                        className='
-                                                w-full min-w-73 max-w-[380px]
-                                        '
-                                        imagem={curso.fotos?.length ? curso.fotos[0] : null}
-                                    />
-                                );
-                            })}
-                    </div>
-                )}
-            </div>
+                        return (
+                            <Reveal
+                                key={curso.id}
+                                delay={i * 120}
+                                className={`w-[80%] max-w-80 shrink-0 snap-start sm:w-auto sm:max-w-none ${i === 3 ? 'lg:max-xl:hidden' : ''}`}
+                            >
+                                <CourseCard
+                                    id={curso.id}
+                                    curso={curso.nomeCurso}
+                                    data={curso.data}
+                                    horario={curso.hora}
+                                    loja={curso.loja}
+                                    culinarista={curso.culinarista}
+                                    duracao={curso.duracao}
+                                    categoria={curso.categoria}
+                                    loadingVagasPorCurso={loadingVagasPorCurso}
+                                    vagasLivres={vagas?.livres}
+                                    vagasTotal={vagas ? vagas.livres + vagas.reservadas : 0}
+                                    valor={curso.valor}
+                                    onClick={() => openForm(curso.id)}
+                                    className='h-full'
+                                    imagem={curso.fotos?.length ? curso.fotos[0] : null}
+                                />
+                            </Reveal>
+                        );
+                    })}
+                </div>
+            )}
 
-            <div className='
-                flex w-full justify-center
-            '>
-                <Link to={'/cursos'}>
-                    <Button className='bg-orange-base text-white hover:bg-orange-light text-sm px-5 py-1.5 sm:px-6 sm:py-2 cursor-pointer transition'>
-                        Ver todos
-                    </Button>
-                </Link>
-            </div>
-            
+            {link && <SectionAction link={link}>Ver agenda completa</SectionAction>}
+
         </section>
     )
 }
