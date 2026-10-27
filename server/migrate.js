@@ -30,6 +30,10 @@ async function migrate() {
       ultimo_login  TIMESTAMPTZ
     )
   `);
+  // sobe a cada troca/redefinição de senha e mudança de status — vai dentro
+  // do JWT do cliente, e o middleware recusa token de versão antiga (ver
+  // middleware/authCliente.middleware.js)
+  await pool.query(`ALTER TABLE cursos.clientes ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0`);
   console.log('✓ cursos.clientes');
 
   await pool.query(`

@@ -21,9 +21,12 @@ const COOKIE_OPTS = {
     path: '/',
 };
 
+// tv = token_version: o middleware recusa token com versão diferente da do
+// banco, e a versão sobe ao trocar/redefinir senha ou desativar a conta —
+// é o que derruba as sessões já abertas (ver authCliente.middleware.js)
 function assinarToken(cliente) {
     return jwt.sign(
-        { sub: cliente.id, nome: cliente.nome, email: cliente.email },
+        { sub: cliente.id, nome: cliente.nome, email: cliente.email, tv: cliente.token_version ?? 0 },
         process.env.CLIENTE_JWT_SECRET,
         { expiresIn: '7d' }
     );
@@ -90,7 +93,7 @@ router.post('/cadastro', cadastroLimiter, async (req, res) => {
             WITH novo AS (
                 INSERT INTO clientes (id, nome, email, senha_hash, cpf, celular, filial_id)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
-                RETURNING id, nome, email, cpf, celular, criado_em, filial_id
+                RETURNING id, nome, email, cpf, celular, criado_em, filial_id, token_version
             )
             SELECT novo.*, REPLACE(b.name, 'Novamix ', '') AS loja
             FROM novo LEFT JOIN public.branchs b ON b.id = novo.filial_id
@@ -216,8 +219,15 @@ router.post('/alterar-senha', authenticateCliente, loginLimiter, async (req, res
         }
 
         const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
-        await pool.query(`UPDATE clientes SET senha_hash = $1 WHERE id = $2`, [novaSenhaHash, req.cliente.sub]);
+        const { rows: atualizado } = await pool.query(`
+            UPDATE clientes SET senha_hash = $1, token_version = token_version + 1
+            WHERE id = $2
+            RETURNING id, nome, email, token_version
+        `, [novaSenhaHash, req.cliente.sub]);
 
+        // a versão nova derruba as sessões abertas em outros aparelhos; esta
+        // aqui ganha um token novo pra pessoa não ser deslogada
+        res.cookie('cliente_token', assinarToken(atualizado[0]), { ...COOKIE_OPTS, maxAge: SETE_DIAS_MS });
         res.json({ message: 'Senha alterada com sucesso.' });
     } catch (err) {
         console.error('Erro ao alterar senha:', err);
@@ -485,7 +495,7 @@ router.put('/:id/status', authenticate, requireCursosAdmin, async (req, res) => 
 
     try {
         const { rows } = await pool.query(
-            `UPDATE clientes SET status = $1 WHERE id = $2 RETURNING id, nome, email`,
+            `UPDATE clientes SET status = $1, token_version = token_version + 1 WHERE id = $2 RETURNING id, nome, email`,
             [status, req.params.id]
         );
         if (!rows.length) return res.status(404).json({ message: 'Cliente não encontrado.' });
@@ -516,3 +526,5 @@ router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
 });
 
 module.exports = router;
+        // token_version + 1: desativar derruba na hora quem estava logado, e
+        // reativar depois não ressuscita essas sessões antigas
