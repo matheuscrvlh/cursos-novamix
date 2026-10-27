@@ -56,17 +56,39 @@ function extrairComprovanteUrl(paymentData) {
 // deve atualizar a linha existente, nunca duplicar. `executor` pode ser o
 // pool ou um client de transação, pra caber tanto em updates isolados quanto
 // dentro de uma transação maior (ex: confirmarPagamentoOuReembolsarConflito).
-async function upsertPagamento(executor, { inscricaoId, mpPaymentId, metodoPagamento, status, comprovanteUrl }) {
+// `valor` só vem na criação (processar-pagamento) e nunca é sobrescrito
+// depois — é a referência que valorPagoConfere usa.
+async function upsertPagamento(executor, { inscricaoId, mpPaymentId, metodoPagamento, status, comprovanteUrl, valor }) {
   await executor.query(
-    `INSERT INTO pagamentos (id, inscricao_id, metodo_pagamento, mp_pagamento_id, status, comprovante_url, criado_em, atualizado_em)
-     VALUES ($1, $2, $3, $4, $5, $6, now(), now())
+    `INSERT INTO pagamentos (id, inscricao_id, metodo_pagamento, mp_pagamento_id, status, comprovante_url, valor, criado_em, atualizado_em)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, now(), now())
      ON CONFLICT (mp_pagamento_id) DO UPDATE SET
        status = EXCLUDED.status,
        metodo_pagamento = COALESCE(EXCLUDED.metodo_pagamento, pagamentos.metodo_pagamento),
        comprovante_url = COALESCE(EXCLUDED.comprovante_url, pagamentos.comprovante_url),
+       valor = COALESCE(pagamentos.valor, EXCLUDED.valor),
        atualizado_em = now()`,
-    [uuidv4(), inscricaoId, metodoPagamento || null, mpPaymentId, status, comprovanteUrl || null]
+    [uuidv4(), inscricaoId, metodoPagamento || null, mpPaymentId, status, comprovanteUrl || null, valor ?? null]
   );
+}
+
+// Confere se o valor aprovado no MP é o que este sistema cobrou: o valor
+// gravado na criação do pagamento ou, se não houver (pagamento anterior à
+// coluna `valor`, ou que ainda não foi registrado), o preço atual do curso.
+// Sem isso, qualquer pagamento aprovado com o external_reference da inscrição
+// a confirmaria — até um de R$ 1 criado fora deste sistema.
+async function valorPagoConfere({ inscricaoId, paymentId, valorPago }) {
+  const { rows } = await pool.query(`
+    SELECT COALESCE(p.valor, c.valor) AS esperado
+    FROM inscricoes i
+    LEFT JOIN cursos c ON c.id = i.curso_id
+    LEFT JOIN pagamentos p ON p.mp_pagamento_id = $2 AND p.inscricao_id = i.id
+    WHERE i.id = $1
+  `, [inscricaoId, String(paymentId)]);
+  const esperado = rows[0]?.esperado;
+  // curso excluído e sem valor registrado: não tem com o que comparar
+  if (esperado == null) return false;
+  return Math.abs(Number(valorPago) - Number(esperado)) < 0.01;
 }
 
 // Traduz o status bruto do MP pro vocabulário que o app já usa em
@@ -248,6 +270,10 @@ router.post('/verificar/:inscricaoId', authenticate, requireCursosAccess, async 
       if (inscricao.status === 'pago') {
         novoStatus = 'pago';
       } else {
+        if (!(await valorPagoConfere({ inscricaoId, paymentId: mpPaymentId, valorPago: paymentData.transaction_amount }))) {
+          console.error(`[pagamento] Valor aprovado (${paymentData.transaction_amount}) não confere com o cobrado — inscrição ${inscricaoId} NÃO confirmada`);
+          return res.status(409).json({ message: `O valor aprovado no Mercado Pago (R$ ${paymentData.transaction_amount}) não confere com o valor cobrado. Confira manualmente antes de confirmar.` });
+        }
         const resultado = await confirmarPagamentoOuReembolsarConflito({ inscricaoId, paymentId: mpPaymentId });
         novoStatus = resultado.conflito ? 'reembolsado' : 'pago';
       }
@@ -365,6 +391,10 @@ router.post('/webhook', async (req, res) => {
       );
       const inscricao = rows[0];
       if (!inscricao || inscricao.statusAtual === 'pago') return;
+      if (!(await valorPagoConfere({ inscricaoId, paymentId, valorPago: paymentData.transaction_amount }))) {
+        console.error(`[pagamento] Webhook: valor aprovado (${paymentData.transaction_amount}) não confere com o cobrado — inscrição ${inscricaoId} NÃO confirmada, conferir manualmente no Mercado Pago (pagamento ${paymentId})`);
+        return;
+      }
       await confirmarPagamentoOuReembolsarConflito({ inscricaoId, paymentId });
     } else if (status === 'rejected' || status === 'cancelled') {
       // 'rejected' = recusado pela operadora/banco, 'cancelled' = cancelado
@@ -468,6 +498,7 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
         metodoPagamento,
         status: statusPagamentoFromMp(status),
         comprovanteUrl: extrairComprovanteUrl(paymentData),
+        valor,
       });
 
       if (status === 'approved') {

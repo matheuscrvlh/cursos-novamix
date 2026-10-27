@@ -166,6 +166,10 @@ async function migrate() {
       atualizado_em     TIMESTAMPTZ
     )
   `);
+  // valor que este sistema pediu pro Mercado Pago cobrar — o webhook confere
+  // o valor aprovado contra isso antes de confirmar a inscrição. Nulo nos
+  // pagamentos criados antes dessa coluna existir.
+  await pool.query(`ALTER TABLE cursos.pagamentos ADD COLUMN IF NOT EXISTS valor NUMERIC(10,2)`);
   console.log('✓ cursos.pagamentos');
 
   await pool.query(`
