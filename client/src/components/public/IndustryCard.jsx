@@ -13,46 +13,46 @@ export default function IndustryCard({
     instagram,
 }) {
     return (
-        <div className='bg-white rounded-xl flex flex-col shadow-md hover:shadow-lg transition-shadow overflow-hidden w-full'>
+        <div className='group bg-white rounded-xl flex flex-col ring-1 ring-chocolate/[0.07] hover:shadow-[0_28px_50px_-28px_rgba(58,42,33,0.45)] transition-shadow duration-700 overflow-hidden w-full'>
 
             <div className='relative h-44 overflow-hidden'>
                 {foto ? (
-                    <img src={foto} alt={nome} className='w-full h-full object-cover' />
+                    <img src={foto} alt={nome} loading='lazy' className='w-full h-full object-cover transition-transform duration-[1400ms] ease-luxo group-hover:scale-[1.06]' />
                 ) : (
                     <div className='w-full h-full bg-gray-base/10 flex items-center justify-center'>
                         <Building2 size={40} className='text-gray-base/30' />
                     </div>
                 )}
 
-                <div className='absolute inset-0 bg-linear-to-t from-black/65 via-black/20 to-transparent' />
+                <div className='absolute inset-0 bg-linear-to-t from-chocolate/80 via-chocolate/15 to-transparent' />
 
                 <div className='absolute bottom-0 left-0 right-0 p-3'>
-                    <p className='text-white font-bold text-base leading-tight'>{nome}</p>
+                    <p className='font-serif text-white text-[26px] font-semibold leading-none'>{nome}</p>
                     {razaoSocial && razaoSocial !== nome && (
-                        <p className='text-white/70 text-xs mt-0.5 truncate'>{razaoSocial}</p>
+                        <p className='text-white/75 text-[11px] font-light mt-1.5 truncate'>{razaoSocial}</p>
                     )}
                 </div>
             </div>
 
-            <div className='p-4 flex flex-col gap-2 flex-1'>
+            <div className='p-5 flex flex-col gap-2.5 flex-1'>
 
                 {telefone && (
-                    <div className='flex items-center gap-2 text-xs text-gray-text/70'>
-                        <Phone size={13} className='shrink-0 text-orange-base' />
+                    <div className='flex items-center gap-2 text-xs font-light text-cocoa'>
+                        <Phone size={13} strokeWidth={1.5} className='shrink-0 text-gold' />
                         <span>{telefone}</span>
                     </div>
                 )}
 
                 {email && (
-                    <div className='flex items-center gap-2 text-xs text-gray-text/70'>
-                        <Mail size={13} className='shrink-0 text-orange-base' />
+                    <div className='flex items-center gap-2 text-xs font-light text-cocoa'>
+                        <Mail size={13} strokeWidth={1.5} className='shrink-0 text-gold' />
                         <span className='truncate'>{email}</span>
                     </div>
                 )}
 
                 {endereco && (
-                    <div className='flex items-center gap-2 text-xs text-gray-text/70'>
-                        <MapPin size={13} className='shrink-0 text-orange-base' />
+                    <div className='flex items-center gap-2 text-xs font-light text-cocoa'>
+                        <MapPin size={13} strokeWidth={1.5} className='shrink-0 text-gold' />
                         <span className='truncate'>{endereco}</span>
                     </div>
                 )}

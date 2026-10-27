@@ -14,7 +14,7 @@ import { getChildren } from '../../api/children.services';
 import { getClientesStats } from '../../api/clientes.services';
 
 import { DadosContext } from '../../contexts/DadosContext';
-import { formatDateBR, cursoEncerrado } from '../../utils/formatDate';
+import { cursoEncerrado } from '../../utils/formatDate';
 import { formatarPreco } from '../../utils/formatCurrency';
 
 const NOMES_MES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -421,14 +421,15 @@ export default function DashboardAdmin() {
                                     key={curso.id}
                                     id={curso.id}
                                     curso={curso.nomeCurso}
-                                    data={formatDateBR(curso.data)}
+                                    data={curso.data}
                                     horario={curso.hora}
                                     loja={curso.loja}
                                     culinarista={curso.culinarista}
                                     duracao={curso.duracao}
                                     categoria={curso.categoria}
-                                    vagasLivres={vagasPorCurso[curso.id]?.livres ?? '...'}
-                                    vagasReservadas={vagasPorCurso[curso.id]?.total ?? 0}
+                                    loadingVagasPorCurso={!vagasPorCurso[curso.id]}
+                                    vagasLivres={vagasPorCurso[curso.id]?.livres}
+                                    vagasTotal={vagasPorCurso[curso.id]?.total ?? 0}
                                     valor={curso.valor}
                                     className='w-75 shrink-0'
                                     imagem={

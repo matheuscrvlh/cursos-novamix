@@ -1,5 +1,7 @@
 import { User } from 'lucide-react';
 
+import { nomeLoja } from '../../utils/lojas';
+
 export default function CulinarianCard({
     id,
     foto,
@@ -11,39 +13,30 @@ export default function CulinarianCard({
     const lojaUnica = Array.isArray(lojas) ? lojas[0] : lojas;
 
     return (
-        <div className={`rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden ${className || ''}`}>
+        <div className={`group rounded-xl ring-1 ring-chocolate/[0.07] hover:shadow-[0_28px_50px_-28px_rgba(58,42,33,0.5)] transition-shadow duration-700 overflow-hidden bg-cream-dark ${className || ''}`}>
 
             <div className='relative h-72 w-full overflow-hidden'>
                 {foto ? (
                     <img
                         src={foto}
                         alt={nomeCulinarista}
-                        className='w-full h-full object-cover'
+                        className='w-full h-full object-cover transition-transform duration-[1400ms] ease-luxo group-hover:scale-[1.06]'
+                        loading='lazy'
                     />
                 ) : (
-                    <div className='w-full h-full bg-gray-base/10 flex items-center justify-center'>
-                        <User size={48} className='text-gray-base/30' />
+                    <div className='w-full h-full flex items-center justify-center'>
+                        <User size={48} strokeWidth={1.25} className='text-gold/50' />
                     </div>
                 )}
 
-                <div className='absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent' />
+                <div className='absolute inset-0 bg-linear-to-t from-chocolate/85 via-chocolate/15 to-transparent' />
 
-                <div className='absolute bottom-0 left-0 right-0 p-4'>
-                    <p className='text-white font-bold text-lg leading-tight mb-1.5'>{nomeCulinarista}</p>
+                <div className='absolute bottom-0 left-0 right-0 p-5'>
+                    <p className='font-serif text-white text-[22px] md:text-[26px] font-semibold leading-[1.05] mb-2.5'>{nomeCulinarista}</p>
 
-                    {duasLojas ? (
-                        <span className='text-xs font-semibold px-2.5 py-1 rounded-full bg-white/20 text-white backdrop-blur-sm'>
-                            Prado e Teresópolis
-                        </span>
-                    ) : lojaUnica === 'Prado' ? (
-                        <span className='text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-base text-white'>
-                            Prado
-                        </span>
-                    ) : (
-                        <span className='text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-base text-white'>
-                            {lojaUnica}
-                        </span>
-                    )}
+                    <span className='inline-block text-[9px] font-medium uppercase tracking-[0.22em] px-3 py-1.5 rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur-sm'>
+                        {duasLojas ? 'Prado e Teresópolis' : nomeLoja(lojaUnica)}
+                    </span>
                 </div>
             </div>
 
