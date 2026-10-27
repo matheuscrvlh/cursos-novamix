@@ -16,11 +16,11 @@ export default function ModalEnrollmentSucess({
 
     return (
         <div
-            className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
+            className='flex items-center justify-center fixed inset-0 w-full h-full bg-chocolate/55 backdrop-blur-sm z-50 p-4 animate-pagina'
             onClick={onClose}
         >
             <div
-                className='bg-white shadow-xl rounded-xl w-[90%] max-w-96 overflow-hidden'
+                className='bg-white shadow-2xl rounded-2xl animate-surgir w-[90%] max-w-96 overflow-hidden'
                 onClick={(e) => e.stopPropagation()}
                 {...props}
             >
@@ -28,7 +28,7 @@ export default function ModalEnrollmentSucess({
                     <div className='w-20 h-20 rounded-full bg-green-base/15 flex items-center justify-center mb-4'>
                         <CheckCircle2 size={42} className='text-green-base' />
                     </div>
-                    <h2 className='font-bold text-gray-dark text-xl text-center'>Inscrição confirmada!</h2>
+                    <h2 className='font-serif text-[32px] leading-none text-chocolate text-center'>Inscrição confirmada!</h2>
                     <p className='text-sm text-gray-text/60 text-center mt-1'>Você está na lista do curso 🎉</p>
                 </div>
 

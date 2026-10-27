@@ -10,15 +10,15 @@ export default function ModalLoginRequired({ isOpen, onClose }) {
 
     return (
         <div
-            className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
+            className='flex items-center justify-center fixed inset-0 w-full h-full bg-chocolate/55 backdrop-blur-sm z-50 p-4 animate-pagina'
             onClick={onClose}
         >
             <div
-                className='bg-white shadow-xl rounded-xl w-[90%] max-w-100 p-6'
+                className='bg-white shadow-2xl rounded-2xl animate-surgir w-[90%] max-w-100 p-6'
                 onClick={e => e.stopPropagation()}
             >
-                <div className='flex items-center justify-between mb-3'>
-                    <h2 className='font-bold text-gray-dark text-lg'>Faça Login</h2>
+                <div className='flex items-center justify-between'>
+                    <h2 className='font-serif text-[28px] leading-none text-chocolate'>Faça Login</h2>
                     <button
                         className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray text-gray-text/60 hover:text-gray-dark transition cursor-pointer'
                         onClick={onClose}
@@ -27,7 +27,7 @@ export default function ModalLoginRequired({ isOpen, onClose }) {
                     </button>
                 </div>
 
-                <p className='text-sm text-gray-text/70 mb-5'>
+                <p className='text-sm font-light text-cocoa mt-3 mb-6'>
                     Pra garantir sua vaga usamos os dados da sua conta, entre ou crie uma conta gratuita pra continuar.
                 </p>
 
@@ -35,14 +35,14 @@ export default function ModalLoginRequired({ isOpen, onClose }) {
                     <Link
                         to='/entrar'
                         onClick={onClose}
-                        className='flex items-center justify-center gap-2 bg-orange-base hover:bg-orange-light text-white font-semibold py-2.5 rounded-lg transition'
+                        className='flex items-center justify-center gap-2 bg-orange-base hover:bg-chocolate text-white py-3.5 rounded-full text-[11px] font-medium uppercase tracking-[0.2em] transition-colors duration-500'
                     >
                         <LogIn size={16} /> Entrar
                     </Link>
                     <Link
                         to='/cadastro'
                         onClick={onClose}
-                        className='flex items-center justify-center gap-2 border border-orange-base text-orange-base hover:bg-orange-base/5 font-semibold py-2.5 rounded-lg transition'
+                        className='flex items-center justify-center gap-2 border border-chocolate/20 text-chocolate hover:bg-chocolate hover:text-cream py-3.5 rounded-full text-[11px] font-medium uppercase tracking-[0.2em] transition-colors duration-500'
                     >
                         <UserPlus size={16} /> Criar conta
                     </Link>

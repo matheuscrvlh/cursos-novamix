@@ -161,17 +161,17 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
 
     return (
         <div
-            className='flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
+            className='flex items-center justify-center fixed inset-0 w-full h-full bg-chocolate/55 backdrop-blur-sm z-50 p-4 animate-pagina'
             onClick={onClose}
         >
             <div
-                className='bg-white shadow-xl rounded-xl w-[90%] max-w-lg max-h-[90vh] overflow-y-auto'
+                className='bg-white shadow-2xl rounded-2xl animate-surgir w-[90%] max-w-lg max-h-[90vh] overflow-y-auto'
                 onClick={e => e.stopPropagation()}
             >
-                <div className='flex items-center justify-between p-5 pb-4 border-b border-gray-base/20'>
+                <div className='flex items-center justify-between p-5 pb-4 border-b border-chocolate/[0.08]'>
                     <div>
-                        <h2 className='font-bold text-gray-dark text-lg'>Pagamento</h2>
-                        <p className='text-xs text-gray-text/60 mt-0.5'>Seus dados são protegidos pelo MercadoPago</p>
+                        <h2 className='font-serif text-[28px] leading-none text-chocolate'>Pagamento</h2>
+                        <p className='text-xs font-light text-cocoa mt-1.5'>Seus dados são protegidos pelo MercadoPago</p>
                     </div>
                     <button
                         className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray text-gray-text/60 hover:text-gray-dark transition cursor-pointer'
@@ -204,7 +204,7 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
                         </div>
                     )}
                     {erro && (
-                        <div className='flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3 mb-4'>
+                        <div className='flex items-start gap-2 bg-red-base/5 border border-red-base/20 text-red-base text-sm rounded-lg p-3 mb-4'>
                             <AlertCircle size={16} className='shrink-0 mt-0.5' />
                             <p>{erro}</p>
                         </div>
