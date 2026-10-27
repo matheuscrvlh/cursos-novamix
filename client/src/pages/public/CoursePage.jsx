@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useContext } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Calendar, Clock, User, MapPin, Tag, ArrowLeft, XCircle, Loader2, Printer } from 'lucide-react'
+import { Calendar, Clock, MapPin, ArrowLeft, XCircle, Loader2, Printer, ChefHat, ShieldCheck, RotateCcw, MessageCircle } from 'lucide-react'
 
 import PublicLayout from '../../layouts/public/PublicLayout'
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
@@ -14,13 +14,8 @@ import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnro
 import { getCourseById } from '../../api/courses.services'
 import { postEnrollment, putSeatChange, getSeats, cancelEnrollment } from '../../api/enrollment.services'
 import { formatarPreco } from '../../utils/formatCurrency'
-import { cursoEncerrado } from '../../utils/formatDate'
-
-function formatDate(dateStr) {
-    if (!dateStr) return ''
-    const [ano, mes, dia] = dateStr.split('-')
-    return `${dia}/${mes}/${ano}`
-}
+import { cursoEncerrado, partesData, formatHora } from '../../utils/formatDate'
+import { LOJAS, nomeLoja } from '../../utils/lojas'
 
 export default function CoursePage() {
     const { id } = useParams()
@@ -239,9 +234,9 @@ export default function CoursePage() {
 
     if (loading) {
         return (
-            <PublicLayout>
+            <PublicLayout showBanner={false}>
                 <div className='flex items-center justify-center min-h-96'>
-                    <p className='text-gray-text/60 text-lg'>Carregando...</p>
+                    <Loader2 size={32} className='text-orange-base animate-spin' />
                 </div>
             </PublicLayout>
         )
@@ -249,8 +244,8 @@ export default function CoursePage() {
 
     if (!curso) {
         return (
-            <PublicLayout>
-                <div className='flex flex-col items-center justify-center min-h-96 gap-4'>
+            <PublicLayout showBanner={false}>
+                <div className='flex flex-col items-center justify-center min-h-96 gap-4 px-5 text-center'>
                     <p className='text-gray-text/60 text-lg'>Curso não encontrado.</p>
                     <Link to='/cursos'>
                         <Button className='bg-orange-base text-white hover:bg-orange-light'>
@@ -265,191 +260,268 @@ export default function CoursePage() {
     const fotos = Array.isArray(curso.fotos) ? curso.fotos : []
     const imagemAtual = fotos[fotoIdx] || null
     const encerrado = cursoEncerrado(curso)
+    const totalAssentos = assentos.length
+    // só conta como esgotado depois que os assentos carregaram — antes disso
+    // vagasLivres ainda é 0 e o botão piscava "Vagas esgotadas"
+    const esgotado = totalAssentos > 0 && vagasLivres === 0
+    const bloqueado = encerrado || esgotado
+    const percentualOcupado = totalAssentos ? Math.round(((totalAssentos - vagasLivres) / totalAssentos) * 100) : 0
+    const ultimasVagas = !esgotado && totalAssentos > 0 && vagasLivres <= Math.max(3, Math.ceil(totalAssentos * 0.2))
+
+    const { dia, mes, semana, extenso } = partesData(curso.data)
+    const preco = Number(curso.valor) === 0 ? 'Grátis' : `R$ ${formatarPreco(curso.valor)}`
+    const textoBotao = encerrado ? 'Curso encerrado' : esgotado ? 'Vagas esgotadas' : 'Garantir minha vaga'
+    const loja = LOJAS[curso.loja]
 
     return (
-        <PublicLayout>
+        <PublicLayout showBanner={false} bottomBar>
             <Head
                 title={curso.nomeCurso}
-                description={`Curso ${curso.nomeCurso}${curso.culinarista ? ` com ${curso.culinarista}` : ''}${curso.loja ? ` na loja ${curso.loja}` : ''}.`}
+                description={`Curso ${curso.nomeCurso}${curso.culinarista ? ` com ${curso.culinarista}` : ''}${curso.loja ? ` na loja ${nomeLoja(curso.loja)}` : ''}.`}
             />
 
-            <div className='max-w-4xl mx-auto px-4 py-8 md:px-8'>
+            <div className='max-w-7xl mx-auto px-5 md:px-8 pt-6 pb-10 md:pt-8 lg:pb-16'>
 
                 <Link
                     to='/cursos'
-                    className='inline-flex items-center gap-1.5 text-sm text-gray-text/60 hover:text-orange-base transition mb-6'
+                    className='inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] text-cocoa hover:text-orange-base transition-colors duration-500 mb-6'
                 >
-                    <ArrowLeft size={15} />
-                    Voltar para cursos
+                    <ArrowLeft size={14} strokeWidth={1.5} />
+                    Voltar para a agenda
                 </Link>
 
-                <div className='relative w-full rounded-2xl overflow-hidden bg-gray-base/10 aspect-video mb-8'>
-                    {imagemAtual ? (
-                        <img src={imagemAtual} alt={curso.nomeCurso} className='w-full h-full object-cover' />
-                    ) : (
-                        <div className='w-full h-full flex items-center justify-center'>
-                            <User size={64} className='text-gray-base/20' />
+                {/* no lg o quadro de inscrição vai pra coluna da direita e fica
+                    fixo na rolagem; no celular ele vem logo depois da arte */}
+                <div className='grid gap-6 items-start lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-10'>
+
+                    <div className='lg:col-start-1 flex flex-col gap-3 min-w-0'>
+                        <div className='relative w-full aspect-4/5 sm:aspect-4/3 rounded-xl overflow-hidden bg-chocolate'>
+                            {imagemAtual ? (
+                                <>
+                                    {/* a arte é 4:5 e o quadro é mais largo a partir do sm —
+                                        a própria arte desfocada preenche as laterais, sem recortar nada */}
+                                    <img src={imagemAtual} alt='' aria-hidden='true' className='absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-60' />
+                                    <img src={imagemAtual} alt={curso.nomeCurso} className='relative w-full h-full object-contain' />
+                                </>
+                            ) : (
+                                <div className='w-full h-full flex items-center justify-center'>
+                                    <ChefHat size={64} strokeWidth={1.25} className='text-cream/20' />
+                                </div>
+                            )}
                         </div>
-                    )}
 
-                    <span className='absolute bottom-4 left-4 bg-orange-base text-white text-base font-bold px-4 py-1.5 rounded-full shadow-lg'>
-                        R$ {formatarPreco(curso.valor)}
-                    </span>
-                    {curso.loja && (
-                        <span className={`absolute top-4 right-4 text-white text-sm font-semibold px-3 py-1 rounded-full ${curso.loja === 'Prado' ? 'bg-orange-base' : 'bg-blue-base'}`}>
-                            {curso.loja}
-                        </span>
-                    )}
+                        {fotos.length > 1 && (
+                            <div className='flex gap-2 overflow-x-auto pb-1'>
+                                {fotos.map((foto, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setFotoIdx(i)}
+                                        aria-label={`Foto ${i + 1}`}
+                                        className={`w-16 h-20 shrink-0 rounded-lg overflow-hidden ring-1 ring-offset-2 ring-offset-cream transition duration-500 cursor-pointer ${i === fotoIdx ? 'ring-gold' : 'ring-transparent opacity-60 hover:opacity-100'}`}
+                                    >
+                                        <img src={foto} alt='' className='w-full h-full object-cover' />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-                    {fotos.length > 1 && (
-                        <div className='absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5'>
-                            {fotos.map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setFotoIdx(i)}
-                                    className={`h-2 rounded-full transition-all cursor-pointer ${i === fotoIdx ? 'w-4 bg-white' : 'w-2 bg-white/50'}`}
-                                />
-                            ))}
+                    <aside className='lg:col-start-2 lg:row-start-1 lg:row-span-3 lg:sticky lg:top-24 bg-white rounded-xl ring-1 ring-chocolate/[0.07] shadow-[0_30px_60px_-40px_rgba(58,42,33,0.45)] p-6 md:p-8 flex flex-col gap-6'>
+
+                        <div>
+                            {curso.categoria && (
+                                <p className='text-[10px] font-medium uppercase tracking-[0.28em] text-gold mb-2'>{curso.categoria}</p>
+                            )}
+                            <h1 className='font-serif text-[34px] md:text-[42px] font-semibold text-chocolate leading-[1.02]'>
+                                {curso.nomeCurso}
+                            </h1>
+                            {curso.culinarista && (
+                                <p className='flex items-center gap-1.5 text-sm font-light text-cocoa mt-3'>
+                                    <ChefHat size={15} strokeWidth={1.5} className='text-gold shrink-0' />
+                                    com <span className='font-serif italic text-lg text-chocolate'>{curso.culinarista}</span>
+                                </p>
+                            )}
                         </div>
-                    )}
-                </div>
 
-                <h1 className='text-2xl md:text-3xl font-bold text-gray-dark mb-6 leading-snug'>
-                    {curso.nomeCurso}
-                </h1>
-
-                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8'>
-                    <InfoCard icon={<Calendar size={18} className='text-orange-base' />} label='Data'>
-                        {formatDate(curso.data)} às {curso.hora}h
-                    </InfoCard>
-                    <InfoCard icon={<Clock size={18} className='text-orange-base' />} label='Duração'>
-                        {curso.duracao}
-                    </InfoCard>
-                    <InfoCard icon={<User size={18} className='text-orange-base' />} label='Culinarista'>
-                        {curso.culinarista}
-                    </InfoCard>
-                    <InfoCard icon={<MapPin size={18} className='text-orange-base' />} label='Loja'>
-                        {curso.loja}
-                    </InfoCard>
-                    {curso.categoria && (
-                        <InfoCard icon={<Tag size={18} className='text-orange-base' />} label='Categoria'>
-                            {curso.categoria}
-                        </InfoCard>
-                    )}
-                </div>
-
-                {curso.ingredientes && curso.ingredientes.trim() && (
-                    <div className='bg-white rounded-xl p-5 shadow-sm mb-8'>
-                        <div className='flex items-center justify-between mb-3'>
-                            <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider'>Ingredientes</p>
-                            <button
-                                onClick={imprimirIngredientes}
-                                className='flex items-center gap-1.5 text-orange-base hover:text-orange-light text-xs font-semibold cursor-pointer'
-                            >
-                                <Printer size={14} />
-                                Imprimir
-                            </button>
-                        </div>
-                        <ul className='flex flex-col gap-1.5'>
-                            {curso.ingredientes.split('\n').filter(i => i.trim()).map((item, idx) => (
-                                <li key={idx} className='flex items-start gap-2 text-sm text-gray-dark'>
-                                    <span className='mt-1.5 w-1.5 h-1.5 rounded-full bg-orange-base shrink-0' />
-                                    {item.trim()}
-                                </li>
-                            ))}
+                        <ul className='flex flex-col gap-3.5'>
+                            <InfoItem icon={<Calendar size={16} strokeWidth={1.5} className='text-gold' />} label='Data'>
+                                {extenso}
+                            </InfoItem>
+                            <InfoItem icon={<Clock size={16} strokeWidth={1.5} className='text-gold' />} label='Horário'>
+                                {formatHora(curso.hora)}{curso.duracao ? ` · ${curso.duracao} de duração` : ''}
+                            </InfoItem>
+                            {curso.loja && (
+                                <InfoItem icon={<MapPin size={16} strokeWidth={1.5} className='text-gold' />} label='Local'>
+                                    Loja {nomeLoja(curso.loja)}
+                                    {loja && <span className='block text-xs font-light text-cocoa mt-0.5'>{loja.endereco}</span>}
+                                </InfoItem>
+                            )}
                         </ul>
-                    </div>
-                )}
 
-                <div className='bg-white rounded-xl p-4 shadow-sm mb-8 flex items-center justify-between'>
-                    <div>
-                        <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-0.5'>Vagas disponíveis</p>
-                        <p className='text-2xl font-bold text-gray-dark'>{vagasLivres}</p>
-                    </div>
-                    <div className='text-right'>
-                        <p className='text-xs text-gray-text/50'>de {assentos.length} lugares</p>
-                        <div className='w-32 h-2 bg-gray-base/20 rounded-full mt-1.5 overflow-hidden'>
-                            <div
-                                className='h-full bg-orange-base rounded-full transition-all'
-                                style={{ width: assentos.length ? `${(vagasLivres / assentos.length) * 100}%` : '0%' }}
-                            />
+                        <div className='border-t border-chocolate/[0.08] pt-6 flex flex-col gap-5'>
+                            <div className='flex items-end justify-between gap-3'>
+                                <div className='leading-tight'>
+                                    <p className='text-[10px] font-medium uppercase tracking-[0.22em] text-cocoa/70 mb-1.5'>Investimento</p>
+                                    <p className='font-serif italic text-[42px] font-semibold text-orange-base leading-none'>{preco}</p>
+                                </div>
+                                {totalAssentos > 0 && !encerrado && (
+                                    <p className={`text-sm text-right font-light ${esgotado || ultimasVagas ? 'text-orange-base font-medium' : 'text-cocoa'}`}>
+                                        {esgotado ? 'Esgotado' : <><span className='font-serif text-xl font-semibold text-chocolate'>{vagasLivres}</span> de {totalAssentos} vagas livres</>}
+                                    </p>
+                                )}
+                            </div>
+
+                            {totalAssentos > 0 && !encerrado && (
+                                <div className='w-full h-0.5 bg-chocolate/[0.08] rounded-full overflow-hidden'>
+                                    <div
+                                        className='h-full rounded-full bg-orange-base transition-all duration-1000 ease-luxo'
+                                        style={{ width: `${percentualOcupado}%` }}
+                                    />
+                                </div>
+                            )}
+
+                            <button
+                                onClick={abrirInscricao}
+                                disabled={bloqueado}
+                                className={`w-full py-4 rounded-full text-xs font-medium uppercase tracking-[0.22em] transition-colors duration-500 ${
+                                    bloqueado
+                                        ? 'bg-cream-dark text-cocoa/60 cursor-not-allowed'
+                                        : 'bg-orange-base text-white hover:bg-chocolate cursor-pointer'
+                                }`}
+                            >
+                                {textoBotao}
+                            </button>
+
+                            <div className='flex flex-col gap-2.5 text-xs font-light text-cocoa'>
+                                <p className='flex items-center gap-2'>
+                                    <ShieldCheck size={15} strokeWidth={1.5} className='text-gold shrink-0' />
+                                    Pagamento seguro pelo Mercado Pago, no Pix ou cartão
+                                </p>
+                                <p className='flex items-center gap-2'>
+                                    <RotateCcw size={15} strokeWidth={1.5} className='text-gold shrink-0' />
+                                    Reembolso somente antes de 24h do início do curso
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                {assentos.length > 0 && (
-                    <div className='bg-white rounded-xl p-5 shadow-sm mb-8'>
-                        <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-4'>Mapa de assentos</p>
+                        <a
+                            href='https://api.whatsapp.com/send?phone=5522998336225'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='flex items-center justify-center gap-2 py-3.5 rounded-full border border-chocolate/15 text-[11px] font-medium uppercase tracking-[0.2em] text-chocolate hover:bg-chocolate hover:text-cream hover:border-chocolate transition-colors duration-500'
+                        >
+                            <MessageCircle size={15} strokeWidth={1.5} />
+                            Dúvidas? Fale com a gente
+                        </a>
+                    </aside>
 
-                        <div className='bg-gray-dark rounded-lg py-3 text-center text-sm font-bold text-white uppercase tracking-widest mb-4'>
-                            Balcão
+                    {curso.ingredientes && curso.ingredientes.trim() && (
+                        <div className='lg:col-start-1 bg-white rounded-xl ring-1 ring-chocolate/[0.07] p-6 md:p-8'>
+                            <div className='flex items-center justify-between mb-5'>
+                                <h2 className='font-serif text-[28px] text-chocolate leading-none'>Ingredientes</h2>
+                                <button
+                                    onClick={imprimirIngredientes}
+                                    className='flex items-center gap-1.5 text-orange-base hover:text-chocolate text-[10px] uppercase tracking-[0.18em] font-medium transition-colors duration-500 cursor-pointer'
+                                >
+                                    <Printer size={14} strokeWidth={1.5} />
+                                    Imprimir
+                                </button>
+                            </div>
+                            <ul className='grid gap-x-8 gap-y-2.5 sm:grid-cols-2'>
+                                {curso.ingredientes.split('\n').filter(i => i.trim()).map((item, idx) => (
+                                    <li key={idx} className='flex items-start gap-3 text-[15px] font-light text-chocolate'>
+                                        <span className='mt-2 w-1.5 h-1.5 rotate-45 bg-gold shrink-0' />
+                                        {item.trim()}
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
+                    )}
 
-                        <div className='grid grid-cols-6 sm:grid-cols-8 gap-3 mb-4'>
-                            {assentos.map(assento => {
-                                const ocupado = assento.status !== 'livre'
-                                return (
-                                    <div key={assento.id} className='flex flex-col items-center'>
-                                        <div className={`w-3/5 h-3 rounded-t-md ${ocupado ? 'bg-gray-base/25' : 'bg-orange-base'}`} />
-                                        <div className={`w-full h-8 rounded-b-lg flex items-center justify-center font-bold text-xs ${
-                                            ocupado ? 'bg-gray-base/20 text-gray-base/40' : 'bg-orange-base text-white'
-                                        }`}>
-                                            {assento.id}
+                    {assentos.length > 0 && !encerrado && (
+                        <div className='lg:col-start-1 bg-white rounded-xl ring-1 ring-chocolate/[0.07] p-6 md:p-8'>
+                            <h2 className='font-serif text-[28px] text-chocolate leading-none mb-5'>Mapa de assentos</h2>
+
+                            <div className='bg-chocolate rounded-lg py-3 text-center text-[11px] font-medium text-cream uppercase tracking-[0.35em] mb-5'>
+                                Balcão
+                            </div>
+
+                            <div className='grid grid-cols-6 sm:grid-cols-8 gap-3 mb-4'>
+                                {assentos.map(assento => {
+                                    const ocupado = assento.status !== 'livre'
+                                    return (
+                                        <div key={assento.id} className='flex flex-col items-center'>
+                                            <div className={`w-3/5 h-3 rounded-t-md ${ocupado ? 'bg-gray-base/25' : 'bg-orange-base'}`} />
+                                            <div className={`w-full h-8 rounded-b-lg flex items-center justify-center font-bold text-xs ${
+                                                ocupado ? 'bg-gray-base/20 text-gray-base/40' : 'bg-orange-base text-white'
+                                            }`}>
+                                                {assento.id}
+                                            </div>
                                         </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-
-                        <div className='flex flex-wrap justify-center gap-x-5 gap-y-1.5'>
-                            <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
-                                <span className='w-3 h-3 rounded-sm bg-orange-base' />
-                                Disponível
+                                    )
+                                })}
                             </div>
-                            <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
-                                <span className='w-3 h-3 rounded-sm bg-gray-base/20' />
-                                Ocupado
+
+                            <div className='flex flex-wrap justify-center gap-x-5 gap-y-1.5'>
+                                <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
+                                    <span className='w-3 h-3 rounded-sm bg-orange-base' />
+                                    Disponível
+                                </div>
+                                <div className='flex items-center gap-1.5 text-xs text-gray-text/60'>
+                                    <span className='w-3 h-3 rounded-sm bg-gray-base/20' />
+                                    Ocupado
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
+            </div>
 
-                <Button
-                    className='w-full bg-orange-base hover:bg-orange-light text-white font-semibold text-base py-3 cursor-pointer transition'
+            {/* barra fixa no celular: o quadro de inscrição fica pra trás quando o
+                cliente rola pra ver ingredientes/assentos, e o botão continua à mão */}
+            <div className='lg:hidden fixed bottom-0 inset-x-0 z-40 bg-cream/95 backdrop-blur border-t border-chocolate/10 px-5 py-3 flex items-center justify-between gap-4 shadow-[0_-10px_30px_-12px_rgba(58,42,33,0.25)]'>
+                <div className='leading-tight min-w-0'>
+                    <p className='font-serif italic text-[26px] font-semibold text-orange-base leading-none'>{preco}</p>
+                    <p className='text-[11px] font-light text-cocoa truncate mt-1'>
+                        <span className='capitalize'>{semana}</span>, {dia} {mes} · {formatHora(curso.hora)}
+                    </p>
+                </div>
+                <button
                     onClick={abrirInscricao}
-                    disabled={encerrado || vagasLivres === 0}
+                    disabled={bloqueado}
+                    className={`shrink-0 px-6 py-3.5 rounded-full text-[11px] font-medium uppercase tracking-[0.18em] transition-colors duration-500 ${
+                        bloqueado
+                            ? 'bg-cream-dark text-cocoa/60 cursor-not-allowed'
+                            : 'bg-orange-base text-white hover:bg-chocolate cursor-pointer'
+                    }`}
                 >
-                    {encerrado ? 'Curso encerrado' : vagasLivres === 0 ? 'Vagas esgotadas' : 'Garantir minha vaga'}
-                </Button>
-
-                <p className='text-center text-xs text-gray-text/50 mt-3'>
-                    Reembolso somente antes de 24h do início do curso.
-                </p>
+                    {bloqueado ? textoBotao : 'Garantir vaga'}
+                </button>
             </div>
 
             {loadingPagamento && (
-                <div className='flex items-center justify-center fixed inset-0 bg-black/70 z-50'>
-                    <div className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 shadow-xl'>
+                <div className='flex items-center justify-center fixed inset-0 bg-chocolate/55 backdrop-blur-sm z-50 animate-pagina'>
+                    <div className='bg-white rounded-2xl p-10 flex flex-col items-center gap-5 shadow-2xl animate-surgir'>
                         <Loader2 size={40} className='text-orange-base animate-spin' />
-                        <p className='text-gray-dark font-semibold'>Preparando pagamento...</p>
+                        <p className='font-serif italic text-2xl text-chocolate'>Preparando pagamento...</p>
                     </div>
                 </div>
             )}
 
             {erroPagamento && (
                 <div
-                    className='flex items-center justify-center fixed inset-0 bg-black/70 z-50 p-4'
+                    className='flex items-center justify-center fixed inset-0 bg-chocolate/55 backdrop-blur-sm z-50 p-4 animate-pagina'
                     onClick={() => setErroPagamento(null)}
                 >
                     <div
-                        className='bg-white rounded-xl p-8 flex flex-col items-center gap-4 max-w-sm w-full shadow-xl'
+                        className='bg-white rounded-2xl p-10 flex flex-col items-center gap-5 max-w-sm w-full shadow-2xl animate-surgir'
                         onClick={e => e.stopPropagation()}
                     >
-                        <XCircle size={48} className='text-red-500' />
-                        <p className='text-gray-dark font-semibold text-center'>{erroPagamento}</p>
+                        <XCircle size={48} className='text-red-base' />
+                        <p className='text-chocolate text-center'>{erroPagamento}</p>
                         <Button
                             className='bg-orange-base text-white hover:bg-orange-light w-full'
-                            onClick={() => { setErroPagamento(null); setStep(inscricaoAtiva ? 'assento' : 'form') }}
+                            onClick={() => { setErroPagamento(null); setStep('assento') }}
                         >
                             Tentar novamente
                         </Button>
@@ -495,14 +567,16 @@ export default function CoursePage() {
     )
 }
 
-function InfoCard({ icon, label, children }) {
+function InfoItem({ icon, label, children }) {
     return (
-        <div className='bg-white rounded-xl p-4 shadow-sm flex items-start gap-3'>
-            <div className='mt-0.5 shrink-0'>{icon}</div>
-            <div>
-                <p className='text-xs font-semibold text-gray-text/50 uppercase tracking-wider mb-0.5'>{label}</p>
-                <p className='text-sm font-medium text-gray-dark'>{children}</p>
+        <li className='flex items-start gap-3'>
+            <span className='w-10 h-10 rounded-full ring-1 ring-gold/40 flex items-center justify-center shrink-0'>
+                {icon}
+            </span>
+            <div className='min-w-0'>
+                <p className='text-[10px] font-medium text-cocoa/70 uppercase tracking-[0.25em] mb-0.5'>{label}</p>
+                <p className='text-[15px] text-chocolate'>{children}</p>
             </div>
-        </div>
+        </li>
     )
 }
