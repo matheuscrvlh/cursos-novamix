@@ -36,15 +36,9 @@ export function redefinirSenha(token, novaSenha) {
     return post('/redefinir-senha', { token, novaSenha })
 }
 
-export async function validarTokenRedefinicao(token) {
-    try {
-        const res = await fetch(`${URL}/redefinir-senha/${encodeURIComponent(token)}`)
-        const data = await res.json().catch(() => ({}))
-        return { ...data, ok: res.ok }
-    } catch (err) {
-        console.error('Erro ao validar token de redefinição:', err)
-        return { ok: false, valido: false, message: 'Erro de conexão. Tente novamente.' }
-    }
+// token vai no corpo, não na URL — URL fica gravada em log e em analytics
+export function validarTokenRedefinicao(token) {
+    return post('/redefinir-senha/validar', { token })
 }
 
 export async function getClienteLogado() {

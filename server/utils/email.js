@@ -131,7 +131,9 @@ function emailLembreteCurso({ nome, nomeCurso, dataCurso, horaCurso, loja }) {
 }
 
 function emailRedefinirSenha({ nome, token }) {
-  const link = `${BASE_URL}/redefinir-senha?token=${encodeURIComponent(token)}`;
+  // token no fragmento (#), não na query (?): o que vem depois do # não vai
+  // pro servidor nem pro Google Analytics da página
+  const link = `${BASE_URL}/redefinir-senha#token=${encodeURIComponent(token)}`;
   return {
     subject: 'Redefinir sua senha',
     html: layout('Redefinir senha', `

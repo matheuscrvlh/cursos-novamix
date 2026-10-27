@@ -295,12 +295,19 @@ router.post('/esqueci-senha', loginLimiter, async (req, res) => {
 // Checa se o token ainda é válido sem consumi-lo — a tela de redefinição usa
 // isso pra já mostrar o erro ao abrir o link (token repetido/expirado), sem
 // esperar o cliente digitar a senha nova e só então descobrir pelo POST.
-router.get('/redefinir-senha/:token', loginLimiter, async (req, res) => {
+// Token vai no corpo (POST), não na URL: URL fica gravada em log de nginx e
+// em ferramenta de analytics.
+router.post('/redefinir-senha/validar', loginLimiter, async (req, res) => {
+    const { token } = req.body;
+    if (typeof token !== 'string' || !token) {
+        return res.status(400).json({ valido: false, message: 'Token inválido ou expirado.' });
+    }
+
     try {
         const { rows } = await pool.query(`
             SELECT 1 FROM clientes_tokens
             WHERE token = $1 AND tipo = 'redefinir_senha' AND usado_em IS NULL AND expira_em > now()
-        `, [req.params.token]);
+        `, [token]);
         if (!rows.length) return res.status(400).json({ valido: false, message: 'Token inválido ou expirado.' });
         res.json({ valido: true });
     } catch (err) {
@@ -311,25 +318,56 @@ router.get('/redefinir-senha/:token', loginLimiter, async (req, res) => {
 
 router.post('/redefinir-senha', loginLimiter, async (req, res) => {
     const { token, novaSenha } = req.body;
-    if (!token || !novaSenha || novaSenha.length < 6) {
+    if (typeof token !== 'string' || !token || !novaSenha || novaSenha.length < 6) {
         return res.status(400).json({ message: 'Token e nova senha (mínimo 6 caracteres) são obrigatórios.' });
     }
 
+    // hash antes de abrir a transação (bcrypt é lento de propósito) pra não
+    // segurar a trava do token enquanto calcula
+    let senhaHash;
     try {
-        const { rows } = await pool.query(`
-            SELECT * FROM clientes_tokens
+        senhaHash = await bcrypt.hash(novaSenha, 10);
+    } catch {
+        return res.status(400).json({ message: 'Senha inválida.' });
+    }
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // conferir e marcar como usado num comando só — com um SELECT e um
+        // UPDATE separados, duas requisições ao mesmo tempo conseguiam usar o
+        // mesmo token
+        const { rows } = await client.query(`
+            UPDATE clientes_tokens SET usado_em = now()
             WHERE token = $1 AND tipo = 'redefinir_senha' AND usado_em IS NULL AND expira_em > now()
+            RETURNING cliente_id
         `, [token]);
-        if (!rows.length) return res.status(400).json({ message: 'Token inválido ou expirado.' });
+        if (!rows.length) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ message: 'Token inválido ou expirado.' });
+        }
+        const clienteId = rows[0].cliente_id;
 
-        const senhaHash = await bcrypt.hash(novaSenha, 10);
-        await pool.query(`UPDATE clientes SET senha_hash = $1 WHERE id = $2`, [senhaHash, rows[0].cliente_id]);
-        await pool.query(`UPDATE clientes_tokens SET usado_em = now() WHERE id = $1`, [rows[0].id]);
+        // token_version + 1 derruba quem estiver logado (ex: quem invadiu a conta)
+        await client.query(
+            `UPDATE clientes SET senha_hash = $1, token_version = token_version + 1 WHERE id = $2`,
+            [senhaHash, clienteId]
+        );
+        // outros links de redefinição pedidos antes deixam de valer
+        await client.query(`
+            UPDATE clientes_tokens SET usado_em = now()
+            WHERE cliente_id = $1 AND tipo = 'redefinir_senha' AND usado_em IS NULL
+        `, [clienteId]);
 
+        await client.query('COMMIT');
         res.json({ message: 'Senha redefinida com sucesso.' });
     } catch (err) {
+        await client.query('ROLLBACK').catch(() => {});
         console.error('Erro ao redefinir senha:', err);
         res.status(500).json({ message: 'Erro interno.' });
+    } finally {
+        client.release();
     }
 });
 
@@ -494,6 +532,8 @@ router.put('/:id/status', authenticate, requireCursosAdmin, async (req, res) => 
     if (typeof status !== 'boolean') return res.status(400).json({ message: 'status (boolean) obrigatório.' });
 
     try {
+        // token_version + 1: desativar derruba na hora quem estava logado, e
+        // reativar depois não ressuscita essas sessões antigas
         const { rows } = await pool.query(
             `UPDATE clientes SET status = $1, token_version = token_version + 1 WHERE id = $2 RETURNING id, nome, email`,
             [status, req.params.id]
@@ -526,5 +566,3 @@ router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
 });
 
 module.exports = router;
-        // token_version + 1: desativar derruba na hora quem estava logado, e
-        // reativar depois não ressuscita essas sessões antigas

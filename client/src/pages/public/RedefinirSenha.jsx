@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 
 import PublicLayout from '../../layouts/public/PublicLayout'
 import { Head } from '../../components/Head'
@@ -9,10 +9,28 @@ import Button from '../../components/Button'
 import { redefinirSenha, validarTokenRedefinicao } from '../../api/clientes.services'
 import { bannerHome } from '../../assets/images/banner'
 
+// O link do e-mail traz o token no fragmento (#token=...): o que vem depois
+// do # não é enviado ao servidor nem registrado pelo Google Analytics/GTM,
+// diferente de ?token=. O ?token= só continua aceito pros links enviados
+// antes dessa mudança (valem 1 hora).
+function lerToken(hash, searchParams) {
+    return new URLSearchParams(hash.replace(/^#/, '')).get('token')
+        || searchParams.get('token')
+        || ''
+}
+
 export default function RedefinirSenha() {
     const [searchParams] = useSearchParams()
-    const token = searchParams.get('token') || ''
+    const { hash, search, pathname } = useLocation()
+    // lido uma vez só: logo abaixo o token sai da barra de endereço
+    const [token] = useState(() => lerToken(hash, searchParams))
     const navigate = useNavigate()
+
+    // tira o token da URL assim que lido — não fica no histórico do
+    // navegador nem vai junto se a pessoa copiar o endereço
+    useEffect(() => {
+        if (hash || search) navigate(pathname, { replace: true })
+    }, [hash, search, pathname, navigate])
 
     const [validandoToken, setValidandoToken] = useState(!!token)
     const [tokenValido, setTokenValido] = useState(false)
