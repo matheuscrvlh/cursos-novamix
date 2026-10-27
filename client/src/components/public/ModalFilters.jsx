@@ -19,17 +19,17 @@ export default function ModalFilters({
 
     return (
         <div
-            className='md:hidden flex items-center justify-center fixed inset-0 w-full h-full bg-black/70 z-50 p-4'
+            className='md:hidden flex items-center justify-center fixed inset-0 w-full h-full bg-chocolate/55 backdrop-blur-sm z-50 p-4 animate-pagina'
             onClick={onClose}
         >
             <div
-                className='bg-white shadow-xl rounded-xl w-[90%] max-w-115 max-h-[90vh] overflow-y-auto overflow-x-hidden'
+                className='bg-white shadow-2xl rounded-2xl animate-surgir w-[90%] max-w-115 max-h-[90vh] overflow-y-auto overflow-x-hidden'
                 onClick={e => e.stopPropagation()}
             >
-                <div className='flex items-center justify-between p-5 pb-4 border-b border-gray-base/20'>
+                <div className='flex items-center justify-between p-5 pb-4 border-b border-chocolate/[0.08]'>
                     <div>
-                        <h2 className='font-bold text-gray-dark text-lg'>{nameModal}</h2>
-                        <p className='text-xs text-gray-text/60 mt-0.5'>Ajuste os filtros para refinar sua busca</p>
+                        <h2 className='font-serif text-[28px] leading-none text-chocolate'>{nameModal}</h2>
+                        <p className='text-xs font-light text-cocoa mt-1.5'>Ajuste os filtros para refinar sua busca</p>
                     </div>
                     <button
                         onClick={onClose}

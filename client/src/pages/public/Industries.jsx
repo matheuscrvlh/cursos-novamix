@@ -20,7 +20,7 @@ export default function Industries() {
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Indústrias' />
-            <section className='bg-gray mb-20'>
+            <section className='mb-24 md:mb-32'>
 
                 <AllIndustries industrias={industrias} loadingIndustries={loadingIndustries} />
 

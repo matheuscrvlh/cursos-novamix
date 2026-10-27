@@ -5,15 +5,16 @@ import CulinarianCard from "../../components/public/CulinarianCard"
 export default function AllCulinariansSections({ culinaristas, loadingCulinarian }) {
 
     return (
-        <section className='w-full px-10 sm:w-[92vw] sm:px-0 max-w-7xl mx-auto pt-10 md:pt-14 pb-16'>
+        <section className='max-w-7xl mx-auto px-5 md:px-8 pt-10 md:pt-14 pb-16'>
 
-            <p className='text-lg font-bold text-gray-dark md:text-3xl mb-6 md:mb-8'>
-                CULINARISTAS PARCEIROS
-            </p>
+            <div className='mb-10 md:mb-12'>
+                <p className='text-[11px] font-medium uppercase tracking-[0.32em] text-gold mb-2'>Quem ensina</p>
+                <h1 className='font-serif text-[40px] md:text-[52px] font-medium text-chocolate leading-[1.05]'>Culinaristas <em className='italic text-orange-base'>parceiros</em></h1>
+            </div>
 
             {loadingCulinarian ? (
                 <div className='flex flex-col items-center justify-center w-full text-center py-20'>
-                    <p className='text-xl font-semibold'>Carregando...</p>
+                    <p className='font-serif text-2xl text-cocoa'>Carregando...</p>
                 </div>
             ) : culinaristas.length === 0 ? (
                 <div className='flex flex-col items-center justify-center w-full text-center py-20 gap-3'>

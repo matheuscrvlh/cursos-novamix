@@ -20,7 +20,7 @@ export default function Culinarians() {
     return (
         <PublicLayout bannerHome={bannerHome}>
             <Head title='Culinaristas' />
-            <section className='bg-gray mb-20'>
+            <section className='mb-24 md:mb-32'>
 
                 <AllCulinariansSections culinaristas={culinaristas} loadingCulinarian={loadingCulinarian} />
 
