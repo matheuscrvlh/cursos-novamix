@@ -5,7 +5,11 @@ const rateLimit = require('express-rate-limit');
 // tráfego real. Isso evita bater no limite geral em dev, onde o StrictMode
 // do React dispara cada efeito duas vezes e recarregar a página várias vezes
 // debugando soma requisições rápido.
+// Só vale fora de produção: o IP vem do X-Forwarded-For, que quem chegasse
+// direto na porta do backend poderia preencher com "127.0.0.1" pra escapar
+// de todos os limites.
 const isLoopback = ip => ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+const isLoopbackDev = ip => process.env.NODE_ENV !== 'production' && isLoopback(ip);
 
 // limite geral pra toda /api — não conta o webhook do MP, que não pode
 // nunca ser bloqueado (é o próprio Mercado Pago chamando, autenticado por
@@ -15,7 +19,7 @@ const apiLimiter = rateLimit({
   limit: 300,
   standardHeaders: true,
   legacyHeaders: false,
-  skip: req => req.originalUrl.startsWith('/api/pagamentos/webhook') || isLoopback(req.ip),
+  skip: req => req.originalUrl.startsWith('/api/pagamentos/webhook') || isLoopbackDev(req.ip),
 });
 
 // login/senha de cliente — protege contra brute-force de senha ou token de

@@ -6,8 +6,11 @@ services:
       dockerfile: Dockerfile
     container_name: cursos-novamix-server
     restart: unless-stopped
+    # só no 127.0.0.1 do servidor: o nginx do host acessa por aqui, mas a
+    # porta não fica aberta pra internet (o Docker passa por cima do UFW, e
+    # quem chegasse direto conseguiria forjar o IP no X-Forwarded-For)
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     env_file:
       - ./server/.env
     environment:
@@ -25,7 +28,7 @@ services:
     container_name: cursos-novamix-client
     restart: unless-stopped
     ports:
-      - "8081:80"
+      - "127.0.0.1:8081:80"
     depends_on:
       - backend
     networks:
