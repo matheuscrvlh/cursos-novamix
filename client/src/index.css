@@ -8,7 +8,69 @@ html {
     scrollbar-gutter: stable;
 }
 
+body {
+    color: var(--color-gray-text);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* a Cormorant usa algarismos de texto por padrão ("05" vira "o5", "10,00"
+   vira "ro,oo") — nas datas e preços em serifada, algarismos alinhados */
+.font-serif {
+    font-variant-numeric: lining-nums;
+}
+
+/* curva de desaceleração longa — dá a sensação de movimento "caro", sem pressa */
+@keyframes surgir {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pagina {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* <Reveal>: começa escondido e surge quando entra na tela (IntersectionObserver) */
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+        opacity 1s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* quem pede menos movimento no sistema vê tudo direto, sem animação */
+@media (prefers-reduced-motion: reduce) {
+    .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 @theme {
+    --font-sans: 'Jost', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Cormorant Garamond', ui-serif, Georgia, serif;
+
+    --ease-luxo: cubic-bezier(0.22, 1, 0.36, 1);
+    /* "backwards", não "both": terminada a animação ela sai de cena — se o
+       estado final ficasse aplicado (opacity/transform), a seção viraria um
+       contexto de empilhamento e os modais (fixed, z-50) ficariam embaixo
+       do header */
+    --animate-surgir: surgir 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    --animate-pagina: pagina 0.6s ease-out backwards;
+
     --color-*: initial;
     --color-white: #ffffff;
     --color-black: #000000;
@@ -24,4 +86,11 @@ html {
     --color-red-light: #F72B2A;
     --color-red-base: #DF0406;
     --color-green-base: #7BAD7F;
+
+    /* site público — linha "pâtisserie" */
+    --color-cream: #FAF6EF;
+    --color-cream-dark: #F1E8DA;
+    --color-gold: #B8975A;
+    --color-chocolate: #3A2A21;
+    --color-cocoa: #7A6656;
 }
