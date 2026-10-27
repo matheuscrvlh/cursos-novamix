@@ -30,7 +30,8 @@ router.get('/:cursoId', async (req, res) => {
 
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 

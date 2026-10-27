@@ -2,11 +2,13 @@ const express = require('express');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
+const tratarErroUpload = require('../middleware/uploadErro.middleware');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
 
 const uploadCursos = createUpload('cursos');
+const CAPACIDADE_MAXIMA = 200;
 const router = express.Router();
 const fs = require('fs');
 
@@ -105,7 +107,8 @@ router.get('/', async (req, res) => {
 
     res.json(cursos);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -121,7 +124,8 @@ router.get('/:id', async (req, res) => {
     const curso = { ...rows[0], fotos: rows[0].fotos ? rows[0].fotos.split(',') : [] };
     res.json(curso);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -139,6 +143,13 @@ router.post('/', authenticate, requireCursosAccess, uploadCursos.array('fotos', 
 
   if (!(parseFloat(valor) > 0)) {
     return res.status(400).json({ error: 'Valor do curso inválido' });
+  }
+
+  // a rota pública de assentos gera uma linha por assento (generate_series)
+  // — sem teto, um número absurdo digitado por engano deixava cada visita à
+  // página do curso gerando milhões de linhas
+  if (!Number.isInteger(capacidade) || capacidade < 1 || capacidade > CAPACIDADE_MAXIMA) {
+    return res.status(400).json({ error: `Capacidade deve ser um número inteiro entre 1 e ${CAPACIDADE_MAXIMA}` });
   }
 
   try {
@@ -189,7 +200,7 @@ router.post('/', authenticate, requireCursosAccess, uploadCursos.array('fotos', 
     res.status(201).json({ cursoId, nomeCurso, tipo, culinaristaId, categoria, duracao, data, hora, loja, valor, capacidade });
   } catch (err) {
     console.error('Erro ao inserir curso:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -289,7 +300,7 @@ router.put('/:id', authenticate, requireCursosAccess, uploadCursos.array('fotos'
     res.json({ message: 'Atualizado' });
   } catch (err) {
     console.error('Erro ao atualizar curso:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -340,14 +351,12 @@ router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
 
     res.sendStatus(204);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
-// Handler de erro do Multer
-router.use((err, req, res, next) => {
-  if (err) return res.status(400).json({ error: err.message });
-  next();
-});
+// erro do multer (arquivo grande demais etc.) ou de algo antes do try
+router.use(tratarErroUpload);
 
 module.exports = router;

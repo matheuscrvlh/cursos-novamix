@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
+const tratarErroUpload = require('../middleware/uploadErro.middleware');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
@@ -219,7 +220,7 @@ router.put('/:id', authenticate, requireCursosAccess, uploadCulinaristas.single(
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Erro ao atualizar culinarista:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   } finally {
     client.release();
   }
@@ -257,14 +258,11 @@ router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
     res.sendStatus(204);
   } catch (err) {
     console.error('Erro ao deletar culinarista:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
-// Handler de erro do Multer
-router.use((err, req, res, next) => {
-  if (err) return res.status(400).json({ error: err.message });
-  next();
-});
+// erro do multer (arquivo grande demais etc.) ou de algo antes do try
+router.use(tratarErroUpload);
 
 module.exports = router;

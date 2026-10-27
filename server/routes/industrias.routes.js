@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
+const tratarErroUpload = require('../middleware/uploadErro.middleware');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
@@ -27,7 +28,8 @@ router.get('/', async (req, res) => {
     const { rows } = await pool.query(`${SELECT_INDUSTRIA} ${where}`, busca ? [`%${busca}%`] : []);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -37,7 +39,8 @@ router.get('/:id', async (req, res) => {
     if (!rows.length) return res.status(404).json({ message: 'Indústria não encontrada' });
     res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -71,7 +74,7 @@ router.post('/', authenticate, requireCursosAccess, uploadIndustria.single('foto
     res.status(201).json({ id, razaoSocial, nome, cnpj, telefone, email, endereco, instagram, site, foto });
   } catch (err) {
     console.error('Erro ao inserir indústria:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -148,10 +151,7 @@ router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
   }
 });
 
-// Handler de erro do Multer
-router.use((err, req, res, next) => {
-  if (err) return res.status(400).json({ error: err.message });
-  next();
-});
+// erro do multer (arquivo grande demais etc.) ou de algo antes do try
+router.use(tratarErroUpload);
 
 module.exports = router;

@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const createUpload = require('../config/createUpload');
+const tratarErroUpload = require('../middleware/uploadErro.middleware');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
@@ -21,7 +22,8 @@ router.get('/', async (req, res) => {
     const { rows } = await pool.query(sql, params);
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -49,7 +51,8 @@ router.post('/', authenticate, requireCursosAccess, uploadFields, async (req, re
     );
     res.status(201).json({ id, posicao, imagem, imagem_mobile: imagemMobile, link: link || null, ordem: Number(ordem) || 0, ativo: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -73,7 +76,8 @@ router.put('/:id', authenticate, requireCursosAccess, async (req, res) => {
     if (result.rowCount === 0) return res.status(404).json({ error: 'Banner não encontrado' });
     res.json({ message: 'Atualizado' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
@@ -92,8 +96,12 @@ router.delete('/:id', authenticate, requireCursosAdmin, async (req, res) => {
 
     res.sendStatus(204);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(`Erro em ${req.method} ${req.baseUrl}${req.path}:`, err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
+
+// erro do multer (arquivo grande demais etc.) ou de algo antes do try
+router.use(tratarErroUpload);
 
 module.exports = router;

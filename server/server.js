@@ -88,8 +88,12 @@ app.use('/api/logs', logsRoutes);
 process.on('unhandledRejection', err => {
   console.error('unhandledRejection não tratado:', err);
 });
+// exceção síncrona não tratada é diferente: o processo pode ter ficado pela
+// metade (conexão presa, estado inconsistente). Loga a causa e encerra — o
+// Docker (restart: unless-stopped) sobe um processo limpo em seguida
 process.on('uncaughtException', err => {
-  console.error('uncaughtException não tratado:', err);
+  console.error('uncaughtException não tratado — encerrando o processo:', err);
+  process.exit(1);
 });
 
 app.listen(3000, () => {
