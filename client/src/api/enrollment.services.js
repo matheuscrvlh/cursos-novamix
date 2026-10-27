@@ -41,6 +41,24 @@ export async function getSeats(cursoId) {
     }
 }
 
+// livres/reservadas de vários cursos — é uma chamada de /assentos por curso,
+// então quem chama deve passar só os cursos que vão aparecer na tela (a API
+// limita 300 req/15min por IP, e buscar de todos os cursos cadastrados,
+// incluindo os que já passaram, gastava ~50 por visita na home)
+export async function getVagasPorCurso(cursoIds) {
+    const resultado = {}
+
+    await Promise.all(cursoIds.map(async id => {
+        const assentos = await getSeats(id)
+        resultado[id] = {
+            livres: assentos.filter(v => v.status === 'livre').length,
+            reservadas: assentos.filter(v => v.status === 'reservado').length,
+        }
+    }))
+
+    return resultado
+}
+
 export async function getEnrollment(cursoId) {
     try {
         const res = await fetch((`${URL}/inscricoes/curso/${cursoId}`), {

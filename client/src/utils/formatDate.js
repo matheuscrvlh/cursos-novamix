@@ -4,6 +4,29 @@ export function formatDateBR(dateStr) {
     return `${dia}/${mes}/${ano}`
 }
 
+// "YYYY-MM-DD" → { dia: '07', mes: 'nov', semana: 'sex', extenso: 'Sexta-feira, 7 de novembro de 2026' }
+// montado como data local pelo mesmo motivo do inicioDoDia (new Date com a
+// string direto cairia no dia anterior em fuso negativo)
+export function partesData(dateStr) {
+    if (!dateStr) return { dia: '', mes: '', semana: '', extenso: '' }
+    const [ano, mes, dia] = dateStr.split('-').map(Number)
+    const data = new Date(ano, mes - 1, dia)
+    const extenso = data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    return {
+        dia: String(dia).padStart(2, '0'),
+        mes: data.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''),
+        semana: data.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
+        extenso: extenso.charAt(0).toUpperCase() + extenso.slice(1),
+    }
+}
+
+// "14:00" → "14h", "14:30" → "14h30"
+export function formatHora(hora) {
+    if (!hora) return ''
+    const [h, m = '00'] = hora.split(':')
+    return m === '00' ? `${Number(h)}h` : `${Number(h)}h${m}`
+}
+
 // Compara data+hora do curso (campos separados, "YYYY-MM-DD" e "HH:MM") com
 // o momento atual — comparar só a data (como antes) deixava um curso de hoje
 // às 09h aparecendo como "atual" o dia inteiro, mesmo horas depois de já ter
