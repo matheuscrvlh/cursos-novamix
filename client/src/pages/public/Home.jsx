@@ -15,6 +15,8 @@ import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnro
 
 import CoursesSections from '../../sections/home/CoursesSections';
 import CategoriesSections from '../../sections/home/CategoriesSections';
+import AtelierSections from '../../sections/home/AtelierSections';
+import TickerSections from '../../sections/home/TickerSections';
 import CulinariansSections from '../../sections/home/CulinariansSections';
 import IndustriesSections from '../../sections/home/IndustriesSections';
 import LocationSections from '../../sections/home/LocationSections';
@@ -327,6 +329,14 @@ export default function Home() {
                     loadingVagasPorCurso={loadingVagasPorCurso}
                     vagasPorCurso={vagasPorCurso}
                     openForm={openForm}
+                />
+
+                <AtelierSections />
+
+                {/* todos os próximos (normais e infantis), sem o filtro de loja
+                    do cliente — é vitrine da agenda */}
+                <TickerSections
+                    cursos={[...cursosAtuais, ...cursosInfantisAtuais].sort((a, b) => new Date(a.data) - new Date(b.data))}
                 />
 
                 <CategoriesSections />
