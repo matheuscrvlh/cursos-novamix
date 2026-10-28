@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 // banners cadastrados no marketing — desktop 1920×480 (4:1) · mobile 425×495.
 // No celular só entram os que têm versão mobile: a arte de desktop recortada
@@ -31,18 +32,43 @@ export default function BannerCarousel({ banners, className = '' }) {
 }
 
 function Slides({ banners, campo, aspecto, onErro }) {
-    const [index, setIndex] = useState(0)
+    const [index, setIndex]     = useState(0)
+    const [pausado, setPausado] = useState(false)
+    const toqueX = useRef(null)
 
+    const total = banners.length
+    const atual = index % total
+
+    // timeout (não interval) refeito a cada troca: depois de um clique na seta
+    // ou num indicador, o banner fica os 6s inteiros antes de avançar sozinho.
+    // Com o mouse em cima, não avança
     useEffect(() => {
-        if (banners.length <= 1) return
-        const t = setInterval(() => setIndex(i => (i + 1) % banners.length), 6000)
-        return () => clearInterval(t)
-    }, [banners.length])
+        if (total <= 1 || pausado) return
+        const t = setTimeout(() => setIndex(i => (i + 1) % total), 6000)
+        return () => clearTimeout(t)
+    }, [index, total, pausado])
 
-    const atual = index % banners.length
+    const anterior = () => setIndex(i => (i - 1 + total) % total)
+    const proximo  = () => setIndex(i => (i + 1) % total)
+
+    // no celular troca arrastando o dedo pro lado
+    function fimDoToque(e) {
+        if (toqueX.current == null) return
+        const dx = e.changedTouches[0].clientX - toqueX.current
+        toqueX.current = null
+        if (Math.abs(dx) < 40) return
+        if (dx > 0) anterior()
+        else proximo()
+    }
 
     return (
-        <div className={`relative w-full overflow-hidden bg-orange-base ${aspecto}`}>
+        <div
+            className={`relative w-full overflow-hidden bg-orange-base ${aspecto}`}
+            onMouseEnter={() => setPausado(true)}
+            onMouseLeave={() => setPausado(false)}
+            onTouchStart={e => { toqueX.current = e.touches[0].clientX }}
+            onTouchEnd={fimDoToque}
+        >
             {banners.map((b, i) => {
                 const visible = i === atual
                 // crossfade lento; sem zoom na imagem porque as artes têm texto
@@ -83,8 +109,28 @@ function Slides({ banners, campo, aspecto, onErro }) {
                 )
             })}
 
-            {banners.length > 1 && (
-                <div className='absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10'>
+            {total > 1 && (
+                <>
+                    <button
+                        onClick={anterior}
+                        aria-label='Banner anterior'
+                        className='hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 lg:w-12 lg:h-12 items-center justify-center rounded-full bg-white/85 hover:bg-white text-chocolate shadow-[0_8px_24px_-8px_rgba(58,42,33,0.45)] backdrop-blur-sm transition duration-500 ease-luxo hover:scale-105 cursor-pointer'
+                    >
+                        <ChevronLeft size={22} strokeWidth={1.5} />
+                    </button>
+                    <button
+                        onClick={proximo}
+                        aria-label='Próximo banner'
+                        className='hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 lg:w-12 lg:h-12 items-center justify-center rounded-full bg-white/85 hover:bg-white text-chocolate shadow-[0_8px_24px_-8px_rgba(58,42,33,0.45)] backdrop-blur-sm transition duration-500 ease-luxo hover:scale-105 cursor-pointer'
+                    >
+                        <ChevronRight size={22} strokeWidth={1.5} />
+                    </button>
+                </>
+            )}
+
+            {total > 1 && (
+                // fundo escuro translúcido: as linhas brancas sumiam nas artes de fundo branco
+                <div className='absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 px-3 rounded-full bg-chocolate/30 backdrop-blur-sm'>
                     {banners.map((_, i) => (
                         <button
                             key={i}

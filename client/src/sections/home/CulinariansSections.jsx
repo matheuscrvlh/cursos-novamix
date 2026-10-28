@@ -42,16 +42,13 @@ export default function CulinariansSections({
         <section className='w-full mt-24 md:mt-32'>
 
             {/* ========== BANNER — padrão 1920×480 desktop · 425×495 mobile =========== */}
-            {/* na largura do conteúdo, como o banner do topo (ver PublicLayout) */}
-            <div className='max-w-7xl mx-auto px-5 md:px-8'>
-                {homeBanners.length > 0 ? (
-                    <BannerCarousel banners={homeBanners} className='rounded-xl overflow-hidden ring-1 ring-chocolate/[0.07]' />
-                ) : (
-                    <div className='w-full rounded-xl overflow-hidden aspect-425/495 md:aspect-4/1'>
-                        <img src={bannerCulinarista} className='w-full h-full object-cover' alt='' />
-                    </div>
-                )}
-            </div>
+            {homeBanners.length > 0 ? (
+                <BannerCarousel banners={homeBanners} />
+            ) : (
+                <div className='w-full overflow-hidden aspect-425/495 md:aspect-4/1'>
+                    <img src={bannerCulinarista} className='w-full h-full object-cover' alt='' />
+                </div>
+            )}
 
             {/* scroll-mt: o "ver menos" rola até aqui sem a lista ficar escondida atrás do header fixo */}
             <div ref={listaRef} className='max-w-7xl mx-auto px-5 md:px-8 mt-20 md:mt-28 scroll-mt-24'>
