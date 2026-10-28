@@ -10,6 +10,7 @@ import { getBanners } from '../../api/banners.services'
 import useBodyScrollLock from '../../hooks/useBodyScrollLock'
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
 import BannerCarousel from '../../components/public/BannerCarousel'
+import { usarRolagemSuave, rolarPara } from '../../utils/rolagemSuave'
 
 const navLinks = [
   { label: 'Home', to: '/' },
@@ -59,6 +60,9 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // rolagem suave com inércia (desktop) — ver utils/rolagemSuave
+  useEffect(() => usarRolagemSuave(), [])
 
   useBodyScrollLock(isMenuOpen)
 
@@ -326,10 +330,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
       {/* voltar ao topo — com a barra fixa de inscrição (celular, página do
           curso) sobe pra não ficar em cima dela */}
       <button
-        onClick={() => window.scrollTo({
-          top: 0,
-          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        })}
+        onClick={() => rolarPara(0)}
         aria-label="Voltar ao topo"
         title="Voltar ao topo"
         tabIndex={mostrarTopo ? 0 : -1}

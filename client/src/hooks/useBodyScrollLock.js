@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 
+import { pausarRolagemSuave, retomarRolagemSuave } from '../utils/rolagemSuave'
+
 // trava o scroll fixando o body na posicao atual, em vez de so mudar
 // overflow — isso evita o "pulo"/zoom que o navegador mobile da quando
 // a barra de endereco recolhe/expande ao (des)travar o scroll
@@ -9,6 +11,10 @@ export default function useBodyScrollLock(isLocked) {
 
         const scrollY = window.scrollY
         const { body } = document
+
+        // a rolagem suave (site público, desktop) também para, senão a roda
+        // do mouse continuava tentando rolar a página por trás do modal
+        pausarRolagemSuave()
 
         body.style.position = 'fixed'
         body.style.top = `-${scrollY}px`
@@ -27,6 +33,7 @@ export default function useBodyScrollLock(isLocked) {
             // scroll logo em seguida (ex: form -> assento na mesma transicao),
             // que le o scrollY no meio da animacao e trava na posicao errada
             window.scrollTo({ top: scrollY, left: 0, behavior: 'instant' })
+            retomarRolagemSuave()
         }
     }, [isLocked])
 }

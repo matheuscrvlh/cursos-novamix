@@ -9,6 +9,7 @@ import Reveal from '../../components/public/Reveal'
 import SectionHeader, { SectionAction } from '../../components/public/SectionHeader'
 
 import { getBanners } from '../../api/banners.services'
+import { rolarPara } from '../../utils/rolagemSuave'
 
 // a lista inteira já vem do DadosContext — o "ver mais" só revela os
 // próximos na própria home, sem mandar a pessoa pra outra página
@@ -35,7 +36,8 @@ export default function CulinariansSections({
 
     function verMenos() {
         setVisiveis(INICIAIS)
-        listaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        // -96px = altura do header fixo + respiro (era o scroll-mt-24)
+        if (listaRef.current) rolarPara(listaRef.current, { offset: -96 })
     }
 
     return (
