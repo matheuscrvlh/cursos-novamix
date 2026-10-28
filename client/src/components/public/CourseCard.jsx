@@ -126,11 +126,17 @@ export default function CourseCard({
         </div>
 
         {/* preço em cima e botão na largura toda embaixo — lado a lado não
-            cabia nos cards estreitos (celular e grade de 4 colunas) */}
-        <div className="flex flex-col gap-4 pt-4 border-t border-chocolate/[0.07]">
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="text-[0.625rem] font-medium uppercase tracking-[0.2em] text-cocoa">Investimento</p>
-            <p className="font-serif italic text-[1.75rem] font-bold text-orange-base leading-none">
+            cabia nos cards estreitos (celular e grade de 4 colunas).
+            O rodapé é um container, e a linha do preço segue a largura
+            dele (igual em todos os cards da fileira): abaixo de 13.5rem o
+            preço diminui pra continuar na mesma linha do "Investimento"
+            (celular pequeno ou com fonte grande); abaixo de 11rem vai pra
+            baixo do rótulo (tablet com a lateral de filtros). O "R$" nunca
+            se separa do valor */}
+        <div className="@container flex flex-col gap-4 pt-4 border-t border-chocolate/[0.07]">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1.5 @max-[13.5rem]:gap-x-2 @max-[11rem]:flex-col @max-[11rem]:items-start">
+            <p className="text-[0.625rem] font-medium uppercase tracking-[0.2em] @max-[13.5rem]:tracking-[0.14em] text-cocoa">Investimento</p>
+            <p className="font-serif italic text-[1.75rem] @max-[13.5rem]:text-[1.375rem] font-bold text-orange-base leading-none whitespace-nowrap">
               {gratuito ? 'Grátis' : `R$ ${formatarPreco(valor)}`}
             </p>
           </div>
