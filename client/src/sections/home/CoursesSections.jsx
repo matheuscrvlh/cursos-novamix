@@ -22,9 +22,9 @@ export default function CoursesSections({
             <SectionHeader eyebrow={eyebrow} titulo={titulo} destaque={destaque} descricao={descricao} />
 
             {loadingCourses ? (
-                <div className='flex gap-4 overflow-hidden sm:grid sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4'>
+                <div className='flex gap-4 overflow-hidden sm:grid sm:grid-cols-2 sm:gap-6 md:grid-cols-3 xl:grid-cols-4'>
                     {[0, 1, 2, 3].map(i => (
-                        <div key={i} className={`w-[80%] shrink-0 sm:w-auto h-112 rounded-xl bg-white ring-1 ring-chocolate/[0.06] animate-pulse ${i === 3 ? 'lg:max-xl:hidden' : ''}`} />
+                        <div key={i} className={`w-[80%] shrink-0 sm:w-auto h-112 rounded-xl bg-white ring-1 ring-chocolate/[0.06] animate-pulse ${i === 3 ? 'md:max-xl:hidden' : ''}`} />
                     ))}
                 </div>
             ) : cursosFiltrados.length === 0 ? (
@@ -35,11 +35,11 @@ export default function CoursesSections({
             ) : (
                 // celular: carrossel com scroll lateral (o card seguinte aparece
                 // pela metade, indicando que dá pra arrastar) · sm+: grade.
-                // O 4º card some só no lg, onde a grade tem 3 colunas
+                // O 4º card some do md ao xl, onde a grade tem 3 colunas
                 <div className='
                     flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-px-5 -mx-5 px-5 pb-2 [scrollbar-width:none]
                     sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0
-                    lg:grid-cols-3 xl:grid-cols-4
+                    md:grid-cols-3 xl:grid-cols-4
                 '>
                     {cursosFiltrados.slice(0, 4).map((curso, i) => {
                         const vagas = vagasPorCurso[curso.id];
@@ -48,7 +48,7 @@ export default function CoursesSections({
                             <Reveal
                                 key={curso.id}
                                 delay={i * 120}
-                                className={`w-[80%] max-w-80 shrink-0 snap-start sm:w-auto sm:max-w-none ${i === 3 ? 'lg:max-xl:hidden' : ''}`}
+                                className={`w-[80%] max-w-80 shrink-0 snap-start sm:w-auto sm:max-w-none ${i === 3 ? 'md:max-xl:hidden' : ''}`}
                             >
                                 <CourseCard
                                     id={curso.id}

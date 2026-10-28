@@ -1,7 +1,7 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useContext, useState, useEffect, useLayoutEffect } from 'react'
 
-import { MapPin, Building2, MessageCircle, Menu, X, User } from 'lucide-react'
+import { MapPin, Building2, MessageCircle, Menu, X, User, ArrowUp } from 'lucide-react'
 
 import { whatsapp } from '../../assets/images/icons'
 import { logoNm } from '../../assets/images/logos'
@@ -29,6 +29,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
   const [heroBanners, setHeroBanners] = useState([])
   const [isMenuOpen, setIsMenuOpen]   = useState(false)
   const [rolou, setRolou]             = useState(false)
+  const [mostrarTopo, setMostrarTopo] = useState(false)
 
   useEffect(() => {
     if (!showBanner) return
@@ -50,7 +51,11 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
   // o header só ganha sombra depois que a página rola — no topo ele fica
   // "colado" no banner, sem separação
   useEffect(() => {
-    const onScroll = () => setRolou(window.scrollY > 8)
+    const onScroll = () => {
+      setRolou(window.scrollY > 8)
+      // botão de voltar ao topo só depois de rolar mais ou menos uma tela
+      setMostrarTopo(window.scrollY > 600)
+    }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -75,7 +80,11 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          {/* menu completo só a partir do xl (1280px): com as fontes em versalete
+              espaçado ele precisa de ~1170px, e entre o md e isso o header
+              estourava (item quebrando linha, "Entrar" fora da tela). Abaixo
+              do xl fica o botão que abre o menu lateral */}
+          <nav className="hidden xl:flex items-center gap-1">
             {navLinks.map(link => (
               <NavLink
                 key={link.to}
@@ -84,7 +93,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
                 // sublinhado fino que desliza da esquerda no hover e fica
                 // fixo no link da página atual
                 className={({ isActive }) =>
-                  `relative px-3 py-2 text-[0.7188rem] font-medium uppercase tracking-[0.16em] transition-colors duration-500
+                  `relative px-3 py-2 whitespace-nowrap text-[0.7188rem] font-medium uppercase tracking-[0.16em] transition-colors duration-500
                   after:absolute after:left-3 after:right-3 after:bottom-0.5 after:h-px after:bg-white after:origin-left after:transition-transform after:duration-500 after:ease-luxo ${
                     isActive
                       ? 'text-white after:scale-x-100'
@@ -121,7 +130,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
 
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-white/35 hover:bg-white/15 transition"
+              className="xl:hidden w-9 h-9 flex items-center justify-center rounded-full border border-white/35 hover:bg-white/15 transition"
               aria-label="Abrir menu"
             >
               <Menu size="1.125rem" strokeWidth={1.5} />
@@ -132,14 +141,14 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
       </header>
 
       <div
-        className={`md:hidden fixed inset-0 bg-chocolate z-60 transition-opacity duration-500 ${
+        className={`xl:hidden fixed inset-0 bg-chocolate z-60 transition-opacity duration-500 ${
           isMenuOpen ? 'opacity-50 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsMenuOpen(false)}
       />
 
       <aside
-        className={`md:hidden fixed top-0 right-0 h-dvh w-72 max-w-[82dvw] bg-cream shadow-2xl z-60 flex flex-col
+        className={`xl:hidden fixed top-0 right-0 h-dvh w-72 max-w-[82dvw] bg-cream shadow-2xl z-60 flex flex-col
           transform transition-transform duration-500 ease-luxo
           ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
@@ -313,6 +322,23 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
         </div>
 
       </footer>
+
+      {/* voltar ao topo — com a barra fixa de inscrição (celular, página do
+          curso) sobe pra não ficar em cima dela */}
+      <button
+        onClick={() => window.scrollTo({
+          top: 0,
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        })}
+        aria-label="Voltar ao topo"
+        title="Voltar ao topo"
+        tabIndex={mostrarTopo ? 0 : -1}
+        className={`fixed right-4 md:right-8 z-40 w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-chocolate text-cream shadow-[0_12px_30px_-10px_rgba(58,42,33,0.6)] hover:bg-orange-base transition duration-500 ease-luxo cursor-pointer
+          ${bottomBar ? 'bottom-24 lg:bottom-8' : 'bottom-5 md:bottom-8'}
+          ${mostrarTopo ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3 pointer-events-none'}`}
+      >
+        <ArrowUp size="1.125rem" strokeWidth={1.5} />
+      </button>
     </main>
   )
 }
