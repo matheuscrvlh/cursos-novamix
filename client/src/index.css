@@ -154,6 +154,44 @@ body {
     to { transform: translateY(-0.75rem) scale(1.04); }
 }
 
+/* <BotaoTopo>: o brigadeiro 3D do voltar ao topo. Uma volta em 48 quadros numa
+   tira só (renderizada em 3D fora do site), passada quadro a quadro; gira só
+   enquanto está à vista. AVIF (74 KB) com WebP pros navegadores sem ele */
+.brigadeiro {
+    background-image: url('./assets/images/brigadeiro/brigadeiro-giro.webp');
+    background-image: image-set(
+        url('./assets/images/brigadeiro/brigadeiro-giro.avif') type('image/avif'),
+        url('./assets/images/brigadeiro/brigadeiro-giro.webp') type('image/webp')
+    );
+    background-size: 4800% 100%;
+    animation: brigadeiro-gira 2s steps(48, jump-none) infinite paused;
+}
+
+.group:focus-visible .brigadeiro,
+.group[data-docinho] .brigadeiro {
+    animation-play-state: running;
+}
+
+@media (hover: hover) {
+    .group:hover .brigadeiro {
+        animation-play-state: running;
+    }
+}
+
+@keyframes brigadeiro-gira {
+    from { background-position: 0% 0; }
+    to   { background-position: 100% 0; }
+}
+
+/* o pulinho do clique: agacha, sobe esticando e cai amassando */
+@keyframes brigadeiro-pulo {
+    0%, 100% { transform: none; }
+    18%      { transform: translateY(2px) scale(1.1, 0.88); }
+    48%      { transform: translateY(-1.1rem) scale(0.94, 1.06); }
+    74%      { transform: translateY(0) scale(1.08, 0.9); }
+    88%      { transform: translateY(-0.2rem) scale(0.98, 1.02); }
+}
+
 /* troca de página (utils/historico, View Transitions API do navegador: a
    animação roda fora do JavaScript). A página de antes some rápido e a nova
    surge subindo de leve, sem as duas sobrepostas no meio do caminho. O header
@@ -231,6 +269,7 @@ html:active-view-transition-type(volta)::view-transition-new(foto-curso) {
     --animate-pagina: pagina 0.6s ease-out backwards;
     --animate-flutuar: flutuar var(--dur, 7s) ease-in-out infinite alternate;
     --animate-ticker: ticker var(--ticker-dur, 40s) linear infinite;
+    --animate-brigadeiro-pulo: brigadeiro-pulo 0.75s ease-in-out;
 
     --color-*: initial;
     --color-white: #ffffff;

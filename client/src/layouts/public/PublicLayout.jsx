@@ -1,7 +1,7 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useContext, useState, useEffect, useLayoutEffect } from 'react'
 
-import { MapPin, Building2, MessageCircle, Menu, X, User, ArrowUp } from 'lucide-react'
+import { MapPin, Building2, MessageCircle, Menu, X, User } from 'lucide-react'
 
 import { whatsapp } from '../../assets/images/icons'
 import { logoNm } from '../../assets/images/logos'
@@ -11,7 +11,8 @@ import useBodyScrollLock from '../../hooks/useBodyScrollLock'
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
 import { useTransicao } from '../../contexts/TransicaoContext'
 import BannerCarousel from '../../components/public/BannerCarousel'
-import { usarRolagemSuave, rolarPara } from '../../utils/rolagemSuave'
+import BotaoTopo from '../../components/public/BotaoTopo'
+import { usarRolagemSuave } from '../../utils/rolagemSuave'
 
 const navLinks = [
   { label: 'Home', to: '/' },
@@ -340,19 +341,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
 
       </footer>
 
-      {/* voltar ao topo — com a barra fixa de inscrição (celular, página do
-          curso) sobe pra não ficar em cima dela */}
-      <button
-        onClick={() => rolarPara(0)}
-        aria-label="Voltar ao topo"
-        title="Voltar ao topo"
-        tabIndex={mostrarTopo ? 0 : -1}
-        className={`fixed right-4 md:right-8 z-40 w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-chocolate text-cream shadow-[0_12px_30px_-10px_rgba(58,42,33,0.6)] hover:bg-orange-base transition duration-500 ease-luxo cursor-pointer
-          ${bottomBar ? 'bottom-24 lg:bottom-8' : 'bottom-5 md:bottom-8'}
-          ${mostrarTopo ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3 pointer-events-none'}`}
-      >
-        <ArrowUp size="1.125rem" strokeWidth={1.5} />
-      </button>
+      <BotaoTopo visivel={mostrarTopo} acimaDaBarra={bottomBar} />
     </main>
   )
 }
