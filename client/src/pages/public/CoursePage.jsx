@@ -236,7 +236,7 @@ export default function CoursePage() {
         return (
             <PublicLayout showBanner={false}>
                 <div className='flex items-center justify-center min-h-96'>
-                    <Loader2 size={32} className='text-orange-base animate-spin' />
+                    <Loader2 size='2rem' className='text-orange-base animate-spin' />
                 </div>
             </PublicLayout>
         )
@@ -284,15 +284,15 @@ export default function CoursePage() {
 
                 <Link
                     to='/cursos'
-                    className='inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] text-cocoa hover:text-orange-base transition-colors duration-500 mb-6'
+                    className='inline-flex items-center gap-2 text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-cocoa hover:text-orange-base transition-colors duration-500 mb-6'
                 >
-                    <ArrowLeft size={14} strokeWidth={1.5} />
+                    <ArrowLeft size='0.875rem' strokeWidth={1.5} />
                     Voltar para a agenda
                 </Link>
 
                 {/* no lg o quadro de inscrição vai pra coluna da direita e fica
                     fixo na rolagem; no celular ele vem logo depois da arte */}
-                <div className='grid gap-6 items-start lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-10'>
+                <div className='grid gap-6 items-start lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-10'>
 
                     <div className='lg:col-start-1 flex flex-col gap-3 min-w-0'>
                         <div className='relative w-full aspect-4/5 sm:aspect-4/3 rounded-xl overflow-hidden bg-chocolate'>
@@ -305,7 +305,7 @@ export default function CoursePage() {
                                 </>
                             ) : (
                                 <div className='w-full h-full flex items-center justify-center'>
-                                    <ChefHat size={64} strokeWidth={1.25} className='text-cream/20' />
+                                    <ChefHat size='4rem' strokeWidth={1.25} className='text-cream/20' />
                                 </div>
                             )}
                         </div>
@@ -330,28 +330,28 @@ export default function CoursePage() {
 
                         <div>
                             {curso.categoria && (
-                                <p className='text-[10px] font-medium uppercase tracking-[0.28em] text-gold mb-2'>{curso.categoria}</p>
+                                <p className='text-[0.625rem] font-medium uppercase tracking-[0.28em] text-gold mb-2'>{curso.categoria}</p>
                             )}
-                            <h1 className='font-serif text-[34px] md:text-[42px] font-bold text-chocolate leading-[1.02]'>
+                            <h1 className='font-serif text-[2.125rem] md:text-[2.625rem] font-bold text-chocolate leading-[1.02]'>
                                 {curso.nomeCurso}
                             </h1>
                             {curso.culinarista && (
                                 <p className='flex items-center gap-1.5 text-sm font-normal text-cocoa mt-3'>
-                                    <ChefHat size={15} strokeWidth={1.5} className='text-gold shrink-0' />
+                                    <ChefHat size='0.9375rem' strokeWidth={1.5} className='text-gold shrink-0' />
                                     com <span className='font-serif italic text-lg font-semibold text-chocolate'>{curso.culinarista}</span>
                                 </p>
                             )}
                         </div>
 
                         <ul className='flex flex-col gap-3.5'>
-                            <InfoItem icon={<Calendar size={16} strokeWidth={1.5} className='text-gold' />} label='Data'>
+                            <InfoItem icon={<Calendar size='1rem' strokeWidth={1.5} className='text-gold' />} label='Data'>
                                 {extenso}
                             </InfoItem>
-                            <InfoItem icon={<Clock size={16} strokeWidth={1.5} className='text-gold' />} label='Horário'>
+                            <InfoItem icon={<Clock size='1rem' strokeWidth={1.5} className='text-gold' />} label='Horário'>
                                 {formatHora(curso.hora)}{curso.duracao ? ` · ${curso.duracao} de duração` : ''}
                             </InfoItem>
                             {curso.loja && (
-                                <InfoItem icon={<MapPin size={16} strokeWidth={1.5} className='text-gold' />} label='Local'>
+                                <InfoItem icon={<MapPin size='1rem' strokeWidth={1.5} className='text-gold' />} label='Local'>
                                     Loja {nomeLoja(curso.loja)}
                                     {loja && <span className='block text-xs font-normal text-cocoa mt-0.5'>{loja.endereco}</span>}
                                 </InfoItem>
@@ -361,8 +361,8 @@ export default function CoursePage() {
                         <div className='border-t border-chocolate/[0.08] pt-6 flex flex-col gap-5'>
                             <div className='flex items-end justify-between gap-3'>
                                 <div className='leading-tight'>
-                                    <p className='text-[10px] font-medium uppercase tracking-[0.22em] text-cocoa mb-1.5'>Investimento</p>
-                                    <p className='font-serif italic text-[42px] font-bold text-orange-base leading-none'>{preco}</p>
+                                    <p className='text-[0.625rem] font-medium uppercase tracking-[0.22em] text-cocoa mb-1.5'>Investimento</p>
+                                    <p className='font-serif italic text-[2.625rem] font-bold text-orange-base leading-none'>{preco}</p>
                                 </div>
                                 {totalAssentos > 0 && !encerrado && (
                                     <p className={`text-sm text-right font-normal ${esgotado || ultimasVagas ? 'text-orange-base font-medium' : 'text-cocoa'}`}>
@@ -394,11 +394,11 @@ export default function CoursePage() {
 
                             <div className='flex flex-col gap-2.5 text-xs font-normal text-cocoa'>
                                 <p className='flex items-center gap-2'>
-                                    <ShieldCheck size={15} strokeWidth={1.5} className='text-gold shrink-0' />
+                                    <ShieldCheck size='0.9375rem' strokeWidth={1.5} className='text-gold shrink-0' />
                                     Pagamento seguro pelo Mercado Pago, no Pix ou cartão
                                 </p>
                                 <p className='flex items-center gap-2'>
-                                    <RotateCcw size={15} strokeWidth={1.5} className='text-gold shrink-0' />
+                                    <RotateCcw size='0.9375rem' strokeWidth={1.5} className='text-gold shrink-0' />
                                     Reembolso somente antes de 24h do início do curso
                                 </p>
                             </div>
@@ -408,9 +408,9 @@ export default function CoursePage() {
                             href='https://api.whatsapp.com/send?phone=5522998336225'
                             target='_blank'
                             rel='noopener noreferrer'
-                            className='flex items-center justify-center gap-2 py-3.5 rounded-full border border-chocolate/15 text-[11px] font-medium uppercase tracking-[0.2em] text-chocolate hover:bg-chocolate hover:text-cream hover:border-chocolate transition-colors duration-500'
+                            className='flex items-center justify-center gap-2 py-3.5 rounded-full border border-chocolate/15 text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-chocolate hover:bg-chocolate hover:text-cream hover:border-chocolate transition-colors duration-500'
                         >
-                            <MessageCircle size={15} strokeWidth={1.5} />
+                            <MessageCircle size='0.9375rem' strokeWidth={1.5} />
                             Dúvidas? Fale com a gente
                         </a>
                     </aside>
@@ -418,18 +418,18 @@ export default function CoursePage() {
                     {curso.ingredientes && curso.ingredientes.trim() && (
                         <div className='lg:col-start-1 bg-white rounded-xl ring-1 ring-chocolate/[0.07] p-6 md:p-8'>
                             <div className='flex items-center justify-between mb-5'>
-                                <h2 className='font-serif text-[28px] font-semibold text-chocolate leading-none'>Ingredientes</h2>
+                                <h2 className='font-serif text-[1.75rem] font-semibold text-chocolate leading-none'>Ingredientes</h2>
                                 <button
                                     onClick={imprimirIngredientes}
-                                    className='flex items-center gap-1.5 text-orange-base hover:text-chocolate text-[10px] uppercase tracking-[0.18em] font-medium transition-colors duration-500 cursor-pointer'
+                                    className='flex items-center gap-1.5 text-orange-base hover:text-chocolate text-[0.625rem] uppercase tracking-[0.18em] font-medium transition-colors duration-500 cursor-pointer'
                                 >
-                                    <Printer size={14} strokeWidth={1.5} />
+                                    <Printer size='0.875rem' strokeWidth={1.5} />
                                     Imprimir
                                 </button>
                             </div>
                             <ul className='grid gap-x-8 gap-y-2.5 sm:grid-cols-2'>
                                 {curso.ingredientes.split('\n').filter(i => i.trim()).map((item, idx) => (
-                                    <li key={idx} className='flex items-start gap-3 text-[15px] font-normal text-chocolate'>
+                                    <li key={idx} className='flex items-start gap-3 text-[0.9375rem] font-normal text-chocolate'>
                                         <span className='mt-2 w-1.5 h-1.5 rotate-45 bg-gold shrink-0' />
                                         {item.trim()}
                                     </li>
@@ -440,9 +440,9 @@ export default function CoursePage() {
 
                     {assentos.length > 0 && !encerrado && (
                         <div className='lg:col-start-1 bg-white rounded-xl ring-1 ring-chocolate/[0.07] p-6 md:p-8'>
-                            <h2 className='font-serif text-[28px] font-semibold text-chocolate leading-none mb-5'>Mapa de assentos</h2>
+                            <h2 className='font-serif text-[1.75rem] font-semibold text-chocolate leading-none mb-5'>Mapa de assentos</h2>
 
-                            <div className='bg-chocolate rounded-lg py-3 text-center text-[11px] font-medium text-cream uppercase tracking-[0.35em] mb-5'>
+                            <div className='bg-chocolate rounded-lg py-3 text-center text-[0.6875rem] font-medium text-cream uppercase tracking-[0.35em] mb-5'>
                                 Balcão
                             </div>
 
@@ -481,15 +481,15 @@ export default function CoursePage() {
                 cliente rola pra ver ingredientes/assentos, e o botão continua à mão */}
             <div className='lg:hidden fixed bottom-0 inset-x-0 z-40 bg-cream/95 backdrop-blur border-t border-chocolate/10 px-5 py-3 flex items-center justify-between gap-4 shadow-[0_-10px_30px_-12px_rgba(58,42,33,0.25)]'>
                 <div className='leading-tight min-w-0'>
-                    <p className='font-serif italic text-[26px] font-bold text-orange-base leading-none'>{preco}</p>
-                    <p className='text-[11px] font-normal text-cocoa truncate mt-1'>
+                    <p className='font-serif italic text-[1.625rem] font-bold text-orange-base leading-none'>{preco}</p>
+                    <p className='text-[0.6875rem] font-normal text-cocoa truncate mt-1'>
                         <span className='capitalize'>{semana}</span>, {dia} {mes} · {formatHora(curso.hora)}
                     </p>
                 </div>
                 <button
                     onClick={abrirInscricao}
                     disabled={bloqueado}
-                    className={`shrink-0 px-6 py-3.5 rounded-full text-[11px] font-medium uppercase tracking-[0.18em] transition-colors duration-500 ${
+                    className={`shrink-0 px-6 py-3.5 rounded-full text-[0.6875rem] font-medium uppercase tracking-[0.18em] transition-colors duration-500 ${
                         bloqueado
                             ? 'bg-cream-dark text-cocoa/60 cursor-not-allowed'
                             : 'bg-orange-base text-white hover:bg-chocolate cursor-pointer'
@@ -502,7 +502,7 @@ export default function CoursePage() {
             {loadingPagamento && (
                 <div className='flex items-center justify-center fixed inset-0 bg-chocolate/55 backdrop-blur-sm z-50 animate-pagina'>
                     <div className='bg-white rounded-2xl p-10 flex flex-col items-center gap-5 shadow-2xl animate-surgir'>
-                        <Loader2 size={40} className='text-orange-base animate-spin' />
+                        <Loader2 size='2.5rem' className='text-orange-base animate-spin' />
                         <p className='font-serif italic text-2xl font-semibold text-chocolate'>Preparando pagamento...</p>
                     </div>
                 </div>
@@ -517,7 +517,7 @@ export default function CoursePage() {
                         className='bg-white rounded-2xl p-10 flex flex-col items-center gap-5 max-w-sm w-full shadow-2xl animate-surgir'
                         onClick={e => e.stopPropagation()}
                     >
-                        <XCircle size={48} className='text-red-base' />
+                        <XCircle size='3rem' className='text-red-base' />
                         <p className='text-chocolate text-center'>{erroPagamento}</p>
                         <Button
                             className='bg-orange-base text-white hover:bg-orange-light w-full'
@@ -574,8 +574,8 @@ function InfoItem({ icon, label, children }) {
                 {icon}
             </span>
             <div className='min-w-0'>
-                <p className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em] mb-0.5'>{label}</p>
-                <p className='text-[15px] text-chocolate'>{children}</p>
+                <p className='text-[0.625rem] font-medium text-cocoa uppercase tracking-[0.25em] mb-0.5'>{label}</p>
+                <p className='text-[0.9375rem] text-chocolate'>{children}</p>
             </div>
         </li>
     )

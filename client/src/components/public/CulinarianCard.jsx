@@ -25,16 +25,16 @@ export default function CulinarianCard({
                     />
                 ) : (
                     <div className='w-full h-full flex items-center justify-center'>
-                        <User size={48} strokeWidth={1.25} className='text-gold/50' />
+                        <User size='3rem' strokeWidth={1.25} className='text-gold/50' />
                     </div>
                 )}
 
                 <div className='absolute inset-0 bg-linear-to-t from-chocolate/85 via-chocolate/15 to-transparent' />
 
                 <div className='absolute bottom-0 left-0 right-0 p-5'>
-                    <p className='font-serif text-white text-[22px] md:text-[26px] font-bold leading-[1.05] mb-2.5'>{nomeCulinarista}</p>
+                    <p className='font-serif text-white text-[1.375rem] md:text-[1.625rem] font-bold leading-[1.05] mb-2.5'>{nomeCulinarista}</p>
 
-                    <span className='inline-block text-[9px] font-medium uppercase tracking-[0.22em] px-3 py-1.5 rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur-sm'>
+                    <span className='inline-block text-[0.5625rem] font-medium uppercase tracking-[0.22em] px-3 py-1.5 rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur-sm'>
                         {duasLojas ? 'Prado e Teresópolis' : nomeLoja(lojaUnica)}
                     </span>
                 </div>

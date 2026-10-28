@@ -84,11 +84,11 @@ export default function CulinariansSections({
 
                 {!loadingCulinarian && culinaristas.length > INICIAIS && (
                     restantes > 0 ? (
-                        <SectionAction onClick={() => setVisiveis(v => v + POR_CLIQUE)} icone={<ChevronDown size={14} />}>
+                        <SectionAction onClick={() => setVisiveis(v => v + POR_CLIQUE)} icone={<ChevronDown size='0.875rem' />}>
                             Ver mais culinaristas <span className='opacity-50'>({restantes})</span>
                         </SectionAction>
                     ) : (
-                        <SectionAction onClick={verMenos} icone={<ChevronUp size={14} />}>
+                        <SectionAction onClick={verMenos} icone={<ChevronUp size='0.875rem' />}>
                             Ver menos
                         </SectionAction>
                     )

@@ -170,14 +170,14 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
             >
                 <div className='flex items-center justify-between p-5 pb-4 border-b border-chocolate/[0.08]'>
                     <div>
-                        <h2 className='font-serif text-[28px] font-semibold leading-none text-chocolate'>Pagamento</h2>
+                        <h2 className='font-serif text-[1.75rem] font-semibold leading-none text-chocolate'>Pagamento</h2>
                         <p className='text-xs font-normal text-cocoa mt-1.5'>Seus dados são protegidos pelo MercadoPago</p>
                     </div>
                     <button
                         className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray text-gray-text/60 hover:text-gray-dark transition cursor-pointer'
                         onClick={onClose}
                     >
-                        <X size={18} />
+                        <X size='1.125rem' />
                     </button>
                 </div>
                 <div className='p-5'>
@@ -188,7 +188,7 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
                                     onClick={onTrocarAssento}
                                     className='flex items-center gap-1.5 text-gray-text/60 hover:text-gray-dark text-xs font-medium cursor-pointer'
                                 >
-                                    <ArrowLeft size={14} />
+                                    <ArrowLeft size='0.875rem' />
                                     Trocar assento
                                 </button>
                             )}
@@ -197,7 +197,7 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
                                     onClick={trocarFormaPagamento}
                                     className='flex items-center gap-1.5 text-gray-text/60 hover:text-gray-dark text-xs font-medium cursor-pointer'
                                 >
-                                    <ArrowLeft size={14} />
+                                    <ArrowLeft size='0.875rem' />
                                     Trocar forma de pagamento
                                 </button>
                             )}
@@ -205,7 +205,7 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
                     )}
                     {erro && (
                         <div className='flex items-start gap-2 bg-red-base/5 border border-red-base/20 text-red-base text-sm rounded-lg p-3 mb-4'>
-                            <AlertCircle size={16} className='shrink-0 mt-0.5' />
+                            <AlertCircle size='1rem' className='shrink-0 mt-0.5' />
                             <p>{erro}</p>
                         </div>
                     )}
@@ -225,11 +225,11 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
                                 onClick={copiarCodigo}
                                 className='flex items-center gap-2 bg-gray-dark/5 hover:bg-gray-dark/10 text-gray-dark text-sm font-medium px-4 py-2.5 rounded-lg transition w-full justify-center cursor-pointer'
                             >
-                                {copied ? <Check size={16} className='text-green-base' /> : <Copy size={16} />}
+                                {copied ? <Check size='1rem' className='text-green-base' /> : <Copy size='1rem' />}
                                 {copied ? 'Código copiado!' : 'Copiar código Pix'}
                             </button>
                             <div className='flex items-center gap-2 text-xs text-gray-text/60 mt-2'>
-                                <Loader2 size={14} className='animate-spin' />
+                                <Loader2 size='0.875rem' className='animate-spin' />
                                 Aguardando confirmação do pagamento...
                             </div>
                         </div>

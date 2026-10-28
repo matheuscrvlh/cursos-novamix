@@ -31,8 +31,8 @@ export default function AllChildrensCoursesSections({
 
             <div className='flex items-end justify-between gap-4 mb-10 md:mb-12'>
                 <div>
-                    <p className='text-[11px] font-medium uppercase tracking-[0.32em] text-gold mb-2'>Para os pequenos</p>
-                    <h1 className='font-serif text-[40px] md:text-[52px] font-bold text-chocolate leading-[1.05]'>Cursos <em className='italic text-orange-base'>infantis</em></h1>
+                    <p className='text-[0.6875rem] font-medium uppercase tracking-[0.32em] text-gold mb-2'>Para os pequenos</p>
+                    <h1 className='font-serif text-[2.5rem] md:text-[3.25rem] font-bold text-chocolate leading-[1.05]'>Cursos <em className='italic text-orange-base'>infantis</em></h1>
                     <p className='text-sm font-normal text-cocoa mt-2'>
                         {cursosFiltrados.length} {cursosFiltrados.length === 1 ? 'curso encontrado' : 'cursos encontrados'}
                     </p>
@@ -40,12 +40,12 @@ export default function AllChildrensCoursesSections({
 
                 <button
                     onClick={() => setShowModalFilters(!showModalFilters)}
-                    className='relative md:hidden shrink-0 flex items-center gap-2 bg-orange-base hover:bg-chocolate text-white px-4 py-2.5 rounded-full font-medium text-[11px] uppercase tracking-[0.16em] transition-colors duration-500 cursor-pointer'
+                    className='relative md:hidden shrink-0 flex items-center gap-2 bg-orange-base hover:bg-chocolate text-white px-4 py-2.5 rounded-full font-medium text-[0.6875rem] uppercase tracking-[0.16em] transition-colors duration-500 cursor-pointer'
                 >
-                    <SlidersHorizontal size={15} />
+                    <SlidersHorizontal size='0.9375rem' />
                     Filtros
                     {activeCount > 0 && (
-                        <span className='absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-orange-base text-[10px] font-semibold flex items-center justify-center shadow'>
+                        <span className='absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white text-orange-base text-[0.625rem] font-semibold flex items-center justify-center shadow'>
                             {activeCount}
                         </span>
                     )}
@@ -59,10 +59,10 @@ export default function AllChildrensCoursesSections({
 
                         <div className='flex items-center justify-between'>
                             <div className='flex items-center gap-2'>
-                                <SlidersHorizontal size={15} strokeWidth={1.5} className='text-gold' />
+                                <SlidersHorizontal size='0.9375rem' strokeWidth={1.5} className='text-gold' />
                                 <p className='font-serif text-2xl font-semibold text-chocolate leading-none'>Filtros</p>
                                 {activeCount > 0 && (
-                                    <span className='w-5 h-5 rounded-full bg-orange-base text-white text-[10px] font-semibold flex items-center justify-center'>
+                                    <span className='w-5 h-5 rounded-full bg-orange-base text-white text-[0.625rem] font-semibold flex items-center justify-center'>
                                         {activeCount}
                                     </span>
                                 )}
@@ -70,7 +70,7 @@ export default function AllChildrensCoursesSections({
                             {activeCount > 0 && (
                                 <button
                                     onClick={clearFilters}
-                                    className='text-[10px] uppercase tracking-[0.18em] text-orange-base hover:text-chocolate font-medium transition-colors duration-500 cursor-pointer'
+                                    className='text-[0.625rem] uppercase tracking-[0.18em] text-orange-base hover:text-chocolate font-medium transition-colors duration-500 cursor-pointer'
                                 >
                                     Limpar tudo
                                 </button>
@@ -78,11 +78,11 @@ export default function AllChildrensCoursesSections({
                         </div>
 
                         <div className='flex flex-col gap-2'>
-                            <label className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em]'>Loja</label>
+                            <label className='text-[0.625rem] font-medium text-cocoa uppercase tracking-[0.25em]'>Loja</label>
                             <div className='flex gap-2'>
                                 <button
                                     onClick={() => toggleLoja('Prado')}
-                                    className={`flex-1 py-2.5 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] border transition-colors duration-500 cursor-pointer ${
+                                    className={`flex-1 py-2.5 rounded-full text-[0.6875rem] font-medium uppercase tracking-[0.14em] border transition-colors duration-500 cursor-pointer ${
                                         filters.loja === 'Prado'
                                             ? 'bg-chocolate border-chocolate text-cream'
                                             : 'border-chocolate/15 text-cocoa hover:border-chocolate/40'
@@ -92,7 +92,7 @@ export default function AllChildrensCoursesSections({
                                 </button>
                                 <button
                                     onClick={() => toggleLoja('Teresopolis')}
-                                    className={`flex-1 py-2.5 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] border transition-colors duration-500 cursor-pointer ${
+                                    className={`flex-1 py-2.5 rounded-full text-[0.6875rem] font-medium uppercase tracking-[0.14em] border transition-colors duration-500 cursor-pointer ${
                                         filters.loja === 'Teresopolis'
                                             ? 'bg-chocolate border-chocolate text-cream'
                                             : 'border-chocolate/15 text-cocoa hover:border-chocolate/40'
@@ -104,10 +104,10 @@ export default function AllChildrensCoursesSections({
                         </div>
 
                         <div className='flex flex-col gap-2'>
-                            <label className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em]'>Período</label>
+                            <label className='text-[0.625rem] font-medium text-cocoa uppercase tracking-[0.25em]'>Período</label>
                             <div className='flex flex-col gap-2'>
                                 <div>
-                                    <p className='text-[11px] font-normal text-cocoa mb-1'>De</p>
+                                    <p className='text-[0.6875rem] font-normal text-cocoa mb-1'>De</p>
                                     <Input
                                         type='date'
                                         className='w-full cursor-pointer text-sm'
@@ -116,7 +116,7 @@ export default function AllChildrensCoursesSections({
                                     />
                                 </div>
                                 <div>
-                                    <p className='text-[11px] font-normal text-cocoa mb-1'>Até</p>
+                                    <p className='text-[0.6875rem] font-normal text-cocoa mb-1'>Até</p>
                                     <Input
                                         type='date'
                                         className='w-full cursor-pointer text-sm'
@@ -129,7 +129,7 @@ export default function AllChildrensCoursesSections({
 
                         {culinaristas.length > 0 && (
                             <div className='flex flex-col gap-2'>
-                                <label className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em]'>Culinarista</label>
+                                <label className='text-[0.625rem] font-medium text-cocoa uppercase tracking-[0.25em]'>Culinarista</label>
                                 <select
                                     className='w-full h-10 px-3 border border-chocolate/15 rounded-lg text-chocolate text-sm bg-white cursor-pointer'
                                     value={filters.culinarista || ''}

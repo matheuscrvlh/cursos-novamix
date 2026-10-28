@@ -116,14 +116,14 @@ function Slides({ banners, campo, aspecto, onErro }) {
                         aria-label='Banner anterior'
                         className='hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 lg:w-12 lg:h-12 items-center justify-center rounded-full bg-white/85 hover:bg-white text-chocolate shadow-[0_8px_24px_-8px_rgba(58,42,33,0.45)] backdrop-blur-sm transition duration-500 ease-luxo hover:scale-105 cursor-pointer'
                     >
-                        <ChevronLeft size={22} strokeWidth={1.5} />
+                        <ChevronLeft size='1.375rem' strokeWidth={1.5} />
                     </button>
                     <button
                         onClick={proximo}
                         aria-label='Próximo banner'
                         className='hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-10 w-11 h-11 lg:w-12 lg:h-12 items-center justify-center rounded-full bg-white/85 hover:bg-white text-chocolate shadow-[0_8px_24px_-8px_rgba(58,42,33,0.45)] backdrop-blur-sm transition duration-500 ease-luxo hover:scale-105 cursor-pointer'
                     >
-                        <ChevronRight size={22} strokeWidth={1.5} />
+                        <ChevronRight size='1.375rem' strokeWidth={1.5} />
                     </button>
                 </>
             )}

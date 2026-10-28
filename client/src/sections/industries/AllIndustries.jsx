@@ -10,8 +10,8 @@ export default function AllIndustries({
         <section className='max-w-7xl mx-auto px-5 md:px-8 pt-10 md:pt-14 pb-16'>
 
             <div className='mb-10 md:mb-12'>
-                <p className='text-[11px] font-medium uppercase tracking-[0.32em] text-gold mb-2'>Marcas que apoiam</p>
-                <h1 className='font-serif text-[40px] md:text-[52px] font-bold text-chocolate leading-[1.05]'>Indústrias <em className='italic text-orange-base'>parceiras</em></h1>
+                <p className='text-[0.6875rem] font-medium uppercase tracking-[0.32em] text-gold mb-2'>Marcas que apoiam</p>
+                <h1 className='font-serif text-[2.5rem] md:text-[3.25rem] font-bold text-chocolate leading-[1.05]'>Indústrias <em className='italic text-orange-base'>parceiras</em></h1>
             </div>
 
             {loadingIndustries ? (
@@ -20,7 +20,7 @@ export default function AllIndustries({
                 </div>
             ) : industrias.length === 0 ? (
                 <div className='flex flex-col items-center justify-center w-full text-center py-20 gap-3'>
-                    <Building2 size={40} className='text-gray-base/30' />
+                    <Building2 size='2.5rem' className='text-gray-base/30' />
                     <p className='text-xl font-semibold text-gray-dark'>Nenhuma indústria encontrada.</p>
                 </div>
             ) : (

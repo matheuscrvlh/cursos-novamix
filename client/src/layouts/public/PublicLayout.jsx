@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
-import { useContext, useState, useEffect } from 'react'
+import { useContext, useState, useEffect, useLayoutEffect } from 'react'
 
 import { MapPin, Building2, MessageCircle, Menu, X, User } from 'lucide-react'
 
@@ -39,6 +39,14 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
     })
   }, [showBanner])
 
+  // liga a escala de monitor grande (index.css, html.site-publico) só no site
+  // público. Layout effect, não effect: entra antes da primeira pintura, senão
+  // a página aparecia pequena e "pulava" de tamanho logo depois de abrir
+  useLayoutEffect(() => {
+    document.documentElement.classList.add('site-publico')
+    return () => document.documentElement.classList.remove('site-publico')
+  }, [])
+
   // o header só ganha sombra depois que a página rola — no topo ele fica
   // "colado" no banner, sem separação
   useEffect(() => {
@@ -62,8 +70,8 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
               className="w-10 h-10 rounded-full object-cover ring-1 ring-white/40 ring-offset-2 ring-offset-orange-base transition-transform duration-700 ease-luxo group-hover:rotate-[8deg]"
             />
             <span className="leading-none">
-              <span className="block font-serif text-[22px] font-semibold">Novamix</span>
-              <span className="block text-[9px] font-medium uppercase tracking-[0.35em] text-white/75 mt-0.5">Cursos</span>
+              <span className="block font-serif text-[1.375rem] font-semibold">Novamix</span>
+              <span className="block text-[0.5625rem] font-medium uppercase tracking-[0.35em] text-white/75 mt-0.5">Cursos</span>
             </span>
           </Link>
 
@@ -76,7 +84,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
                 // sublinhado fino que desliza da esquerda no hover e fica
                 // fixo no link da página atual
                 className={({ isActive }) =>
-                  `relative px-3 py-2 text-[11.5px] font-medium uppercase tracking-[0.16em] transition-colors duration-500
+                  `relative px-3 py-2 text-[0.7188rem] font-medium uppercase tracking-[0.16em] transition-colors duration-500
                   after:absolute after:left-3 after:right-3 after:bottom-0.5 after:h-px after:bg-white after:origin-left after:transition-transform after:duration-500 after:ease-luxo ${
                     isActive
                       ? 'text-white after:scale-x-100'
@@ -97,7 +105,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Atendimento pelo WhatsApp"
-              className="flex items-center justify-center gap-2 border border-white/35 hover:bg-white hover:text-orange-base transition-colors duration-500 w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] whitespace-nowrap"
+              className="flex items-center justify-center gap-2 border border-white/35 hover:bg-white hover:text-orange-base transition-colors duration-500 w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-full text-[0.6875rem] font-medium uppercase tracking-[0.14em] whitespace-nowrap"
             >
               <img src={whatsapp} alt="" className="h-4" />
               <span className="hidden sm:inline">Atendimento</span>
@@ -105,9 +113,9 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
 
             <Link
               to={cliente ? '/minha-conta' : '/entrar'}
-              className="hidden sm:flex items-center gap-2 border border-white/35 hover:bg-white hover:text-orange-base transition-colors duration-500 px-3.5 py-2 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] whitespace-nowrap"
+              className="hidden sm:flex items-center gap-2 border border-white/35 hover:bg-white hover:text-orange-base transition-colors duration-500 px-3.5 py-2 rounded-full text-[0.6875rem] font-medium uppercase tracking-[0.14em] whitespace-nowrap"
             >
-              <User size={15} strokeWidth={1.5} />
+              <User size="0.9375rem" strokeWidth={1.5} />
               <span>{cliente ? 'Minha conta' : 'Entrar'}</span>
             </Link>
 
@@ -116,7 +124,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
               className="md:hidden w-9 h-9 flex items-center justify-center rounded-full border border-white/35 hover:bg-white/15 transition"
               aria-label="Abrir menu"
             >
-              <Menu size={18} strokeWidth={1.5} />
+              <Menu size="1.125rem" strokeWidth={1.5} />
             </button>
           </div>
 
@@ -138,14 +146,14 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
         <div className="flex items-center justify-between px-6 py-5 border-b border-chocolate/10">
           <span className="leading-none">
             <span className="block font-serif text-2xl font-semibold text-chocolate">Novamix</span>
-            <span className="block text-[9px] font-medium uppercase tracking-[0.35em] text-gold mt-1">Cursos</span>
+            <span className="block text-[0.5625rem] font-medium uppercase tracking-[0.35em] text-gold mt-1">Cursos</span>
           </span>
           <button
             onClick={() => setIsMenuOpen(false)}
             className="w-9 h-9 flex items-center justify-center rounded-full border border-chocolate/15 hover:bg-cream-dark transition-colors cursor-pointer"
             aria-label="Fechar menu"
           >
-            <X size={16} strokeWidth={1.5} className="text-chocolate" />
+            <X size="1rem" strokeWidth={1.5} className="text-chocolate" />
           </button>
         </div>
 
@@ -157,7 +165,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
               end={link.to === '/'}
               onClick={() => setIsMenuOpen(false)}
               className={({ isActive }) =>
-                `py-3.5 border-b border-chocolate/[0.07] font-serif text-[22px] font-medium transition-colors duration-500 ${
+                `py-3.5 border-b border-chocolate/[0.07] font-serif text-[1.375rem] font-medium transition-colors duration-500 ${
                   isActive ? 'text-orange-base italic' : 'text-chocolate hover:text-orange-base'
                 }`
               }
@@ -171,16 +179,16 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
           <NavLink
             to={cliente ? '/minha-conta' : '/entrar'}
             onClick={() => setIsMenuOpen(false)}
-            className="flex items-center justify-center gap-2 py-3.5 rounded-full border border-chocolate/20 text-chocolate text-[11px] font-medium uppercase tracking-[0.2em] hover:bg-chocolate hover:text-cream transition-colors duration-500"
+            className="flex items-center justify-center gap-2 py-3.5 rounded-full border border-chocolate/20 text-chocolate text-[0.6875rem] font-medium uppercase tracking-[0.2em] hover:bg-chocolate hover:text-cream transition-colors duration-500"
           >
-            <User size={15} strokeWidth={1.5} /> {cliente ? 'Minha conta' : 'Entrar'}
+            <User size="0.9375rem" strokeWidth={1.5} /> {cliente ? 'Minha conta' : 'Entrar'}
           </NavLink>
 
           <a
             href={WHATSAPP}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 bg-orange-base hover:bg-chocolate transition-colors duration-500 text-white py-3.5 rounded-full text-[11px] font-medium uppercase tracking-[0.2em]"
+            className="flex items-center justify-center gap-2 bg-orange-base hover:bg-chocolate transition-colors duration-500 text-white py-3.5 rounded-full text-[0.6875rem] font-medium uppercase tracking-[0.2em]"
           >
             <img src={whatsapp} alt="" className="h-4" />
             Atendimento
@@ -214,8 +222,8 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
 
             <div className="flex flex-col gap-5">
               <p className="leading-none">
-                <span className="block font-serif text-[34px] font-semibold">Novamix</span>
-                <span className="block text-[10px] font-medium uppercase tracking-[0.35em] text-white/70 mt-1">Cursos</span>
+                <span className="block font-serif text-[2.125rem] font-semibold">Novamix</span>
+                <span className="block text-[0.625rem] font-medium uppercase tracking-[0.35em] text-white/70 mt-1">Cursos</span>
               </p>
               <p className="font-serif italic text-xl font-medium text-white/90 leading-snug max-w-xs">
                 Venha desenvolver suas habilidades culinárias com os melhores profissionais.
@@ -224,7 +232,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
                 href={WHATSAPP}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 border border-white/40 hover:bg-white hover:text-orange-base transition-colors duration-500 px-5 py-3 rounded-full w-fit text-[11px] font-medium uppercase tracking-[0.18em]"
+                className="flex items-center gap-2 border border-white/40 hover:bg-white hover:text-orange-base transition-colors duration-500 px-5 py-3 rounded-full w-fit text-[0.6875rem] font-medium uppercase tracking-[0.18em]"
               >
                 <img src={whatsapp} alt="" className="h-4" />
                 Fale conosco
@@ -232,7 +240,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
             </div>
 
             <div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-white/60 mb-5">Navegação</p>
+              <p className="text-[0.625rem] font-medium uppercase tracking-[0.3em] text-white/60 mb-5">Navegação</p>
               <div className="flex flex-col gap-3">
                 {navLinks.map(link => (
                   <Link
@@ -247,18 +255,18 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
             </div>
 
             <div>
-              <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-white/60 mb-5">Onde estamos</p>
+              <p className="text-[0.625rem] font-medium uppercase tracking-[0.3em] text-white/60 mb-5">Onde estamos</p>
               <div className="flex flex-col gap-3.5 font-normal">
                 <div className="flex items-start gap-2.5 text-sm text-white/85">
-                  <MapPin size={15} strokeWidth={1.5} className="shrink-0 mt-0.5 text-white/60" />
+                  <MapPin size="0.9375rem" strokeWidth={1.5} className="shrink-0 mt-0.5 text-white/60" />
                   <span>Avenida Governador Roberto Silveira, 1700 – Prado – Nova Friburgo/RJ</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-sm text-white/85">
-                  <Building2 size={15} strokeWidth={1.5} className="shrink-0 text-white/60" />
+                  <Building2 size="0.9375rem" strokeWidth={1.5} className="shrink-0 text-white/60" />
                   <span>CNPJ: 19.303.867/0001-44</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-sm text-white/85">
-                  <MessageCircle size={15} strokeWidth={1.5} className="shrink-0 text-white/60" />
+                  <MessageCircle size="0.9375rem" strokeWidth={1.5} className="shrink-0 text-white/60" />
                   <a
                     href={WHATSAPP}
                     target="_blank"

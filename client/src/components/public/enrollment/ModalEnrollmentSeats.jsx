@@ -49,14 +49,14 @@ export default function ModalEnrollmentSeats({
             >
                 <div className='flex items-center justify-between p-5 pb-4 border-b border-chocolate/[0.08]'>
                     <div>
-                        <h2 className='font-serif text-[28px] font-semibold leading-none text-chocolate'>Escolha seu assento</h2>
+                        <h2 className='font-serif text-[1.75rem] font-semibold leading-none text-chocolate'>Escolha seu assento</h2>
                         <p className='text-xs font-normal text-cocoa mt-1.5'>Toque no assento para selecioná-lo</p>
                     </div>
                     <button
                         className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray text-gray-text/60 hover:text-gray-dark transition cursor-pointer'
                         onClick={onClose}
                     >
-                        <X size={18} />
+                        <X size='1.125rem' />
                     </button>
                 </div>
 

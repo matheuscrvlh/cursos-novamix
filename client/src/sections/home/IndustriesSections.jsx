@@ -28,11 +28,11 @@ export default function IndustriesSections({ industrias }) {
                                     className='w-full h-full object-cover grayscale opacity-75 transition duration-700 group-hover:grayscale-0 group-hover:opacity-100'
                                 />
                             ) : (
-                                <Building2 size={26} strokeWidth={1.25} className='text-gold/60' />
+                                <Building2 size='1.625rem' strokeWidth={1.25} className='text-gold/60' />
                             )}
                         </div>
 
-                        <p className='text-[10px] font-medium uppercase tracking-[0.14em] text-cocoa text-center leading-tight line-clamp-2 w-full'>
+                        <p className='text-[0.625rem] font-medium uppercase tracking-[0.14em] text-cocoa text-center leading-tight line-clamp-2 w-full'>
                             {industria.nome}
                         </p>
 

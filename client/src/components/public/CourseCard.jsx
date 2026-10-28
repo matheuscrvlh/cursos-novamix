@@ -50,25 +50,25 @@ export default function CourseCard({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <ChefHat size={44} strokeWidth={1.25} className="text-gold/50" />
+            <ChefHat size="2.75rem" strokeWidth={1.25} className="text-gold/50" />
           </div>
         )}
 
         {dia && (
           <span className="absolute top-3 left-3 flex flex-col items-center min-w-13 bg-cream/95 backdrop-blur-sm rounded-md px-2.5 pt-1.5 pb-1 shadow-sm leading-none">
-            <span className="font-serif text-[26px] font-bold text-chocolate">{dia}</span>
-            <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-orange-base mt-0.5">{mes}</span>
+            <span className="font-serif text-[1.625rem] font-bold text-chocolate">{dia}</span>
+            <span className="text-[0.5625rem] font-medium uppercase tracking-[0.2em] text-orange-base mt-0.5">{mes}</span>
           </span>
         )}
 
         {loja && (
-          <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-chocolate text-[10px] font-medium uppercase tracking-[0.18em] px-3 py-1.5 rounded-full shadow-sm">
+          <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-chocolate text-[0.625rem] font-medium uppercase tracking-[0.18em] px-3 py-1.5 rounded-full shadow-sm">
             {nomeLoja(loja)}
           </span>
         )}
 
         {!loadingVagasPorCurso && (esgotado || ultimasVagas) && (
-          <span className={`absolute bottom-3 left-3 text-[10px] font-medium uppercase tracking-[0.18em] px-3 py-1.5 rounded-full shadow-sm ${esgotado ? 'bg-chocolate text-cream' : 'bg-orange-base text-white'}`}>
+          <span className={`absolute bottom-3 left-3 text-[0.625rem] font-medium uppercase tracking-[0.18em] px-3 py-1.5 rounded-full shadow-sm ${esgotado ? 'bg-chocolate text-cream' : 'bg-orange-base text-white'}`}>
             {esgotado ? 'Esgotado' : 'Últimas vagas'}
           </span>
         )}
@@ -78,23 +78,23 @@ export default function CourseCard({
 
         <div className="flex flex-col gap-1.5">
           {categoria && (
-            <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-gold">{categoria}</p>
+            <p className="text-[0.625rem] font-medium uppercase tracking-[0.25em] text-gold">{categoria}</p>
           )}
           <Link to={link} className="transition-colors duration-500 hover:text-orange-base">
-            <h3 className="font-serif text-chocolate text-[23px] sm:text-[25px] font-bold leading-[1.08] line-clamp-2">{curso}</h3>
+            <h3 className="font-serif text-chocolate text-[1.4375rem] sm:text-[1.5625rem] font-bold leading-[1.08] line-clamp-2">{curso}</h3>
           </Link>
         </div>
 
         <ul className="flex flex-col gap-1.5 text-sm text-cocoa">
           <li className="flex items-center gap-2">
-            <Clock size={14} strokeWidth={1.5} className="shrink-0 text-gold" />
+            <Clock size="0.875rem" strokeWidth={1.5} className="shrink-0 text-gold" />
             <span className="truncate">
               <span className="capitalize">{semana}</span>, {formatHora(horario)}{duracao ? ` · ${duracao} de duração` : ''}
             </span>
           </li>
           {culinarista && (
             <li className="flex items-center gap-2">
-              <ChefHat size={14} strokeWidth={1.5} className="shrink-0 text-gold" />
+              <ChefHat size="0.875rem" strokeWidth={1.5} className="shrink-0 text-gold" />
               <span className="truncate">{culinarista}</span>
             </li>
           )}
@@ -129,8 +129,8 @@ export default function CourseCard({
             cabia nos cards estreitos (celular e grade de 4 colunas) */}
         <div className="flex flex-col gap-4 pt-4 border-t border-chocolate/[0.07]">
           <div className="flex items-baseline justify-between gap-3">
-            <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-cocoa">Investimento</p>
-            <p className="font-serif italic text-[28px] font-bold text-orange-base leading-none">
+            <p className="text-[0.625rem] font-medium uppercase tracking-[0.2em] text-cocoa">Investimento</p>
+            <p className="font-serif italic text-[1.75rem] font-bold text-orange-base leading-none">
               {gratuito ? 'Grátis' : `R$ ${formatarPreco(valor)}`}
             </p>
           </div>
@@ -138,7 +138,7 @@ export default function CourseCard({
           {/* sem onClick (ex: card de prévia no admin) não tem o que o botão fazer */}
           {onClick && (
             <button
-              className={`w-full text-[11px] font-medium uppercase tracking-[0.18em] px-5 py-3.5 rounded-full transition-colors duration-500 ${
+              className={`w-full text-[0.6875rem] font-medium uppercase tracking-[0.18em] px-5 py-3.5 rounded-full transition-colors duration-500 ${
                 esgotado
                   ? 'bg-cream-dark text-cocoa/60 cursor-not-allowed'
                   : 'bg-orange-base text-white hover:bg-chocolate cursor-pointer'

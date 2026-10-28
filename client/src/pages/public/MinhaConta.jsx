@@ -132,19 +132,19 @@ export default function MinhaConta() {
                             onClick={abrirEdicao}
                             className='flex items-center gap-1.5 text-sm text-gray-text/70 hover:text-orange-base transition cursor-pointer'
                         >
-                            <Pencil size={16} /> Editar informações
+                            <Pencil size='1rem' /> Editar informações
                         </button>
                         <button
                             onClick={abrirAlterarSenha}
                             className='flex items-center gap-1.5 text-sm text-gray-text/70 hover:text-orange-base transition cursor-pointer'
                         >
-                            <Lock size={16} /> Alterar senha
+                            <Lock size='1rem' /> Alterar senha
                         </button>
                         <button
                             onClick={handleLogout}
                             className='flex items-center gap-1.5 text-sm text-gray-text/70 hover:text-red-base transition cursor-pointer'
                         >
-                            <LogOut size={16} /> Sair
+                            <LogOut size='1rem' /> Sair
                         </button>
                     </div>
                 </div>
@@ -155,7 +155,7 @@ export default function MinhaConta() {
                     <p className='text-gray-text/50 text-sm'>Carregando...</p>
                 ) : inscricoes.length === 0 ? (
                     <div className='flex flex-col items-center gap-2 py-16 text-gray-text/40'>
-                        <Inbox size={36} />
+                        <Inbox size='2.25rem' />
                         <p className='text-sm'>Você ainda não se inscreveu em nenhum curso</p>
                     </div>
                 ) : (

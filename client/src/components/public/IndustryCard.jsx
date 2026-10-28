@@ -20,16 +20,16 @@ export default function IndustryCard({
                     <img src={foto} alt={nome} loading='lazy' className='w-full h-full object-cover transition-transform duration-[1400ms] ease-luxo group-hover:scale-[1.06]' />
                 ) : (
                     <div className='w-full h-full bg-gray-base/10 flex items-center justify-center'>
-                        <Building2 size={40} className='text-gray-base/30' />
+                        <Building2 size='2.5rem' className='text-gray-base/30' />
                     </div>
                 )}
 
                 <div className='absolute inset-0 bg-linear-to-t from-chocolate/80 via-chocolate/15 to-transparent' />
 
                 <div className='absolute bottom-0 left-0 right-0 p-3'>
-                    <p className='font-serif text-white text-[26px] font-bold leading-none'>{nome}</p>
+                    <p className='font-serif text-white text-[1.625rem] font-bold leading-none'>{nome}</p>
                     {razaoSocial && razaoSocial !== nome && (
-                        <p className='text-white/75 text-[11px] font-normal mt-1.5 truncate'>{razaoSocial}</p>
+                        <p className='text-white/75 text-[0.6875rem] font-normal mt-1.5 truncate'>{razaoSocial}</p>
                     )}
                 </div>
             </div>
@@ -38,28 +38,28 @@ export default function IndustryCard({
 
                 {telefone && (
                     <div className='flex items-center gap-2 text-xs font-normal text-cocoa'>
-                        <Phone size={13} strokeWidth={1.5} className='shrink-0 text-gold' />
+                        <Phone size='0.8125rem' strokeWidth={1.5} className='shrink-0 text-gold' />
                         <span>{telefone}</span>
                     </div>
                 )}
 
                 {email && (
                     <div className='flex items-center gap-2 text-xs font-normal text-cocoa'>
-                        <Mail size={13} strokeWidth={1.5} className='shrink-0 text-gold' />
+                        <Mail size='0.8125rem' strokeWidth={1.5} className='shrink-0 text-gold' />
                         <span className='truncate'>{email}</span>
                     </div>
                 )}
 
                 {endereco && (
                     <div className='flex items-center gap-2 text-xs font-normal text-cocoa'>
-                        <MapPin size={13} strokeWidth={1.5} className='shrink-0 text-gold' />
+                        <MapPin size='0.8125rem' strokeWidth={1.5} className='shrink-0 text-gold' />
                         <span className='truncate'>{endereco}</span>
                     </div>
                 )}
 
                 {site && (
                     <div className='flex items-center gap-2 text-xs mt-auto pt-1'>
-                        <Globe size={13} className='shrink-0 text-blue-base' />
+                        <Globe size='0.8125rem' className='shrink-0 text-blue-base' />
                         <a
                             href={site}
                             target='_blank'

@@ -399,7 +399,7 @@ export default function Home() {
                 {loadingPagamento && (
                     <div className='flex items-center justify-center fixed inset-0 bg-chocolate/55 backdrop-blur-sm z-50 animate-pagina'>
                         <div className='bg-white rounded-2xl p-10 flex flex-col items-center gap-5 shadow-2xl animate-surgir'>
-                            <Loader2 size={40} className='text-orange-base animate-spin' />
+                            <Loader2 size='2.5rem' className='text-orange-base animate-spin' />
                             <p className='font-serif italic text-2xl font-semibold text-chocolate'>Preparando pagamento...</p>
                         </div>
                     </div>
@@ -414,10 +414,10 @@ export default function Home() {
                             className='bg-white rounded-2xl p-10 flex flex-col items-center gap-5 max-w-sm w-full shadow-2xl animate-surgir'
                             onClick={e => e.stopPropagation()}
                         >
-                            <XCircle size={48} className='text-red-base' />
+                            <XCircle size='3rem' className='text-red-base' />
                             <p className='text-chocolate text-center'>{erroPagamento}</p>
                             <button
-                                className='bg-orange-base text-white hover:bg-chocolate w-full py-3.5 rounded-full text-[11px] font-medium uppercase tracking-[0.2em] transition-colors duration-500 cursor-pointer'
+                                className='bg-orange-base text-white hover:bg-chocolate w-full py-3.5 rounded-full text-[0.6875rem] font-medium uppercase tracking-[0.2em] transition-colors duration-500 cursor-pointer'
                                 onClick={() => { setErroPagamento(null); setStep('assento') }}
                             >
                                 Tentar novamente

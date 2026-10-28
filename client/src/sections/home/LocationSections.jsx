@@ -44,17 +44,17 @@ export default function LocationSections() {
 
                     <div className='flex flex-col gap-5'>
                         <div className='flex items-start gap-3.5'>
-                            <MapPin size={18} strokeWidth={1.5} className='text-gold shrink-0 mt-0.5' />
+                            <MapPin size='1.125rem' strokeWidth={1.5} className='text-gold shrink-0 mt-0.5' />
                             <div>
-                                <p className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em] mb-1'>Endereço</p>
-                                <p className='text-[15px] font-normal text-chocolate'>{location.endereco}</p>
+                                <p className='text-[0.625rem] font-medium text-cocoa uppercase tracking-[0.25em] mb-1'>Endereço</p>
+                                <p className='text-[0.9375rem] font-normal text-chocolate'>{location.endereco}</p>
                             </div>
                         </div>
                         <div className='flex items-start gap-3.5'>
-                            <Clock size={18} strokeWidth={1.5} className='text-gold shrink-0 mt-0.5' />
+                            <Clock size='1.125rem' strokeWidth={1.5} className='text-gold shrink-0 mt-0.5' />
                             <div>
-                                <p className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em] mb-1'>Horário</p>
-                                <p className='text-[15px] font-normal text-chocolate'>{location.horario}</p>
+                                <p className='text-[0.625rem] font-medium text-cocoa uppercase tracking-[0.25em] mb-1'>Horário</p>
+                                <p className='text-[0.9375rem] font-normal text-chocolate'>{location.horario}</p>
                             </div>
                         </div>
                     </div>
@@ -63,9 +63,9 @@ export default function LocationSections() {
                         href={linkComoChegar(active)}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className='group md:mt-auto flex items-center justify-center gap-3 w-full py-3.5 rounded-full border border-chocolate/20 text-chocolate text-[11px] font-medium uppercase tracking-[0.22em] hover:bg-chocolate hover:text-cream hover:border-chocolate transition-colors duration-500'
+                        className='group md:mt-auto flex items-center justify-center gap-3 w-full py-3.5 rounded-full border border-chocolate/20 text-chocolate text-[0.6875rem] font-medium uppercase tracking-[0.22em] hover:bg-chocolate hover:text-cream hover:border-chocolate transition-colors duration-500'
                     >
-                        <Navigation size={14} strokeWidth={1.5} />
+                        <Navigation size='0.875rem' strokeWidth={1.5} />
                         Como chegar
                     </a>
                 </div>

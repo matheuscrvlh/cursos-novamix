@@ -18,6 +18,23 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+/* Site público em monitor grande: tudo (fontes, espaçamentos, ícones, largura
+   do conteúdo) é em rem, então aumentar a fonte raiz escala a página inteira,
+   como o zoom do navegador. Em 2560px fica igual ao zoom de 125%. A classe
+   vem do PublicLayout, pra o painel admin não mudar. Os breakpoints em rem das
+   media queries não são afetados (lá o rem é sempre o padrão do navegador) */
+@media (min-width: 1600px) {
+    html.site-publico {
+        font-size: 112.5%;
+    }
+}
+
+@media (min-width: 2000px) {
+    html.site-publico {
+        font-size: 125%;
+    }
+}
+
 /* a Cormorant usa algarismos de texto por padrão ("05" vira "o5", "10,00"
    vira "ro,oo") — nas datas e preços em serifada, algarismos alinhados */
 .font-serif {
