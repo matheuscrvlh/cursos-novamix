@@ -37,7 +37,7 @@ export default function CategoriesSections() {
                             </div>
 
                             <p className='
-                                font-serif text-xl md:text-2xl text-chocolate text-center leading-tight
+                                font-serif text-xl md:text-2xl font-semibold text-chocolate text-center leading-tight
                                 transition-colors duration-500 group-hover:text-orange-base group-hover:italic
                             '>
                                 {cat.label}

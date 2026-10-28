@@ -33,9 +33,9 @@ export default function AllCoursesSections({
             <div className='flex items-end justify-between gap-4 mb-10 md:mb-12'>
                 <div>
                     <p className='text-[11px] font-medium uppercase tracking-[0.32em] text-gold mb-2'>Aulas presenciais</p>
-                    <h1 className='font-serif text-[40px] md:text-[52px] font-medium text-chocolate leading-[1.05]'>Agenda de <em className='italic text-orange-base'>cursos</em></h1>
+                    <h1 className='font-serif text-[40px] md:text-[52px] font-bold text-chocolate leading-[1.05]'>Agenda de <em className='italic text-orange-base'>cursos</em></h1>
                     {!loadingCourses && (
-                        <p className='text-sm font-light text-cocoa mt-2'>
+                        <p className='text-sm font-normal text-cocoa mt-2'>
                             {cursosFiltrados.length} {cursosFiltrados.length === 1 ? 'curso encontrado' : 'cursos encontrados'}
                         </p>
                     )}
@@ -63,7 +63,7 @@ export default function AllCoursesSections({
                         <div className='flex items-center justify-between'>
                             <div className='flex items-center gap-2'>
                                 <SlidersHorizontal size={15} strokeWidth={1.5} className='text-gold' />
-                                <p className='font-serif text-2xl text-chocolate leading-none'>Filtros</p>
+                                <p className='font-serif text-2xl font-semibold text-chocolate leading-none'>Filtros</p>
                                 {activeCount > 0 && (
                                     <span className='w-5 h-5 rounded-full bg-orange-base text-white text-[10px] font-semibold flex items-center justify-center'>
                                         {activeCount}
@@ -81,7 +81,7 @@ export default function AllCoursesSections({
                         </div>
 
                         <div className='flex flex-col gap-2'>
-                            <label className='text-[10px] font-medium text-cocoa/70 uppercase tracking-[0.25em]'>Loja</label>
+                            <label className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em]'>Loja</label>
                             <div className='flex gap-2'>
                                 <button
                                     onClick={() => toggleLoja('Prado')}
@@ -107,10 +107,10 @@ export default function AllCoursesSections({
                         </div>
 
                         <div className='flex flex-col gap-2'>
-                            <label className='text-[10px] font-medium text-cocoa/70 uppercase tracking-[0.25em]'>Período</label>
+                            <label className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em]'>Período</label>
                             <div className='flex flex-col gap-2'>
                                 <div>
-                                    <p className='text-[11px] font-light text-cocoa/70 mb-1'>De</p>
+                                    <p className='text-[11px] font-normal text-cocoa mb-1'>De</p>
                                     <Input
                                         type='date'
                                         className='w-full cursor-pointer text-sm'
@@ -119,7 +119,7 @@ export default function AllCoursesSections({
                                     />
                                 </div>
                                 <div>
-                                    <p className='text-[11px] font-light text-cocoa/70 mb-1'>Até</p>
+                                    <p className='text-[11px] font-normal text-cocoa mb-1'>Até</p>
                                     <Input
                                         type='date'
                                         className='w-full cursor-pointer text-sm'
@@ -132,7 +132,7 @@ export default function AllCoursesSections({
 
                         {culinaristas.length > 0 && (
                             <div className='flex flex-col gap-2'>
-                                <label className='text-[10px] font-medium text-cocoa/70 uppercase tracking-[0.25em]'>Culinarista</label>
+                                <label className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em]'>Culinarista</label>
                                 <select
                                     className='w-full h-10 px-3 border border-chocolate/15 rounded-lg text-chocolate text-sm bg-white cursor-pointer'
                                     value={filters.culinarista || ''}
@@ -155,8 +155,8 @@ export default function AllCoursesSections({
                         </div>
                     ) : cursosFiltrados.length === 0 ? (
                         <div className='flex flex-col items-center justify-center text-center mt-24 gap-3'>
-                            <p className='font-serif text-3xl text-chocolate'>Nenhum curso encontrado.</p>
-                            <p className='text-cocoa font-light text-sm'>Tente ajustar os filtros.</p>
+                            <p className='font-serif text-3xl font-semibold text-chocolate'>Nenhum curso encontrado.</p>
+                            <p className='text-cocoa font-normal text-sm'>Tente ajustar os filtros.</p>
                             {activeCount > 0 && (
                                 <button
                                     onClick={clearFilters}

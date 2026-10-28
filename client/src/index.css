@@ -19,6 +19,17 @@ body {
     font-variant-numeric: lining-nums;
 }
 
+/* a Cormorant para no 700 e é fina pra quem enxerga menos — um contorno na
+   cor do próprio texto, proporcional ao tamanho (em), engrossa o traço como
+   um peso extra que a fonte não tem */
+.font-serif.font-bold {
+    -webkit-text-stroke: 0.02em currentColor;
+}
+
+.font-serif.font-semibold {
+    -webkit-text-stroke: 0.012em currentColor;
+}
+
 /* curva de desaceleração longa — dá a sensação de movimento "caro", sem pressa */
 @keyframes surgir {
     from { opacity: 0; transform: translateY(12px); }
@@ -90,7 +101,9 @@ body {
     /* site público — linha "pâtisserie" */
     --color-cream: #FAF6EF;
     --color-cream-dark: #F1E8DA;
-    --color-gold: #B8975A;
+    /* dourado envelhecido: escuro o bastante pras etiquetas pequenas lerem
+       bem no creme (contraste ~4.6:1, AA) — o #B8975A anterior dava ~2.6:1 */
+    --color-gold: #8A6B33;
     --color-chocolate: #3A2A21;
     --color-cocoa: #7A6656;
 }

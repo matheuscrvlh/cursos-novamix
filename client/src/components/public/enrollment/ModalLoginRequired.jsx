@@ -18,7 +18,7 @@ export default function ModalLoginRequired({ isOpen, onClose }) {
                 onClick={e => e.stopPropagation()}
             >
                 <div className='flex items-center justify-between'>
-                    <h2 className='font-serif text-[28px] leading-none text-chocolate'>Faça Login</h2>
+                    <h2 className='font-serif text-[28px] font-semibold leading-none text-chocolate'>Faça Login</h2>
                     <button
                         className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray text-gray-text/60 hover:text-gray-dark transition cursor-pointer'
                         onClick={onClose}
@@ -27,7 +27,7 @@ export default function ModalLoginRequired({ isOpen, onClose }) {
                     </button>
                 </div>
 
-                <p className='text-sm font-light text-cocoa mt-3 mb-6'>
+                <p className='text-sm font-normal text-cocoa mt-3 mb-6'>
                     Pra garantir sua vaga usamos os dados da sua conta, entre ou crie uma conta gratuita pra continuar.
                 </p>
 

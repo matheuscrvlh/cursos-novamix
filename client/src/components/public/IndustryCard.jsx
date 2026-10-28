@@ -27,9 +27,9 @@ export default function IndustryCard({
                 <div className='absolute inset-0 bg-linear-to-t from-chocolate/80 via-chocolate/15 to-transparent' />
 
                 <div className='absolute bottom-0 left-0 right-0 p-3'>
-                    <p className='font-serif text-white text-[26px] font-semibold leading-none'>{nome}</p>
+                    <p className='font-serif text-white text-[26px] font-bold leading-none'>{nome}</p>
                     {razaoSocial && razaoSocial !== nome && (
-                        <p className='text-white/75 text-[11px] font-light mt-1.5 truncate'>{razaoSocial}</p>
+                        <p className='text-white/75 text-[11px] font-normal mt-1.5 truncate'>{razaoSocial}</p>
                     )}
                 </div>
             </div>
@@ -37,21 +37,21 @@ export default function IndustryCard({
             <div className='p-5 flex flex-col gap-2.5 flex-1'>
 
                 {telefone && (
-                    <div className='flex items-center gap-2 text-xs font-light text-cocoa'>
+                    <div className='flex items-center gap-2 text-xs font-normal text-cocoa'>
                         <Phone size={13} strokeWidth={1.5} className='shrink-0 text-gold' />
                         <span>{telefone}</span>
                     </div>
                 )}
 
                 {email && (
-                    <div className='flex items-center gap-2 text-xs font-light text-cocoa'>
+                    <div className='flex items-center gap-2 text-xs font-normal text-cocoa'>
                         <Mail size={13} strokeWidth={1.5} className='shrink-0 text-gold' />
                         <span className='truncate'>{email}</span>
                     </div>
                 )}
 
                 {endereco && (
-                    <div className='flex items-center gap-2 text-xs font-light text-cocoa'>
+                    <div className='flex items-center gap-2 text-xs font-normal text-cocoa'>
                         <MapPin size={13} strokeWidth={1.5} className='shrink-0 text-gold' />
                         <span className='truncate'>{endereco}</span>
                     </div>

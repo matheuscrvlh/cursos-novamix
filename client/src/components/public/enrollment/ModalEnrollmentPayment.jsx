@@ -170,8 +170,8 @@ export default function ModalEnrollmentPayment({ isOpen, inscricaoId, valor, pay
             >
                 <div className='flex items-center justify-between p-5 pb-4 border-b border-chocolate/[0.08]'>
                     <div>
-                        <h2 className='font-serif text-[28px] leading-none text-chocolate'>Pagamento</h2>
-                        <p className='text-xs font-light text-cocoa mt-1.5'>Seus dados são protegidos pelo MercadoPago</p>
+                        <h2 className='font-serif text-[28px] font-semibold leading-none text-chocolate'>Pagamento</h2>
+                        <p className='text-xs font-normal text-cocoa mt-1.5'>Seus dados são protegidos pelo MercadoPago</p>
                     </div>
                     <button
                         className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray text-gray-text/60 hover:text-gray-dark transition cursor-pointer'

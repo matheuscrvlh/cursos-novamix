@@ -28,7 +28,7 @@ export default function ModalEnrollmentSucess({
                     <div className='w-20 h-20 rounded-full bg-green-base/15 flex items-center justify-center mb-4'>
                         <CheckCircle2 size={42} className='text-green-base' />
                     </div>
-                    <h2 className='font-serif text-[32px] leading-none text-chocolate text-center'>Inscrição confirmada!</h2>
+                    <h2 className='font-serif text-[32px] font-semibold leading-none text-chocolate text-center'>Inscrição confirmada!</h2>
                     <p className='text-sm text-gray-text/60 text-center mt-1'>Você está na lista do curso 🎉</p>
                 </div>
 

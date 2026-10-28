@@ -30,7 +30,7 @@ export default function LocationSections() {
                             <button
                                 key={key}
                                 onClick={() => setActive(key)}
-                                className={`relative pb-3 font-serif text-2xl transition-colors duration-500 cursor-pointer
+                                className={`relative pb-3 font-serif text-2xl font-semibold transition-colors duration-500 cursor-pointer
                                     after:absolute after:left-0 after:right-0 after:-bottom-px after:h-px after:bg-orange-base after:origin-left after:transition-transform after:duration-500 after:ease-luxo ${
                                     active === key
                                         ? 'text-chocolate italic after:scale-x-100'
@@ -46,15 +46,15 @@ export default function LocationSections() {
                         <div className='flex items-start gap-3.5'>
                             <MapPin size={18} strokeWidth={1.5} className='text-gold shrink-0 mt-0.5' />
                             <div>
-                                <p className='text-[10px] font-medium text-cocoa/70 uppercase tracking-[0.25em] mb-1'>Endereço</p>
-                                <p className='text-[15px] font-light text-chocolate'>{location.endereco}</p>
+                                <p className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em] mb-1'>Endereço</p>
+                                <p className='text-[15px] font-normal text-chocolate'>{location.endereco}</p>
                             </div>
                         </div>
                         <div className='flex items-start gap-3.5'>
                             <Clock size={18} strokeWidth={1.5} className='text-gold shrink-0 mt-0.5' />
                             <div>
-                                <p className='text-[10px] font-medium text-cocoa/70 uppercase tracking-[0.25em] mb-1'>Horário</p>
-                                <p className='text-[15px] font-light text-chocolate'>{location.horario}</p>
+                                <p className='text-[10px] font-medium text-cocoa uppercase tracking-[0.25em] mb-1'>Horário</p>
+                                <p className='text-[15px] font-normal text-chocolate'>{location.horario}</p>
                             </div>
                         </div>
                     </div>

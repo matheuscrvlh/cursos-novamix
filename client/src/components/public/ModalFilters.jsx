@@ -28,8 +28,8 @@ export default function ModalFilters({
             >
                 <div className='flex items-center justify-between p-5 pb-4 border-b border-chocolate/[0.08]'>
                     <div>
-                        <h2 className='font-serif text-[28px] leading-none text-chocolate'>{nameModal}</h2>
-                        <p className='text-xs font-light text-cocoa mt-1.5'>Ajuste os filtros para refinar sua busca</p>
+                        <h2 className='font-serif text-[28px] font-semibold leading-none text-chocolate'>{nameModal}</h2>
+                        <p className='text-xs font-normal text-cocoa mt-1.5'>Ajuste os filtros para refinar sua busca</p>
                     </div>
                     <button
                         onClick={onClose}

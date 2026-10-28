@@ -9,7 +9,7 @@ export default function AllCulinariansSections({ culinaristas, loadingCulinarian
 
             <div className='mb-10 md:mb-12'>
                 <p className='text-[11px] font-medium uppercase tracking-[0.32em] text-gold mb-2'>Quem ensina</p>
-                <h1 className='font-serif text-[40px] md:text-[52px] font-medium text-chocolate leading-[1.05]'>Culinaristas <em className='italic text-orange-base'>parceiros</em></h1>
+                <h1 className='font-serif text-[40px] md:text-[52px] font-bold text-chocolate leading-[1.05]'>Culinaristas <em className='italic text-orange-base'>parceiros</em></h1>
             </div>
 
             {loadingCulinarian ? (

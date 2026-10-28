@@ -29,8 +29,8 @@ export default function CoursesSections({
                 </div>
             ) : cursosFiltrados.length === 0 ? (
                 <div className='flex flex-col items-center justify-center text-center py-16 px-6 rounded-xl bg-white ring-1 ring-chocolate/[0.06]'>
-                    <p className='font-serif text-2xl text-chocolate'>Nenhum curso com inscrição aberta no momento.</p>
-                    <p className='text-sm font-light text-cocoa mt-2'>Novas turmas são divulgadas toda semana, volte em breve.</p>
+                    <p className='font-serif text-2xl font-semibold text-chocolate'>Nenhum curso com inscrição aberta no momento.</p>
+                    <p className='text-sm font-normal text-cocoa mt-2'>Novas turmas são divulgadas toda semana, volte em breve.</p>
                 </div>
             ) : (
                 // celular: carrossel com scroll lateral (o card seguinte aparece

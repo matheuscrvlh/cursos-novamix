@@ -309,7 +309,7 @@ export default function Courses() {
                     <div className='flex items-center justify-center fixed inset-0 bg-chocolate/55 backdrop-blur-sm z-50 animate-pagina'>
                         <div className='bg-white rounded-2xl p-10 flex flex-col items-center gap-5 shadow-2xl animate-surgir'>
                             <Loader2 size={40} className='text-orange-base animate-spin' />
-                            <p className='font-serif italic text-2xl text-chocolate'>Preparando pagamento...</p>
+                            <p className='font-serif italic text-2xl font-semibold text-chocolate'>Preparando pagamento...</p>
                         </div>
                     </div>
                 )}

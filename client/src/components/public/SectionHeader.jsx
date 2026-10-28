@@ -17,12 +17,12 @@ export default function SectionHeader({ eyebrow, titulo, destaque, descricao, as
                     <span className='h-px w-8 bg-gold/50' />
                 </p>
             )}
-            <Titulo className='font-serif text-[40px] md:text-[56px] font-medium text-chocolate leading-[1.05] mt-3'>
+            <Titulo className='font-serif text-[40px] md:text-[56px] font-bold text-chocolate leading-[1.05] mt-3'>
                 {titulo}
                 {destaque && <> <em className='italic text-orange-base'>{destaque}</em></>}
             </Titulo>
             {descricao && (
-                <p className='text-[15px] md:text-base font-light text-cocoa mt-4 max-w-lg'>{descricao}</p>
+                <p className='text-[15px] md:text-base font-normal text-cocoa mt-4 max-w-lg'>{descricao}</p>
             )}
         </Reveal>
     )

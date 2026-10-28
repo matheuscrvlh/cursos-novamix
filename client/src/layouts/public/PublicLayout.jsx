@@ -154,7 +154,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
               end={link.to === '/'}
               onClick={() => setIsMenuOpen(false)}
               className={({ isActive }) =>
-                `py-3.5 border-b border-chocolate/[0.07] font-serif text-[22px] transition-colors duration-500 ${
+                `py-3.5 border-b border-chocolate/[0.07] font-serif text-[22px] font-medium transition-colors duration-500 ${
                   isActive ? 'text-orange-base italic' : 'text-chocolate hover:text-orange-base'
                 }`
               }
@@ -212,7 +212,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
                 <span className="block font-serif text-[34px] font-semibold">Novamix</span>
                 <span className="block text-[10px] font-medium uppercase tracking-[0.35em] text-white/70 mt-1">Cursos</span>
               </p>
-              <p className="font-serif italic text-xl text-white/85 leading-snug max-w-xs">
+              <p className="font-serif italic text-xl font-medium text-white/90 leading-snug max-w-xs">
                 Venha desenvolver suas habilidades culinárias com os melhores profissionais.
               </p>
               <a
@@ -233,7 +233,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
                   <Link
                     key={link.to}
                     to={link.to}
-                    className="font-serif text-lg text-white/85 hover:text-white hover:translate-x-1 transition duration-500 ease-luxo w-fit"
+                    className="font-serif text-lg font-medium text-white/90 hover:text-white hover:translate-x-1 transition duration-500 ease-luxo w-fit"
                   >
                     {link.label}
                   </Link>
@@ -243,7 +243,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
 
             <div>
               <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-white/60 mb-5">Onde estamos</p>
-              <div className="flex flex-col gap-3.5 font-light">
+              <div className="flex flex-col gap-3.5 font-normal">
                 <div className="flex items-start gap-2.5 text-sm text-white/85">
                   <MapPin size={15} strokeWidth={1.5} className="shrink-0 mt-0.5 text-white/60" />
                   <span>Avenida Governador Roberto Silveira, 1700 – Prado – Nova Friburgo/RJ</span>
@@ -274,7 +274,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
         </div>
 
         <div className="max-w-7xl mx-auto px-5 md:px-8 py-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-1 font-light">
+          <div className="flex flex-col gap-1 font-normal">
             <p className="text-white/65 text-xs">
               © {new Date().getFullYear()} Novamix Food Service Comércio de Alimentos Ltda. Todos os direitos reservados.
             </p>
@@ -282,7 +282,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
               Imagens meramente ilustrativas. Preços e disponibilidade podem variar.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-xs font-light text-white/65 mt-2 md:mt-0">
+          <div className="flex items-center gap-2 text-xs font-normal text-white/65 mt-2 md:mt-0">
             <span>Desenvolvido por</span>
             <a href="https://mthcode.com.br" target="_blank" rel="noreferrer" className="text-white font-medium tracking-wider hover:text-white/80 transition">
               MTHCODE

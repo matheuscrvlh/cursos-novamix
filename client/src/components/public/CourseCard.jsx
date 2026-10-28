@@ -56,7 +56,7 @@ export default function CourseCard({
 
         {dia && (
           <span className="absolute top-3 left-3 flex flex-col items-center min-w-13 bg-cream/95 backdrop-blur-sm rounded-md px-2.5 pt-1.5 pb-1 shadow-sm leading-none">
-            <span className="font-serif text-[26px] font-semibold text-chocolate">{dia}</span>
+            <span className="font-serif text-[26px] font-bold text-chocolate">{dia}</span>
             <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-orange-base mt-0.5">{mes}</span>
           </span>
         )}
@@ -81,11 +81,11 @@ export default function CourseCard({
             <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-gold">{categoria}</p>
           )}
           <Link to={link} className="transition-colors duration-500 hover:text-orange-base">
-            <h3 className="font-serif text-chocolate text-[23px] font-semibold leading-[1.1] line-clamp-2">{curso}</h3>
+            <h3 className="font-serif text-chocolate text-[25px] font-bold leading-[1.08] line-clamp-2">{curso}</h3>
           </Link>
         </div>
 
-        <ul className="flex flex-col gap-1.5 text-[13px] font-light text-cocoa">
+        <ul className="flex flex-col gap-1.5 text-sm text-cocoa">
           <li className="flex items-center gap-2">
             <Clock size={14} strokeWidth={1.5} className="shrink-0 text-gold" />
             <span className="truncate">
@@ -108,7 +108,7 @@ export default function CourseCard({
             </div>
           ) : total > 0 && (
             <div className="flex flex-col gap-2">
-              <p className={`text-xs ${esgotado || ultimasVagas ? 'font-medium text-orange-base' : 'font-light text-cocoa'}`}>
+              <p className={`text-xs ${esgotado || ultimasVagas ? 'font-medium text-orange-base' : 'font-normal text-cocoa'}`}>
                 {esgotado
                   ? 'Vagas esgotadas'
                   : ultimasVagas
@@ -127,8 +127,8 @@ export default function CourseCard({
 
         <div className="flex items-end justify-between gap-3 pt-4 border-t border-chocolate/[0.07]">
           <div className="leading-none">
-            <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-cocoa/70 mb-1.5">Investimento</p>
-            <p className="font-serif italic text-[28px] font-semibold text-orange-base">
+            <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-cocoa mb-1.5">Investimento</p>
+            <p className="font-serif italic text-[28px] font-bold text-orange-base">
               {gratuito ? 'Grátis' : `R$ ${formatarPreco(valor)}`}
             </p>
           </div>
