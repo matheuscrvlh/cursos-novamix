@@ -63,24 +63,45 @@ body {
     to   { opacity: 1; }
 }
 
-/* <Reveal>: começa escondido e surge quando entra na tela (IntersectionObserver) */
+/* <Reveal>: começa escondido e surge quando entra na tela (IntersectionObserver).
+   O desfoque saindo junto com a opacidade é o "desembaçar" dos sites feitos no
+   Framer (lá: blur 10px, 10px de subida, ~1,5s em curva de mola). O estado
+   final é filter: none, não blur(0): filter ativo cria bloco de contenção pra
+   elementos fixed dentro dele */
 .reveal {
     opacity: 0;
-    transform: translateY(20px);
+    filter: blur(10px);
+    transform: translateY(14px);
     transition:
-        opacity 1s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+        opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .reveal.is-visible {
     opacity: 1;
+    filter: none;
     transform: none;
+}
+
+/* doces da seção do ateliê: flutuação lenta e contínua, cada um com o próprio
+   ritmo (--dur), distância (--dist) e giro (--giro) — ver DoceFlutuante */
+@keyframes flutuar {
+    from { transform: translate3d(0, calc(var(--dist, 12px) * -1), 0) rotate(calc(var(--giro, 3deg) * -1)); }
+    to   { transform: translate3d(0, var(--dist, 12px), 0) rotate(var(--giro, 3deg)); }
+}
+
+/* <Ticker>: o conteúdo vem duplicado, e andar uma cópia inteira (-50%) emenda
+   o fim no começo sem salto */
+@keyframes ticker {
+    to { transform: translate3d(-50%, 0, 0); }
 }
 
 /* quem pede menos movimento no sistema vê tudo direto, sem animação */
 @media (prefers-reduced-motion: reduce) {
     .reveal {
         opacity: 1;
+        filter: none;
         transform: none;
         transition: none;
     }
@@ -103,6 +124,8 @@ body {
        do header */
     --animate-surgir: surgir 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
     --animate-pagina: pagina 0.6s ease-out backwards;
+    --animate-flutuar: flutuar var(--dur, 7s) ease-in-out infinite alternate;
+    --animate-ticker: ticker var(--ticker-dur, 40s) linear infinite;
 
     --color-*: initial;
     --color-white: #ffffff;
