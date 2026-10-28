@@ -1,8 +1,14 @@
+import { useRef } from 'react';
 import { Clock, ChefHat } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatarPreco } from '../../utils/formatCurrency';
 import { partesData, formatHora } from '../../utils/formatDate';
 import { nomeLoja } from '../../utils/lojas';
+import { marcarFotoDoCard } from '../../utils/transicaoCurso';
+
+// a página do curso sabe que veio de um card: o "Voltar para a agenda" volta
+// pra página de antes, no mesmo ponto da lista (CoursePage)
+const VEIO_DO_CARD = { doCard: true };
 
 export default function CourseCard({
   id,
@@ -34,22 +40,31 @@ export default function CourseCard({
   const { dia, mes, semana } = partesData(data)
   const link = id ? `/curso/${id}` : '#'
 
+  // a foto do card cresce até virar a arte da página do curso (utils/transicaoCurso).
+  // Ctrl/Cmd+clique e afins abrem em outra aba, sem animação
+  const foto = useRef(null)
+  function abrirCurso(e) {
+    if (!id || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    marcarFotoDoCard(foto.current)
+  }
+
   return (
     <article className={`group bg-white rounded-xl flex flex-col overflow-hidden ring-1 ring-chocolate/[0.07] shadow-[0_1px_2px_rgba(58,42,33,0.04)] hover:shadow-[0_28px_50px_-28px_rgba(58,42,33,0.45)] transition-shadow duration-700 ${className || ''}`}>
 
-      <Link to={link} className="relative block aspect-4/3 overflow-hidden bg-cream-dark" tabIndex={-1} aria-hidden="true">
+      <Link to={link} state={VEIO_DO_CARD} onClick={abrirCurso} className="relative block aspect-4/3 overflow-hidden bg-cream-dark" tabIndex={-1} aria-hidden="true">
         {imagem ? (
           // as artes são posts 4:5 (1080×1350) — o object-position pula o
           // título "Oficina de Culinária" do topo e enquadra as fotos do
           // culinarista e do prato, o nome e a faixa de local/data da arte
           <img
+            ref={foto}
             src={imagem}
             alt=""
             loading="lazy"
             className="w-full h-full object-cover object-[center_54%] transition-transform duration-[1400ms] ease-luxo group-hover:scale-[1.06]"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div ref={foto} className="w-full h-full flex items-center justify-center">
             <ChefHat size="2.75rem" strokeWidth={1.25} className="text-gold/50" />
           </div>
         )}
@@ -80,7 +95,7 @@ export default function CourseCard({
           {categoria && (
             <p className="text-[0.625rem] font-medium uppercase tracking-[0.25em] text-gold">{categoria}</p>
           )}
-          <Link to={link} className="transition-colors duration-500 hover:text-orange-base">
+          <Link to={link} state={VEIO_DO_CARD} onClick={abrirCurso} className="transition-colors duration-500 hover:text-orange-base">
             <h3 className="font-serif text-chocolate text-[1.4375rem] sm:text-[1.5625rem] font-bold leading-[1.08] line-clamp-2">{curso}</h3>
           </Link>
         </div>

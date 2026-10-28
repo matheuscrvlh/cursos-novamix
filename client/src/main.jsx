@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
+import { historico } from './utils/historico.js'
 import { DadosProvider } from './contexts/DadosContext.jsx'
 import { ClienteAuthProvider } from './contexts/ClienteAuthContext.jsx'
 // regras de base da rolagem suave (classes que a Lenis põe no <html>). A de
@@ -12,12 +13,13 @@ import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
+    {/* o mesmo histórico do BrowserRouter, com a transição entre páginas (utils/historico) */}
+    <HistoryRouter history={historico}>
       <ClienteAuthProvider>
         <DadosProvider>
           <App />
         </DadosProvider>
       </ClienteAuthProvider>
-    </BrowserRouter>
+    </HistoryRouter>
   </StrictMode>,
 )

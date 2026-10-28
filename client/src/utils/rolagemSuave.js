@@ -61,6 +61,9 @@ export function retomarRolagemSuave() {
 // "puxar" de volta pra posição que estava animando
 export function rolarPara(alvo, { offset = 0, imediato = false } = {}) {
     if (lenis) {
+        // pulo direto logo depois de trocar de página: o tamanho que a Lenis
+        // guardou ainda pode ser o da página anterior, e ela cortaria o destino
+        if (imediato) lenis.resize()
         lenis.scrollTo(alvo, { offset, immediate: imediato, force: true })
         return
     }

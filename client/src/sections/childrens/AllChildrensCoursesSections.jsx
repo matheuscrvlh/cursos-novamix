@@ -27,7 +27,7 @@ export default function AllChildrensCoursesSections({
     }
 
     return (
-        <section className='max-w-7xl mx-auto px-5 md:px-8 pt-10 md:pt-14 pb-16'>
+        <section id='agenda' className='max-w-7xl mx-auto px-5 md:px-8 pt-10 md:pt-14 pb-16'>
 
             <div className='flex items-end justify-between gap-4 mb-10 md:mb-12'>
                 <div>

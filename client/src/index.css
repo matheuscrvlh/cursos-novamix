@@ -154,6 +154,54 @@ body {
     to { transform: translateY(-0.75rem) scale(1.04); }
 }
 
+/* troca de página (utils/historico, View Transitions API do navegador: a
+   animação roda fora do JavaScript). A página de antes some rápido e a nova
+   surge subindo de leve, sem as duas sobrepostas no meio do caminho. O header
+   tem nome próprio e fica parado, sem piscar junto */
+[data-cabecalho] {
+    view-transition-name: cabecalho;
+}
+
+::view-transition-old(root) {
+    animation-duration: 0.2s;
+}
+
+::view-transition-new(root) {
+    animation: pagina-surge 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pagina-surge {
+    from { opacity: 0; transform: translateY(0.75rem); }
+}
+
+/* curso aberto pelo card (utils/transicaoCurso): a foto do card cresce até a
+   arte da página do curso, que tem o mesmo nome, e na volta encolhe pro card */
+[data-foto-curso] {
+    view-transition-name: foto-curso;
+}
+
+::view-transition-group(foto-curso) {
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* a foto do card é 4:3 e a arte é 4:5 no celular: as duas preenchem o quadro
+   que muda de tamanho, recortando, em vez de esticar */
+::view-transition-old(foto-curso),
+::view-transition-new(foto-curso) {
+    height: 100%;
+    object-fit: cover;
+}
+
+/* na volta, a arte encolhe sozinha até perto do tamanho do card, e só então
+   os dois trocam (o card com a data e a loja por cima) — sem a arte ficar
+   transparente no meio do caminho */
+html:active-view-transition-type(volta)::view-transition-old(foto-curso),
+html:active-view-transition-type(volta)::view-transition-new(foto-curso) {
+    animation-delay: 0.18s;
+    animation-duration: 0.32s;
+}
+
 /* quem pede menos movimento no sistema vê tudo direto, sem animação */
 @media (prefers-reduced-motion: reduce) {
     .reveal {

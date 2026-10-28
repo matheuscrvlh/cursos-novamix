@@ -80,7 +80,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
   return (
     <main className="min-h-screen w-full flex flex-col bg-cream text-chocolate"
     >
-      <header className={`w-full bg-orange-base text-white sticky top-0 z-50 transition-shadow duration-700 ${rolou ? 'shadow-[0_10px_30px_-12px_rgba(58,42,33,0.45)]' : ''}`}>
+      <header data-cabecalho className={`w-full bg-orange-base text-white sticky top-0 z-50 transition-shadow duration-700 ${rolou ? 'shadow-[0_10px_30px_-12px_rgba(58,42,33,0.45)]' : ''}`}>
         <div className="max-w-7xl mx-auto px-5 md:px-8 py-3.5 flex items-center justify-between gap-4">
 
           <Link to="/" onClick={e => irComTransicao(e, '/')} className="group flex items-center gap-3 shrink-0">

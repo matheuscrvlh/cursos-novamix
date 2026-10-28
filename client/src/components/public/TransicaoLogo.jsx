@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { TransicaoContext } from '../../contexts/TransicaoContext'
+import { semTransicaoNaProxima } from '../../utils/historico'
 
 // a parte visual (e o Motion, ~30 KB) vem num pedaço separado do JS, baixado
 // logo depois que o site abre, pra não pesar no carregamento inicial
@@ -37,6 +38,7 @@ export default function TransicaoLogo({ children }) {
         } else if (fase.current === 'trocou') {
             // clicou em outro item com a logo ainda na tela: a página já está
             // coberta, troca na hora
+            semTransicaoNaProxima()
             navigate(to)
         }
         // 'cobrindo': a troca ainda vai acontecer e já usa o destino novo

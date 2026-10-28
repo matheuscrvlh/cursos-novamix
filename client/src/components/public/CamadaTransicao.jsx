@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent, useId, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, LazyMotion, domAnimation, m } from 'motion/react'
 
+import { semTransicaoNaProxima } from '../../utils/historico'
 import { Brilho } from './Doces'
 import { LETRA_N, LETRA_M, COR_N, COR_M, TRACO_N, TRACO_M, PINCEL } from './logoNovamix'
 
@@ -141,6 +142,8 @@ function Sobreposicao({ rodada, destino, aoTrocar, aoTerminar }) {
     // reiniciar os tempos lá embaixo (o navigate muda a cada troca de rota)
     const trocarPagina = useEffectEvent(() => {
         aoTrocar()
+        // a troca acontece coberta pelo logo, sem a transição de página por cima
+        semTransicaoNaProxima()
         navigate(destino)
     })
     const terminar = useEffectEvent(() => aoTerminar(rodada))

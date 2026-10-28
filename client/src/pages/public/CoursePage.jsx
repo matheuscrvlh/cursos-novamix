@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useContext } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useLocation, useNavigate, Link } from 'react-router-dom'
 import { Calendar, Clock, MapPin, ArrowLeft, XCircle, Loader2, Printer, ChefHat, ShieldCheck, RotateCcw, MessageCircle } from 'lucide-react'
 
 import PublicLayout from '../../layouts/public/PublicLayout'
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
+import { DadosContext } from '../../contexts/DadosContext'
 import { Head } from '../../components/Head'
 import Button from '../../components/Button'
 import ModalLoginRequired from '../../components/public/enrollment/ModalLoginRequired'
@@ -19,10 +20,17 @@ import { LOJAS, nomeLoja } from '../../utils/lojas'
 
 export default function CoursePage() {
     const { id } = useParams()
+    const location = useLocation()
+    const navigate = useNavigate()
     const { cliente } = useContext(ClienteAuthContext)
+    const { cursos, cursosInfantis } = useContext(DadosContext)
 
-    const [curso, setCurso]               = useState(null)
-    const [loading, setLoading]           = useState(true)
+    // vindo de um card, o curso já está na lista do DadosContext (com os mesmos
+    // campos da busca por id): a página abre na hora, sem o carregando, e com a
+    // arte no lugar pra animação do card (utils/transicaoCurso). A busca lá
+    // embaixo atualiza do mesmo jeito
+    const [curso, setCurso]               = useState(() => cursos.concat(cursosInfantis).find(c => String(c.id) === id) || null)
+    const [loading, setLoading]           = useState(curso === null)
     const [assentos, setAssentos]         = useState([])
     const [vagasLivres, setVagasLivres]   = useState(0)
     const [fotoIdx, setFotoIdx]           = useState(0)
@@ -219,6 +227,16 @@ export default function CoursePage() {
         janela.print()
     }
 
+    // veio de um card (CourseCard): volta pra página de antes, no mesmo ponto
+    // da lista em que estava (ScrollToTop). Entrou direto, por um link de fora:
+    // vai pra agenda já na altura dos cursos, pulando o banner
+    function voltarParaAgenda(e) {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+        if (!location.state?.doCard) return
+        e.preventDefault()
+        navigate(-1)
+    }
+
     // Fecha o modal e, se havia uma inscrição pendente em aberto (cliente
     // desistiu no meio do pagamento), cancela ela e libera o assento na hora
     async function closeModal() {
@@ -283,7 +301,8 @@ export default function CoursePage() {
             <div className='max-w-7xl mx-auto px-5 md:px-8 pt-6 pb-10 md:pt-8 lg:pb-16'>
 
                 <Link
-                    to='/cursos'
+                    to={`${curso.tipo === 'infantil' ? '/cursosInfantis' : '/cursos'}#agenda`}
+                    onClick={voltarParaAgenda}
                     className='inline-flex items-center gap-2 text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-cocoa hover:text-orange-base transition-colors duration-500 mb-6'
                 >
                     <ArrowLeft size='0.875rem' strokeWidth={1.5} />
@@ -295,7 +314,7 @@ export default function CoursePage() {
                 <div className='grid gap-6 items-start lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-10'>
 
                     <div className='lg:col-start-1 flex flex-col gap-3 min-w-0'>
-                        <div className='relative w-full aspect-4/5 sm:aspect-4/3 rounded-xl overflow-hidden bg-chocolate'>
+                        <div data-foto-curso className='relative w-full aspect-4/5 sm:aspect-4/3 rounded-xl overflow-hidden bg-chocolate'>
                             {imagemAtual ? (
                                 <>
                                     {/* a arte é 4:5 e o quadro é mais largo a partir do sm —

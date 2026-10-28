@@ -32,7 +32,6 @@ export default function App() {
     // por fora das rotas: cada página monta o próprio PublicLayout, e a
     // animação do logo precisa continuar viva durante a troca
     <TransicaoLogo>
-    <ScrollToTop />
     <Saudacao />
     <Routes>
         <Route path='/' element={<Home />} />
@@ -59,6 +58,9 @@ export default function App() {
           <Route path='/logsAdmin' element={<LogsAdmin />} />
         </Route>
     </Routes>
+    {/* depois das rotas: os efeitos dele rodam depois dos da página (ex: a
+        escala de monitor grande do PublicLayout), com ela já no tamanho final */}
+    <ScrollToTop />
     </TransicaoLogo>
   )
 }
