@@ -34,12 +34,15 @@ export default function CoursesSections({
                 </div>
             ) : (
                 // celular: carrossel com scroll lateral (o card seguinte aparece
-                // pela metade, indicando que dá pra arrastar) · sm+: grade.
-                // O 4º card some do md ao xl, onde a grade tem 3 colunas
+                // pela metade, indicando que dá pra arrastar) · sm+: linhas
+                // centralizadas (flex-wrap, não grade), pra quando tem menos
+                // cursos que colunas — ex: filtro da loja do cliente deixando
+                // 3 — os cards ficarem no meio e não encostados à esquerda.
+                // Largura = (100% - espaços entre colunas) / colunas: 2 no sm,
+                // 3 do md ao xl (o 4º card some) e 4 a partir do xl
                 <div className='
                     flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-px-5 -mx-5 px-5 pb-2 [scrollbar-width:none]
-                    sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0
-                    md:grid-cols-3 xl:grid-cols-4
+                    sm:flex-wrap sm:justify-center sm:gap-6 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0
                 '>
                     {cursosFiltrados.slice(0, 4).map((curso, i) => {
                         const vagas = vagasPorCurso[curso.id];
@@ -48,7 +51,7 @@ export default function CoursesSections({
                             <Reveal
                                 key={curso.id}
                                 delay={i * 120}
-                                className={`w-[80%] max-w-80 shrink-0 snap-start sm:w-auto sm:max-w-none ${i === 3 ? 'md:max-xl:hidden' : ''}`}
+                                className={`w-[80%] max-w-80 shrink-0 snap-start sm:max-w-none sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)] xl:w-[calc(25%-1.125rem)] ${i === 3 ? 'md:max-xl:hidden' : ''}`}
                             >
                                 <CourseCard
                                     id={curso.id}
