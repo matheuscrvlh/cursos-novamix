@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 
 import ScrollToTop from './components/ScrollToTop'
+import TransicaoLogo from './components/public/TransicaoLogo'
 
 import Home from './pages/public/Home'
 import Courses from './pages/public/Courses'
@@ -27,7 +28,9 @@ import LogsAdmin from './pages/admin/LogsAdmin'
 
 export default function App() {
   return (
-    <>
+    // por fora das rotas: cada página monta o próprio PublicLayout, e a
+    // animação do logo precisa continuar viva durante a troca
+    <TransicaoLogo>
     <ScrollToTop />
     <Routes>
         <Route path='/' element={<Home />} />
@@ -54,6 +57,6 @@ export default function App() {
           <Route path='/logsAdmin' element={<LogsAdmin />} />
         </Route>
     </Routes>
-    </>
+    </TransicaoLogo>
   )
 }

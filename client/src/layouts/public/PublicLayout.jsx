@@ -9,6 +9,7 @@ import { logoNm } from '../../assets/images/logos'
 import { getBanners } from '../../api/banners.services'
 import useBodyScrollLock from '../../hooks/useBodyScrollLock'
 import { ClienteAuthContext } from '../../contexts/ClienteAuthContext'
+import { useTransicao } from '../../contexts/TransicaoContext'
 import BannerCarousel from '../../components/public/BannerCarousel'
 import { usarRolagemSuave, rolarPara } from '../../utils/rolagemSuave'
 
@@ -27,6 +28,7 @@ const WHATSAPP = 'https://api.whatsapp.com/send?phone=5522998336225'
 // cobrir o final dele
 export default function PublicLayout({ children, bannerHome, showBanner = true, bottomBar = false }) {
   const { cliente } = useContext(ClienteAuthContext)
+  const { navegarComTransicao } = useTransicao()
   const [heroBanners, setHeroBanners] = useState([])
   const [isMenuOpen, setIsMenuOpen]   = useState(false)
   const [rolou, setRolou]             = useState(false)
@@ -66,13 +68,22 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
 
   useBodyScrollLock(isMenuOpen)
 
+  // itens do menu: clique comum troca de página com a animação do logo
+  // (TransicaoLogo). Ctrl/cmd/shift+clique e botão do meio seguem o normal
+  // do link (abrir em nova aba etc.)
+  function irComTransicao(e, to) {
+    setIsMenuOpen(false)
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    if (navegarComTransicao(to)) e.preventDefault()
+  }
+
   return (
     <main className="min-h-screen w-full flex flex-col bg-cream text-chocolate"
     >
       <header className={`w-full bg-orange-base text-white sticky top-0 z-50 transition-shadow duration-700 ${rolou ? 'shadow-[0_10px_30px_-12px_rgba(58,42,33,0.45)]' : ''}`}>
         <div className="max-w-7xl mx-auto px-5 md:px-8 py-3.5 flex items-center justify-between gap-4">
 
-          <Link to="/" className="group flex items-center gap-3 shrink-0">
+          <Link to="/" onClick={e => irComTransicao(e, '/')} className="group flex items-center gap-3 shrink-0">
             <img
               src={logoNm}
               alt="Novamix Cursos"
@@ -94,6 +105,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
                 key={link.to}
                 to={link.to}
                 end={link.to === '/'}
+                onClick={e => irComTransicao(e, link.to)}
                 // sublinhado fino que desliza da esquerda no hover e fica
                 // fixo no link da página atual
                 className={({ isActive }) =>
@@ -176,7 +188,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
               key={link.to}
               to={link.to}
               end={link.to === '/'}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={e => irComTransicao(e, link.to)}
               className={({ isActive }) =>
                 `py-3.5 border-b border-chocolate/[0.07] font-serif text-[1.375rem] font-medium transition-colors duration-500 ${
                   isActive ? 'text-orange-base italic' : 'text-chocolate hover:text-orange-base'
@@ -259,6 +271,7 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
                   <Link
                     key={link.to}
                     to={link.to}
+                    onClick={e => irComTransicao(e, link.to)}
                     className="font-serif text-lg font-medium text-white/90 hover:text-white hover:translate-x-1 transition duration-500 ease-luxo w-fit"
                   >
                     {link.label}
