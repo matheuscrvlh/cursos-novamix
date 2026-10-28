@@ -97,6 +97,63 @@ body {
     to { transform: translate3d(-50%, 0, 0); }
 }
 
+/* <Saudacao>: quem chega no site (uma vez a cada 12h). Os tempos de cada
+   peça ficam no componente */
+@keyframes saudacao-selo {
+    from { opacity: 0; transform: scale(0.55) rotate(-16deg); }
+    30%  { opacity: 1; }
+    to   { opacity: 1; transform: none; }
+}
+
+/* o "pincel" da máscara (pathLength 1) percorrendo a linha central da letra */
+@keyframes saudacao-traco {
+    from { stroke-dasharray: 0 1; }
+    to   { stroke-dasharray: 1 1; }
+}
+
+@keyframes saudacao-pulo {
+    0%, 100% { transform: scale(1); }
+    35%      { transform: scale(1.08); }
+    70%      { transform: scale(0.97); }
+}
+
+@keyframes saudacao-onda {
+    from { opacity: 0.9; transform: scale(1); }
+    to   { opacity: 0; transform: scale(1.75); }
+}
+
+/* faísca: sai da borda do selo na direção --ang até --dist, girando */
+@keyframes saudacao-faisca {
+    from { opacity: 0; transform: rotate(var(--ang)) translateX(52px) rotate(calc(var(--ang) * -1)) scale(0) rotate(0deg); }
+    45%  { opacity: 1; transform: rotate(var(--ang)) translateX(calc(var(--dist) * 0.85)) rotate(calc(var(--ang) * -1)) scale(1) rotate(45deg); }
+    to   { opacity: 0; transform: rotate(var(--ang)) translateX(var(--dist)) rotate(calc(var(--ang) * -1)) scale(0) rotate(90deg); }
+}
+
+@keyframes saudacao-doce {
+    from { opacity: 0; transform: translateY(-1.5rem) scale(0.3) rotate(-25deg); }
+    40%  { opacity: 1; }
+    to   { opacity: 1; transform: none; }
+}
+
+/* o mesmo "desembaçar" do <Reveal> */
+@keyframes saudacao-texto {
+    from { opacity: 0; filter: blur(10px); transform: translateY(12px); }
+    to   { opacity: 1; filter: none; transform: none; }
+}
+
+@keyframes saudacao-linha {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+@keyframes saudacao-sai {
+    to { opacity: 0; }
+}
+
+@keyframes saudacao-sobe {
+    to { transform: translateY(-0.75rem) scale(1.04); }
+}
+
 /* quem pede menos movimento no sistema vê tudo direto, sem animação */
 @media (prefers-reduced-motion: reduce) {
     .reveal {

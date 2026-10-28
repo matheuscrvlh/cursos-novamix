@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 
 import ScrollToTop from './components/ScrollToTop'
 import TransicaoLogo from './components/public/TransicaoLogo'
+import Saudacao from './components/public/Saudacao'
 
 import Home from './pages/public/Home'
 import Courses from './pages/public/Courses'
@@ -32,6 +33,7 @@ export default function App() {
     // animação do logo precisa continuar viva durante a troca
     <TransicaoLogo>
     <ScrollToTop />
+    <Saudacao />
     <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/cursos' element={<Courses />} />
