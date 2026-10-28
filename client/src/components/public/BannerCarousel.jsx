@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-// banners cadastrados no marketing — desktop 1920×650 · mobile 425×495.
+// banners cadastrados no marketing — desktop 1920×480 (4:1) · mobile 425×495.
 // No celular só entram os que têm versão mobile: a arte de desktop recortada
 // no formato do celular perde o texto pelas bordas. Se nenhum tiver versão
 // mobile, o celular mostra a arte de desktop no formato dela, sem recorte.
@@ -20,11 +20,11 @@ export default function BannerCarousel({ banners, className = '' }) {
                         aspecto='aspect-425/495'
                         onErro={b => setMobileComErro(prev => [...prev, b.id])}
                     />
-                    : <Slides banners={banners} campo='imagem' aspecto='aspect-1920/650' />
+                    : <Slides banners={banners} campo='imagem' aspecto='aspect-4/1' />
                 }
             </div>
             <div className='hidden md:block'>
-                <Slides banners={banners} campo='imagem' aspecto='aspect-1920/650' />
+                <Slides banners={banners} campo='imagem' aspecto='aspect-4/1' />
             </div>
         </div>
     )
@@ -48,14 +48,22 @@ function Slides({ banners, campo, aspecto, onErro }) {
                 // crossfade lento; sem zoom na imagem porque as artes têm texto
                 // encostado nas bordas, que o zoom cortaria
                 const className = `absolute inset-0 transition-opacity duration-[1400ms] ease-luxo ${visible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`
+                // a arte aparece sempre inteira (contain): o quadro tem a proporção
+                // do padrão, e uma arte fora dele (ex: 1920×650 ou 2182×480) fica
+                // com as sobras preenchidas pela própria arte desfocada, em vez de
+                // ser cortada — o quadro em 1920×650 cortava as laterais das artes
+                // 1920×480, que são a maioria
                 const img = (
-                    <img
-                        src={b[campo]}
-                        alt=''
-                        loading={i === 0 ? 'eager' : 'lazy'}
-                        onError={onErro ? () => onErro(b) : undefined}
-                        className='w-full h-full object-cover'
-                    />
+                    <>
+                        <img src={b[campo]} alt='' aria-hidden='true' loading={i === 0 ? 'eager' : 'lazy'} className='absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-70' />
+                        <img
+                            src={b[campo]}
+                            alt=''
+                            loading={i === 0 ? 'eager' : 'lazy'}
+                            onError={onErro ? () => onErro(b) : undefined}
+                            className='relative w-full h-full object-contain'
+                        />
+                    </>
                 )
 
                 if (!b.link) return <div key={b.id} className={className}>{img}</div>

@@ -191,16 +191,23 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
       {/* cada página monta o próprio layout, então o fade roda a cada troca de rota */}
       <section className="grow w-full animate-pagina">
 
-        {/* HERO BANNER — desktop 1920×650 · mobile 425×495 */}
-        {showBanner && (heroBanners.length > 0 ? (
-          <BannerCarousel banners={heroBanners} />
-        ) : (
-          <a href='#cursos' className='block w-full'>
-            <div className='w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-1920/650'>
-              <img src={bannerHome} alt='' className='w-full h-full object-cover object-center' />
-            </div>
-          </a>
-        ))}
+        {/* HERO BANNER — desktop 1920×480 · mobile 425×495. Fica na largura do
+            conteúdo (não da tela): em monitor largo, a tela toda na proporção
+            da arte passava de 800px de altura, e cortar a altura cortaria o
+            texto da arte */}
+        {showBanner && (
+          <div className='max-w-7xl mx-auto px-5 md:px-8 pt-5 md:pt-8'>
+            {heroBanners.length > 0 ? (
+              <BannerCarousel banners={heroBanners} className='rounded-xl overflow-hidden ring-1 ring-chocolate/[0.07]' />
+            ) : (
+              <a href='#cursos' className='block w-full rounded-xl overflow-hidden'>
+                <div className='w-full overflow-hidden bg-orange-base aspect-425/495 md:aspect-4/1'>
+                  <img src={bannerHome} alt='' className='w-full h-full object-cover object-center' />
+                </div>
+              </a>
+            )}
+          </div>
+        )}
 
         {children}
       </section>

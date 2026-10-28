@@ -81,8 +81,8 @@ function BannerForm({ posicao, onAdded }) {
             <div className='grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 items-start'>
                 <UploadArea
                     label='Desktop'
-                    hint='1920 × 650 px'
-                    aspectClass='aspect-1920/650 min-h-16'
+                    hint='1920 × 480 px'
+                    aspectClass='aspect-4/1 min-h-16'
                     preview={previewDesktop}
                     inputRef={inputDesktopRef}
                     onChange={e => handleFile(e, 'desktop')}
