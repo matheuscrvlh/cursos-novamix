@@ -81,7 +81,7 @@ export default function CourseCard({
             <p className="text-[10px] font-medium uppercase tracking-[0.25em] text-gold">{categoria}</p>
           )}
           <Link to={link} className="transition-colors duration-500 hover:text-orange-base">
-            <h3 className="font-serif text-chocolate text-[25px] font-bold leading-[1.08] line-clamp-2">{curso}</h3>
+            <h3 className="font-serif text-chocolate text-[23px] sm:text-[25px] font-bold leading-[1.08] line-clamp-2">{curso}</h3>
           </Link>
         </div>
 
@@ -125,10 +125,12 @@ export default function CourseCard({
           )}
         </div>
 
-        <div className="flex items-end justify-between gap-3 pt-4 border-t border-chocolate/[0.07]">
-          <div className="leading-none">
-            <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-cocoa mb-1.5">Investimento</p>
-            <p className="font-serif italic text-[28px] font-bold text-orange-base">
+        {/* preço em cima e botão na largura toda embaixo — lado a lado não
+            cabia nos cards estreitos (celular e grade de 4 colunas) */}
+        <div className="flex flex-col gap-4 pt-4 border-t border-chocolate/[0.07]">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-cocoa">Investimento</p>
+            <p className="font-serif italic text-[28px] font-bold text-orange-base leading-none">
               {gratuito ? 'Grátis' : `R$ ${formatarPreco(valor)}`}
             </p>
           </div>
@@ -136,7 +138,7 @@ export default function CourseCard({
           {/* sem onClick (ex: card de prévia no admin) não tem o que o botão fazer */}
           {onClick && (
             <button
-              className={`shrink-0 text-[11px] font-medium uppercase tracking-[0.18em] px-5 py-3 rounded-full transition-colors duration-500 ${
+              className={`w-full text-[11px] font-medium uppercase tracking-[0.18em] px-5 py-3.5 rounded-full transition-colors duration-500 ${
                 esgotado
                   ? 'bg-cream-dark text-cocoa/60 cursor-not-allowed'
                   : 'bg-orange-base text-white hover:bg-chocolate cursor-pointer'

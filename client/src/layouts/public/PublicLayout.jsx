@@ -90,14 +90,17 @@ export default function PublicLayout({ children, bannerHome, showBanner = true, 
           </nav>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* no celular fica só o ícone: logo + texto + menu não cabem em
+                ~390px (o "Atendimento" por extenso continua no menu lateral) */}
             <a
               href={WHATSAPP}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 border border-white/35 hover:bg-white hover:text-orange-base transition-colors duration-500 px-3.5 py-2 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] whitespace-nowrap"
+              aria-label="Atendimento pelo WhatsApp"
+              className="flex items-center justify-center gap-2 border border-white/35 hover:bg-white hover:text-orange-base transition-colors duration-500 w-9 h-9 sm:w-auto sm:h-auto sm:px-3.5 sm:py-2 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] whitespace-nowrap"
             >
               <img src={whatsapp} alt="" className="h-4" />
-              <span>Atendimento</span>
+              <span className="hidden sm:inline">Atendimento</span>
             </a>
 
             <Link

@@ -4,8 +4,13 @@
    — sem isso, cada troca de tela no admin (páginas com alturas diferentes)
    faz a barra aparecer/sumir e o layout inteiro (que usa vw pra largura)
    "tremer" alguns pixels de largura. */
-html {
-    scrollbar-gutter: stable;
+/* Só em tela com mouse: no celular a barra de rolagem é sobreposta e o espaço
+   reservado só aparecia como uma faixa laranja (o fundo do <html>, pintado
+   pelo useThemeColor) na lateral direita */
+@media (pointer: fine) {
+    html {
+        scrollbar-gutter: stable;
+    }
 }
 
 body {
