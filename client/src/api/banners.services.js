@@ -19,7 +19,9 @@ export async function postBanner(formData) {
             body: formData
         })
         const data = await res.json().catch(() => ({}))
-        if (!res.ok) throw new Error(data.error || 'Erro ao criar banner.')
+        // 413 vem do nginx (corpo do envio grande demais), sem JSON do servidor
+        if (res.status === 413) throw new Error('Imagem grande demais para o servidor.')
+        if (!res.ok) throw new Error(data.error || `Erro ao criar banner (código ${res.status}).`)
         return data
     } catch (err) {
         console.error('Erro ao criar banner:', err)

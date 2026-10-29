@@ -7,8 +7,14 @@ import ConfirmModal from '../../components/admin/ModalConfirm'
 import useConfirmAction from '../../hooks/useConfirmAction'
 import { AdminAuthContext } from '../../contexts/AdminAuthContext'
 import { getBanners, postBanner, putBanner, deleteBanner } from '../../api/banners.services'
+import { otimizarImagem, formatarTamanho } from '../../utils/otimizarImagem'
 
-function UploadArea({ label, hint, aspectClass, preview, inputRef, onChange }) {
+// largura máxima de cada versão: o desktop aparece com até 1920 px; o mobile,
+// na largura do celular, em tela de alta densidade
+const LARGURA_MAX = { desktop: 1920, mobile: 900 }
+const LIMITE_SERVIDOR = 5 * 1024 * 1024
+
+function UploadArea({ label, hint, aspectClass, preview, inputRef, onChange, info }) {
     return (
         <div className='flex flex-col gap-1.5'>
             <div className='flex items-baseline gap-2'>
@@ -28,6 +34,7 @@ function UploadArea({ label, hint, aspectClass, preview, inputRef, onChange }) {
                 }
                 <input ref={inputRef} type='file' accept='image/*' className='hidden' onChange={onChange} />
             </div>
+            {info && <p className='text-[11px] text-gray-text/50'>{info}</p>}
         </div>
     )
 }
@@ -39,20 +46,46 @@ function BannerForm({ posicao, onAdded }) {
     const [previewMobile, setPreviewMobile]   = useState(null)
     const [link, setLink]                     = useState('')
     const [loading, setLoading]               = useState(false)
+    // quantas imagens ainda estão sendo otimizadas, e o peso de cada uma
+    const [otimizando, setOtimizando]         = useState(0)
+    const [info, setInfo]                     = useState({ desktop: '', mobile: '' })
+    const [erro, setErro]                     = useState('')
     const inputDesktopRef                     = useRef()
     const inputMobileRef                      = useRef()
 
-    function handleFile(e, type) {
-        const file = e.target.files[0]
-        if (!file) return
-        const url = URL.createObjectURL(file)
-        if (type === 'desktop') { setImagemDesktop(file); setPreviewDesktop(url) }
-        else                    { setImagemMobile(file);  setPreviewMobile(url)  }
+    // a imagem é reduzida e comprimida aqui mesmo, antes de enviar: banners
+    // chegam com até 8 MB, o servidor aceita até 5 MB, e o site fica leve
+    async function handleFile(e, type) {
+        const original = e.target.files[0]
+        if (!original) return
+        setErro('')
+        setOtimizando(n => n + 1)
+        setInfo(prev => ({ ...prev, [type]: 'Otimizando...' }))
+        try {
+            const file = await otimizarImagem(original, { larguraMax: LARGURA_MAX[type] })
+            if (file.size > LIMITE_SERVIDOR) throw new Error('Imagem muito grande mesmo depois de otimizar (máximo 5 MB).')
+            const url = URL.createObjectURL(file)
+            if (type === 'desktop') { setImagemDesktop(file); setPreviewDesktop(url) }
+            else                    { setImagemMobile(file);  setPreviewMobile(url)  }
+            setInfo(prev => ({
+                ...prev,
+                [type]: file === original
+                    ? formatarTamanho(file.size)
+                    : `${formatarTamanho(original.size)} → ${formatarTamanho(file.size)} (otimizada)`,
+            }))
+        } catch (err) {
+            setErro(err.message)
+            setInfo(prev => ({ ...prev, [type]: '' }))
+            e.target.value = ''
+        } finally {
+            setOtimizando(n => n - 1)
+        }
     }
 
     async function handleSubmit(e) {
         e.preventDefault()
-        if (!imagemDesktop) return
+        if (!imagemDesktop || otimizando) return
+        setErro('')
         setLoading(true)
         try {
             const fd = new FormData()
@@ -67,10 +100,11 @@ function BannerForm({ posicao, onAdded }) {
             setImagemDesktop(null); setPreviewDesktop(null)
             setImagemMobile(null);  setPreviewMobile(null)
             setLink('')
+            setInfo({ desktop: '', mobile: '' })
             inputDesktopRef.current.value = ''
             inputMobileRef.current.value  = ''
-        } catch {
-            alert('Erro ao adicionar banner.')
+        } catch (err) {
+            setErro(err.message || 'Erro ao adicionar banner.')
         } finally {
             setLoading(false)
         }
@@ -86,6 +120,7 @@ function BannerForm({ posicao, onAdded }) {
                     preview={previewDesktop}
                     inputRef={inputDesktopRef}
                     onChange={e => handleFile(e, 'desktop')}
+                    info={info.desktop}
                 />
                 <UploadArea
                     label='Mobile'
@@ -94,8 +129,13 @@ function BannerForm({ posicao, onAdded }) {
                     preview={previewMobile}
                     inputRef={inputMobileRef}
                     onChange={e => handleFile(e, 'mobile')}
+                    info={info.mobile}
                 />
             </div>
+
+            <p className='text-[11px] text-gray-text/45 -mt-1'>
+                Imagens grandes são reduzidas e otimizadas automaticamente antes de enviar.
+            </p>
 
             <div className='flex items-center gap-2 bg-white border border-gray-base/25 rounded-lg px-3 py-2'>
                 <Link size={15} className='text-gray-base/50 shrink-0' />
@@ -108,13 +148,15 @@ function BannerForm({ posicao, onAdded }) {
                 />
             </div>
 
+            {erro && <p className='text-sm text-red-base'>{erro}</p>}
+
             <button
                 type='submit'
-                disabled={!imagemDesktop || loading}
+                disabled={!imagemDesktop || loading || otimizando > 0}
                 className='flex items-center justify-center gap-2 bg-orange-base text-white text-sm font-semibold py-2.5 rounded-lg hover:bg-orange-light transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
             >
                 <Plus size={16} />
-                {loading ? 'Enviando...' : 'Adicionar banner'}
+                {loading ? 'Enviando...' : otimizando > 0 ? 'Otimizando imagem...' : 'Adicionar banner'}
             </button>
         </form>
     )
