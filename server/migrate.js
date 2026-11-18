@@ -110,6 +110,11 @@ async function migrate() {
       criado_em      TIMESTAMPTZ DEFAULT now()
     )
   `);
+  // curso cancelado continua no site (com aviso) até a data em que
+  // aconteceria — o site já esconde sozinho os cursos que passaram da hora
+  await pool.query(`ALTER TABLE cursos.cursos ADD COLUMN IF NOT EXISTS cancelado_em TIMESTAMPTZ`);
+  await pool.query(`ALTER TABLE cursos.cursos ADD COLUMN IF NOT EXISTS cancelado_por INTEGER`);
+  await pool.query(`ALTER TABLE cursos.cursos ADD COLUMN IF NOT EXISTS motivo_cancelamento TEXT`);
   console.log('✓ cursos.cursos');
 
   await pool.query(`
@@ -219,6 +224,7 @@ async function migrate() {
     ['cursos.inscricoes', 'inscricoes_cliente_fk', 'FOREIGN KEY (cliente_id) REFERENCES cursos.clientes(id) ON DELETE SET NULL'],
     ['cursos.inscricoes', 'inscricoes_reembolsado_por_fk', 'FOREIGN KEY (reembolsado_por) REFERENCES public.users(id)'],
     ['cursos.inscricoes', 'inscricoes_excluido_por_fk', 'FOREIGN KEY (curso_excluido_por) REFERENCES public.users(id)'],
+    ['cursos.cursos', 'cursos_cancelado_por_fk', 'FOREIGN KEY (cancelado_por) REFERENCES public.users(id)'],
     ['cursos.clientes_tokens', 'clientes_tokens_cliente_fk', 'FOREIGN KEY (cliente_id) REFERENCES cursos.clientes(id) ON DELETE CASCADE'],
     ['cursos.pagamentos', 'pagamentos_inscricao_fk', 'FOREIGN KEY (inscricao_id) REFERENCES cursos.inscricoes(id) ON DELETE CASCADE'],
     ['cursos.logs', 'logs_usuario_hub_fk', 'FOREIGN KEY (usuario_hub_id) REFERENCES public.users(id)'],

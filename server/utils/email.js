@@ -119,6 +119,27 @@ function emailReembolsoProcessado({ nome, nomeCurso }) {
   };
 }
 
+// situacao: 'reembolsado' (pagou e o estorno já foi feito), 'reembolso_pendente'
+// (pagou, mas o Mercado Pago não aceitou o estorno automático — a equipe faz
+// pelo painel) ou 'sem_pagamento' (só tinha reserva, não chegou a pagar)
+function emailCursoCancelado({ nome, nomeCurso, dataCurso, horaCurso, motivo, situacao }) {
+  const textoPagamento = {
+    reembolsado: 'O valor que você pagou já foi estornado. Ele deve aparecer no seu extrato em alguns dias, de acordo com o prazo da sua operadora/banco.',
+    reembolso_pendente: 'O estorno do valor que você pagou será feito pela nossa equipe nos próximos dias. Você receberá outro e-mail quando ele for processado.',
+    sem_pagamento: 'Como o pagamento não tinha sido concluído, nenhuma cobrança foi feita e a sua reserva foi cancelada.',
+  }[situacao];
+  return {
+    subject: `Curso cancelado — ${nomeCurso}`,
+    html: layout('Curso cancelado', `
+      <p>Olá, ${escapeHtml(nome)}!</p>
+      <p>Infelizmente o curso <strong>${escapeHtml(nomeCurso)}</strong>, que aconteceria no dia <strong>${escapeHtml(dataCurso)}</strong> às <strong>${escapeHtml(horaCurso)}</strong>, foi cancelado.</p>
+      ${motivo ? `<p><strong>Motivo:</strong> ${escapeHtml(motivo)}</p>` : ''}
+      <p>${textoPagamento}</p>
+      <p>Pedimos desculpas pelo transtorno. Confira a agenda para ver os próximos cursos: <a href="${escapeHtml(BASE_URL)}">${escapeHtml(BASE_URL.replace(/^https?:\/\//, ''))}</a></p>
+    `),
+  };
+}
+
 function emailLembreteCurso({ nome, nomeCurso, dataCurso, horaCurso, loja }) {
   return {
     subject: `Seu curso é amanhã — ${nomeCurso}`,
@@ -151,6 +172,7 @@ module.exports = {
   emailInscricaoRecebida,
   emailPagamentoConfirmado,
   emailReembolsoProcessado,
+  emailCursoCancelado,
   emailLembreteCurso,
   emailRedefinirSenha,
 };

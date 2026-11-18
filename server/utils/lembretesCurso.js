@@ -16,6 +16,7 @@ async function enviarLembretesCurso(pool) {
       JOIN cursos.cursos c ON c.id = i.curso_id
       LEFT JOIN public.branchs b ON b.id = c.filial_id
       WHERE i.status = 'pago'
+        AND c.cancelado_em IS NULL
         AND i.lembrete_enviado_em IS NULL
         AND c.data BETWEEN now() + interval '23 hours' AND now() + interval '25 hours'
     `);

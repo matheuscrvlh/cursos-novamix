@@ -7,6 +7,8 @@ const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../mi
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
 const { formatarTitulo } = require('../utils/titulo');
+const { enviarEmail, emailCursoCancelado } = require('../utils/email');
+const { reembolsarInscricao } = require('./pagamentos.routes');
 
 // marcas das indústrias parceiras — ficam com maiúscula no nome do curso
 // (ver utils/titulo.js)
@@ -55,6 +57,8 @@ const SELECT_CURSO = `
     c.capacidade,
     CASE WHEN c.status THEN 'true' ELSE 'false' END AS ativo,
     c.criado_em AS "criadoEm",
+    c.cancelado_em AS "canceladoEm",
+    c.motivo_cancelamento AS "motivoCancelamento",
     STRING_AGG(f.url, ',') AS fotos
   FROM cursos c
   LEFT JOIN culinaristas cu ON cu.id = c.culinarista_id
@@ -311,6 +315,98 @@ router.put('/:id', authenticate, requireCursosAccess, uploadCursos.array('fotos'
     res.json({ message: 'Atualizado' });
   } catch (err) {
     console.error('Erro ao atualizar curso:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Cancela um curso que ainda vai acontecer. Ele continua no site com o aviso
+// de cancelado até a data/hora em que aconteceria (o site já esconde sozinho
+// os cursos que passaram da hora). Na hora do cancelamento:
+//  - reservas pendentes (não pagas) são canceladas e liberam o assento;
+//  - inscrições pagas são reembolsadas no Mercado Pago, uma a uma. Se o MP
+//    recusar algum estorno (ex: pagamento aprovado há poucos minutos), a
+//    inscrição continua 'pago' e volta na resposta em `falhas`, para o admin
+//    reembolsar depois pelo botão de sempre;
+//  - todo mundo recebe um e-mail avisando (depois da resposta).
+// Só admin do módulo: mexe com o dinheiro dos inscritos e não tem volta.
+router.post('/:id/cancelar', authenticate, requireCursosAdmin, async (req, res) => {
+  const { id } = req.params;
+  const motivo = typeof req.body.motivo === 'string' ? req.body.motivo.trim().slice(0, 300) : '';
+
+  try {
+    // trava atômica: dois cliques (ou dois admins) não cancelam/reembolsam duas vezes
+    const { rows } = await pool.query(`
+      UPDATE cursos SET cancelado_em = now(), cancelado_por = $2, motivo_cancelamento = $3
+      WHERE id = $1 AND cancelado_em IS NULL AND data > now()
+      RETURNING nome_curso AS "nomeCurso", to_char(data,'DD/MM/YYYY') AS "dataCurso", to_char(data,'HH24:MI') AS "horaCurso"
+    `, [id, req.user?.sub ?? null, motivo || null]);
+
+    if (!rows.length) {
+      const { rows: atual } = await pool.query(`SELECT cancelado_em, data > now() AS futuro FROM cursos WHERE id = $1`, [id]);
+      if (!atual.length) return res.status(404).json({ error: 'Curso não encontrado' });
+      if (atual[0].cancelado_em) return res.status(409).json({ error: 'Este curso já está cancelado' });
+      return res.status(400).json({ error: 'Não dá para cancelar um curso que já aconteceu' });
+    }
+    const curso = rows[0];
+
+    logAudit({ entityType: 'curso', entityId: id, action: 'cancelar', details: motivo ? `${curso.nomeCurso} — ${motivo}` : curso.nomeCurso, userHubId: req.user?.sub });
+
+    const { rows: pendentes } = await pool.query(
+      `UPDATE inscricoes SET status = 'cancelado' WHERE curso_id = $1 AND status = 'pendente' RETURNING nome, email`,
+      [id]
+    );
+
+    const { rows: pagas } = await pool.query(
+      `SELECT id, nome, email FROM inscricoes WHERE curso_id = $1 AND status = 'pago'`,
+      [id]
+    );
+    const reembolsadas = [];
+    const falhas = [];
+    for (const inscricao of pagas) {
+      const resultado = await reembolsarInscricao({ inscricaoId: inscricao.id, userHubId: req.user?.sub });
+      if (resultado.ok) reembolsadas.push(inscricao);
+      else falhas.push({ ...inscricao, motivo: resultado.message });
+    }
+
+    res.json({
+      cancelado: true,
+      reservasCanceladas: pendentes.length,
+      reembolsadas: reembolsadas.length,
+      falhas: falhas.map(f => ({ id: f.id, nome: f.nome, motivo: f.motivo })),
+    });
+
+    // e-mails são best-effort e saem depois da resposta
+    const avisar = [
+      ...reembolsadas.map(i => ({ ...i, situacao: 'reembolsado' })),
+      ...falhas.map(i => ({ ...i, situacao: 'reembolso_pendente' })),
+      ...pendentes.map(i => ({ ...i, situacao: 'sem_pagamento' })),
+    ];
+    for (const inscrito of avisar) {
+      const { subject, html } = emailCursoCancelado({ ...curso, nome: inscrito.nome, motivo, situacao: inscrito.situacao });
+      enviarEmail({ to: inscrito.email, subject, html });
+    }
+  } catch (err) {
+    console.error('Erro ao cancelar curso:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Desfaz o cancelamento (ex: cancelado por engano). Reembolsos já feitos não
+// voltam — quem foi reembolsado precisa se inscrever de novo.
+router.post('/:id/reativar', authenticate, requireCursosAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { rows } = await pool.query(`
+      UPDATE cursos SET cancelado_em = NULL, cancelado_por = NULL, motivo_cancelamento = NULL
+      WHERE id = $1 AND cancelado_em IS NOT NULL
+      RETURNING nome_curso
+    `, [id]);
+    if (!rows.length) return res.status(404).json({ error: 'Curso não encontrado ou não está cancelado' });
+
+    logAudit({ entityType: 'curso', entityId: id, action: 'reativar', details: rows[0].nome_curso, userHubId: req.user?.sub });
+    res.json({ reativado: true });
+  } catch (err) {
+    console.error('Erro ao reativar curso:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });

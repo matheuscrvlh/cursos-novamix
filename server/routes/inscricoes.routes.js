@@ -43,10 +43,13 @@ router.post('/', paymentLimiter, reservaLimiter, authenticateClienteOpcional, as
 
   try {
     const { rows: cursoRows } = await pool.query(
-      `SELECT capacidade, nome_curso AS "nomeCurso", to_char(data,'DD/MM/YYYY') AS "dataCurso", to_char(data,'HH24:MI') AS "horaCurso" FROM cursos WHERE id = $1`,
+      `SELECT capacidade, nome_curso AS "nomeCurso", to_char(data,'DD/MM/YYYY') AS "dataCurso", to_char(data,'HH24:MI') AS "horaCurso", cancelado_em FROM cursos WHERE id = $1`,
       [cursoId]
     );
     if (!cursoRows.length) return res.status(404).json({ message: 'Curso não encontrado' });
+    if (cursoRows[0].cancelado_em) {
+      return res.status(400).json({ message: 'Este curso foi cancelado.' });
+    }
     if (!(assentoId >= 1 && assentoId <= cursoRows[0].capacidade)) {
       return res.status(404).json({ message: 'Assento não encontrado' });
     }

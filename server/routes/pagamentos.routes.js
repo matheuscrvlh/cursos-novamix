@@ -159,6 +159,26 @@ function mensagemAmigavelReembolso(err) {
 // inscrição como 'reembolsado' — quem pagou não fica no prejuízo, só sem vaga.
 async function confirmarPagamentoOuReembolsarConflito({ inscricaoId, paymentId }) {
   try {
+    // curso cancelado depois que o cliente gerou o Pix (ou com o cartão em
+    // análise): o pagamento aprovado é estornado na hora, em vez de confirmar
+    // uma vaga num curso que não vai acontecer
+    const { rows: cursoRows } = await pool.query(
+      `SELECT c.cancelado_em FROM inscricoes i JOIN cursos c ON c.id = i.curso_id WHERE i.id = $1`,
+      [inscricaoId]
+    );
+    if (cursoRows[0]?.cancelado_em) {
+      try {
+        const paymentRefund = new PaymentRefund(getMpClient());
+        await paymentRefund.total({ payment_id: paymentId });
+        await pool.query(`UPDATE inscricoes SET status = 'reembolsado' WHERE id = $1`, [inscricaoId]);
+        await upsertPagamento(pool, { inscricaoId, mpPaymentId: paymentId, status: 'reembolsado' });
+        console.warn(`[curso cancelado] Inscrição ${inscricaoId} paga depois do cancelamento do curso — reembolsada automaticamente`);
+      } catch (refundErr) {
+        console.error(`[curso cancelado] Falha ao reembolsar automaticamente a inscrição ${inscricaoId} — requer ação manual:`, refundErr);
+      }
+      return { ok: false, conflito: true, cancelado: true };
+    }
+
     const confirmacao = await pool.query(
       `UPDATE inscricoes SET status = 'pago' WHERE id = $1 AND status != 'pago'`,
       [inscricaoId]
@@ -299,54 +319,63 @@ router.post('/verificar/:inscricaoId', authenticate, requireCursosAccess, async 
   }
 });
 
-// Devolve o valor total ao cliente e libera a vaga. Só a confirmação vem do
-// frontend; depois de chamado o MP não tem como desfazer, então validamos
-// tudo antes de mexer no dinheiro.
+// Devolve o valor total de uma inscrição paga no Mercado Pago e libera a
+// vaga. Usado pelo botão de reembolso do painel e pelo cancelamento de curso
+// (cursos.routes.js). Depois de chamado o MP não tem como desfazer, então
+// valida tudo antes de mexer no dinheiro. Nunca lança erro: devolve
+// { ok, httpStatus, message, inscricao }.
+async function reembolsarInscricao({ inscricaoId, userHubId }) {
+  const { rows } = await pool.query(`SELECT * FROM inscricoes WHERE id = $1`, [inscricaoId]);
+  if (!rows.length) return { ok: false, httpStatus: 404, message: 'Inscrição não encontrada' };
+  const inscricao = rows[0];
+  if (inscricao.status !== 'pago') {
+    return { ok: false, httpStatus: 400, message: 'Só é possível reembolsar inscrições pagas', inscricao };
+  }
+
+  const mpPaymentId = await buscarUltimoPaymentId(inscricaoId);
+  if (!mpPaymentId) {
+    return { ok: false, httpStatus: 400, message: 'Sem ID de pagamento para reembolsar no MercadoPago', inscricao };
+  }
+
+  // trava atômica: o WHERE status = 'pago' garante que, sob dois cliques
+  // (ou dois admins) quase simultâneos, só uma requisição sai de 'pago' e
+  // chega a chamar o MP — evita reembolsar o mesmo pagamento duas vezes
+  const trava = await pool.query(
+    `UPDATE inscricoes SET status = 'reembolsando' WHERE id = $1 AND status = 'pago'`,
+    [inscricaoId]
+  );
+  if (trava.rowCount === 0) {
+    return { ok: false, httpStatus: 409, message: 'Reembolso já em andamento para esta inscrição', inscricao };
+  }
+
+  try {
+    const paymentRefund = new PaymentRefund(getMpClient());
+    await paymentRefund.total({ payment_id: mpPaymentId });
+
+    // só marca como reembolsada depois do MP confirmar o reembolso
+    await pool.query(
+      `UPDATE inscricoes SET status = 'reembolsado', reembolsado_por = $1 WHERE id = $2`,
+      [userHubId ?? null, inscricaoId]
+    );
+    await upsertPagamento(pool, { inscricaoId, mpPaymentId, status: 'reembolsado' });
+
+    logAudit({ entityType: 'inscricao', entityId: inscricaoId, action: 'reembolsar', details: inscricao.nome, userHubId });
+    return { ok: true, inscricao };
+  } catch (err) {
+    console.error('Erro ao reembolsar pagamento no MP:', err);
+    // MP não confirmou o reembolso — volta pro estado anterior
+    await pool.query(`UPDATE inscricoes SET status = 'pago' WHERE id = $1`, [inscricaoId]);
+    return { ok: false, httpStatus: 500, message: mensagemAmigavelReembolso(err), inscricao };
+  }
+}
+
 router.post('/reembolsar/:inscricaoId', authenticate, requireCursosAdmin, async (req, res) => {
   const { inscricaoId } = req.params;
 
   try {
-    const { rows } = await pool.query(`SELECT * FROM inscricoes WHERE id = $1`, [inscricaoId]);
-    if (!rows.length) return res.status(404).json({ message: 'Inscrição não encontrada' });
-    const inscricao = rows[0];
-    if (inscricao.status !== 'pago') {
-      return res.status(400).json({ message: 'Só é possível reembolsar inscrições pagas' });
-    }
-
-    const mpPaymentId = await buscarUltimoPaymentId(inscricaoId);
-    if (!mpPaymentId) {
-      return res.status(400).json({ message: 'Sem ID de pagamento para reembolsar no MercadoPago' });
-    }
-
-    // trava atômica: o WHERE status = 'pago' garante que, sob dois cliques
-    // (ou dois admins) quase simultâneos, só uma requisição sai de 'pago' e
-    // chega a chamar o MP — evita reembolsar o mesmo pagamento duas vezes
-    const trava = await pool.query(
-      `UPDATE inscricoes SET status = 'reembolsando' WHERE id = $1 AND status = 'pago'`,
-      [inscricaoId]
-    );
-    if (trava.rowCount === 0) {
-      return res.status(409).json({ message: 'Reembolso já em andamento para esta inscrição' });
-    }
-
-    try {
-      const paymentRefund = new PaymentRefund(getMpClient());
-      await paymentRefund.total({ payment_id: mpPaymentId });
-
-      // só marca como reembolsada depois do MP confirmar o reembolso
-      await pool.query(
-        `UPDATE inscricoes SET status = 'reembolsado', reembolsado_por = $1 WHERE id = $2`,
-        [req.user?.sub ?? null, inscricaoId]
-      );
-      await upsertPagamento(pool, { inscricaoId, mpPaymentId, status: 'reembolsado' });
-
-      logAudit({ entityType: 'inscricao', entityId: inscricaoId, action: 'reembolsar', details: inscricao.nome, userHubId: req.user?.sub });
-    } catch (err) {
-      console.error('Erro ao reembolsar pagamento no MP:', err);
-      // MP não confirmou o reembolso — volta pro estado anterior
-      await pool.query(`UPDATE inscricoes SET status = 'pago' WHERE id = $1`, [inscricaoId]);
-      return res.status(500).json({ message: mensagemAmigavelReembolso(err) });
-    }
+    const resultado = await reembolsarInscricao({ inscricaoId, userHubId: req.user?.sub });
+    if (!resultado.ok) return res.status(resultado.httpStatus).json({ message: resultado.message });
+    const { inscricao } = resultado;
 
     res.json({ status: 'reembolsado', reembolsado: true });
 
@@ -432,7 +461,7 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
 
   try {
     const { rows } = await pool.query(
-      `SELECT i.*, c.nome_curso AS "nomeCurso", c.valor AS "cursoValor"
+      `SELECT i.*, c.nome_curso AS "nomeCurso", c.valor AS "cursoValor", c.cancelado_em AS "cursoCanceladoEm"
        FROM inscricoes i
        LEFT JOIN cursos c ON c.id = i.curso_id
        WHERE i.id = $1`,
@@ -443,6 +472,9 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
 
     if (inscricao.status === 'pago') {
       return res.status(400).json({ message: 'Inscrição já paga' });
+    }
+    if (inscricao.cursoCanceladoEm) {
+      return res.status(400).json({ message: 'Este curso foi cancelado. Nenhuma cobrança foi feita.' });
     }
 
     // CPF vem da inscrição (já coletado no cadastro), não do Brick — o Brick de Pix
@@ -501,9 +533,11 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
         valor,
       });
 
+      let cursoCancelado = false;
       if (status === 'approved') {
         const resultado = await confirmarPagamentoOuReembolsarConflito({ inscricaoId, paymentId });
         conflitoAssento = !!resultado.conflito;
+        cursoCancelado = !!resultado.cancelado;
       } else if (status === 'rejected' || status === 'cancelled') {
         // 'rejected' = recusado pela operadora/banco (cartão), 'cancelled' =
         // pagamento cancelado (ex: Pix expirado) — status diferentes pro
@@ -525,7 +559,9 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
       res.json({
         status: conflitoAssento ? 'cancelled' : status,
         status_detail: conflitoAssento ? 'seat_conflict_refunded' : paymentData.status_detail,
-        message: conflitoAssento
+        message: cursoCancelado
+          ? 'Pagamento aprovado, porém o curso foi cancelado nesse meio-tempo. O valor foi estornado automaticamente no Mercado Pago.'
+          : conflitoAssento
           ? 'Pagamento aprovado, porém a vaga já havia sido ocupada por outra pessoa nesse meio-tempo. O valor foi estornado automaticamente no Mercado Pago.'
           : (status === 'rejected' ? mensagemAmigavelMp(paymentData.status_detail) : undefined),
         id: paymentId,
@@ -543,3 +579,5 @@ router.post('/processar-pagamento', paymentLimiter, async (req, res) => {
 });
 
 module.exports = router;
+// usado pelo cancelamento de curso (cursos.routes.js)
+module.exports.reembolsarInscricao = reembolsarInscricao;
