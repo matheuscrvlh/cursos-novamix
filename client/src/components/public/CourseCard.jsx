@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { Clock, ChefHat } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatarPreco } from '../../utils/formatCurrency';
+import { useFormatarTitulo } from '../../hooks/useFormatarTitulo';
 import { partesData, formatHora } from '../../utils/formatDate';
 import { nomeLoja } from '../../utils/lojas';
 import { marcarFotoDoCard } from '../../utils/transicaoCurso';
@@ -38,6 +39,7 @@ export default function CourseCard({
   const gratuito = Number(valor) === 0
 
   const { dia, mes, semana } = partesData(data)
+  const formatarTitulo = useFormatarTitulo()
   const link = id ? `/curso/${id}` : '#'
 
   // a foto do card cresce até virar a arte da página do curso (utils/transicaoCurso).
@@ -69,13 +71,6 @@ export default function CourseCard({
           </div>
         )}
 
-        {dia && (
-          <span className="absolute top-3 left-3 flex flex-col items-center min-w-13 bg-cream/95 backdrop-blur-sm rounded-md px-2.5 pt-1.5 pb-1 shadow-sm leading-none">
-            <span className="font-serif text-[1.625rem] font-bold text-chocolate">{dia}</span>
-            <span className="text-[0.5625rem] font-medium uppercase tracking-[0.2em] text-orange-base mt-0.5">{mes}</span>
-          </span>
-        )}
-
         {loja && (
           <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-chocolate text-[0.625rem] font-medium uppercase tracking-[0.18em] px-3 py-1.5 rounded-full shadow-sm">
             {nomeLoja(loja)}
@@ -91,13 +86,26 @@ export default function CourseCard({
 
       <div className="p-5 flex flex-col gap-3.5 flex-1">
 
-        <div className="flex flex-col gap-1.5">
-          {categoria && (
-            <p className="text-[0.625rem] font-medium uppercase tracking-[0.25em] text-gold">{categoria}</p>
+        {/* a data fica aqui, ao lado do título, e não sobre a foto: o canto
+            superior esquerdo da arte é onde está o rosto do culinarista.
+            A data estica até a altura da categoria + título (1 ou 2 linhas),
+            com o dia e o mês centralizados, pra não sobrar vão embaixo dela */}
+        <div className="flex items-stretch gap-3.5">
+          {dia && (
+            <span className="flex flex-col items-center justify-center shrink-0 min-w-14 bg-cream rounded-md px-2.5 py-1.5 ring-1 ring-chocolate/[0.07] leading-none">
+              <span className="font-serif text-[1.625rem] font-bold text-chocolate">{dia}</span>
+              <span className="text-[0.5625rem] font-medium uppercase tracking-[0.2em] text-orange-base mt-0.5">{mes}</span>
+            </span>
           )}
-          <Link to={link} state={VEIO_DO_CARD} onClick={abrirCurso} className="transition-colors duration-500 hover:text-orange-base">
-            <h3 className="font-serif text-chocolate text-[1.4375rem] sm:text-[1.5625rem] font-bold leading-[1.08] line-clamp-2">{curso}</h3>
-          </Link>
+
+          <div className="flex flex-col gap-1.5 min-w-0">
+            {categoria && (
+              <p className="text-[0.625rem] font-medium uppercase tracking-[0.25em] text-gold">{categoria}</p>
+            )}
+            <Link to={link} state={VEIO_DO_CARD} onClick={abrirCurso} className="transition-colors duration-500 hover:text-orange-base">
+              <h3 className="font-serif text-chocolate text-[1.4375rem] sm:text-[1.5625rem] font-bold leading-[1.08] line-clamp-2">{formatarTitulo(curso)}</h3>
+            </Link>
+          </div>
         </div>
 
         <ul className="flex flex-col gap-1.5 text-sm text-cocoa">
