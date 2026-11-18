@@ -421,6 +421,8 @@ export default function DashboardAdmin() {
                                     key={curso.id}
                                     id={curso.id}
                                     curso={curso.nomeCurso}
+                                    cancelado={!!curso.canceladoEm}
+                                    motivoCancelamento={curso.motivoCancelamento}
                                     data={curso.data}
                                     horario={curso.hora}
                                     loja={curso.loja}

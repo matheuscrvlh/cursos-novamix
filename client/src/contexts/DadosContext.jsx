@@ -5,6 +5,8 @@ import {
     getCourses,
     putCourse,
     deleteCourse,
+    cancelCourse,
+    reactivateCourse,
 } from '../api/courses.services';
 
 import {
@@ -200,6 +202,21 @@ export function DadosProvider({ children }) {
         }
     }
 
+    // cancelar/reativar valem pra curso normal e infantil (mesma tabela) —
+    // recarrega a lista e devolve o resultado pra tela mostrar o resumo
+    // (reembolsos feitos, falhas)
+    async function cancelarCurso(cursoId, motivo) {
+        const res = await cancelCourse(cursoId, motivo);
+        if (res.ok) await refreshCourses().catch(err => console.error('Erro ao recarregar cursos', err));
+        return res;
+    }
+
+    async function reativarCurso(cursoId) {
+        const res = await reactivateCourse(cursoId);
+        if (res.ok) await refreshCourses().catch(err => console.error('Erro ao recarregar cursos', err));
+        return res;
+    }
+
     async function removeCursoInfantil(id) {
         try {
             const res = await deleteChildren(id);
@@ -260,6 +277,9 @@ export function DadosProvider({ children }) {
                 removeCulinarian,
                 removeIndustry,
                 removeCursoInfantil,
+
+                cancelarCurso,
+                reativarCurso,
 
                 ativarModoAdmin,
             }}

@@ -280,17 +280,20 @@ export default function CoursePage() {
     const fotos = Array.isArray(curso.fotos) ? curso.fotos : []
     const imagemAtual = fotos[fotoIdx] || null
     const encerrado = cursoEncerrado(curso)
+    // cancelado: continua visível com o aviso até a data em que aconteceria, mas sem inscrição
+    const cancelado = !!curso.canceladoEm
+    const indisponivel = encerrado || cancelado
     const totalAssentos = assentos.length
     // só conta como esgotado depois que os assentos carregaram — antes disso
     // vagasLivres ainda é 0 e o botão piscava "Vagas esgotadas"
     const esgotado = totalAssentos > 0 && vagasLivres === 0
-    const bloqueado = encerrado || esgotado
+    const bloqueado = indisponivel || esgotado
     const percentualOcupado = totalAssentos ? Math.round(((totalAssentos - vagasLivres) / totalAssentos) * 100) : 0
     const ultimasVagas = !esgotado && totalAssentos > 0 && vagasLivres <= Math.max(3, Math.ceil(totalAssentos * 0.2))
 
     const { dia, mes, semana, extenso } = partesData(curso.data)
     const preco = Number(curso.valor) === 0 ? 'Grátis' : `R$ ${formatarPreco(curso.valor)}`
-    const textoBotao = encerrado ? 'Curso encerrado' : esgotado ? 'Vagas esgotadas' : 'Garantir minha vaga'
+    const textoBotao = cancelado ? 'Curso cancelado' : encerrado ? 'Curso encerrado' : esgotado ? 'Vagas esgotadas' : 'Garantir minha vaga'
     const loja = LOJAS[curso.loja]
 
     return (
@@ -322,7 +325,7 @@ export default function CoursePage() {
                                     {/* a arte é 4:5 e o quadro é mais largo a partir do sm —
                                         a própria arte desfocada preenche as laterais, sem recortar nada */}
                                     <img src={imagemAtual} alt='' aria-hidden='true' className='absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-60' />
-                                    <img src={imagemAtual} alt={formatarTitulo(curso.nomeCurso)} className='relative w-full h-full object-contain' />
+                                    <img src={imagemAtual} alt={formatarTitulo(curso.nomeCurso)} className={`relative w-full h-full object-contain ${cancelado ? 'grayscale opacity-60' : ''}`} />
                                 </>
                             ) : (
                                 <div className='w-full h-full flex items-center justify-center'>
@@ -348,6 +351,17 @@ export default function CoursePage() {
                     </div>
 
                     <aside className='lg:col-start-2 lg:row-start-1 lg:row-span-3 lg:sticky lg:top-24 bg-white rounded-xl ring-1 ring-chocolate/[0.07] shadow-[0_30px_60px_-40px_rgba(58,42,33,0.45)] p-6 md:p-8 flex flex-col gap-6'>
+
+                        {cancelado && (
+                            <div className='flex gap-3 rounded-lg bg-red-base/[0.07] ring-1 ring-red-base/20 p-4'>
+                                <XCircle size='1.25rem' strokeWidth={1.75} className='text-red-base shrink-0 mt-0.5' />
+                                <div className='flex flex-col gap-1 text-sm text-chocolate'>
+                                    <p className='font-semibold'>Este curso foi cancelado</p>
+                                    {curso.motivoCancelamento && <p className='text-cocoa'>{curso.motivoCancelamento}</p>}
+                                    <p className='text-cocoa'>Se você tinha se inscrito, o valor pago foi estornado e você recebeu um e-mail com os detalhes.</p>
+                                </div>
+                            </div>
+                        )}
 
                         <div>
                             {curso.categoria && (
@@ -385,14 +399,14 @@ export default function CoursePage() {
                                     <p className='text-[0.625rem] font-medium uppercase tracking-[0.22em] text-cocoa mb-1.5'>Investimento</p>
                                     <p className='font-serif italic text-[2.625rem] font-bold text-orange-base leading-none'>{preco}</p>
                                 </div>
-                                {totalAssentos > 0 && !encerrado && (
+                                {totalAssentos > 0 && !indisponivel && (
                                     <p className={`text-sm text-right font-normal ${esgotado || ultimasVagas ? 'text-orange-base font-medium' : 'text-cocoa'}`}>
                                         {esgotado ? 'Esgotado' : <><span className='font-serif text-xl font-bold text-chocolate'>{vagasLivres}</span> de {totalAssentos} vagas livres</>}
                                     </p>
                                 )}
                             </div>
 
-                            {totalAssentos > 0 && !encerrado && (
+                            {totalAssentos > 0 && !indisponivel && (
                                 <div className='w-full h-0.5 bg-chocolate/[0.08] rounded-full overflow-hidden'>
                                     <div
                                         className='h-full rounded-full bg-orange-base transition-all duration-1000 ease-luxo'
@@ -459,7 +473,7 @@ export default function CoursePage() {
                         </div>
                     )}
 
-                    {assentos.length > 0 && !encerrado && (
+                    {assentos.length > 0 && !indisponivel && (
                         <div className='lg:col-start-1 bg-white rounded-xl ring-1 ring-chocolate/[0.07] p-6 md:p-8'>
                             <h2 className='font-serif text-[1.75rem] font-semibold text-chocolate leading-none mb-5'>Mapa de assentos</h2>
 

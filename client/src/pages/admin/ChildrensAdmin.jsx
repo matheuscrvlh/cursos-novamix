@@ -7,6 +7,7 @@ import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
 import Tooltip from '../../components/admin/Tooltip';
 import ConfirmModal from '../../components/admin/ModalConfirm';
+import BotaoCancelarCurso, { SeloCancelado } from '../../components/admin/BotaoCancelarCurso';
 import FilterPills from '../../components/admin/FilterPills';
 import AdminPage from '../../layouts/admin/AdminPage';
 
@@ -329,6 +330,7 @@ export default function ChildrensAdmin() {
                                     <div className='flex items-center gap-2'>
                                         <span className={`w-2 h-2 rounded-full shrink-0 ${!cursoEncerrado(c) ? 'bg-green-base' : 'bg-gray-base/40'}`} />
                                         <p className='font-semibold'>{c.nomeCurso}</p>
+                                        {c.canceladoEm && <SeloCancelado />}
                                     </div>
                                     <p className='text-sm text-gray-text/70 mt-0.5'>{c.culinarista} · {formatDateBR(c.data)} · {c.hora}</p>
                                     {c.loja === 'Prado'
@@ -349,6 +351,7 @@ export default function ChildrensAdmin() {
                                             </Button>
                                         </Tooltip>
                                         )}
+                                        <BotaoCancelarCurso curso={c} />
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEdit(c.id)}>
                                                 <Edit size={16} />
@@ -360,7 +363,10 @@ export default function ChildrensAdmin() {
                                 <div className='hidden md:grid grid-cols-[2fr_1fr_0.7fr_0.6fr_0.7fr_auto] gap-2
                                                 px-3 py-3 items-center text-gray-text text-sm
                                                 hover:bg-gray/60 transition-colors rounded-md'>
-                                    <p className='font-medium truncate pr-2'>{c.nomeCurso}</p>
+                                    <p className='font-medium truncate pr-2 flex items-center gap-2'>
+                                        <span className='truncate'>{c.nomeCurso}</span>
+                                        {c.canceladoEm && <SeloCancelado />}
+                                    </p>
                                     <p className='truncate'>{c.culinarista}</p>
                                     <div className='flex items-center gap-1.5'>
                                         <span className={`w-2 h-2 rounded-full shrink-0 ${!cursoEncerrado(c) ? 'bg-green-base' : 'bg-gray-base/40'}`} />
@@ -385,6 +391,7 @@ export default function ChildrensAdmin() {
                                             </Button>
                                         </Tooltip>
                                         )}
+                                        <BotaoCancelarCurso curso={c} />
                                         <Tooltip label='Editar'>
                                             <Button className='bg-orange-base p-2 hover:bg-orange-light text-white' onClick={() => handleEdit(c.id)}>
                                                 <Edit size={16} />

@@ -61,6 +61,41 @@ export async function putCourse(cursoId, body) {
     }
 }
 
+// cancela o curso: reembolsa no Mercado Pago quem pagou, cancela as reservas
+// e manda e-mail pra todo mundo (cursos.routes.js). Pode demorar alguns
+// segundos por inscrição paga.
+export async function cancelCourse(cursoId, motivo) {
+    try {
+        const res = await fetch(`${URL}/cursos/${cursoId}/cancelar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ motivo }),
+        });
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) return { ok: false, message: data.error || data.message || 'Erro ao cancelar curso.' }
+        return { ...data, ok: true }
+    } catch (err) {
+        console.error('Erro ao cancelar Curso:', err);
+        return { ok: false, message: 'Erro de conexão. Tente novamente.' }
+    }
+}
+
+export async function reactivateCourse(cursoId) {
+    try {
+        const res = await fetch(`${URL}/cursos/${cursoId}/reativar`, {
+            method: 'POST',
+            credentials: 'include',
+        });
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) return { ok: false, message: data.error || data.message || 'Erro ao reativar curso.' }
+        return { ok: true }
+    } catch (err) {
+        console.error('Erro ao reativar Curso:', err);
+        return { ok: false, message: 'Erro de conexão. Tente novamente.' }
+    }
+}
+
 export async function deleteCourse(cursoId) {
     try {
         const res = await fetch((`${URL}/cursos/${cursoId}`), {

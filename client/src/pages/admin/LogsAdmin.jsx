@@ -42,10 +42,13 @@ const LABELS_ACAO = {
     reembolsar: 'Reembolsar',
     redefinir_senha: 'Redefinir senha',
     alterar_status: 'Alterar status',
+    cancelar: 'Cancelar curso',
+    reativar: 'Reativar curso',
 }
 
 function acaoClass(acao) {
-    if (acao === 'criar' || acao === 'ativar') return 'bg-green-base text-white'
+    if (acao === 'criar' || acao === 'ativar' || acao === 'reativar') return 'bg-green-base text-white'
+    if (acao === 'cancelar') return 'bg-red-base text-white'
     if (acao === 'excluir') return 'bg-red-base text-white'
     if (acao === 'reembolsar' || acao === 'alterar_status') return 'bg-red-light text-white'
     if (acao === 'desativar') return 'bg-gray-base text-white'

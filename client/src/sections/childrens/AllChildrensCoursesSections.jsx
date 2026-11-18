@@ -168,6 +168,8 @@ export default function AllChildrensCoursesSections({
                                     <CourseCard
                                         id={curso.id}
                                         curso={curso.nomeCurso}
+                                        cancelado={!!curso.canceladoEm}
+                                        motivoCancelamento={curso.motivoCancelamento}
                                         data={curso.data}
                                         horario={curso.hora}
                                         loja={curso.loja}

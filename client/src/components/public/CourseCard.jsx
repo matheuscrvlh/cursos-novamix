@@ -25,6 +25,8 @@ export default function CourseCard({
   loadingVagasPorCurso,
   vagasLivres,
   vagasTotal,
+  cancelado = false,
+  motivoCancelamento,
   className,
   onClick
 }) {
@@ -37,6 +39,9 @@ export default function CourseCard({
   // pequena não ficar com o aviso aceso desde a primeira inscrição
   const ultimasVagas = !esgotado && total > 0 && livres <= Math.max(3, Math.ceil(total * 0.2))
   const gratuito = Number(valor) === 0
+  // curso cancelado fica no site, em cinza e com o aviso, até a data em que
+  // aconteceria (depois some junto com os encerrados) — sem inscrição
+  const bloqueado = esgotado || cancelado
 
   const { dia, mes, semana } = partesData(data)
   const formatarTitulo = useFormatarTitulo()
@@ -63,12 +68,20 @@ export default function CourseCard({
             src={imagem}
             alt=""
             loading="lazy"
-            className="w-full h-full object-cover object-[center_54%] transition-transform duration-[1400ms] ease-luxo group-hover:scale-[1.06]"
+            className={`w-full h-full object-cover object-[center_54%] transition-transform duration-[1400ms] ease-luxo ${cancelado ? 'grayscale opacity-60' : 'group-hover:scale-[1.06]'}`}
           />
         ) : (
           <div ref={foto} className="w-full h-full flex items-center justify-center">
             <ChefHat size="2.75rem" strokeWidth={1.25} className="text-gold/50" />
           </div>
+        )}
+
+        {cancelado && (
+          <span className="absolute inset-0 flex items-center justify-center bg-chocolate/20">
+            <span className="bg-red-base text-white text-[0.6875rem] font-semibold uppercase tracking-[0.2em] px-4 py-2 rounded-full shadow-md">
+              Curso cancelado
+            </span>
+          </span>
         )}
 
         {loja && (
@@ -77,14 +90,14 @@ export default function CourseCard({
           </span>
         )}
 
-        {!loadingVagasPorCurso && (esgotado || ultimasVagas) && (
+        {!cancelado && !loadingVagasPorCurso && (esgotado || ultimasVagas) && (
           <span className={`absolute bottom-3 left-3 text-[0.625rem] font-medium uppercase tracking-[0.18em] px-3 py-1.5 rounded-full shadow-sm ${esgotado ? 'bg-chocolate text-cream' : 'bg-orange-base text-white'}`}>
             {esgotado ? 'Esgotado' : 'Últimas vagas'}
           </span>
         )}
       </Link>
 
-      <div className="p-5 flex flex-col gap-3.5 flex-1">
+      <div className={`p-5 flex flex-col gap-3.5 flex-1 ${cancelado ? 'grayscale opacity-75' : ''}`}>
 
         {/* a data fica aqui, ao lado do título, e não sobre a foto: o canto
             superior esquerdo da arte é onde está o rosto do culinarista.
@@ -111,7 +124,7 @@ export default function CourseCard({
         <ul className="flex flex-col gap-1.5 text-sm text-cocoa">
           <li className="flex items-center gap-2">
             <Clock size="0.875rem" strokeWidth={1.5} className="shrink-0 text-gold" />
-            <span className="truncate">
+            <span className={`truncate ${cancelado ? 'line-through' : ''}`}>
               <span className="capitalize">{semana}</span>, {formatHora(horario)}{duracao ? ` · ${duracao} de duração` : ''}
             </span>
           </li>
@@ -124,7 +137,14 @@ export default function CourseCard({
         </ul>
 
         <div className="mt-auto">
-          {loadingVagasPorCurso ? (
+          {cancelado ? (
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium text-chocolate">Este curso foi cancelado</p>
+              {motivoCancelamento && (
+                <p className="text-xs text-cocoa line-clamp-2">{motivoCancelamento}</p>
+              )}
+            </div>
+          ) : loadingVagasPorCurso ? (
             <div className="flex flex-col gap-2 animate-pulse">
               <div className="h-2.5 w-24 rounded bg-cream-dark" />
               <div className="h-0.5 w-full rounded-full bg-cream-dark" />
@@ -159,7 +179,7 @@ export default function CourseCard({
         <div className="@container flex flex-col gap-4 pt-4 border-t border-chocolate/[0.07]">
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1.5 @max-[13.5rem]:gap-x-2 @max-[11rem]:flex-col @max-[11rem]:items-start">
             <p className="text-[0.625rem] font-medium uppercase tracking-[0.2em] @max-[13.5rem]:tracking-[0.14em] text-cocoa">Investimento</p>
-            <p className="font-serif italic text-[1.75rem] @max-[13.5rem]:text-[1.375rem] font-bold text-orange-base leading-none whitespace-nowrap">
+            <p className={`font-serif italic text-[1.75rem] @max-[13.5rem]:text-[1.375rem] font-bold text-orange-base leading-none whitespace-nowrap ${cancelado ? 'line-through' : ''}`}>
               {gratuito ? 'Grátis' : `R$ ${formatarPreco(valor)}`}
             </p>
           </div>
@@ -168,14 +188,14 @@ export default function CourseCard({
           {onClick && (
             <button
               className={`w-full text-[0.6875rem] font-medium uppercase tracking-[0.18em] px-5 py-3.5 rounded-full transition-colors duration-500 ${
-                esgotado
+                bloqueado
                   ? 'bg-cream-dark text-cocoa/60 cursor-not-allowed'
                   : 'bg-orange-base text-white hover:bg-chocolate cursor-pointer'
               }`}
-              onClick={esgotado ? undefined : onClick}
-              disabled={esgotado}
+              onClick={bloqueado ? undefined : onClick}
+              disabled={bloqueado}
             >
-              {esgotado ? 'Lotado' : 'Garantir vaga'}
+              {cancelado ? 'Curso cancelado' : esgotado ? 'Lotado' : 'Garantir vaga'}
             </button>
           )}
         </div>

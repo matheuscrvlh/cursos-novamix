@@ -7,6 +7,7 @@ import Button from '../../components/Button';
 import Modal from '../../components/public/Modal';
 import Tooltip from '../../components/admin/Tooltip';
 import ConfirmModal from '../../components/admin/ModalConfirm';
+import BotaoCancelarCurso, { SeloCancelado } from '../../components/admin/BotaoCancelarCurso';
 import FilterPills from '../../components/admin/FilterPills';
 import AdminPage from '../../layouts/admin/AdminPage';
 
@@ -518,6 +519,7 @@ export default function CoursesAdmin() {
                                     <div className='flex items-center gap-2'>
                                         <span className={`w-2 h-2 rounded-full shrink-0 ${!cursoEncerrado(curso) ? 'bg-green-base' : 'bg-gray-base/40'}`} />
                                         <p className='font-semibold'>{curso.nomeCurso}</p>
+                                        {curso.canceladoEm && <SeloCancelado />}
                                     </div>
                                     <p className='text-sm text-gray-text/70 mt-0.5'>{curso.culinarista} · {formatDateBR(curso.data)} · {curso.hora}</p>
                                     {curso.loja === 'Prado'
@@ -538,6 +540,7 @@ export default function CoursesAdmin() {
                                             </Button>
                                         </Tooltip>
                                         )}
+                                        <BotaoCancelarCurso curso={curso} />
                                         <Tooltip label='Ver inscritos'>
                                             <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => abrirListaAssentos(curso)} disabled={carregandoLista === curso.id}>
                                                 {carregandoLista === curso.id ? <Loader2 size={16} className='animate-spin' /> : <Users size={16} />}
@@ -554,7 +557,10 @@ export default function CoursesAdmin() {
                                 <div className='hidden md:grid grid-cols-[2fr_1fr_0.7fr_0.6fr_0.7fr_auto] gap-2
                                                 px-3 py-3 items-center text-gray-text text-sm
                                                 hover:bg-gray/60 transition-colors rounded-md'>
-                                    <p className='font-medium truncate pr-2'>{curso.nomeCurso}</p>
+                                    <p className='font-medium truncate pr-2 flex items-center gap-2'>
+                                        <span className='truncate'>{curso.nomeCurso}</span>
+                                        {curso.canceladoEm && <SeloCancelado />}
+                                    </p>
                                     <p className='truncate'>{curso.culinarista}</p>
                                     <div className='flex items-center gap-1.5'>
                                         <span className={`w-2 h-2 rounded-full shrink-0 ${!cursoEncerrado(curso) ? 'bg-green-base' : 'bg-gray-base/40'}`} />
@@ -579,6 +585,7 @@ export default function CoursesAdmin() {
                                             </Button>
                                         </Tooltip>
                                         )}
+                                        <BotaoCancelarCurso curso={curso} />
                                         <Tooltip label='Ver inscritos'>
                                             <Button className='bg-gray-base p-2 hover:bg-gray-dark text-white' onClick={() => abrirListaAssentos(curso)} disabled={carregandoLista === curso.id}>
                                                 {carregandoLista === curso.id ? <Loader2 size={16} className='animate-spin' /> : <Users size={16} />}
