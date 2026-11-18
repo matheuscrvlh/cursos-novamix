@@ -14,6 +14,7 @@ import { DadosContext } from '../../contexts/DadosContext';
 import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 import { formatDateBR, cursoEncerrado } from '../../utils/formatDate';
+import { useFormatarTitulo } from '../../hooks/useFormatarTitulo';
 
 function maskValor(value) {
     const digits = value.replace(/\D/g, '');
@@ -71,6 +72,7 @@ export default function ChildrensAdmin() {
         editCursoInfantil,
         culinaristas
     } = useContext(DadosContext);
+    const formatarTitulo = useFormatarTitulo();
 
     const [form, setForm] = useState(CURSO_VAZIO);
     const [cursoEditar, setCursoEditar] = useState({});
@@ -181,6 +183,7 @@ export default function ChildrensAdmin() {
                         <Input placeholder='Nome do curso'
                             value={form.nomeCurso}
                             onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
+                            onBlur={() => setForm(f => ({ ...f, nomeCurso: formatarTitulo(f.nomeCurso) }))}
                         />
                     </div>
 
@@ -435,6 +438,7 @@ export default function ChildrensAdmin() {
                         <Input
                             value={cursoEditar.nomeCurso || ''}
                             onChange={e => setCursoEditar({ ...cursoEditar, nomeCurso: e.target.value })}
+                            onBlur={() => setCursoEditar(c => ({ ...c, nomeCurso: formatarTitulo(c.nomeCurso) }))}
                         />
                     </div>
                     <div className='flex flex-col gap-1.5'>

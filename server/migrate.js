@@ -1,5 +1,6 @@
 require('dotenv').config();
 const pool = require('./db');
+const { formatarTitulo } = require('./utils/titulo');
 
 // Todas as tabelas vivem no schema `cursos`, não no `public` padrão — o pool
 // já seta search_path=cursos,public em toda conexão (ver db.js), então as
@@ -251,6 +252,37 @@ async function migrate() {
 
   await pool.query(`DROP TABLE IF EXISTS cursos.usuarios`);
   await pool.query(`DROP TABLE IF EXISTS cursos.assentos`);
+
+  // nomes de curso no padrão "primeira letra maiúscula + nomes próprios"
+  // (utils/titulo.js), com as marcas das indústrias como nomes próprios
+  // — as rotas já gravam assim; isto ajusta os que foram salvos antes da
+  // regra existir. Feito em JS, e não com lower()/upper() do Postgres, porque
+  // dependendo da collation do banco eles não convertem letra acentuada
+  // ("AÇÚCAR" viraria "aÇÚcar"). Só atualiza o que está diferente, então
+  // rodar de novo a cada subida não muda nada.
+  let ajustados = 0;
+  const { rows: industrias } = await pool.query(`SELECT nome FROM cursos.industrias`);
+  const marcas = industrias.map(i => i.nome);
+  const { rows: cursos } = await pool.query(`SELECT id, nome_curso FROM cursos.cursos`);
+  for (const c of cursos) {
+    const formatado = formatarTitulo(c.nome_curso, marcas);
+    if (formatado && formatado !== c.nome_curso) {
+      await pool.query(`UPDATE cursos.cursos SET nome_curso = $1 WHERE id = $2`, [formatado, c.id]);
+      ajustados++;
+    }
+  }
+  // nome guardado nas inscrições de cursos já excluídos
+  const { rows: removidos } = await pool.query(
+    `SELECT DISTINCT curso_removido_nome AS nome FROM cursos.inscricoes WHERE curso_removido_nome IS NOT NULL`
+  );
+  for (const r of removidos) {
+    const formatado = formatarTitulo(r.nome, marcas);
+    if (formatado && formatado !== r.nome) {
+      await pool.query(`UPDATE cursos.inscricoes SET curso_removido_nome = $1 WHERE curso_removido_nome = $2`, [formatado, r.nome]);
+      ajustados++;
+    }
+  }
+  console.log(`✓ nomes de curso no padrão (${ajustados} ajustado(s))`);
 }
 
 migrate()

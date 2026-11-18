@@ -15,6 +15,7 @@ import { AdminAuthContext } from '../../contexts/AdminAuthContext';
 import useConfirmAction from '../../hooks/useConfirmAction';
 import { formatDateBR, cursoEncerrado } from '../../utils/formatDate';
 import { formatarCpf } from '../../utils/formatCpf';
+import { useFormatarTitulo } from '../../hooks/useFormatarTitulo';
 import { getEnrollment } from '../../api/enrollment.services';
 
 function maskValor(value) {
@@ -94,6 +95,7 @@ export default function CoursesAdmin() {
         editCourse,
         culinaristas
     } = useContext(DadosContext);
+    const formatarTitulo = useFormatarTitulo();
 
     const [form, setForm]               = useState(FORM_VAZIO);
     const [cursoEditar, setCursoEditar] = useState(EDITAR_VAZIO);
@@ -343,6 +345,7 @@ export default function CoursesAdmin() {
                             value={form.nomeCurso}
                             className={fieldClass(erros.nomeCurso)}
                             onChange={e => setForm({ ...form, nomeCurso: e.target.value })}
+                            onBlur={() => setForm(f => ({ ...f, nomeCurso: formatarTitulo(f.nomeCurso) }))}
                         />
                         {erros.nomeCurso && <p className='text-red-base text-xs'>Informe o nome do curso</p>}
                     </div>
@@ -636,6 +639,7 @@ export default function CoursesAdmin() {
                             value={cursoEditar.nomeCurso}
                             className={fieldClass(errosEdit.nomeCurso)}
                             onChange={e => setCursoEditar({ ...cursoEditar, nomeCurso: e.target.value })}
+                            onBlur={() => setCursoEditar(c => ({ ...c, nomeCurso: formatarTitulo(c.nomeCurso) }))}
                         />
                         {errosEdit.nomeCurso && <p className='text-red-base text-xs'>Informe o nome do curso</p>}
                     </div>

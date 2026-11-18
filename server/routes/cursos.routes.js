@@ -6,6 +6,14 @@ const tratarErroUpload = require('../middleware/uploadErro.middleware');
 const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../middleware/auth.middleware');
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
+const { formatarTitulo } = require('../utils/titulo');
+
+// marcas das indústrias parceiras — ficam com maiúscula no nome do curso
+// (ver utils/titulo.js)
+async function nomesDasIndustrias() {
+  const { rows } = await pool.query(`SELECT nome FROM industrias`);
+  return rows.map(r => r.nome);
+}
 
 const uploadCursos = createUpload('cursos');
 const CAPACIDADE_MAXIMA = 200;
@@ -131,7 +139,8 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', authenticate, requireCursosAccess, uploadCursos.array('fotos', 5), async (req, res) => {
   const cursoId = uuidv4();
-  const { nomeCurso, culinaristaId, categoria, duracao, data, hora, loja, valor, ingredientes } = req.body
+  const { culinaristaId, categoria, duracao, data, hora, loja, valor, ingredientes } = req.body
+  let nomeCurso = req.body.nomeCurso
   const tipo = req.body.tipo === 'infantil' ? 'infantil' : 'normal';
   // curso infantil tem 20 assentos por padrão, normal tem 24 — dá pra
   // sobrescrever mandando capacidade explícita no body
@@ -153,6 +162,7 @@ router.post('/', authenticate, requireCursosAccess, uploadCursos.array('fotos', 
   }
 
   try {
+    nomeCurso = formatarTitulo(nomeCurso, await nomesDasIndustrias());
     const filialId = await resolverFilialId(loja);
     if (!filialId) return res.status(400).json({ error: 'Loja inválida' });
 
@@ -222,6 +232,7 @@ router.put('/:id', authenticate, requireCursosAccess, uploadCursos.array('fotos'
   }
 
   try {
+    const nomeCurso = formatarTitulo(req.body.nomeCurso, await nomesDasIndustrias());
     const culinaristaInformado = req.body.culinaristaId !== undefined;
     const novoCulinaristaId = culinaristaInformado ? req.body.culinaristaId : null;
 
@@ -259,7 +270,7 @@ router.put('/:id', authenticate, requireCursosAccess, uploadCursos.array('fotos'
         ingredientes   = $9
       WHERE id = $10
     `, [
-      req.body.nomeCurso,
+      nomeCurso,
       req.body.tipo,
       novoCulinaristaId,
       novoFilialId,
@@ -275,7 +286,7 @@ router.put('/:id', authenticate, requireCursosAccess, uploadCursos.array('fotos'
 
     if (result.rowCount === 0) return res.status(404).json({ error: 'Curso não encontrado' });
 
-    logAudit({ entityType: 'curso', entityId: id, action: 'editar', details: req.body.nomeCurso || null, userHubId: req.user?.sub });
+    logAudit({ entityType: 'curso', entityId: id, action: 'editar', details: nomeCurso || null, userHubId: req.user?.sub });
 
     if (req.files && req.files.length > 0) {
       const permitidos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];

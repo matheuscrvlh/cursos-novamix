@@ -15,6 +15,7 @@ import ModalEnrollmentPayment from '../../components/public/enrollment/ModalEnro
 import { getCourseById } from '../../api/courses.services'
 import { postEnrollment, putSeatChange, getSeats, cancelEnrollment } from '../../api/enrollment.services'
 import { formatarPreco } from '../../utils/formatCurrency'
+import { useFormatarTitulo } from '../../hooks/useFormatarTitulo'
 import { cursoEncerrado, partesData, formatHora } from '../../utils/formatDate'
 import { LOJAS, nomeLoja } from '../../utils/lojas'
 
@@ -24,6 +25,7 @@ export default function CoursePage() {
     const navigate = useNavigate()
     const { cliente } = useContext(ClienteAuthContext)
     const { cursos, cursosInfantis } = useContext(DadosContext)
+    const formatarTitulo = useFormatarTitulo()
 
     // vindo de um card, o curso já está na lista do DadosContext (com os mesmos
     // campos da busca por id): a página abre na hora, sem o carregando, e com a
@@ -199,7 +201,7 @@ export default function CoursePage() {
         }[c]))
 
         const itens = curso.ingredientes.split('\n').filter(i => i.trim()).map(escapeHtml)
-        const nomeCurso = escapeHtml(curso.nomeCurso || '')
+        const nomeCurso = escapeHtml(formatarTitulo(curso.nomeCurso) || '')
         const janela = window.open('', '_blank')
         if (!janela) return
 
@@ -294,8 +296,8 @@ export default function CoursePage() {
     return (
         <PublicLayout showBanner={false} bottomBar>
             <Head
-                title={curso.nomeCurso}
-                description={`Curso ${curso.nomeCurso}${curso.culinarista ? ` com ${curso.culinarista}` : ''}${curso.loja ? ` na loja ${nomeLoja(curso.loja)}` : ''}.`}
+                title={formatarTitulo(curso.nomeCurso)}
+                description={`Curso ${formatarTitulo(curso.nomeCurso)}${curso.culinarista ? ` com ${curso.culinarista}` : ''}${curso.loja ? ` na loja ${nomeLoja(curso.loja)}` : ''}.`}
             />
 
             <div className='max-w-7xl mx-auto px-5 md:px-8 pt-6 pb-10 md:pt-8 lg:pb-16'>
@@ -320,7 +322,7 @@ export default function CoursePage() {
                                     {/* a arte é 4:5 e o quadro é mais largo a partir do sm —
                                         a própria arte desfocada preenche as laterais, sem recortar nada */}
                                     <img src={imagemAtual} alt='' aria-hidden='true' className='absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-60' />
-                                    <img src={imagemAtual} alt={curso.nomeCurso} className='relative w-full h-full object-contain' />
+                                    <img src={imagemAtual} alt={formatarTitulo(curso.nomeCurso)} className='relative w-full h-full object-contain' />
                                 </>
                             ) : (
                                 <div className='w-full h-full flex items-center justify-center'>
@@ -352,7 +354,7 @@ export default function CoursePage() {
                                 <p className='text-[0.625rem] font-medium uppercase tracking-[0.28em] text-gold mb-2'>{curso.categoria}</p>
                             )}
                             <h1 className='font-serif text-[2.125rem] md:text-[2.625rem] font-bold text-chocolate leading-[1.02]'>
-                                {curso.nomeCurso}
+                                {formatarTitulo(curso.nomeCurso)}
                             </h1>
                             {curso.culinarista && (
                                 <p className='flex items-center gap-1.5 text-sm font-normal text-cocoa mt-3'>
