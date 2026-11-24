@@ -151,6 +151,18 @@ function emailLembreteCurso({ nome, nomeCurso, dataCurso, horaCurso, loja }) {
   };
 }
 
+function emailCursoRemarcado({ nome, nomeCurso, dataAntiga, horaAntiga, dataCurso, horaCurso, loja }) {
+  return {
+    subject: `Nova data — ${nomeCurso}`,
+    html: layout('Seu curso mudou de data', `
+      <p>Olá, ${escapeHtml(nome)}!</p>
+      <p>O curso <strong>${escapeHtml(nomeCurso)}</strong>, que estava marcado para <s>${escapeHtml(dataAntiga)} às ${escapeHtml(horaAntiga)}</s>, foi remarcado para:</p>
+      <p style="font-size: 17px;"><strong>${escapeHtml(dataCurso)} às ${escapeHtml(horaCurso)}</strong>${loja ? `, na loja <strong>${escapeHtml(loja)}</strong>` : ''}.</p>
+      <p>Sua inscrição continua valendo para a nova data. Se não puder comparecer, fale com a gente pelo WhatsApp da loja.</p>
+    `),
+  };
+}
+
 function emailRedefinirSenha({ nome, token }) {
   // token no fragmento (#), não na query (?): o que vem depois do # não vai
   // pro servidor nem pro Google Analytics da página
@@ -174,5 +186,6 @@ module.exports = {
   emailReembolsoProcessado,
   emailCursoCancelado,
   emailLembreteCurso,
+  emailCursoRemarcado,
   emailRedefinirSenha,
 };

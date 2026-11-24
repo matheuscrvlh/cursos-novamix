@@ -7,7 +7,7 @@ const { authenticate, requireCursosAccess, requireCursosAdmin } = require('../mi
 const pool = require('../db');
 const logAudit = require('../utils/logAudit');
 const { formatarTitulo } = require('../utils/titulo');
-const { enviarEmail, emailCursoCancelado } = require('../utils/email');
+const { enviarEmail, emailCursoCancelado, emailCursoRemarcado } = require('../utils/email');
 const { reembolsarInscricao } = require('./pagamentos.routes');
 
 // marcas das indústrias parceiras — ficam com maiúscula no nome do curso
@@ -218,6 +218,57 @@ router.post('/', authenticate, requireCursosAccess, uploadCursos.array('fotos', 
   }
 });
 
+// Avisa por e-mail quem está inscrito (pago ou reserva pendente) que o curso
+// mudou de data/hora. Best-effort: roda depois da resposta e nunca lança
+async function avisarRemarcacao(id, dataAntes, userHubId) {
+  try {
+    const { rows } = await pool.query(`
+      SELECT c.nome_curso AS "nomeCurso",
+             to_char(c.data,'DD/MM/YYYY') AS "dataCurso",
+             to_char(c.data,'HH24:MI') AS "horaCurso",
+             REPLACE(b.name, 'Novamix ', '') AS loja,
+             to_char(c.data,'YYYY-MM-DD HH24:MI:SS') <> $2 AS mudou,
+             c.data > now() AND c.cancelado_em IS NULL AS avisar
+      FROM cursos c
+      LEFT JOIN public.branchs b ON b.id = c.filial_id
+      WHERE c.id = $1
+    `, [id, dataAntes.bruta]);
+    const curso = rows[0];
+    if (!curso || !curso.mudou || !curso.avisar) return;
+
+    // o lembrete de "seu curso é amanhã" já enviado era da data antiga
+    await pool.query(
+      `UPDATE inscricoes SET lembrete_enviado_em = NULL WHERE curso_id = $1 AND status = 'pago'`,
+      [id]
+    );
+
+    const { rows: inscritos } = await pool.query(
+      `SELECT nome, email FROM inscricoes WHERE curso_id = $1 AND status IN ('pago', 'pendente')`,
+      [id]
+    );
+    logAudit({
+      entityType: 'curso', entityId: id, action: 'remarcar',
+      details: `${curso.nomeCurso}: ${dataAntes.dataBr} ${dataAntes.hora} → ${curso.dataCurso} ${curso.horaCurso} (${inscritos.length} avisados)`,
+      userHubId,
+    });
+
+    for (const inscrito of inscritos) {
+      const { subject, html } = emailCursoRemarcado({
+        nome: inscrito.nome,
+        nomeCurso: curso.nomeCurso,
+        dataAntiga: dataAntes.dataBr,
+        horaAntiga: dataAntes.hora,
+        dataCurso: curso.dataCurso,
+        horaCurso: curso.horaCurso,
+        loja: curso.loja,
+      });
+      await enviarEmail({ to: inscrito.email, subject, html });
+    }
+  } catch (err) {
+    console.error(`Erro ao avisar remarcação do curso ${id}:`, err);
+  }
+}
+
 router.put('/:id', authenticate, requireCursosAccess, uploadCursos.array('fotos', 5), async (req, res) => {
   const id = req.params.id;
 
@@ -250,12 +301,17 @@ router.put('/:id', authenticate, requireCursosAccess, uploadCursos.array('fotos'
     // data e hora são uma coluna só (TIMESTAMP) — se só um dos dois veio no
     // body, busca o outro no banco pra não perder metade do horário
     let novaData = null;
+    let dataAntes = null; // pra saber, depois de salvar, se o curso foi remarcado
     if (req.body.data !== undefined || req.body.hora !== undefined) {
       const { rows: atual } = await pool.query(
-        `SELECT to_char(data,'YYYY-MM-DD') AS data, to_char(data,'HH24:MI') AS hora FROM cursos WHERE id = $1`,
+        `SELECT to_char(data,'YYYY-MM-DD') AS data, to_char(data,'HH24:MI') AS hora,
+                to_char(data,'DD/MM/YYYY') AS "dataBr",
+                to_char(data,'YYYY-MM-DD HH24:MI:SS') AS bruta
+         FROM cursos WHERE id = $1`,
         [id]
       );
       if (!atual.length) return res.status(404).json({ error: 'Curso não encontrado' });
+      dataAntes = atual[0];
       const dataFinal = req.body.data ?? atual[0].data;
       const horaFinal = req.body.hora ?? atual[0].hora;
       novaData = `${dataFinal} ${horaFinal}`;
@@ -313,6 +369,11 @@ router.put('/:id', authenticate, requireCursosAccess, uploadCursos.array('fotos'
     }
 
     res.json({ message: 'Atualizado' });
+
+    // remarcou (data ou hora diferente)? avisa os inscritos por e-mail, depois
+    // da resposta pra não segurar o painel. Só curso que ainda vai acontecer e
+    // não foi cancelado. O lembrete de 24h volta a valer pra nova data
+    if (dataAntes) avisarRemarcacao(id, dataAntes, req.user?.sub);
   } catch (err) {
     console.error('Erro ao atualizar curso:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
